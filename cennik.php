@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/components/plan-card.php';
+require_once __DIR__ . '/components/slot-configurator.php';
 
 $pageTitle       = 'Cennik hostingu gier — DNCT Hosting';
 $metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.';
@@ -58,10 +59,30 @@ try {
         $plansByType[$plan['type']][] = $plan;
     }
 
+    // Progi slotow dla gier rozliczanych za liczbe graczy (Zomboid, Vintage
+    // Story). Jedno zapytanie na wszystkie typy, grupowane w PHP.
+    $tierRows = $pdo->query(
+        'SELECT * FROM hosting_slot_tiers WHERE is_active = 1 ORDER BY slots ASC'
+    )->fetchAll();
+    $tiersByType = [];
+    foreach ($tierRows as $tier) {
+        $tiersByType[$tier['type']][] = $tier;
+    }
+
+    $periods = $pdo->query(
+        'SELECT * FROM hosting_periods WHERE is_active = 1 ORDER BY sort_order ASC'
+    )->fetchAll();
+
     foreach ($gameRows as $game) {
         $game['plans'] = $plansByType[$game['type']] ?? [];
+        $game['tiers'] = $tiersByType[$game['type']] ?? [];
         $games[] = $game;
     }
+
+    // Dowod spoleczny na ZYWYCH danych - liczba dziala sie sama i nikt jej nie
+    // musi pamietac aktualizowac. Zmyslona liczba to obietnica, ktorej nie da
+    // sie dotrzymac, a klienci sprawdzaja.
+    $liveServers = (int)$pdo->query('SELECT COUNT(*) FROM servers')->fetchColumn();
 } catch (Throwable $e) {
     error_log('cennik: baza niedostepna - ' . $e->getMessage());
     $dbError = true;
@@ -77,9 +98,14 @@ function cennik_size(int $mb): string
     return $mb . 'MB';
 }
 
-/* Gry z planami idą pierwsze — pusta zakładka na górze wygląda jak awaria. */
-$gamesWithPlans = array_values(array_filter($games, static fn(array $g): bool => $g['plans'] !== []));
-$gamesSoon      = array_values(array_filter($games, static fn(array $g): bool => $g['plans'] === []));
+/* Gra jest do kupienia, gdy ma gotowe plany ALBO progi slotow do konfiguratora.
+   Gry bez jednego i drugiego trafiaja do sekcji "Wkrotce" - pusta zakladka na
+   gorze wyglada jak awaria, a nie jak zapowiedz. */
+$isSellable     = static fn(array $g): bool => $g['plans'] !== [] || $g['tiers'] !== [];
+$gamesWithPlans = array_values(array_filter($games, $isSellable));
+$gamesSoon      = array_values(array_filter($games, static fn(array $g): bool => !$isSellable($g)));
+$periods        = $periods ?? [];
+$liveServers    = $liveServers ?? 0;
 
 ob_start();
 ?>
@@ -110,8 +136,9 @@ ob_start();
 
     <?php else: ?>
 
-        <?php /* Zakładki pokazujemy dopiero od dwóch gier — przy jednej byłby to
-                 przełącznik, który nie ma czego przełączać. */ ?>
+        <?php /* Zakładki gier. Pokazujemy je zawsze, gdy gier jest więcej niż
+                 jedna — to jedyny sposób, żeby klient w ogóle zauważył, że
+                 hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
             <div class="cennik-tabs" role="tablist">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
@@ -125,7 +152,9 @@ ob_start();
                                  alt="" width="20" height="20" loading="lazy">
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($game['name']); ?></span>
-                        <span class="cennik-tab-count"><?php echo count($game['plans']); ?></span>
+                        <span class="cennik-tab-count">
+                            <?php echo $game['plans'] ? count($game['plans']) : 'suwak'; ?>
+                        </span>
                     </button>
                 <?php endforeach; ?>
             </div>
@@ -136,34 +165,54 @@ ob_start();
                  id="game-<?php echo htmlspecialchars($game['type']); ?>"
                  role="tabpanel">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-                    <?php foreach ($game['plans'] as $plan): ?>
-                        <?php
-                        // btn_text i href dotyczą wyłącznie planów DOSTĘPNYCH.
-                        // Dla wyprzedanych komponent rysuje własny, nieaktywny
-                        // przycisk "Wyprzedane" i te wartości ignoruje.
-                        render_plan_card((int)$plan['id'], [
-                            'name'       => $plan['name'] ?? '',
-                            'price'      => $plan['price'] ?? '',
-                            'popular'    => !empty($plan['popular']),
-                            'sold_out'   => !empty($plan['sold_out']),
-                            'is_on_sale' => !empty($plan['is_on_sale']),
-                            'old_price'  => $plan['old_price'] ?? 0,
-                            'ram'        => cennik_size((int)($plan['ram_mb'] ?? 0)),
-                            'cpu'        => ($plan['cpu_cores'] ?? 0) . ' vCore',
-                            'ssd'        => cennik_size((int)($plan['ssd_mb'] ?? 0)),
-                            'backups'    => $plan['backups_limit'] ?? 0,
-                            'bg'         => $plan['background_img'] ?? '',
-                            'icon'       => $plan['icon_img'] ?? '',
-                            // Sprzedaż jest wyłączona na czas przerwy technicznej.
-                            // Gdy wróci, podmień href na ścieżkę zamówienia
-                            // (np. /zamowienie?plan=ID) i zdejmij ten komentarz.
-                            'href'       => 'https://discord.gg/r2SsJp9e',
-                            'btn_text'   => 'Zapytaj na Discordzie',
-                        ]);
-                        ?>
-                    <?php endforeach; ?>
-                </div>
+                <?php if ($game['plans']): ?>
+                    <?php /* Gotowe plany. Każda karta ma własne id planu i daje się
+                             zaznaczyć — zaznaczenie ląduje w pasku podsumowania
+                             na dole ekranu. */ ?>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+                        <?php foreach ($game['plans'] as $plan): ?>
+                            <div class="plan-pick"
+                                 data-plan-id="<?php echo (int)$plan['id']; ?>"
+                                 data-plan-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
+                                 data-plan-game="<?php echo htmlspecialchars((string)$game['name']); ?>"
+                                 data-plan-price="<?php echo htmlspecialchars((string)$plan['price']); ?>"
+                                 data-plan-soldout="<?php echo !empty($plan['sold_out']) ? '1' : '0'; ?>"
+                                 tabindex="0" role="button"
+                                 aria-label="Wybierz plan <?php echo htmlspecialchars((string)$plan['name']); ?>">
+                                <?php
+                                render_plan_card((int)$plan['id'], [
+                                    'name'       => $plan['name'] ?? '',
+                                    'price'      => $plan['price'] ?? '',
+                                    'popular'    => !empty($plan['popular']),
+                                    'sold_out'   => !empty($plan['sold_out']),
+                                    'is_on_sale' => !empty($plan['is_on_sale']),
+                                    'old_price'  => $plan['old_price'] ?? 0,
+                                    'ram'        => cennik_size((int)($plan['ram_mb'] ?? 0)),
+                                    'cpu'        => ($plan['cpu_cores'] ?? 0) . ' vCore',
+                                    'ssd'        => cennik_size((int)($plan['ssd_mb'] ?? 0)),
+                                    'backups'    => $plan['backups_limit'] ?? 0,
+                                    'bg'         => $plan['background_img'] ?? '',
+                                    'icon'       => $plan['icon_img'] ?? '',
+                                    // Karta sluzy dzis WYLACZNIE do zaznaczania -
+                                    // sprzedaz jest wylaczona, wiec przycisk nie
+                                    // prowadzi nigdzie. Kliniecie obsluguje skrypt.
+                                    'href'       => '#',
+                                    'btn_text'   => 'Wybierz ten plan',
+                                ]);
+                                ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                <?php else: ?>
+                    <?php /* Gry rozliczane za sloty: zamiast gotowych planów klient
+                             sam ustawia liczbę graczy suwakiem. */ ?>
+                    <div class="cfg-intro">
+                        <h2>Zbuduj serwer pod swoją ekipę</h2>
+                        <p>Przesuń suwak i ustaw liczbę graczy — resztę dobierzemy automatycznie.</p>
+                    </div>
+                    <?php render_slot_configurator($game['type'], $game['tiers'], $periods); ?>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
 
@@ -187,6 +236,42 @@ ob_start();
         </div>
     <?php endif; ?>
 
+    <?php /* Gwarancja zwrotu jest w regulaminie od zawsze, ale na cenniku nie
+             było o niej słowa. To najtańszy sposób zdjęcia oporu przed pierwszym
+             zakupem: klient ryzykuje mniej, niż mu się wydaje. */ ?>
+    <div class="cennik-trust">
+        <div class="cennik-trust-item">
+            <span class="cennik-trust-icon">↩</span>
+            <div>
+                <strong>Zwrot w 24 h</strong>
+                <span>Nie spodobało się? Odzyskujesz pieniądze.</span>
+            </div>
+        </div>
+        <div class="cennik-trust-item">
+            <span class="cennik-trust-icon">⚡</span>
+            <div>
+                <strong>Bez oversellingu</strong>
+                <span>RAM i CPU są gwarantowane, nie współdzielone.</span>
+            </div>
+        </div>
+        <div class="cennik-trust-item">
+            <span class="cennik-trust-icon">🛡</span>
+            <div>
+                <strong>Ochrona DDoS</strong>
+                <span>Cloudflare Magic Transit w każdym planie.</span>
+            </div>
+        </div>
+        <?php if ($liveServers > 0): ?>
+            <div class="cennik-trust-item">
+                <span class="cennik-trust-icon">●</span>
+                <div>
+                    <strong><?php echo $liveServers; ?> serwerów</strong>
+                    <span>działa u nas w tej chwili.</span>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
     <div class="cennik-note">
         <p>
             Ceny brutto w złotych. Szczegółowe warunki świadczenia usług opisuje
@@ -194,6 +279,24 @@ ob_start();
         </p>
     </div>
 </section>
+
+<?php /* Pasek podsumowania. Startuje ukryty; pokazuje go skrypt po pierwszym
+         zaznaczeniu. Zgodnie z ustaleniem NIE MA tu przycisku "kup" - sprzedaż
+         jest wyłączona, a przycisk prowadzący donikąd jest gorszy niż jego brak. */ ?>
+<div class="pick-bar" id="pick-bar" role="status" aria-live="polite">
+    <div class="pick-bar-inner glass glass-top-edge">
+        <div class="pick-bar-info">
+            <span class="pick-bar-label">Twój wybór</span>
+            <span class="pick-bar-name" data-role="pickName"></span>
+        </div>
+        <div class="pick-bar-price">
+            <span data-role="pickPrice"></span>
+            <span class="pick-bar-cur">zł</span>
+            <span class="pick-bar-per" data-role="pickPer"></span>
+        </div>
+        <button type="button" class="pick-bar-clear" data-role="pickClear" aria-label="Wyczyść wybór">✕</button>
+    </div>
+</div>
 
 <script src="/assets/js/cennik.js" defer></script>
 <?php

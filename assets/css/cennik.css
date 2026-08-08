@@ -126,3 +126,298 @@
     text-decoration: underline;
     text-underline-offset: 3px;
 }
+
+/* ==========================================================================
+   ZAZNACZANIE PLANÓW
+   Karta ma własne id planu i daje się wybrać. Zaznaczenie jest widoczne
+   obrysem, a nie zmianą tła — karty planów mają własne grafiki i tło
+   zjadałoby ich czytelność.
+   ========================================================================== */
+.plan-pick {
+    cursor: pointer;
+    border-radius: 26px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+    outline: none;
+}
+.plan-pick:hover { transform: translateY(-4px); }
+.plan-pick:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+
+.plan-pick.is-selected {
+    box-shadow: 0 0 0 2px #8b5cf6, 0 12px 40px rgba(139, 92, 246, 0.28);
+}
+
+.plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
+.plan-pick[data-plan-soldout="1"]:hover { transform: none; }
+
+/* ==========================================================================
+   KONFIGURATOR SLOTÓW
+   ========================================================================== */
+.cfg-intro { text-align: center; margin-bottom: 2rem; }
+.cfg-intro h2 { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; margin: 0 0 0.5rem; }
+.cfg-intro p { color: #94a3b8; font-size: 0.9rem; margin: 0; }
+
+.cfg {
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 26px;
+    padding: 2rem;
+    transition: box-shadow 0.25s ease;
+}
+.cfg.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 12px 40px rgba(139, 92, 246, 0.28); }
+
+.cfg-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 2.5rem;
+    align-items: center;
+}
+
+.cfg-block { margin-bottom: 2rem; }
+.cfg-block:last-child { margin-bottom: 0; }
+
+.cfg-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 800;
+    color: #64748b;
+    margin-bottom: 0.85rem;
+}
+
+.cfg-slots { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem; }
+.cfg-slots-num { font-size: 2.5rem; font-weight: 900; color: #fff; line-height: 1; }
+.cfg-slots-unit { font-size: 0.9rem; color: #64748b; font-weight: 600; }
+
+/* Suwak — własny wygląd, bo domyślny wygląda inaczej w każdej przeglądarce. */
+.cfg-range {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+}
+.cfg-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    border: 3px solid #0a0b14;
+    box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
+    cursor: grab;
+}
+.cfg-range::-moz-range-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    border: 3px solid #0a0b14;
+    box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
+    cursor: grab;
+}
+
+.cfg-range-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: #475569;
+    font-family: ui-monospace, monospace;
+    margin-top: 0.5rem;
+}
+
+.cfg-hint {
+    margin-top: 0.85rem;
+    font-size: 0.8rem;
+    color: #a78bfa;
+    min-height: 1.2em;
+}
+
+/* --- Okresy --- */
+.cfg-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+
+.cfg-period {
+    position: relative;
+    padding: 0.85rem 0.5rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.cfg-period:hover { background: rgba(255, 255, 255, 0.06); color: #e2e8f0; }
+.cfg-period.is-active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+    border-color: rgba(139, 92, 246, 0.5);
+    color: #fff;
+}
+
+.cfg-period-label { display: block; }
+.cfg-period-badge {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4ade80;
+}
+
+/* --- Podsumowanie --- */
+.cfg-summary {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cfg-specs { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.25rem; }
+.cfg-spec { text-align: center; }
+.cfg-spec-key {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #64748b;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+.cfg-spec-val { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; font-family: ui-monospace, monospace; }
+
+.cfg-price-old {
+    font-size: 0.85rem;
+    color: #64748b;
+    text-decoration: line-through;
+    margin-bottom: 0.15rem;
+}
+.cfg-price { display: flex; align-items: baseline; justify-content: center; gap: 0.3rem; }
+.cfg-price span:first-child { font-size: 2.75rem; font-weight: 900; color: #fff; line-height: 1; }
+.cfg-price-cur { font-size: 1rem; color: #64748b; font-weight: 700; }
+.cfg-price-per { font-size: 0.75rem; color: #64748b; margin-top: 0.35rem; }
+
+.cfg-save {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.cfg-select {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.9rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+}
+.cfg-select:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45); }
+
+/* ==========================================================================
+   PASEK ZAUFANIA
+   ========================================================================== */
+.cennik-trust {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 1rem;
+    margin-top: 4rem;
+}
+
+.cennik-trust-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 1rem 1.15rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cennik-trust-icon { font-size: 1.1rem; color: #a78bfa; line-height: 1.3; }
+.cennik-trust-item strong { display: block; color: #e2e8f0; font-size: 0.85rem; margin-bottom: 0.15rem; }
+.cennik-trust-item span { color: #64748b; font-size: 0.78rem; line-height: 1.45; }
+
+/* ==========================================================================
+   PASEK WYBORU
+   Startuje poza ekranem; skrypt dokłada .is-visible po pierwszym zaznaczeniu.
+   Świadomie bez przycisku "kup" — sprzedaż jest wyłączona, a przycisk
+   prowadzący donikąd szkodzi bardziej niż jego brak.
+   ========================================================================== */
+.pick-bar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 80;
+    transform: translateY(110%);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    pointer-events: none;
+}
+.pick-bar.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+
+.pick-bar-inner {
+    max-width: 1100px;
+    margin: 0 auto 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.pick-bar-info { flex: 1; min-width: 0; }
+.pick-bar-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #64748b;
+    font-weight: 800;
+}
+.pick-bar-name {
+    display: block;
+    color: #f1f5f9;
+    font-weight: 700;
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pick-bar-price { display: flex; align-items: baseline; gap: 0.3rem; flex-shrink: 0; }
+.pick-bar-price span:first-child { font-size: 1.6rem; font-weight: 900; color: #fff; }
+.pick-bar-cur { font-size: 0.85rem; color: #64748b; font-weight: 700; }
+.pick-bar-per { font-size: 0.75rem; color: #64748b; margin-left: 0.25rem; }
+
+.pick-bar-clear {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.pick-bar-clear:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+@media (max-width: 860px) {
+    .cfg-grid { grid-template-columns: 1fr; gap: 1.75rem; }
+    .cfg { padding: 1.5rem; }
+    .pick-bar-inner { margin: 0 0.75rem 0.75rem; padding: 0.85rem 1rem; gap: 1rem; }
+    .pick-bar-price span:first-child { font-size: 1.3rem; }
+}
