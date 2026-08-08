@@ -22,10 +22,25 @@
 
 declare(strict_types=1);
 
-/** Ścieżki sprawdzane po kolei - pierwsza istniejąca wygrywa. */
+/**
+ * Ścieżki sprawdzane po kolei - pierwsza istniejąca wygrywa.
+ *
+ * PIERWSZEŃSTWO ma jawne wskazanie z vhosta:
+ *
+ *     SetEnv DNCT_ENV_FILE /var/www/dnct.pl/config/beta.env
+ *
+ * Bez tego środowisko testowe czytałoby produkcyjny .env, bo oba katalogi
+ * (WEB/-dnct.pl i WEB/beta.dnct.pl) leżą tak samo głęboko i wypadają na tę samą
+ * ścieżkę. Skutek byłby taki, że "zabawa na becie" pisałaby do produkcyjnej bazy
+ * i strzelała prawdziwymi kluczami Stripe - czyli dokładnie to, przed czym
+ * osobne środowisko ma chronić.
+ */
 function env_candidate_paths(): array
 {
+    $explicit = $_SERVER['DNCT_ENV_FILE'] ?? getenv('DNCT_ENV_FILE') ?: null;
+
     return [
+        ...($explicit ? [(string)$explicit] : []),
         dirname(__DIR__, 4) . '/.env', // public_html/.env  (układ WEB/-dnct.pl - docelowy)
         dirname(__DIR__, 3) . '/.env', // public_html/.env  (układ private/  - przed przeprowadzką)
         dirname(__DIR__, 2) . '/.env', // .env w katalogu strony (zaszłość - awaryjnie)
