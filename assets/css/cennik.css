@@ -1,0 +1,128 @@
+/* assets/css/cennik.css
+   Styl strony cennika. Same karty planów mają własny wygląd w
+   components/plan-card.php — tutaj jest wyłącznie obudowa: zakładki gier,
+   komunikaty i sekcja "wkrótce". */
+
+/* --- Zakładki gier ------------------------------------------------------ */
+.cennik-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 3rem;
+}
+
+.cennik-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cennik-tab:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #e2e8f0;
+}
+
+.cennik-tab.is-active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(59, 130, 246, 0.18) 100%);
+    border-color: rgba(139, 92, 246, 0.45);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.22);
+}
+
+.cennik-tab img { border-radius: 4px; object-fit: contain; }
+
+.cennik-tab-count {
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: inherit;
+}
+
+/* --- Panele gier --------------------------------------------------------
+   Panel nieaktywny znika przez display:none, a NIE przez klasę .hidden —
+   ta w navbar.css jest oznaczona !important i bywa trudna do nadpisania. */
+.cennik-panel { display: none; }
+.cennik-panel.is-active { display: block; animation: cennikFade 0.25s ease; }
+
+@keyframes cennikFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Komunikaty --------------------------------------------------------- */
+.cennik-info,
+.cennik-soon {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 22px;
+    text-align: center;
+}
+
+.cennik-info h2,
+.cennik-soon h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0 0 0.75rem;
+}
+
+.cennik-info p,
+.cennik-soon p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.cennik-soon { margin-top: 4rem; }
+
+.cennik-soon-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+}
+
+.cennik-soon-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.cennik-soon-item img { border-radius: 4px; object-fit: contain; opacity: 0.85; }
+
+/* --- Stopka cennika ----------------------------------------------------- */
+.cennik-note {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.cennik-note a {
+    color: #a78bfa;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
