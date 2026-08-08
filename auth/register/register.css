@@ -1,0 +1,924 @@
+/* DNCT Hosting - Authentication Pages Styles */
+/* Shared between login.php and register.php */
+
+html {
+    height: 100%;
+}
+
+body.register-page {
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.register-page .glass {
+    max-height: calc(100dvh - 2rem);
+    overflow-x: hidden;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.register-page.is-step-3 .glass {
+    overflow-y: auto;
+}
+
+body.register-page .wizard-panels {
+    overflow-x: hidden;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.input-field {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.input-field:focus {
+    border-color: #8b5cf6;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+    outline: none;
+}
+
+/* Autofill Fix - Separated rules for maximum specificity */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 9999s ease-in-out 0s;
+    color: #ffffff !important;
+}
+
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+    background-color: #121212 !important;
+}
+/* DNCT Hosting - Main Styles */
+/* Shared across all pages */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #050505;
+    color: #ffffff;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-main {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* Accessibility: Focus state */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
+/* Navbar Styles moved from index.css */
+.user-badge {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+#mobile-menu {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+#mobile-menu.open {
+    max-height: 400px;
+    opacity: 1;
+}
+
+/* ==========================================================
+   REGISTER PAGE - walidacja, siła hasła, zgody
+   ========================================================== */
+
+/* --- Honeypot: niewidoczny dla ludzi, kuszący dla botów --- */
+.hp-field {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- Ikony statusu pola (zielony check / czerwony krzyżyk) --- */
+.field-status {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+/* Pole z okiem podglądu hasła - status przesuwamy w lewo, żeby się nie nakładały */
+.field-status.field-status--offset {
+    right: 3rem;
+}
+
+.field-status.is-valid,
+.field-status.is-invalid,
+.field-status.is-pending {
+    opacity: 1;
+}
+
+/* Tylko błąd musi łapać hover - reszta nie przechwytuje kliknięć w input */
+.field-status.is-invalid {
+    pointer-events: auto;
+    cursor: help;
+}
+
+.field-status.is-valid {
+    color: #22c55e;
+}
+
+.field-status.is-invalid {
+    color: #ef4444;
+}
+
+.field-status.is-pending {
+    color: #6b7280;
+}
+
+.field-status .status-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.field-status.is-pending .status-icon {
+    animation: field-spin 0.9s linear infinite;
+}
+
+@keyframes field-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Tooltip z treścią błędu --- */
+.field-status[data-tooltip]:hover::after,
+.field-status[data-tooltip]:focus-visible::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 0.6rem);
+    right: -0.25rem;
+    z-index: 30;
+    width: max-content;
+    max-width: 15rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 0.65rem;
+    background: #1c1c22;
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fecaca;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    font-weight: 600;
+    text-align: left;
+    white-space: normal;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+.field-status[data-tooltip]:hover::before,
+.field-status[data-tooltip]:focus-visible::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 0.25rem);
+    right: 0.4rem;
+    z-index: 31;
+    border: 5px solid transparent;
+    border-top-color: rgba(239, 68, 68, 0.45);
+}
+
+/* --- Podświetlenie pola z błędem --- */
+.input-field.is-invalid {
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.input-field.is-invalid:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+
+.input-field.is-valid {
+    border-color: rgba(34, 197, 94, 0.45);
+}
+
+/* Komunikat pod polem pojawia się dopiero, gdy pole zostało "dotknięte"
+   albo gdy próbowano zatwierdzić krok (klasę has-error nadaje register.js). */
+.field-error {
+    display: none;
+    margin-left: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #f87171;
+}
+
+.field-error.has-error {
+    display: block;
+}
+
+/* --- Miernik siły hasła --- */
+.pw-meter-track {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.pw-meter-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: #ef4444;
+    transition: width 0.35s ease, background-color 0.35s ease;
+}
+
+.pw-meter[data-strength="0"] .pw-meter-bar { width: 12%;  background: #ef4444; }
+.pw-meter[data-strength="1"] .pw-meter-bar { width: 33%;  background: #f97316; }
+.pw-meter[data-strength="2"] .pw-meter-bar { width: 55%;  background: #eab308; }
+.pw-meter[data-strength="3"] .pw-meter-bar { width: 78%;  background: #84cc16; }
+.pw-meter[data-strength="4"] .pw-meter-bar { width: 100%; background: #22c55e; }
+
+.pw-meter[data-strength="0"] .pw-meter-label { color: #ef4444; }
+.pw-meter[data-strength="1"] .pw-meter-label { color: #f97316; }
+.pw-meter[data-strength="2"] .pw-meter-label { color: #eab308; }
+.pw-meter[data-strength="3"] .pw-meter-label { color: #84cc16; }
+.pw-meter[data-strength="4"] .pw-meter-label { color: #22c55e; }
+
+/* --- Lista wymagań hasła --- */
+.req-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 0.85rem 0.9rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.75rem;
+}
+
+@media (max-width: 400px) {
+    .req-box {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.req {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.req-check {
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.req-check svg {
+    width: 0.7rem;
+    height: 0.7rem;
+    stroke-width: 3.5;
+}
+
+.req.is-met {
+    color: #22c55e;
+}
+
+.req.is-met .req-check {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #050505;
+}
+
+/* --- Zgody (regulamin / marketing) --- */
+.consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    cursor: pointer;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: #9ca3af;
+}
+
+.consent-box {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.05rem;
+    border-radius: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.consent-box:hover {
+    border-color: rgba(139, 92, 246, 0.7);
+}
+
+.consent-box:checked {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    border-color: transparent;
+}
+
+.consent-box:checked::after {
+    content: '';
+    position: absolute;
+    left: 0.34rem;
+    top: 0.12rem;
+    width: 0.3rem;
+    height: 0.58rem;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.consent-box.is-invalid {
+    border-color: #ef4444;
+}
+
+.consent a {
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.consent a:hover {
+    color: #a78bfa;
+}
+
+/* ==========================================================
+   KREATOR 3-KROKOWY - wskaźnik postępu, panele, OTP, przyciski
+   ========================================================== */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Etykiety i ikony pól (wyciągnięte z klas Tailwinda do jednego miejsca) --- */
+.field-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6b7280;
+    margin-left: 0.25rem;
+}
+
+.field-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+    pointer-events: none;
+}
+
+.field-hint {
+    font-size: 0.65rem;
+    color: #6b7280;
+    margin-left: 0.25rem;
+}
+
+.pw-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.pw-toggle:hover {
+    color: #ffffff;
+}
+
+/* --- Wskaźnik kroków --- */
+.wizard {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 1.75rem;
+}
+
+.wizard-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+    width: 4.25rem;
+}
+
+.wizard-bullet {
+    position: relative;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #6b7280;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: background 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.wizard-tick {
+    position: absolute;
+    width: 1.05rem;
+    height: 1.05rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.wizard-caption {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4b5563;
+    transition: color 0.35s ease;
+}
+
+/* Krok bieżący */
+.wizard-node.is-active .wizard-bullet {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    border-color: transparent;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.wizard-node.is-active .wizard-caption {
+    color: #ffffff;
+}
+
+/* Krok ukończony - numer ustępuje miejsca "ptaszkowi" */
+.wizard-node.is-done .wizard-bullet {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #22c55e;
+}
+
+.wizard-node.is-done .wizard-number {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.wizard-node.is-done .wizard-tick {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wizard-node.is-done .wizard-caption {
+    color: #9ca3af;
+}
+
+/* Łącznik między kropkami - wypełnia się po ukończeniu kroku */
+.wizard-track {
+    flex: 1 1 auto;
+    height: 2px;
+    margin-top: 1.07rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    max-width: 3.5rem;
+}
+
+.wizard-track-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    transition: width 0.45s ease;
+}
+
+.wizard-track.is-filled .wizard-track-fill {
+    width: 100%;
+}
+
+/* --- Panele kroków --- */
+.wizard-panels {
+    position: relative;
+}
+
+.step {
+    display: none;
+}
+
+.step.is-active {
+    display: block;
+}
+
+/* Kierunek animacji ustawia JS na kontenerze (data-direction) */
+.wizard-panels[data-direction="forward"] .step.is-active {
+    animation: step-in-forward 0.35s ease both;
+}
+
+.wizard-panels[data-direction="back"] .step.is-active {
+    animation: step-in-back 0.35s ease both;
+}
+
+@keyframes step-in-forward {
+    from {
+        opacity: 0;
+        transform: translateX(28px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes step-in-back {
+    from {
+        opacity: 0;
+        transform: translateX(-28px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.step-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.step-subtitle {
+    margin-top: 0.3rem;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #9ca3af;
+}
+
+/* --- Komunikat globalny nad formularzem --- */
+.form-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 1rem;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+
+.form-alert.is-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #fca5a5;
+}
+
+.form-alert.is-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.45);
+    color: #86efac;
+}
+
+.form-alert.hidden {
+    display: none;
+}
+
+/* --- Przycisk główny (z shimmerem i spinnerem) --- */
+.btn-primary {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 1rem 0;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #ffffff;
+    overflow: hidden;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2);
+    transition: opacity 0.25s ease, transform 0.15s ease;
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: translateX(-100%);
+    pointer-events: none;
+}
+
+.btn-primary:hover:not(:disabled) .btn-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+.btn-text {
+    position: relative;
+    z-index: 10;
+}
+
+/* Spinner pojawia się tylko w stanie ładowania */
+.btn-spinner {
+    position: relative;
+    z-index: 10;
+    display: none;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+}
+
+.btn-primary.is-loading {
+    cursor: progress;
+    opacity: 0.85;
+}
+
+.btn-primary.is-loading .btn-spinner {
+    display: block;
+    animation: field-spin 0.7s linear infinite;
+}
+
+.btn-primary.is-loading .btn-shimmer {
+    animation: none;
+}
+
+/* --- Przycisk "Wróć" (celowo mniej wyrazisty) --- */
+.btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 0.9rem;
+    padding: 0.6rem 0;
+    border-radius: 0.9rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6b7280;
+    background: transparent;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.btn-back:hover {
+    color: #d1d5db;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* --- Link-przycisk (np. "Wyślij kod ponownie") --- */
+.link-button {
+    font-weight: 700;
+    color: #a78bfa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.link-button:hover:not(:disabled) {
+    color: #ffffff;
+}
+
+.link-button:disabled {
+    color: #4b5563;
+    text-decoration: none;
+    cursor: not-allowed;
+}
+
+/* ==========================================================
+   KROK 2 - pola kodu jednorazowego
+   ========================================================== */
+
+.otp-hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.otp-badge {
+    width: 3.25rem;
+    height: 3.25rem;
+    margin: 0 auto 1rem;
+    border-radius: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a78bfa;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.otp-email {
+    display: inline-block;
+    margin-top: 0.3rem;
+    color: #ffffff;
+    font-weight: 700;
+    word-break: break-all;
+}
+
+.otp-inputs {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 1.5rem 0 0.75rem;
+}
+
+.otp-box {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    max-height: 3.6rem;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    caret-color: #8b5cf6;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.9rem;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+}
+
+.otp-box:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+    transform: translateY(-1px);
+}
+
+.otp-box.is-filled {
+    border-color: rgba(139, 92, 246, 0.5);
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.otp-inputs.is-invalid .otp-box {
+    border-color: rgba(239, 68, 68, 0.65);
+    background: rgba(239, 68, 68, 0.07);
+}
+
+.otp-inputs.is-invalid {
+    animation: otp-shake 0.4s ease;
+}
+
+.otp-inputs.is-valid .otp-box {
+    border-color: rgba(34, 197, 94, 0.55);
+    background: rgba(34, 197, 94, 0.1);
+}
+
+@keyframes otp-shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-7px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+
+.otp-expiry {
+    font-size: 0.65rem;
+    text-align: center;
+    color: #6b7280;
+    min-height: 1rem;
+}
+
+.otp-resend {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+.otp-resend > span {
+    margin-right: 0.3rem;
+}
+
+/* Komunikaty pod polami kroku 2/3 pokazujemy od razu po próbie wysyłki */
+.step .field-error.has-error {
+    display: block;
+}
+
+/* --- Redukcja ruchu --- */
+@media (prefers-reduced-motion: reduce) {
+    .pw-meter-bar,
+    .field-status,
+    .req-check,
+    .wizard-bullet,
+    .wizard-track-fill,
+    .otp-box {
+        transition: none;
+    }
+
+    .field-status.is-pending .status-icon,
+    .btn-primary.is-loading .btn-spinner {
+        animation-duration: 1.5s;
+    }
+
+    .wizard-panels[data-direction="forward"] .step.is-active,
+    .wizard-panels[data-direction="back"] .step.is-active,
+    .otp-inputs.is-invalid {
+        animation: none;
+    }
+}

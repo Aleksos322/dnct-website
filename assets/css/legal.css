@@ -1,0 +1,149 @@
+/* assets/css/legal.css
+   Styl dokumentów prawnych (regulamin, polityka prywatności).
+
+   Treść przeniesiona 1:1 ze starej strony, więc nazwy klas (.ai-summary,
+   .info-box, .warning-box, .tech-box, .price-cell...) zostały takie same —
+   zmienia się wyłącznie ich wygląd, żeby pasował do reszty serwisu.
+   Dzięki temu ewentualna aktualizacja treści z beta/ nie wymaga przepisywania
+   znaczników. */
+
+.legal {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+    line-height: 1.75;
+    color: #cbd5e1;
+}
+
+.legal h1 {
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+.legal h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 2.5rem 0 0.85rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legal h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 1.75rem 0 0.6rem;
+}
+
+.legal p { margin: 0 0 1rem; }
+.legal strong { color: #f1f5f9; font-weight: 600; }
+
+.legal a {
+    color: #a78bfa;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.legal a:hover { color: #c4b5fd; }
+
+.legal ul, .legal ol {
+    margin: 0 0 1rem;
+    padding-left: 1.4rem;
+}
+.legal li { margin-bottom: 0.45rem; }
+
+.legal section { margin-bottom: 0.5rem; }
+
+/* --- Tabele -------------------------------------------------------------
+   Cenniki i wykazy danych bywają szerokie. Przewijają się WEWNĄTRZ własnego
+   kontenera, żeby na telefonie nie rozjeżdżały całej strony w poziomie. */
+.legal .table-container,
+.legal table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.legal table {
+    display: block;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.legal th,
+.legal td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: left;
+}
+
+.legal th {
+    background: rgba(255, 255, 255, 0.04);
+    color: #f1f5f9;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.legal tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+.legal .price-cell,
+.legal .price-3 { font-variant-numeric: tabular-nums; color: #f8fafc; font-weight: 600; }
+
+.legal .small { font-size: 0.8rem; color: #94a3b8; }
+
+/* --- Wyróżnione bloki ---------------------------------------------------
+   Każdy dostaje inny kolor krawędzi, żeby dało się je rozróżnić jednym
+   spojrzeniem, bez czytania nagłówka. */
+.legal .ai-summary,
+.legal .info-box,
+.legal .warning-box,
+.legal .tech-box,
+.legal .contact-info {
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid rgba(255, 255, 255, 0.15);
+}
+
+.legal .ai-summary  { border-left-color: #8b5cf6; }
+.legal .info-box    { border-left-color: #3b82f6; }
+.legal .warning-box { border-left-color: #f59e0b; }
+.legal .tech-box    { border-left-color: #06b6d4; }
+.legal .contact-info{ border-left-color: #22c55e; }
+
+.legal .ai-summary h3 { margin-top: 0; color: #c4b5fd; }
+
+.legal .gdpr-badge {
+    display: inline-block;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.25rem;
+}
+
+/* Data ostatniej aktualizacji — czytelnik ma od razu wiedzieć, jak świeży
+   jest dokument, bez szukania na końcu strony. */
+.legal-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 640px) {
+    .legal { line-height: 1.7; }
+    .legal h2 { margin-top: 2rem; }
+}

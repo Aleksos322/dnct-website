@@ -1,0 +1,4 @@
+# Warstwa wykonawcza — wyłącznie include'y, nigdy endpointy HTTP.
+# Blokada per-katalog, a nie regułą rewrite w DocumentRoocie: działa nawet przy
+# wyłączonym mod_rewrite i nie zależy od tego, jak Apache rozwiązał ścieżkę.
+Require all denied

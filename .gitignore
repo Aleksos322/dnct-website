@@ -1,0 +1,16 @@
+# Konfiguracja jest RÓŻNA w każdym środowisku (inna baza, klucze Stripe testowe
+# kontra produkcyjne), więc nigdy nie trafia do repozytorium. Leży piętro wyżej,
+# poza DocumentRootem — ten wpis to zabezpieczenie na wypadek, gdyby kiedyś
+# ktoś położył .env w katalogu strony.
+.env
+.env.*
+
+# Zależności instalowane menedżerem, nie trzymane w historii
+backend/mail/vendor/
+
+# Śmieci
+*.log
+*.bak
+*.orig
+*.swp
+.DS_Store

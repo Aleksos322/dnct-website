@@ -1,0 +1,5 @@
+# Layout i navbar są dołączane przez PHP (require), więc dostęp przez HTTP
+# tylko by je wykonał w oderwaniu od strony. Pliki statyczne obok zostają.
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

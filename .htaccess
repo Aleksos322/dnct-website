@@ -1,0 +1,229 @@
+# ============================================================================
+# DNCT Hosting — konfiguracja DocumentRootu (WEB/-dnct.pl)
+# ============================================================================
+# Ten katalog JEST DocumentRootem, więc wszystko, czego nie zablokujemy tutaj,
+# jest dostępne przez HTTP. Plik .env leży w public_html/, czyli dwa poziomy
+# wyżej — poza zasięgiem serwera nawet przy błędnej konfiguracji Apache'a.
+#
+# Blokady katalogów-include'ów (backend, components, assets/clear,
+# assets/navibar) siedzą w .htaccess W TYCH katalogach, nie tutaj. Działają
+# wtedy niezależnie od mod_rewrite i od tego, jak Apache rozwiązał ścieżkę.
+# ============================================================================
+
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.php index.html
+AddDefaultCharset UTF-8
+
+# ----------------------------------------------------------------------------
+# 1. Pliki ukryte — .env, .git, .htaccess, .claude...
+# ----------------------------------------------------------------------------
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# ----------------------------------------------------------------------------
+# 2. Rozszerzenia, które nigdy nie mają wyjść przez HTTP.
+#    Osobno od reguł rewrite, żeby działały nawet przy wyłączonym mod_rewrite.
+# ----------------------------------------------------------------------------
+<FilesMatch "\.(log|sql|md|bak|old|orig|save|swp|dist|sample|ini|sh|yml|yaml|lock|json)$">
+    Require all denied
+</FilesMatch>
+
+# Gdyby kiedyś doszedł manifest PWA — .json jest wyżej zablokowany hurtem,
+# więc wyjątki dopisuje się tutaj.
+<Files "site.webmanifest">
+    Require all granted
+</Files>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # ------------------------------------------------------------------------
+    # 3. Druga warstwa blokad (pierwsza to .htaccess w tamtych katalogach).
+    #
+    #    errors/ świadomie NIE jest blokowane: ErrorDocument wykonuje wewnętrzne
+    #    przekierowanie na /errors/404.php, więc zablokowanie tego katalogu
+    #    zapętliłoby obsługę błędów.
+    # ------------------------------------------------------------------------
+    RewriteRule ^backend/ - [F,L]
+    RewriteRule ^(assets|components)/.*\.php$ - [F,L]
+
+    # Katalog .git — osobna reguła, bo blokada plików ukrytych go NIE łapie.
+    # <FilesMatch "^\."> dopasowuje NAZWĘ PLIKU, a w /.git/config nazwą jest
+    # "config" i przechodzi. Wystawiony .git to cała historia zmian i każdy
+    # sekret, który kiedykolwiek w niej był.
+    RewriteRule ^\.git(/|$) - [F,L]
+
+    # ------------------------------------------------------------------------
+    # 4. Czyste adresy — w linku nie ma ani nazw katalogów, ani rozszerzeń
+    #
+    #    Działa w dwie strony:
+    #      a) /login  ->  wewnętrznie serwuje auth/login/login.php
+    #      b) wejście wprost na /auth/login/login.php  ->  301 na /login
+    #
+    #    Bez (b) prawdziwa ścieżka i tak by wyciekła — wystarczy jeden stary
+    #    link albo zakładka sprzed zmiany.
+    #
+    #    DWA warunki powtarzają się przy każdej regule 301 i oba są konieczne:
+    #
+    #    REDIRECT_STATUS musi być puste. Przy obsłudze błędu Apache przetwarza
+    #    ten plik PONOWNIE, a THE_REQUEST wciąż trzyma pierwotne żądanie —
+    #    bez tego warunku odmowa dostępu do /backend/x.php wracała jako 301
+    #    na /backend/x zamiast jako 403 i zdradzała układ katalogów.
+    #
+    #    THE_REQUEST to ORYGINALNA linia żądania, więc wewnętrzne przepisania
+    #    z punktu (a) jej nie zmieniają i pętli przekierowań nie ma.
+    # ------------------------------------------------------------------------
+
+    # --- (b) 301 ze starych, "brzydkich" adresów ---------------------------
+    # Za Cloudflare Apache widzi połączenie jako zwykłe HTTP i sam budowałby
+    # przekierowania jako http:// — każdy 301 robiłby wtedy zbędny skok przez
+    # czysty HTTP, zanim proxy odbiłoby go z powrotem na HTTPS. Schemat bierzemy
+    # więc z nagłówka od proxy, a gdy go nie ma (wejście wprost po HTTP na porcie
+    # testowym) zostaje http i nic się nie psuje.
+    RewriteCond %{HTTP:X-Forwarded-Proto} =https
+    RewriteRule ^ - [E=SITE_SCHEME:https]
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ - [E=SITE_SCHEME:http]
+
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+auth/login/login\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/login [R=301,L]
+
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+auth/register/register\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/register [R=301,L]
+
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+auth/logout\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/wyloguj [R=301,L]
+
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+auth/to-panel\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/panel [R=301,L]
+
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+auth/demo\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/demo [R=301,L]
+
+    # index.php w adresie nic nie wnosi — zwijamy do samego katalogu.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/%1 [R=301,L]
+
+    # Każdy inny bezpośredni strzał w .php — zdejmujemy rozszerzenie.
+    # /api/ zostaje z rozszerzeniem: front woła te endpointy wprost i częścią
+    # POST-em, a przeglądarka przy 301 zamienia POST na GET.
+    # Katalogi zamknięte są wyjęte, żeby oddawały 403, a nie 301.
+    #
+    # /auth/callback.php jest wyjęty ODDZIELNIE i to nie jest kosmetyka:
+    # dokładnie ten adres jest zarejestrowany w Authentiku jako redirect_uri
+    # (backend/lib/oidc.php), a Authentik dopasowuje go dosłownie. Wpuszczenie
+    # tu przekierowania wstawia zbędny skok w środek wymiany kodu na token —
+    # ścieżki, w której nie chcemy żadnych niespodzianek z query stringiem.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_URI} !^/(backend|components|errors)/
+    RewriteCond %{REQUEST_URI} !^/assets/(clear|navibar)/
+    RewriteCond %{REQUEST_URI} !^/auth/callback\.php$
+    RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+    RewriteRule ^ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/%1 [R=301,L]
+
+    # Stare adresy dokumentów prawnych ze starej strony. Regulamin i polityka
+    # prywatności bywają linkowane z zewnątrz (Discord, faktury, maile), więc
+    # muszą prowadzić dalej, a nie w 404.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^regulamin\.html$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/regulamin [R=301,L]
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^privacy-policy\.html$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/polityka-prywatnosci [R=301,L]
+
+    # --- (a) nazwane trasy --------------------------------------------------
+    RewriteRule ^login/?$        auth/login/login.php       [L]
+    RewriteRule ^logowanie/?$    auth/login/login.php       [L]
+    RewriteRule ^register/?$     auth/register/register.php [L]
+    RewriteRule ^rejestracja/?$  auth/register/register.php [L]
+    RewriteRule ^wyloguj/?$      auth/logout.php            [L]
+    RewriteRule ^logout/?$       auth/logout.php            [L]
+    RewriteRule ^panel/?$        auth/to-panel.php          [L]
+    RewriteRule ^demo/?$         auth/demo.php              [L]
+    RewriteRule ^callback/?$     auth/callback.php          [L]
+
+    # --- (a2) reszta: /cokolwiek -> /cokolwiek.php, jeśli taki plik istnieje -
+    # Dzięki temu każda nowa podstrona dostaje czysty adres bez dopisywania
+    # osobnej reguły. Istniejące pliki i katalogi zostawiamy w spokoju.
+    RewriteCond %{REQUEST_URI} !^/api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+    RewriteRule ^(.+?)/?$ $1.php [L]
+</IfModule>
+
+# ----------------------------------------------------------------------------
+# 5. Nagłówki bezpieczeństwa
+# ----------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+
+    # Serwer nie musi się przedstawiać.
+    Header always unset X-Powered-By
+
+    # Odpowiedzi PHP zależą od sesji, a przed Apache'em stoi Cloudflare —
+    # jedna zakeszowana odpowiedź to cudza sesja u kogoś innego.
+    <FilesMatch "\.php$">
+        Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header always set Pragma "no-cache"
+    </FilesMatch>
+
+    # Statyki. mod_expires NIE jest na tym serwerze włączony, więc czas życia
+    # ustawiamy nagłówkiem wprost. Krótko, bo nazwy plików nie mają hashy —
+    # przy dłuższym cache podmiana CSS-a nie dotarłaby do wracających.
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+    <FilesMatch "\.(png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|eot)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+
+    # --- Content-Security-Policy -------------------------------------------
+    # Na razie Report-Only: przeglądarka RAPORTUJE naruszenia, ale niczego nie
+    # blokuje. Włączenie od razu na ostro położyłoby stronę — Tailwind jest
+    # generowany po stronie klienta i potrzebuje 'unsafe-eval', a widżet
+    # Discorda ładuje się w ramce.
+    #
+    # Zanim przełączysz na Content-Security-Policy (bez -Report-Only): obejdź
+    # wszystkie podstrony, sprawdź konsolę i dopisz to, czego zabraknie.
+    # Domeny Google Analytics są tu wpisane, mimo że GA startuje dopiero po
+    # zgodzie użytkownika. CSP działa na poziomie przeglądarki i nie wie nic
+    # o zgodzie — gdyby ich zabrakło, analityka byłaby blokowana także tym,
+    # którzy ją świadomie włączyli.
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com; frame-src https://discord.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'"
+
+    # --- HSTS ---------------------------------------------------------------
+    # ŚWIADOMIE WYŁĄCZONE. HSTS jest kleisty: przeglądarka zapamiętuje go na
+    # cały max-age i przez ten czas ODMÓWI połączenia po HTTP — także wtedy,
+    # gdy padnie certyfikat. Włączać dopiero, gdy HTTPS działa stabilnie na
+    # dnct.pl i www.dnct.pl, i zaczynając od max-age=300, nie od roku.
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# ----------------------------------------------------------------------------
+# 6. Kompresja (obrazki i fonty są już skompresowane — pomijamy)
+# ----------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
+    AddOutputFilterByType DEFLATE application/json application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ----------------------------------------------------------------------------
+# 7. Strony błędów
+# ----------------------------------------------------------------------------
+ErrorDocument 403 /errors/404.php
+ErrorDocument 404 /errors/404.php
+ErrorDocument 500 /errors/500.php

@@ -1,0 +1,214 @@
+/* =========================================
+   DNCT HOSTING - LOGOWANIE (Główne style)
+   ========================================= */
+
+/* --- 1. Ustawienia Globalne --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #050505;
+    color: #ffffff;
+    /* Uwaga: ukrycie przepełnienia jest ok dla prostego logowania, 
+       ale uważaj, bo na bardzo małych ekranach może zablokować scrollowanie */
+    overflow: hidden; 
+}
+
+/* Dostępność: wyraźny obrys przy nawigowaniu po stronie klawiaturą (klawisz Tab) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+}
+
+/* --- 2. Efekty Wizualne (Glassmorphism i Gradienty) --- */
+
+/* Efekt szkła używany w głównym kontenerze formularza logowania */
+.glass {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Kolorowy tekst używany m.in. w tytule "hostingu gier" */
+.gradient-text {
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Tło gradientowe dla przycisku logowania */
+.bg-gradient-main {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
+/* Animacja "przejścia światła" na przycisku po najechaniu myszką (hover) */
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* --- 3. Formularze (Inputy i Autofill) --- */
+
+/* Główne style dla pól tekstowych (login, hasło) */
+.input-field {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
+    caret-color: #ffffff !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Efekt po kliknięciu w pole tekstowe */
+.input-field:focus {
+    border-color: #8b5cf6;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15);
+    outline: none;
+}
+
+/* FIX: Naprawa brzydkiego żółtego/białego tła dodawanego przez przeglądarkę przy autouzupełnianiu haseł */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background-color: #121212 !important;
+}
+
+/* --- 4. Baner Cookies (RODO/GDPR) --- */
+
+/* Kontener główny wyskakującego okienka cookies */
+#cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.98) 0%, rgba(20, 20, 30, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 20px;
+    z-index: 999999;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    display: none; /* Domyślnie ukryte, pokazywane przez JS */
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cookie-consent-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Teksty wewnątrz banera cookies */
+.cookie-consent-text {
+    flex: 1;
+    min-width: 280px;
+}
+
+.cookie-consent-text h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cookie-consent-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cookie-consent-text a {
+    color: #a78bfa;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.cookie-consent-text a:hover {
+    color: #c4b5fd;
+}
+
+/* Przyciski Akceptuj/Odrzuć */
+.cookie-consent-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.cookie-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.cookie-btn-accept {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.cookie-btn-accept:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.cookie-btn-reject {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cookie-btn-reject:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cookie-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+}
+
+/* Animacja wjazdu okienka cookies (opcjonalnie do wykorzystania w JS) */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(100%); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 5. RWD (Dostosowanie do smartfonów) --- */
+@media (max-width: 768px) {
+    #cookie-consent-banner { padding: 16px; }
+    .cookie-consent-container { flex-direction: column; gap: 16px; }
+    .cookie-consent-text { text-align: center; }
+    .cookie-consent-text h3 { justify-content: center; font-size: 1rem; }
+    .cookie-consent-text p { font-size: 0.85rem; }
+    
+    /* Zmiana układu przycisków na pionowy na małych ekranach */
+    .cookie-consent-actions { width: 100%; flex-direction: column; }
+    .cookie-btn { width: 100%; padding: 14px; }
+}  

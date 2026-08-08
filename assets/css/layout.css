@@ -1,0 +1,141 @@
+/* assets/css/layout.css
+   Wspólne style layoutu (clear.php) — wyniesione z inline <style> */
+
+.btn-panel {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0d6efd;
+    color: #ffffff;
+    border-radius: 6px;
+    font-weight: bold;
+    margin: 10px 0;
+    transition: background-color 0.2s ease;
+}
+
+.btn-panel:hover {
+    background-color: #0b5ed7;
+}
+
+/* Stopka ma być poza pierwszym ekranem NAWET na pustej stronie - użytkownik
+   musi celowo przescrollować, żeby ją zobaczyć.
+   100vh (pełny ekran) + 185px zapasu => stopka zaczyna się 185px pod krawędzią
+   ekranu. Klasa, a nie selektor `main`, bo utility Tailwinda (klasa) wygrałoby
+   ze specyficznością z selektorem elementu. Działa też z wyłączonym JS. */
+.page-main {
+    min-height: calc(100vh + 185px);
+}
+/* ==========================================================================
+   BANER ZGODY NA COOKIES
+
+   Znaczniki: assets/clear/cookie-banner.php, logika: assets/js/cookie-consent.js.
+   Baner startuje ukryty i przezroczysty — skrypt pokazuje go dopiero, gdy
+   użytkownik nie ma jeszcze zapisanego wyboru. Animacja wjazdu jest w
+   transition, bo skrypt zmienia tylko opacity i transform.
+   ========================================================================== */
+#cookie-consent-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;               /* nad treścią, pod modalami */
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 300ms ease, transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cookie-consent-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.15rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.cookie-consent-text h3 {
+    margin: 0 0 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cookie-consent-text p {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: #94a3b8;
+}
+
+.cookie-consent-text a {
+    color: #a78bfa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.cookie-consent-text a:hover { color: #c4b5fd; }
+
+.cookie-consent-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-shrink: 0;
+}
+
+.cookie-btn {
+    padding: 0.6rem 1.35rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* Odrzucenie musi być równie widoczne i łatwe jak akceptacja — inaczej zgoda
+   przestaje być dobrowolna. Stąd oba przyciski tej samej wielkości, różnią się
+   wyłącznie wypełnieniem. */
+.cookie-btn-reject {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+}
+.cookie-btn-reject:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.cookie-btn-accept {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+}
+.cookie-btn-accept:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(139, 92, 246, 0.5);
+}
+
+/* Odnośnik do zmiany decyzji w stopce. */
+.cookie-settings-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+    .cookie-consent-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        padding: 1rem 1.15rem;
+    }
+    .cookie-consent-actions { justify-content: stretch; }
+    .cookie-btn { flex: 1; }
+}

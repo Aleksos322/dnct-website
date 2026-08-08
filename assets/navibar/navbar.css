@@ -1,0 +1,632 @@
+/* ==========================================================================
+   IMPORT CZCIONKI (Montserrat - Nowoczesna, Gruba, Czytelna)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap');
+
+/* Główna klasa narzucająca nową czcionkę dla całego navbara */
+.nav-modern-font {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* ==========================================================================
+   LIQUID GLASS (navbar + stopka)
+
+   Krawędzie zostają OSTRE (żadnego border-radius) - "płynność" bierze się
+   z samego szkła, nie z zaokrągleń:
+     - saturate() podbija kolory tego, co przepływa pod spodem, więc element
+       tła wjeżdżający za navbar rozlewa się barwnie zamiast po prostu zniknąć,
+     - brightness() lekko rozjaśnia, dzięki czemu przejście jest "mokre",
+     - pionowy gradient + wewnętrzne krawędzie dają wypukłość tafli.
+   ========================================================================== */
+.glass {
+    position: relative;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.055) 0%,
+        rgba(255, 255, 255, 0.018) 45%,
+        rgba(255, 255, 255, 0.038) 100%
+    );
+    backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* Rzadki, delikatny przebłysk przesuwający się po tafli.
+   Cykl trwa 5 minut, ale sam przejazd zajmuje tylko ~2% tego czasu (ok. 6s) -
+   resztę pasmo stoi poza kadrem. Dzięki temu efekt jest niespodzianką raz na
+   kilka minut, a nie tapetą migającą w kółko. */
+.glass::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        transparent 42%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 58%
+    );
+    background-size: 250% 100%;
+    animation: glassSheen 300s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes glassSheen {
+    0%   { background-position: 160% 0; }
+    2%   { background-position: -160% 0; }
+    /* Przez pozostałe 98% cyklu nic się nie dzieje - stąd powtórzona wartość */
+    100% { background-position: -160% 0; }
+}
+
+/* Treść musi leżeć nad warstwą przebłysku.
+   Celowo osobna klasa, a nie `.glass > *` - to drugie objęłoby też rozwijane
+   menu mobilne (absolutnie pozycjonowane dziecko <nav>) i zależałoby od
+   kolejności reguł w pliku, żeby go nie zepsuć. */
+.glass-content {
+    position: relative;
+    z-index: 1;
+}
+
+.glass-top-edge { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.glass-bottom-edge { border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+
+/* ==========================================================================
+   ANIMOWANY GRADIENT (Ruszający się płynnie)
+   ========================================================================== */
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+    /* 3 kolory aby płynnie przechodzić z powrotem */
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6, #8b5cf6);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientFlow 4s ease infinite; /* 4 sekundy, nieskończona, gładka pętla */
+}
+
+.bg-gradient-main {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+}
+
+/* ==========================================================================
+   LOGO "DNCT HOSTING"
+   ========================================================================== */
+
+/* "DNCT" - subtelny przebłysk. Pasmo idzie od lekko przygaszonej bieli do
+   czystej i z powrotem, więc efekt jest przyjemny, a nie krzykliwy. */
+.brand-dnct {
+    background: linear-gradient(
+        100deg,
+        #dfe5f0 40%,
+        #ffffff 50%,
+        #dfe5f0 60%
+    );
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #ffffff; /* fallback, gdyby background-clip nie zadziałał */
+    animation: brandSheen 7s ease-in-out infinite;
+}
+
+@keyframes brandSheen {
+    0%   { background-position: 130% 0; }
+    /* Dłuższa pauza między przebłyskami - stąd ten sam stan na 60% i 100% */
+    60%  { background-position: -130% 0; }
+    100% { background-position: -130% 0; }
+}
+
+/* "HOSTING" - powolny gradient niebieski -> fioletowy -> niebieski, w kółko.
+   Trzy przystanki (niebieski na obu końcach) + przesunięcie o pełne 200%
+   dają pętlę bez widocznego "skoku" przy zapętleniu. */
+.brand-hosting {
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #3b82f6; /* fallback */
+    animation: brandGradientFlow 9s linear infinite;
+}
+
+@keyframes brandGradientFlow {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* Szacunek dla ustawień dostępności - wyłączamy ozdobne animacje */
+@media (prefers-reduced-motion: reduce) {
+    .glass::after,
+    .brand-dnct,
+    .brand-hosting {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   POZYCJONOWANIE
+   ========================================================================== */
+.fixed { position: fixed; }
+.absolute { position: absolute; }
+.top-full { top: 100%; }
+.left-0 { left: 0; }
+.z-50 { z-index: 50; }
+.z-full { z-index: 9999; }
+
+/* ==========================================================================
+   DISPLAY & FLEXBOX
+   ========================================================================== */
+.block { display: block; }
+.inline-block { display: inline-block; }
+.hidden { display: none !important; }
+
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+
+/* ==========================================================================
+   ODSTĘPY (GAP, MARGIN, PADDING) - LEKKO POWIĘKSZONE
+   ========================================================================== */
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-5 { gap: 1.25rem; }
+.gap-8 { gap: 2.25rem; } /* powiększony z 2rem dla większej oddychalności */
+
+.w-full { width: 100%; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.ml-auto { margin-left: auto; }
+
+.max-w-7xl { max-width: 80rem; }
+.max-w-lg { max-width: 32rem; }
+
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+/* Powiększony padding navbara = szerszy pasek pionowo */
+.py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; } 
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+
+.space-x-8 > * + * { margin-left: 2.25rem; } /* Zwiększone z 2rem */
+.space-y-6 > * + * { margin-top: 1.5rem; }
+
+/* ==========================================================================
+   ZAOKRĄGLENIA & OBRAMOWANIA
+   ========================================================================== */
+.rounded-full { border-radius: 9999px; }
+.rounded-lg { border-radius: 0.5rem; }
+
+.border-b { border-bottom-width: 1px; }
+.border-t { border-top-width: 1px; }
+.border { border-width: 1px; }
+.border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
+
+/* ==========================================================================
+   TYPOGRAFIA & KOLORY TEKSTU (WIĘKSZE ROZMIARY)
+   ========================================================================== */
+.navbar-link, .text-white { color: #ffffff; }
+.text-gray-400 { color: #9ca3af; }
+.text-red-400 { color: #fb7185; }
+.text-red-500 { color: #ef4444; }
+
+.font-extrabold { font-weight: 800; } /* Montserrat ma świetne grubości */
+.font-bold { font-weight: 700; }
+.font-medium { font-weight: 500; }
+
+/* Zwiększone fonty */
+.text-2xl { font-size: 1.65rem; } /* Powiększone z 1.5rem */
+.text-lg { font-size: 1.20rem; }  /* Powiększone z 1.125rem */
+.text-base { font-size: 1.05rem; } /* Powiększone z 1rem */
+.text-sm { font-size: 0.95rem; }   /* Powiększone z 0.875rem */
+
+.tracking-tighter { letter-spacing: -0.05em; }
+.tracking-tight { letter-spacing: -0.025em; }
+
+/* ==========================================================================
+   TRANSITIONS & HOVERY
+   ========================================================================== */
+.transition-colors,
+.transition-transform,
+.transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover\:text-white:hover { color: #ffffff; }
+.hover\:text-red-400:hover { color: #fb7185; }
+.hover\:bg-white\/10:hover { background-color: rgba(255, 255, 255, 0.1); }
+.hover\:scale-105:hover { transform: scale(1.05); }
+
+/* ==========================================================================
+   LINKI DO STRON JESZCZE NIEGOTOWYCH (Cennik, Twoje serwery)
+   Zamiast normalnego hovera pokazują dymek "tymczasowo niedostępne".
+   ========================================================================== */
+.nav-disabled {
+    color: #ef4444;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.nav-disabled:hover,
+.nav-disabled:focus-visible {
+    color: #ef4444;
+}
+
+/* Dymek na desktopie (hover) */
+.nav-disabled::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%) translateY(4px);
+    background: rgba(15, 15, 15, 0.95);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 60;
+}
+
+.nav-disabled:hover::after,
+.nav-disabled:focus-visible::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(8px);
+}
+
+/* Dymek wewnątrz menu mobilnego (link na całą szerokość, tooltip pod spodem
+   wyrównany do lewej, żeby nie wychodził poza ekran) */
+.nav-mobile-menu .nav-disabled::after {
+    left: 0;
+    transform: translateX(0) translateY(4px);
+    white-space: normal;
+    max-width: 90%;
+}
+
+.nav-mobile-menu .nav-disabled:hover::after,
+.nav-mobile-menu .nav-disabled.nav-disabled-tapped::after {
+    transform: translateX(0) translateY(8px);
+    opacity: 1;
+}
+
+/* Tap na telefonie (brak hover) - JS dodaje tę klasę na chwilę po dotknięciu */
+.nav-disabled.nav-disabled-tapped::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(8px);
+}
+
+.shadow-lg { box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25); }
+.shadow-purple-500\/20 { box-shadow: 0 15px 30px -15px rgba(139, 92, 246, 0.3); }
+
+/* ==========================================================================
+   ZMIANY W WYGLĄDZIE UŻYTKOWNIKA
+   ========================================================================== */
+.user-badge {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    backdrop-filter: blur(8px);
+}
+
+.object-cover { object-fit: cover; }
+
+/* Powiększone ikonki manualnie gdy używasz Lucide */
+.lucide { width: 1.25rem; height: 1.25rem; }
+.lucide-menu { width: 2.25rem; height: 2.25rem; } /* Większy hamburger */
+
+/* ==========================================================================
+   MENU MOBILNE (ROZWIJANE)
+
+   UWAGA: to menu NIE MOŻE dostać klasy .hidden - jest ona zadeklarowana jako
+   `display: none !important`, więc przykryłaby animację max-height i menu nie
+   dałoby się otworzyć. Widocznością na desktopie steruje media query niżej.
+   ========================================================================== */
+.nav-mobile-menu {
+    display: none; /* na desktopie menu nie istnieje wcale */
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    background: rgba(10, 10, 10, 0.72);
+    backdrop-filter: blur(32px) saturate(170%);
+    -webkit-backdrop-filter: blur(32px) saturate(170%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-mobile-menu.open {
+    max-height: 420px;
+    opacity: 1;
+}
+
+.nav-mobile-menu a {
+    color: #d1d5db;
+    text-decoration: none;
+}
+
+.nav-mobile-menu a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-hamburger {
+    display: none; /* pokazywany dopiero, gdy chowają się linki desktopowe */
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.nav-hamburger:hover {
+    opacity: 0.8;
+}
+
+/* Ikonki hamburgera - przełączamy między "menu" a "X" samym CSS-em */
+.nav-hamburger .nav-icon {
+    width: 2rem;
+    height: 2rem;
+    display: block;
+}
+
+.nav-hamburger .nav-icon-close,
+.nav-hamburger.open .nav-icon-menu {
+    display: none;
+}
+
+.nav-hamburger.open .nav-icon-close {
+    display: block;
+}
+
+.nav-icon-inline {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* Linki desktopowe - chowają się dokładnie wtedy, gdy pojawia się hamburger */
+.nav-links-desktop {
+    display: flex;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES (DESKTOP)
+   ========================================================================== */
+@media (min-width: 768px) {
+    .md\:block { display: block !important; }
+    .md\:flex { display: flex !important; }
+    .md\:hidden { display: none !important; }
+
+    .md\:px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .md\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .md\:py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .md\:text-base { font-size: 1.05rem; }
+    .md\:ml-0 { margin-left: 0; }
+    
+    /* Zmiany klas szerokości dla logo w wersji desktopowej */
+    .md\:w-10 { width: 2.5rem; }
+    .md\:h-10 { height: 2.5rem; }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES (MOBILE)
+   ========================================================================== */
+@media (max-width: 767px) {
+    .md\:hidden { display: block !important; }
+    .md\:flex { display: none !important; }
+    .md\:block { display: none !important; }
+    .md\:ml-0 { margin-left: 0; }
+}
+
+/* ==========================================================================
+   INTERAKTYWNY PRZYCISK PROFILU (HOVER MAGIC)
+   ========================================================================== */
+
+/* 1. Zewnętrzna obwódka (Pigułka z logoutem) */
+.profile-magic-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: rgba(31, 41, 55, 0.5); /* Ciemne tło pigułki */
+    border: 1px solid rgba(75, 85, 99, 0.6); /* Obramowanie */
+    border-radius: 9999px;
+    padding: 4px;
+    gap: 4px; /* Odstęp między polem profilu a logoutem */
+}
+
+/* 2. Przycisk profilu (klikowalna lewa część) */
+.profile-magic-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-radius: 9999px;
+    overflow: hidden;
+    cursor: pointer;
+    min-width: 135px; /* Szerokość minimalna */
+    height: 36px;
+    text-decoration: none;
+}
+
+/* 3. Nazwa użytkownika - leży NIERUCHOMO na spodzie (z-index 1).
+   Nie animuje się wcale; na hover po prostu zakrywa ją wjeżdżające tło. */
+.profile-magic-text-container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 38px; /* miejsce na avatar spoczywający przy lewej krawędzi */
+    padding-right: 10px;
+    z-index: 1;
+}
+
+.profile-text-username {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* 4. JEDNA wspólna warstwa: niebieskie tło + avatar + napis "Panel".
+   Wszystko troje jest tym samym elementem, więc porusza się jednym
+   transformem - rozjechanie się animacji jest fizycznie niemożliwe.
+   W spoczynku warstwa jest wysunięta w lewo tak, że wystaje z niej
+   dokładnie 36px z prawej strony = sam avatar. */
+.profile-magic-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 38px; /* miejsce na avatar dosunięty do prawej krawędzi */
+    padding-left: 10px;
+    background-color: #2563eb;
+    border-radius: 9999px;
+    transform: translateX(calc(-100% + 36px));
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+}
+
+.profile-magic-btn:hover .profile-magic-slide {
+    transform: translateX(0);
+}
+
+/* 5. Napis "Panel" - bez własnej animacji, wjeżdża razem z tłem */
+.profile-text-profil {
+    white-space: nowrap;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.profile-magic-btn:hover .profile-text-profil {
+    opacity: 1;
+}
+
+/* 6. Avatar - przyklejony do prawej krawędzi warstwy, więc jedzie razem z nią.
+   W spoczynku jest tym jedynym wystającym fragmentem (zlewa się kolorem z tłem
+   warstwy, więc wygląda jak samodzielne niebieskie kółko). */
+.profile-magic-avatar {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.95rem;
+    transition: background-color 0.28s ease, color 0.28s ease;
+}
+
+.profile-magic-btn:hover .profile-magic-avatar {
+    background-color: #ffffff;
+    color: #2563eb;
+}
+
+/* 8. Przycisk wylogowania - osobny element obok pigułki, ze stałym,
+   jawnym rozmiarem (nie może "zniknąć" przez zerowanie się we flexie). */
+.profile-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    color: #9ca3af;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.profile-logout-btn:hover {
+    color: #fb7185;
+    background-color: rgba(251, 113, 133, 0.1);
+}
+
+.profile-logout-btn svg,
+.profile-logout-btn i {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   RESPONSYWNOŚĆ NAVBARA
+   UWAGA: te media queries MUSZĄ zostać na końcu pliku. Media query nie
+   podnosi specyficzności, więc przy równej specyficzności decyduje kolejność -
+   umieszczone wyżej zostałyby nadpisane przez reguły bazowe poniżej.
+   ========================================================================== */
+
+/* Logo: najpierw znika "HOSTING", potem "DNCT", zostaje sama ikonka. */
+@media (max-width: 1180px) {
+    .brand-hosting { display: none; }
+}
+
+@media (max-width: 950px) {
+    .brand-dnct { display: none; }
+}
+
+/* Poniżej 900px: linki chowają się do hamburgera, a pigułka profilu zwija się
+   do okrągłego avatara. Jeden wspólny próg, żeby navbar przełączał się w tryb
+   mobilny w jednym momencie, a nie etapami. */
+@media (max-width: 900px) {
+    .nav-links-desktop { display: none; }
+    .nav-hamburger { display: inline-flex; }
+    .nav-mobile-menu { display: block; }
+}
+
+/* Pigułka profilu: znika nick i wylogowanie, zostaje okrągły avatar w obwódce. */
+@media (max-width: 900px) {
+    .profile-magic-wrapper {
+        padding: 3px;
+        gap: 0;
+        border-radius: 9999px;
+    }
+
+    .profile-magic-btn {
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .profile-magic-text-container,
+    .profile-logout-btn {
+        display: none;
+    }
+
+    /* Warstwa wypełnia całe kółko - bez wjeżdżania, nie ma dokąd */
+    .profile-magic-slide,
+    .profile-magic-btn:hover .profile-magic-slide {
+        transform: translateX(0);
+        padding: 0;
+    }
+
+    .profile-magic-avatar {
+        right: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
