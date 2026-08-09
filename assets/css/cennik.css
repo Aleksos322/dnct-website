@@ -9,6 +9,20 @@
    Nowy jest wyłącznie rytm: pasma sekcji, ograniczone powierzchnie i skala mocy.
    ========================================================================== */
 
+
+/* --------------------------------------------------------------------------
+   KONTENER STRONY
+
+   Jedna szerokość i jedne marginesy dla WSZYSTKIEGO: hero, zakładek, paneli
+   i sekcji dolnej. Wcześniej hero było pełnoekranowe, a panele wcięte —
+   przez co strona wyglądała, jakby rozjeżdżała się w lewo i w prawo.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-wrap {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 2.5rem);
+}
+
 /* --------------------------------------------------------------------------
    Wspólne elementy typograficzne
    -------------------------------------------------------------------------- */
@@ -59,20 +73,23 @@
    ma każdy cennik w internecie; przesunięcie treści w lewo i postawienie obok
    niej żywego licznika daje stronie punkt zaczepienia dla wzroku.
    -------------------------------------------------------------------------- */
+/* Hero nie ma własnych marginesów bocznych — bierze je z .cnk-wrap, dzięki
+   czemu nagłówek stoi w tej samej pionowej linii co panel z planami poniżej. */
 .cennik-page .cnk-hero {
     position: relative;
-    padding: clamp(3rem, 8vw, 6rem) 0 clamp(4rem, 9vw, 7rem);
-    overflow: hidden;
+    padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(2.5rem, 5vw, 4rem);
 }
 
 /* Miękka poświata pod hero. Tło strony rysuje FinisherHeader (wspólne z całym
    serwisem); to jest warstwa sekcyjna, która oddziela pasma od siebie. */
+/* Poświata jest tylko tłem — nie może rozpychać strony ani łapać kliknięć. */
 .cennik-page .cnk-hero-glow {
     position: absolute;
-    top: -40%;
-    left: -10%;
-    width: 70%;
-    height: 180%;
+    top: -30%;
+    left: -5%;
+    width: 55%;
+    height: 160%;
+    z-index: -1;
     background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.16) 0%, transparent 65%);
     filter: blur(60px);
     pointer-events: none;
@@ -131,60 +148,68 @@
 }
 
 /* --------------------------------------------------------------------------
-   PIGUŁKI GIER — siedzą NA granicy hero i panelu planów. Ujemny margines
-   sprawia, że przełącznik fizycznie wchodzi w powierzchnię pod spodem, więc
-   czytelne jest, że przełącza właśnie ją, a nie całą stronę.
+   PRZEŁĄCZNIK GIER
+
+   Zwykły rząd pigułek NAD panelem. Wcześniej zakładki wchodziły w powierzchnię
+   pod spodem ujemnym marginesem — w zamyśle miało to je z nią spiąć, w praktyce
+   czytało się jak błąd renderowania. Efekt usunięty; czytelność wygrywa.
    -------------------------------------------------------------------------- */
 .cennik-page .cennik-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 0;
-}
-
-.cennik-page .cnk-tabs-straddle {
-    position: relative;
-    z-index: 3;
-    margin-bottom: -1.6rem;
-    padding-left: 1.75rem;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .cennik-page .cennik-tab {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.7rem 1.3rem;
-    border-radius: 14px 14px 0 0;
-    background: rgba(18, 18, 28, 0.85);
-    backdrop-filter: blur(20px);
+    gap: 0.55rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.07);
-    border-bottom: none;
     color: #94a3b8;
-    font-size: 0.85rem;
+    font-size: 0.83rem;
     font-weight: 700;
     cursor: pointer;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
 }
 
-.cennik-page .cennik-tab:hover { color: #e2e8f0; background: rgba(30, 30, 45, 0.9); }
+.cennik-page .cennik-tab:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+}
 
 .cennik-page .cennik-tab.is-active {
     color: #fff;
-    background: rgba(139, 92, 246, 0.14);
-    border-color: rgba(139, 92, 246, 0.35);
-    box-shadow: 0 -4px 20px rgba(139, 92, 246, 0.15);
+    background: rgba(139, 92, 246, 0.16);
+    border-color: rgba(139, 92, 246, 0.42);
 }
 
-.cennik-page .cennik-tab img { border-radius: 4px; object-fit: contain; }
+.cennik-page .cennik-tab:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+}
+
+.cennik-page .cennik-tab img {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: contain;
+}
 
 .cennik-page .cennik-tab-count {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: 800;
-    padding: 0.1rem 0.45rem;
+    padding: 0.08rem 0.42rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    color: inherit;
+    opacity: 0.75;
 }
 
 /* --------------------------------------------------------------------------
@@ -237,7 +262,14 @@
 
 /* Zagęszczenie: mniejsze wypełnienie, niższa grafika, spokojniejsza typografia. */
 .cennik-page .plan-pick > .glass { padding: 1.35rem !important; border-radius: 22px !important; }
-.cennik-page .plan-pick .h-44 { height: 6.5rem !important; margin-bottom: 1.1rem !important; border-radius: 16px !important; }
+ /* Kadr grafiki. W oryginale ma 11 rem i na stronie głównej to działa, bo
+    karta jest jedna z trzech i ma oddychać. Tutaj kart jest dziewięć, a same
+    grafiki są ciemne i rozmyte — przy tej wysokości czytały się jako pusty
+    prostokąt z ikoną zawieszoną w środku. 5 rem robi z tego pasek, w którym
+    ikona wypełnia kadr. */
+.cennik-page .plan-pick .h-44 { height: 5rem !important; margin-bottom: 0.9rem !important; border-radius: 14px !important; }
+.cennik-page .plan-pick .h-44 .p-4 { padding: 0.5rem !important; border-radius: 12px !important; }
+.cennik-page .plan-pick .h-44 img[alt] { max-height: 2.4rem; }
 .cennik-page .plan-pick .text-3xl { font-size: 1.35rem !important; }
 .cennik-page .plan-pick .text-4xl { font-size: 2rem !important; }
 .cennik-page .plan-pick .mb-8 { margin-bottom: 1.1rem !important; }
@@ -280,11 +312,13 @@
    Rozdzielone celowo: to dwa różne rodzaje argumentu i mieszanie ich osłabia
    oba.
    -------------------------------------------------------------------------- */
+/* Jedna skala odstępów dla wszystkich pasm — wcześniej każde miało własny
+   margines i strona rwała się w pionie. */
 .cennik-page .cnk-split {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 5rem;
+    gap: 1.25rem;
+    margin-top: 3rem;
 }
 
 .cennik-page .cnk-split-col {
@@ -354,15 +388,34 @@
 /* --------------------------------------------------------------------------
    Komunikaty i sekcja "wkrótce"
    -------------------------------------------------------------------------- */
-.cennik-page .cennik-info,
-.cennik-page .cennik-soon {
+.cennik-page .cennik-info {
     max-width: 640px;
     margin: 0 auto;
     padding: 2rem;
     border-radius: 22px;
     text-align: center;
 }
-.cennik-page .cennik-soon { margin-top: 4rem; }
+
+/* "Wkrótce" był wycentrowanym boxem w pustym pasie i wyglądał na zgubiony.
+   Teraz jest wąskim paskiem na pełnej szerokości kontenera: informacja
+   zostaje, a strona nie rwie się dziurą. */
+.cennik-page .cennik-soon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    max-width: none;
+    margin-top: 1.25rem;
+    padding: 1.15rem 1.5rem;
+    border-radius: 18px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.018);
+    border: 1px solid rgba(255, 255, 255, 0.055);
+}
+.cennik-page .cennik-soon h2 { font-size: 0.95rem; margin: 0 0 0.15rem; }
+.cennik-page .cennik-soon p { font-size: 0.8rem; max-width: 46ch; }
+.cennik-page .cennik-soon > div:first-child { flex: 1 1 22rem; }
 
 .cennik-page .cennik-info h2,
 .cennik-page .cennik-soon h2 {
@@ -377,9 +430,9 @@
 .cennik-page .cennik-soon-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-top: 1.25rem;
+    gap: 0.5rem;
+    margin-top: 0;
+    flex-shrink: 0;
 }
 .cennik-page .cennik-soon-item {
     display: inline-flex;
@@ -566,4 +619,22 @@
 @media (prefers-reduced-motion: reduce) {
     .pick-bar { transition: none; }
     .cennik-page .cfg-select:hover { transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   HOVER KARTY — jeden ruch zamiast trzech
+
+   Karta ma w komponencie hover:scale-[1.05] ORAZ hover:-translate-y-2. Przy
+   ciasnej siatce 3x3 rosnąca karta nachodziła na sąsiadki i wyglądało to jak
+   zepsuty układ. Wyłączamy to u ŹRÓDŁA (parametr `compact` w render_plan_card),
+   a nie nadpisaniem — walka na !important z klasami Tailwinda kończy się
+   regułami, których nikt później nie rozumie.
+
+   Tutaj zostaje tylko jeden, spokojny ruch całego kafelka.
+   -------------------------------------------------------------------------- */
+.cennik-page .plan-pick:hover { transform: translateY(-3px); }
+
+.cennik-page .plan-pick:hover > .glass {
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
 }

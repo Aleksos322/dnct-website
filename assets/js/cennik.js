@@ -152,7 +152,14 @@
             elPrice.textContent = money(total);
             elHint.textContent  = slotHint(tier.slots);
 
-            var months = current.days / 30;
+            // Ile PEŁNYCH miesięcy obejmuje okres. Dzielenie przez 30 dawało dla
+            // roku 12.17 miesiąca, przez co cena odniesienia rosła do 790.83 zł,
+            // a "oszczędzasz" pokazywało 75.83 zł przy odznace "1 miesiąc gratis"
+            // i cenie 65 zł/mies. Liczby przeczyły obietnicy. Rok to 12 miesięcy,
+            // więc oszczędność ma wyjść równo jednym miesiącem.
+            var months = current.days >= 30
+                ? Math.round(current.days / 30.44)
+                : current.days / 30;
             elPer.textContent = current.days === 30
                 ? 'za miesiąc'
                 : 'za ' + current.label.toLowerCase() + ' · ' + money(total / months) + ' zł/mies.';

@@ -122,6 +122,7 @@ ob_start();
 <link rel="stylesheet" href="/assets/css/cennik.css">
 
 <div class="cennik-page">
+<div class="cnk-wrap">
 
 <!-- ============ HERO ============ -->
 <section class="cnk-hero">
@@ -171,7 +172,7 @@ ob_start();
                  jedna — to jedyny sposób, żeby klient w ogóle zauważył, że
                  hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
-            <div class="cennik-tabs cnk-tabs-straddle" role="tablist">
+            <div class="cennik-tabs" role="tablist">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
                     <button type="button"
                             class="cennik-tab<?php echo $i === 0 ? ' is-active' : ''; ?>"
@@ -236,6 +237,9 @@ ob_start();
 
                                 <?php
                                 render_plan_card((int)$plan['id'], [
+                                    // Ciasna siatka 3x3 - karta nie animuje sie sama,
+                                    // ruch przejmuje kontener .plan-pick.
+                                    'compact'    => true,
                                     'name'       => $plan['name'] ?? '',
                                     'price'      => $plan['price'] ?? '',
                                     'popular'    => !empty($plan['popular']),
@@ -344,7 +348,8 @@ ob_start();
             <a href="/regulamin">Regulamin</a>.
         </p>
     </div>
-</section>
+
+</div><!-- /.cnk-wrap -->
 
 <?php /* Pasek podsumowania. Startuje ukryty; pokazuje go skrypt po pierwszym
          zaznaczeniu. Zgodnie z ustaleniem NIE MA tu przycisku "kup" - sprzedaż

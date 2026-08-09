@@ -43,17 +43,31 @@ function render_plan_card(int $id, array $p): void
     $href    = (string)($p['href'] ?? '/cennik');
     $btnText = (string)($p['btn_text'] ?? 'Zobacz szczegóły');
 
+    /* Tryb kompaktowy - dla widoków, w ktorych kart jest duzo i leza ciasno
+       (cennik). Wylacza wlasne animacje hoveru karty: przy siatce 3x3 karta
+       rosnaca o 5% i podnoszaca sie o 8 px nachodzila na sasiadki i wygladalo
+       to jak zepsuty uklad, a nie jak reakcja na kursor. Ruch przejmuje wtedy
+       kontener wyzej (.plan-pick), zeby byl JEDEN, spokojny.
+
+       Strona glowna zostaje przy oryginale - tam karty sa trzy i maja miejsce
+       na taki gest. */
+    $compact = !empty($p['compact']);
+
     $classes = 'relative group glass p-8 rounded-[2.5rem] transition-all duration-500 overflow-hidden border ';
 
     if ($isSoldOut) {
         $classes .= 'border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)] opacity-90 ';
     } elseif ($isPopular) {
-        $classes .= 'border-purple-500 shadow-[0_0_40px_rgba(139,92,246,0.15)] scale-[1.02] ';
+        $classes .= 'border-purple-500 shadow-[0_0_40px_rgba(139,92,246,0.15)] ';
+        $classes .= $compact ? '' : 'scale-[1.02] ';
     } elseif ($isOnSale) {
-        $classes .= 'border-blue-500/40 shadow-[0_0_30px_rgba(59,130,246,0.2)] hover:scale-[1.05] ';
+        $classes .= 'border-blue-500/40 shadow-[0_0_30px_rgba(59,130,246,0.2)] ';
+        $classes .= $compact ? '' : 'hover:scale-[1.05] ';
     } else {
-        $classes .= 'border-white/5 hover:scale-[1.05] hover:border-blue-500/30 '
-                  . 'hover:shadow-[0_0_50px_rgba(59,130,246,0.2)] hover:-translate-y-2 ';
+        $classes .= 'border-white/5 hover:border-blue-500/30 ';
+        $classes .= $compact
+            ? ''
+            : 'hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(59,130,246,0.2)] hover:-translate-y-2 ';
     }
 
     $bgSrc   = plan_card_media($p['bg'] ?? '', 'background');
