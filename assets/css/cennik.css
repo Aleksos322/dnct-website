@@ -1,104 +1,387 @@
-/* assets/css/cennik.css
-   Styl strony cennika. Same karty planów mają własny wygląd w
-   components/plan-card.php — tutaj jest wyłącznie obudowa: zakładki gier,
-   komunikaty i sekcja "wkrótce". */
+/* ==========================================================================
+   CENNIK — układ i rytm strony
 
-/* --- Zakładki gier ------------------------------------------------------ */
-.cennik-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.6rem;
-    margin-bottom: 3rem;
+   Wszystko jest zagnieżdżone pod .cennik-page. To nie ozdobnik: reguły niżej
+   zagęszczają karty planów, a te same karty żyją też na stronie głównej, gdzie
+   mają zostać duże. Bez tego zawężenia zmiana tutaj przerobiłaby stronę główną.
+
+   Paleta i szkło są celowo TE SAME co na reszcie serwisu i w panelu gry.
+   Nowy jest wyłącznie rytm: pasma sekcji, ograniczone powierzchnie i skala mocy.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Wspólne elementy typograficzne
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-eyebrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #7c6ba8;
+    margin-bottom: 1rem;
 }
 
-.cennik-tab {
+.cennik-page .cnk-h1 {
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    color: #f8fafc;
+    margin: 0 0 1.25rem;
+}
+
+.cennik-page .cnk-h1-accent {
+    background: linear-gradient(100deg, #8b5cf6 0%, #3b82f6 55%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.cennik-page .cnk-h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #f1f5f9;
+    margin: 0 0 1.5rem;
+}
+
+.cennik-page .cnk-lead {
+    color: #94a3b8;
+    font-size: 1rem;
+    line-height: 1.65;
+    max-width: 34ch;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   HERO — asymetryczny. Wycentrowany nagłówek nad siatką kart to układ, który
+   ma każdy cennik w internecie; przesunięcie treści w lewo i postawienie obok
+   niej żywego licznika daje stronie punkt zaczepienia dla wzroku.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-hero {
+    position: relative;
+    padding: clamp(3rem, 8vw, 6rem) 0 clamp(4rem, 9vw, 7rem);
+    overflow: hidden;
+}
+
+/* Miękka poświata pod hero. Tło strony rysuje FinisherHeader (wspólne z całym
+   serwisem); to jest warstwa sekcyjna, która oddziela pasma od siebie. */
+.cennik-page .cnk-hero-glow {
+    position: absolute;
+    top: -40%;
+    left: -10%;
+    width: 70%;
+    height: 180%;
+    background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.16) 0%, transparent 65%);
+    filter: blur(60px);
+    pointer-events: none;
+}
+
+.cennik-page .cnk-hero-inner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.cennik-page .cnk-hero-text { flex: 1 1 24rem; }
+
+/* Licznik na żywo — jedyna liczba na stronie, której nie da się podważyć. */
+.cennik-page .cnk-live {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1.1rem 1.5rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+}
+
+.cennik-page .cnk-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 12px #22c55e;
+    animation: cnkPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes cnkPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.45; transform: scale(0.85); }
+}
+
+.cennik-page .cnk-live-num {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.cennik-page .cnk-live-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   PIGUŁKI GIER — siedzą NA granicy hero i panelu planów. Ujemny margines
+   sprawia, że przełącznik fizycznie wchodzi w powierzchnię pod spodem, więc
+   czytelne jest, że przełącza właśnie ją, a nie całą stronę.
+   -------------------------------------------------------------------------- */
+.cennik-page .cennik-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0;
+}
+
+.cennik-page .cnk-tabs-straddle {
+    position: relative;
+    z-index: 3;
+    margin-bottom: -1.6rem;
+    padding-left: 1.75rem;
+}
+
+.cennik-page .cennik-tab {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.65rem 1.25rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.7rem 1.3rem;
+    border-radius: 14px 14px 0 0;
+    background: rgba(18, 18, 28, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: none;
     color: #94a3b8;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease, background 0.2s ease;
 }
 
-.cennik-tab:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.18);
-    color: #e2e8f0;
-}
+.cennik-page .cennik-tab:hover { color: #e2e8f0; background: rgba(30, 30, 45, 0.9); }
 
-.cennik-tab.is-active {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(59, 130, 246, 0.18) 100%);
-    border-color: rgba(139, 92, 246, 0.45);
+.cennik-page .cennik-tab.is-active {
     color: #fff;
-    box-shadow: 0 4px 18px rgba(139, 92, 246, 0.22);
+    background: rgba(139, 92, 246, 0.14);
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 -4px 20px rgba(139, 92, 246, 0.15);
 }
 
-.cennik-tab img { border-radius: 4px; object-fit: contain; }
+.cennik-page .cennik-tab img { border-radius: 4px; object-fit: contain; }
 
-.cennik-tab-count {
-    font-size: 0.7rem;
+.cennik-page .cennik-tab-count {
+    font-size: 0.65rem;
     font-weight: 800;
     padding: 0.1rem 0.45rem;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
-    color: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
-/* --- Panele gier --------------------------------------------------------
-   Panel nieaktywny znika przez display:none, a NIE przez klasę .hidden —
-   ta w navbar.css jest oznaczona !important i bywa trudna do nadpisania. */
-.cennik-panel { display: none; }
-.cennik-panel.is-active { display: block; animation: cennikFade 0.25s ease; }
+/* --------------------------------------------------------------------------
+   POWIERZCHNIE SEKCJI — karty przestają wisieć w próżni, bo dostają
+   ograniczone tło, na którym leżą.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-panel {
+    position: relative;
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.012) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+}
 
-@keyframes cennikFade {
-    from { opacity: 0; transform: translateY(6px); }
+.cennik-page .cnk-panel-head { margin-bottom: 2rem; }
+.cennik-page .cnk-panel-head h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0 0 0.3rem;
+}
+.cennik-page .cnk-panel-head p { color: #64748b; font-size: 0.85rem; margin: 0; }
+
+.cennik-page .cennik-panel { display: none; }
+.cennik-page .cennik-panel.is-active { display: block; animation: cnkFade 0.3s ease; }
+
+@keyframes cnkFade {
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Komunikaty --------------------------------------------------------- */
-.cennik-info,
-.cennik-soon {
+/* --------------------------------------------------------------------------
+   KARTY PLANÓW — zagęszczone. Dziewięć kart w rozmiarze ze strony głównej
+   zamienia cennik w niekończące się przewijanie; tu liczy się porównywanie,
+   a nie prezentacja pojedynczego planu.
+   -------------------------------------------------------------------------- */
+.cennik-page .plan-pick {
+    position: relative;
+    cursor: pointer;
+    border-radius: 22px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+    outline: none;
+}
+.cennik-page .plan-pick:hover { transform: translateY(-4px); }
+.cennik-page .plan-pick:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+.cennik-page .plan-pick.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); }
+.cennik-page .plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
+.cennik-page .plan-pick[data-plan-soldout="1"]:hover { transform: none; }
+
+/* Zagęszczenie: mniejsze wypełnienie, niższa grafika, spokojniejsza typografia. */
+.cennik-page .plan-pick > .glass { padding: 1.35rem !important; border-radius: 22px !important; }
+.cennik-page .plan-pick .h-44 { height: 6.5rem !important; margin-bottom: 1.1rem !important; border-radius: 16px !important; }
+.cennik-page .plan-pick .text-3xl { font-size: 1.35rem !important; }
+.cennik-page .plan-pick .text-4xl { font-size: 2rem !important; }
+.cennik-page .plan-pick .mb-8 { margin-bottom: 1.1rem !important; }
+.cennik-page .plan-pick .mb-6 { margin-bottom: 0.9rem !important; }
+.cennik-page .plan-pick .mt-8 { margin-top: 1.1rem !important; }
+.cennik-page .plan-pick .py-4 { padding-top: 0.7rem !important; padding-bottom: 0.7rem !important; }
+.cennik-page .plan-pick .gap-4 { gap: 0.65rem !important; }
+.cennik-page .plan-pick .space-y-4 > * + * { margin-top: 0.5rem !important; }
+.cennik-page .plan-pick li { font-size: 0.8rem; }
+.cennik-page .plan-pick .p-4 { padding: 0.6rem !important; }
+.cennik-page .plan-pick .p-2 { padding: 0.35rem !important; }
+
+/* SYGNATURA: wskaźnik mocy.
+   Liczba "8 GB" nic nie mówi komuś, kto kupuje serwer pierwszy raz. Pozycja
+   między najmniejszym a największym planem mówi wszystko od razu — i to jest
+   informacja, której żadna inna część karty nie niesie. */
+.cennik-page .plan-scale {
+    position: absolute;
+    top: 0;
+    left: 1.35rem;
+    right: 1.35rem;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+    z-index: 5;
+}
+
+.cennik-page .plan-scale-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.65);
+    transition: width 0.5s ease;
+}
+
+/* --------------------------------------------------------------------------
+   SEKCJA DWUKOLUMNOWA — specyfikacja po lewej, zaufanie po prawej.
+   Rozdzielone celowo: to dwa różne rodzaje argumentu i mieszanie ich osłabia
+   oba.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 5rem;
+}
+
+.cennik-page .cnk-split-col {
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cennik-page .cnk-included {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.008) 100%);
+}
+
+/* Prawa kolumna dostaje delikatny fiolet — to strona argumentów, nie danych,
+   i ma się różnić w odbiorze, a nie tylko treścią. */
+.cennik-page .cnk-trust {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.09) 0%, rgba(59, 130, 246, 0.04) 100%);
+    border-color: rgba(139, 92, 246, 0.18);
+}
+
+.cennik-page .cnk-list { list-style: none; margin: 0; padding: 0; }
+.cennik-page .cnk-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    color: #cbd5e1;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cennik-page .cnk-list li:last-child { border-bottom: none; }
+
+.cennik-page .cnk-check {
+    color: #22c55e;
+    font-weight: 900;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.cennik-page .cnk-trust-item {
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cennik-page .cnk-trust-item:last-child { border-bottom: none; }
+.cennik-page .cnk-trust-item strong {
+    display: block;
+    color: #f1f5f9;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+}
+.cennik-page .cnk-trust-item span { color: #94a3b8; font-size: 0.82rem; line-height: 1.5; }
+
+.cennik-page .cnk-trust-hero { display: flex; align-items: center; gap: 1.1rem; padding-top: 0; }
+
+.cennik-page .cnk-trust-big {
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Komunikaty i sekcja "wkrótce"
+   -------------------------------------------------------------------------- */
+.cennik-page .cennik-info,
+.cennik-page .cennik-soon {
     max-width: 640px;
     margin: 0 auto;
     padding: 2rem;
     border-radius: 22px;
     text-align: center;
 }
+.cennik-page .cennik-soon { margin-top: 4rem; }
 
-.cennik-info h2,
-.cennik-soon h2 {
-    font-size: 1.25rem;
+.cennik-page .cennik-info h2,
+.cennik-page .cennik-soon h2 {
+    font-size: 1.2rem;
     font-weight: 800;
     color: #f1f5f9;
     margin: 0 0 0.75rem;
 }
+.cennik-page .cennik-info p,
+.cennik-page .cennik-soon p { color: #94a3b8; font-size: 0.88rem; line-height: 1.6; margin: 0; }
 
-.cennik-info p,
-.cennik-soon p {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin: 0;
-}
-
-.cennik-soon { margin-top: 4rem; }
-
-.cennik-soon-list {
+.cennik-page .cennik-soon-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.6rem;
     margin-top: 1.25rem;
 }
-
-.cennik-soon-item {
+.cennik-page .cennik-soon-item {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -110,314 +393,177 @@
     font-size: 0.8rem;
     font-weight: 600;
 }
+.cennik-page .cennik-soon-item img { border-radius: 4px; object-fit: contain; opacity: 0.85; }
 
-.cennik-soon-item img { border-radius: 4px; object-fit: contain; opacity: 0.85; }
-
-/* --- Stopka cennika ----------------------------------------------------- */
-.cennik-note {
+.cennik-page .cennik-note {
     margin-top: 3rem;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: #64748b;
 }
+.cennik-page .cennik-note a { color: #a78bfa; text-decoration: underline; text-underline-offset: 3px; }
 
-.cennik-note a {
-    color: #a78bfa;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+/* --------------------------------------------------------------------------
+   Dostępność i mniejsze ekrany
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .cennik-page .cnk-split { grid-template-columns: 1fr; }
+    .cennik-page .cnk-hero-inner { align-items: flex-start; }
+    .cennik-page .cnk-tabs-straddle { padding-left: 0.5rem; }
+    .cennik-page .cnk-lead { max-width: none; }
 }
 
-/* ==========================================================================
-   ZAZNACZANIE PLANÓW
-   Karta ma własne id planu i daje się wybrać. Zaznaczenie jest widoczne
-   obrysem, a nie zmianą tła — karty planów mają własne grafiki i tło
-   zjadałoby ich czytelność.
-   ========================================================================== */
-.plan-pick {
-    cursor: pointer;
-    border-radius: 26px;
-    transition: transform 0.2s ease, box-shadow 0.25s ease;
-    outline: none;
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-live-dot { animation: none; }
+    .cennik-page .cennik-panel.is-active { animation: none; }
+    .cennik-page .plan-pick:hover { transform: none; }
+    .cennik-page .plan-scale-fill { transition: none; }
 }
-.plan-pick:hover { transform: translateY(-4px); }
-.plan-pick:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
-
-.plan-pick.is-selected {
-    box-shadow: 0 0 0 2px #8b5cf6, 0 12px 40px rgba(139, 92, 246, 0.28);
-}
-
-.plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
-.plan-pick[data-plan-soldout="1"]:hover { transform: none; }
 
 /* ==========================================================================
    KONFIGURATOR SLOTÓW
+   Układ asymetryczny: sterowanie po lewej, wynik po prawej. Celowo inny rytm
+   niż siatka kart — druga gra ma się różnić w odbiorze, nie tylko treścią.
    ========================================================================== */
-.cfg-intro { text-align: center; margin-bottom: 2rem; }
-.cfg-intro h2 { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; margin: 0 0 0.5rem; }
-.cfg-intro p { color: #94a3b8; font-size: 0.9rem; margin: 0; }
+.cennik-page .cnk-panel-cfg { max-width: 940px; margin: 0 auto; }
 
-.cfg {
-    max-width: 900px;
-    margin: 0 auto;
-    border-radius: 26px;
-    padding: 2rem;
-    transition: box-shadow 0.25s ease;
-}
-.cfg.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 12px 40px rgba(139, 92, 246, 0.28); }
+.cennik-page .cfg-intro { text-align: center; margin-bottom: 2rem; }
+.cennik-page .cfg-intro h2 { font-size: 1.35rem; font-weight: 800; color: #f1f5f9; margin: 0 0 0.4rem; }
+.cennik-page .cfg-intro p { color: #64748b; font-size: 0.87rem; margin: 0; }
 
-.cfg-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 2.5rem;
-    align-items: center;
+.cennik-page .cfg { border-radius: 22px; padding: 1.75rem; transition: box-shadow 0.25s ease; }
+.cennik-page .cfg.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); }
+
+.cennik-page .cfg-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 2.25rem; align-items: center; }
+.cennik-page .cfg-block { margin-bottom: 1.75rem; }
+.cennik-page .cfg-block:last-child { margin-bottom: 0; }
+
+.cennik-page .cfg-label {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.2em;
+    font-weight: 800; color: #64748b; margin-bottom: 0.8rem;
 }
 
-.cfg-block { margin-bottom: 2rem; }
-.cfg-block:last-child { margin-bottom: 0; }
+.cennik-page .cfg-slots { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.9rem; }
+.cennik-page .cfg-slots-num { font-size: 2.6rem; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+.cennik-page .cfg-slots-unit { font-size: 0.88rem; color: #64748b; font-weight: 600; }
 
-.cfg-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-weight: 800;
-    color: #64748b;
-    margin-bottom: 0.85rem;
-}
-
-.cfg-slots { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem; }
-.cfg-slots-num { font-size: 2.5rem; font-weight: 900; color: #fff; line-height: 1; }
-.cfg-slots-unit { font-size: 0.9rem; color: #64748b; font-weight: 600; }
-
-/* Suwak — własny wygląd, bo domyślny wygląda inaczej w każdej przeglądarce. */
-.cfg-range {
-    width: 100%;
-    height: 6px;
-    border-radius: 999px;
+.cennik-page .cfg-range {
+    width: 100%; height: 6px; border-radius: 999px;
     background: rgba(255, 255, 255, 0.08);
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
-    cursor: pointer;
+    appearance: none; -webkit-appearance: none; outline: none; cursor: pointer;
 }
-.cfg-range::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px; height: 22px;
-    border-radius: 50%;
+.cennik-page .cfg-range::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-    border: 3px solid #0a0b14;
-    box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
-    cursor: grab;
+    border: 3px solid #0a0b14; box-shadow: 0 0 14px rgba(139, 92, 246, 0.6); cursor: grab;
 }
-.cfg-range::-moz-range-thumb {
-    width: 22px; height: 22px;
-    border-radius: 50%;
+.cennik-page .cfg-range::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6, #3b82f6);
-    border: 3px solid #0a0b14;
-    box-shadow: 0 0 14px rgba(139, 92, 246, 0.6);
-    cursor: grab;
+    border: 3px solid #0a0b14; box-shadow: 0 0 14px rgba(139, 92, 246, 0.6); cursor: grab;
+}
+.cennik-page .cfg-range:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.45); }
+
+.cennik-page .cfg-range-ends {
+    display: flex; justify-content: space-between;
+    font-size: 0.7rem; color: #475569; font-family: ui-monospace, monospace; margin-top: 0.5rem;
 }
 
-.cfg-range-ends {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    color: #475569;
-    font-family: ui-monospace, monospace;
-    margin-top: 0.5rem;
-}
+/* Podpowiedź kontekstowa — klient nietechniczny nie musi zgadywać liczby slotów. */
+.cennik-page .cfg-hint { margin-top: 0.85rem; font-size: 0.8rem; color: #a78bfa; min-height: 1.2em; }
 
-.cfg-hint {
-    margin-top: 0.85rem;
-    font-size: 0.8rem;
-    color: #a78bfa;
-    min-height: 1.2em;
+.cennik-page .cfg-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
+.cennik-page .cfg-period {
+    position: relative; padding: 0.8rem 0.4rem; border-radius: 13px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #94a3b8; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease;
 }
-
-/* --- Okresy --- */
-.cfg-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
-
-.cfg-period {
-    position: relative;
-    padding: 0.85rem 0.5rem;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #94a3b8;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.cfg-period:hover { background: rgba(255, 255, 255, 0.06); color: #e2e8f0; }
-.cfg-period.is-active {
+.cennik-page .cfg-period:hover { background: rgba(255, 255, 255, 0.06); color: #e2e8f0; }
+.cennik-page .cfg-period.is-active {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
-    border-color: rgba(139, 92, 246, 0.5);
-    color: #fff;
+    border-color: rgba(139, 92, 246, 0.5); color: #fff;
+}
+.cennik-page .cfg-period-label { display: block; }
+.cennik-page .cfg-period-badge {
+    display: block; margin-top: 0.22rem; font-size: 0.58rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em; color: #4ade80;
 }
 
-.cfg-period-label { display: block; }
-.cfg-period-badge {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.6rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #4ade80;
+.cennik-page .cfg-summary {
+    text-align: center; padding: 1.5rem; border-radius: 18px;
+    background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cennik-page .cfg-specs { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.15rem; }
+.cennik-page .cfg-spec-key {
+    display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: #64748b; font-weight: 800; margin-bottom: 0.25rem;
+}
+.cennik-page .cfg-spec-val { font-size: 0.92rem; font-weight: 700; color: #e2e8f0; font-family: ui-monospace, monospace; }
+
+.cennik-page .cfg-price-old { font-size: 0.82rem; color: #64748b; text-decoration: line-through; margin-bottom: 0.15rem; }
+.cennik-page .cfg-price { display: flex; align-items: baseline; justify-content: center; gap: 0.3rem; }
+.cennik-page .cfg-price span:first-child { font-size: 2.7rem; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+.cennik-page .cfg-price-cur { font-size: 0.95rem; color: #64748b; font-weight: 700; }
+.cennik-page .cfg-price-per { font-size: 0.73rem; color: #64748b; margin-top: 0.35rem; }
+
+.cennik-page .cfg-save {
+    display: inline-block; margin-top: 0.6rem; padding: 0.25rem 0.7rem; border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #4ade80; font-size: 0.68rem; font-weight: 800;
 }
 
-/* --- Podsumowanie --- */
-.cfg-summary {
-    text-align: center;
-    padding: 1.5rem;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.cfg-specs { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.25rem; }
-.cfg-spec { text-align: center; }
-.cfg-spec-key {
-    display: block;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #64748b;
-    font-weight: 800;
-    margin-bottom: 0.25rem;
-}
-.cfg-spec-val { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; font-family: ui-monospace, monospace; }
-
-.cfg-price-old {
-    font-size: 0.85rem;
-    color: #64748b;
-    text-decoration: line-through;
-    margin-bottom: 0.15rem;
-}
-.cfg-price { display: flex; align-items: baseline; justify-content: center; gap: 0.3rem; }
-.cfg-price span:first-child { font-size: 2.75rem; font-weight: 900; color: #fff; line-height: 1; }
-.cfg-price-cur { font-size: 1rem; color: #64748b; font-weight: 700; }
-.cfg-price-per { font-size: 0.75rem; color: #64748b; margin-top: 0.35rem; }
-
-.cfg-save {
-    display: inline-block;
-    margin-top: 0.6rem;
-    padding: 0.25rem 0.7rem;
-    border-radius: 999px;
-    background: rgba(34, 197, 94, 0.12);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #4ade80;
-    font-size: 0.7rem;
-    font-weight: 800;
-}
-
-.cfg-select {
-    width: 100%;
-    margin-top: 1.5rem;
-    padding: 0.9rem;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-    color: #fff;
-    font-weight: 800;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
+.cennik-page .cfg-select {
+    width: 100%; margin-top: 1.4rem; padding: 0.85rem; border-radius: 15px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff;
+    font-weight: 800; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.12em;
+    cursor: pointer; border: none; transition: all 0.2s ease;
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
 }
-.cfg-select:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45); }
+.cennik-page .cfg-select:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45); }
 
 /* ==========================================================================
-   PASEK ZAUFANIA
-   ========================================================================== */
-.cennik-trust {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 1rem;
-    margin-top: 4rem;
-}
-
-.cennik-trust-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.85rem;
-    padding: 1rem 1.15rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-.cennik-trust-icon { font-size: 1.1rem; color: #a78bfa; line-height: 1.3; }
-.cennik-trust-item strong { display: block; color: #e2e8f0; font-size: 0.85rem; margin-bottom: 0.15rem; }
-.cennik-trust-item span { color: #64748b; font-size: 0.78rem; line-height: 1.45; }
-
-/* ==========================================================================
-   PASEK WYBORU
-   Startuje poza ekranem; skrypt dokłada .is-visible po pierwszym zaznaczeniu.
-   Świadomie bez przycisku "kup" — sprzedaż jest wyłączona, a przycisk
+   PASEK WYBORU — bez przycisku zakupu; sprzedaż jest wyłączona, a przycisk
    prowadzący donikąd szkodzi bardziej niż jego brak.
    ========================================================================== */
 .pick-bar {
-    position: fixed;
-    left: 0; right: 0; bottom: 0;
-    z-index: 80;
-    transform: translateY(110%);
-    opacity: 0;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
+    transform: translateY(110%); opacity: 0; pointer-events: none;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-    pointer-events: none;
 }
 .pick-bar.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
 
 .pick-bar-inner {
-    max-width: 1100px;
-    margin: 0 auto 1rem;
-    padding: 1rem 1.5rem;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
+    max-width: 1100px; margin: 0 auto 1rem; padding: 1rem 1.5rem; border-radius: 20px;
+    display: flex; align-items: center; gap: 1.5rem;
 }
-
 .pick-bar-info { flex: 1; min-width: 0; }
 .pick-bar-label {
-    display: block;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: #64748b;
-    font-weight: 800;
+    display: block; font-size: 0.62rem; text-transform: uppercase;
+    letter-spacing: 0.2em; color: #64748b; font-weight: 800;
 }
 .pick-bar-name {
-    display: block;
-    color: #f1f5f9;
-    font-weight: 700;
-    font-size: 0.95rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: block; color: #f1f5f9; font-weight: 700; font-size: 0.95rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-
 .pick-bar-price { display: flex; align-items: baseline; gap: 0.3rem; flex-shrink: 0; }
-.pick-bar-price span:first-child { font-size: 1.6rem; font-weight: 900; color: #fff; }
-.pick-bar-cur { font-size: 0.85rem; color: #64748b; font-weight: 700; }
-.pick-bar-per { font-size: 0.75rem; color: #64748b; margin-left: 0.25rem; }
-
+.pick-bar-price span:first-child { font-size: 1.6rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+.pick-bar-cur { font-size: 0.82rem; color: #64748b; font-weight: 700; }
+.pick-bar-per { font-size: 0.72rem; color: #64748b; margin-left: 0.25rem; }
 .pick-bar-clear {
-    width: 32px; height: 32px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
+    width: 32px; height: 32px; border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8; cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;
 }
 .pick-bar-clear:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
 @media (max-width: 860px) {
-    .cfg-grid { grid-template-columns: 1fr; gap: 1.75rem; }
-    .cfg { padding: 1.5rem; }
+    .cennik-page .cfg-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+    .cennik-page .cfg { padding: 1.25rem; }
     .pick-bar-inner { margin: 0 0.75rem 0.75rem; padding: 0.85rem 1rem; gap: 1rem; }
     .pick-bar-price span:first-child { font-size: 1.3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pick-bar { transition: none; }
+    .cennik-page .cfg-select:hover { transform: none; }
 }

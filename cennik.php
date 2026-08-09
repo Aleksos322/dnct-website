@@ -101,6 +101,16 @@ function cennik_size(int $mb): string
 /* Gra jest do kupienia, gdy ma gotowe plany ALBO progi slotow do konfiguratora.
    Gry bez jednego i drugiego trafiaja do sekcji "Wkrotce" - pusta zakladka na
    gorze wyglada jak awaria, a nie jak zapowiedz. */
+/* Zakres RAM w obrebie gry. Sluzy wskaznikowi mocy na karcie: klient widzi,
+   gdzie dany plan lezy miedzy najmniejszym a najwiekszym. To odpowiedz na
+   pierwsze pytanie osoby, ktora nie wie, czy 8 GB to duzo - sama liczba jej
+   tego nie powie, pozycja na skali owszem. */
+foreach ($games as $gi => $g) {
+    $rams = array_map(static fn(array $p): int => (int)$p['ram_mb'], $g['plans']);
+    $games[$gi]['ram_min'] = $rams ? min($rams) : 0;
+    $games[$gi]['ram_max'] = $rams ? max($rams) : 0;
+}
+
 $isSellable     = static fn(array $g): bool => $g['plans'] !== [] || $g['tiers'] !== [];
 $gamesWithPlans = array_values(array_filter($games, $isSellable));
 $gamesSoon      = array_values(array_filter($games, static fn(array $g): bool => !$isSellable($g)));
@@ -111,16 +121,37 @@ ob_start();
 ?>
 <link rel="stylesheet" href="/assets/css/cennik.css">
 
-<section class="w-full max-w-7xl mx-auto px-6 py-16">
+<div class="cennik-page">
 
-    <div class="text-center mb-14">
-        <h1 class="text-3xl md:text-4xl font-black mb-4">Cennik hostingu gier</h1>
-        <p class="text-gray-400 text-sm md:text-base max-w-2xl mx-auto">
-            Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.
-            Wszystkie plany zawierają pełny dostęp do panelu i wsparcie przez Discord.
-        </p>
-        <div class="w-24 h-1 bg-gradient-main mx-auto rounded-full mt-6"></div>
+<!-- ============ HERO ============ -->
+<section class="cnk-hero">
+    <div class="cnk-hero-glow" aria-hidden="true"></div>
+
+    <div class="cnk-hero-inner">
+        <div class="cnk-hero-text">
+            <span class="cnk-eyebrow">Cennik</span>
+            <h1 class="cnk-h1">
+                Serwer, który<br>
+                <span class="cnk-h1-accent">nie zwalnia</span>
+            </h1>
+            <p class="cnk-lead">
+                Gwarantowany RAM i CPU, dyski NVMe i ochrona DDoS w każdym planie.
+                Płacisz za moc, nie za obietnicę.
+            </p>
+        </div>
+
+        <?php if ($liveServers > 0): ?>
+            <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
+                     ozdobą: to jedyna liczba na tej stronie, której nie da się
+                     podważyć, bo pochodzi z działających maszyn. */ ?>
+            <aside class="cnk-live">
+                <span class="cnk-live-dot" aria-hidden="true"></span>
+                <span class="cnk-live-num"><?php echo $liveServers; ?></span>
+                <span class="cnk-live-label">serwerów działa<br>w tej chwili</span>
+            </aside>
+        <?php endif; ?>
     </div>
+</section>
 
     <?php if ($dbError): ?>
         <div class="cennik-info glass">
@@ -140,7 +171,7 @@ ob_start();
                  jedna — to jedyny sposób, żeby klient w ogóle zauważył, że
                  hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
-            <div class="cennik-tabs" role="tablist">
+            <div class="cennik-tabs cnk-tabs-straddle" role="tablist">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
                     <button type="button"
                             class="cennik-tab<?php echo $i === 0 ? ' is-active' : ''; ?>"
@@ -166,11 +197,26 @@ ob_start();
                  role="tabpanel">
 
                 <?php if ($game['plans']): ?>
+                    <div class="cnk-panel">
+                    <div class="cnk-panel-head">
+                        <h2>Gotowe plany</h2>
+                        <p>Wybierz rozmiar — resztę mamy taką samą w każdym.</p>
+                    </div>
                     <?php /* Gotowe plany. Każda karta ma własne id planu i daje się
                              zaznaczyć — zaznaczenie ląduje w pasku podsumowania
                              na dole ekranu. */ ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                         <?php foreach ($game['plans'] as $plan): ?>
+                            <?php
+                            // Pozycja planu na skali mocy w obrebie gry.
+                            // Skala PIERWIASTKOWA, nie liniowa. Rozpiętość planów to
+                            // 1.5 GB do 32 GB, czyli ponad dwudziestokrotność - przy
+                            // podziale liniowym cztery najmniejsze plany dostawały
+                            // praktycznie identyczny pasek i wskaźnik przestawał
+                            // odróżniać to, co miał odróżniać.
+                            $ramSpan = max(1, $game['ram_max'] - $game['ram_min']);
+                            $ramPos  = sqrt(((int)$plan['ram_mb'] - $game['ram_min']) / $ramSpan);
+                            ?>
                             <div class="plan-pick"
                                  data-plan-id="<?php echo (int)$plan['id']; ?>"
                                  data-plan-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
@@ -179,6 +225,15 @@ ob_start();
                                  data-plan-soldout="<?php echo !empty($plan['sold_out']) ? '1' : '0'; ?>"
                                  tabindex="0" role="button"
                                  aria-label="Wybierz plan <?php echo htmlspecialchars((string)$plan['name']); ?>">
+
+                                <?php /* Wskaźnik mocy. Sama liczba "8 GB" nic nie mówi
+                                         komuś, kto kupuje serwer pierwszy raz — pozycja
+                                         między najmniejszym a największym planem mówi
+                                         wszystko w ułamku sekundy. */ ?>
+                                <div class="plan-scale" title="Moc na tle pozostałych planów">
+                                    <span class="plan-scale-fill" style="width: <?php echo round(max($ramPos, 0.04) * 100); ?>%"></span>
+                                </div>
+
                                 <?php
                                 render_plan_card((int)$plan['id'], [
                                     'name'       => $plan['name'] ?? '',
@@ -203,15 +258,18 @@ ob_start();
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    </div>
 
                 <?php else: ?>
                     <?php /* Gry rozliczane za sloty: zamiast gotowych planów klient
                              sam ustawia liczbę graczy suwakiem. */ ?>
+                    <div class="cnk-panel cnk-panel-cfg">
                     <div class="cfg-intro">
                         <h2>Zbuduj serwer pod swoją ekipę</h2>
                         <p>Przesuń suwak i ustaw liczbę graczy — resztę dobierzemy automatycznie.</p>
                     </div>
                     <?php render_slot_configurator($game['type'], $game['tiers'], $periods); ?>
+                    </div>
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
@@ -236,41 +294,49 @@ ob_start();
         </div>
     <?php endif; ?>
 
-    <?php /* Gwarancja zwrotu jest w regulaminie od zawsze, ale na cenniku nie
-             było o niej słowa. To najtańszy sposób zdjęcia oporu przed pierwszym
-             zakupem: klient ryzykuje mniej, niż mu się wydaje. */ ?>
-    <div class="cennik-trust">
-        <div class="cennik-trust-item">
-            <span class="cennik-trust-icon">↩</span>
-            <div>
-                <strong>Zwrot w 24 h</strong>
-                <span>Nie spodobało się? Odzyskujesz pieniądze.</span>
-            </div>
+    <!-- ============ CO ZAWSZE W CENIE / DLACZEGO MY ============ -->
+    <?php /* Dwie kolumny zamiast rzędu kafelków na dole. Po lewej to, czego
+             karty planów nie muszą już powtarzać dziewięć razy; po prawej
+             powody, dla których warto zaryzykować pierwszy zakup. Rozdzielenie
+             tych dwóch rzeczy jest celowe: pierwsze to specyfikacja, drugie to
+             zaufanie, i mieszanie ich osłabia oba. */ ?>
+    <section class="cnk-split">
+        <div class="cnk-split-col cnk-included">
+            <span class="cnk-eyebrow">W każdym planie</span>
+            <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
+            <ul class="cnk-list">
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Pełny dostęp do panelu i konsoli</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Dyski NVMe, bez współdzielenia RAM-u i CPU</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Codzienne backupy z retencją 7 dni</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Ochrona DDoS: Cloudflare Magic Transit</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Własna subdomena i zmiana wersji gry</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Wsparcie przez Discord, bez systemu biletów</li>
+            </ul>
         </div>
-        <div class="cennik-trust-item">
-            <span class="cennik-trust-icon">⚡</span>
-            <div>
-                <strong>Bez oversellingu</strong>
-                <span>RAM i CPU są gwarantowane, nie współdzielone.</span>
-            </div>
-        </div>
-        <div class="cennik-trust-item">
-            <span class="cennik-trust-icon">🛡</span>
-            <div>
-                <strong>Ochrona DDoS</strong>
-                <span>Cloudflare Magic Transit w każdym planie.</span>
-            </div>
-        </div>
-        <?php if ($liveServers > 0): ?>
-            <div class="cennik-trust-item">
-                <span class="cennik-trust-icon">●</span>
+
+        <div class="cnk-split-col cnk-trust">
+            <span class="cnk-eyebrow">Zanim klikniesz</span>
+            <h2 class="cnk-h2">Ryzykujesz mniej, niż myślisz</h2>
+
+            <div class="cnk-trust-item cnk-trust-hero">
+                <span class="cnk-trust-big">24 h</span>
                 <div>
-                    <strong><?php echo $liveServers; ?> serwerów</strong>
-                    <span>działa u nas w tej chwili.</span>
+                    <strong>na rezygnację</strong>
+                    <span>Nie spodobało się? Piszesz na Discordzie i odzyskujesz pieniądze.</span>
                 </div>
             </div>
-        <?php endif; ?>
-    </div>
+
+            <div class="cnk-trust-item">
+                <strong>Zasoby są Twoje</strong>
+                <span>Zero oversellingu — RAM i CPU nie są dzielone z nikim innym.</span>
+            </div>
+
+            <div class="cnk-trust-item">
+                <strong>Rok taniej o miesiąc</strong>
+                <span>Płatność roczna liczy się jak jedenaście miesięcy, nie dwanaście.</span>
+            </div>
+        </div>
+    </section>
 
     <div class="cennik-note">
         <p>
@@ -299,6 +365,8 @@ ob_start();
 </div>
 
 <script src="/assets/js/cennik.js" defer></script>
+
+</div><!-- /.cennik-page -->
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/assets/clear/clear.php';
