@@ -944,12 +944,25 @@
 }
 .cennik-page .cnk-trust-item span { color: #94a3b8; font-size: 0.82rem; line-height: 1.5; }
 
-.cennik-page .cnk-trust-hero { display: flex; align-items: center; gap: 1.1rem; padding-top: 0; }
+/* "24 h" wyrównane do GÓRY, nie do środka.
+   Przy wyśrodkowaniu duża liczba lądowała obok DRUGIEGO wiersza opisu, przez co
+   nagłówek "na rezygnację" wisiał sam nad nią i para czytała się jak dwie
+   niezwiązane rzeczy. Od góry liczba stoi przy swoim podpisie i spływa wzdłuż
+   opisu — tak, jak działa każdy tego typu układ. */
+.cennik-page .cnk-trust-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+    padding-top: 0;
+}
 
 .cennik-page .cnk-trust-big {
     font-size: 2.4rem;
     font-weight: 900;
+    /* Wersalikowa wysokość cyfr jest mniejsza niż pole tekstu, więc bez tego
+       przesunięcia liczba wyrównana "do góry" siedzi optycznie za nisko. */
     line-height: 1;
+    margin-top: -0.15rem;
     background: linear-gradient(135deg, #8b5cf6, #06b6d4);
     -webkit-background-clip: text;
     background-clip: text;
@@ -1239,7 +1252,20 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 1rem 1.5rem;
-    margin-bottom: var(--cnk-band-gap);
+}
+
+/* Od tej szerokości szyna staje się prawą kolumną hero — mieści się obok
+   nagłówka i przestaje kosztować cokolwiek w pionie. */
+@media (min-width: 860px) {
+    .cennik-page .cnk-rail {
+        flex: 0 1 auto;
+        flex-direction: column;
+        align-items: flex-end;
+        text-align: right;
+        gap: 0.9rem;
+        max-width: 22rem;
+    }
+    .cennik-page .cnk-rail-points { flex-direction: column; align-items: flex-end; gap: 0.4rem; }
 }
 
 .cennik-page .cnk-rail-points {
@@ -1354,4 +1380,41 @@
 
 @media (prefers-reduced-motion: reduce) {
     .cennik-page .cennik-ask-btn:hover { transform: none; }
+}
+
+/* Pływająca plakietka z licznikiem — patrz komentarz w cennik.php.
+   Powyżej 1400 px jest zbędna, bo tam przykleja się cała szyna. */
+.cnk-live-float {
+    position: fixed;
+    right: clamp(0.75rem, 2vw, 1.5rem);
+    bottom: clamp(0.75rem, 2vw, 1.5rem);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.95rem;
+    border-radius: 999px;
+    background: rgba(10, 12, 20, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    font-size: 0.72rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    pointer-events: none;   /* ozdoba informacyjna, nie ma być klikalna */
+
+    /* Startuje schowana; pokazuje ją skrypt, gdy licznik z hero zjedzie z ekranu. */
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.cnk-live-float.is-visible { opacity: 1; transform: none; }
+.cnk-live-float strong { font-size: 1.05rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+
+@media (min-width: 1400px) {
+    .cnk-live-float { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cnk-live-float { transition: none; transform: none; }
 }

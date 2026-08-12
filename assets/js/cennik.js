@@ -309,8 +309,26 @@
         return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     }
 
+
+    /* ------------------------------------------------------------------
+       Pływająca plakietka z licznikiem
+
+       Pokazujemy ją DOPIERO gdy licznik z nagłówka wyjedzie z ekranu —
+       dwie te same liczby naraz to nie jest przypomnienie, tylko bałagan.
+       ------------------------------------------------------------------ */
+    function initLiveFloat() {
+        var badge = document.querySelector('[data-role="liveFloat"]');
+        var source = document.querySelector('.cnk-rail .cnk-live');
+        if (!badge || !source || !window.IntersectionObserver) return;
+
+        new IntersectionObserver(function (entries) {
+            badge.classList.toggle('is-visible', !entries[0].isIntersecting);
+        }, { threshold: 0 }).observe(source);
+    }
+
     initTabs();
     initPlanPicks();
+    initLiveFloat();
     initParallax();
     document.querySelectorAll('.cfg').forEach(initConfigurator);
 })();
