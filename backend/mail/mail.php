@@ -25,7 +25,7 @@ require_once dirname(__DIR__) . '/lib/env.php';
  *
  * @throws Exception gdy konfiguracja SMTP jest niekompletna
  */
-function mailer_factory(): PHPMailer
+function mailer_factory(string $profile = 'default'): PHPMailer
 {
     $mail = new PHPMailer(true);
 
@@ -43,8 +43,23 @@ function mailer_factory(): PHPMailer
     $mail->Host = $host;
     $mail->Port = env_int('SMTP_PORT', $encryption === 'ssl' ? 465 : 587);
 
-    $user = (string)env('SMTP_USER', '');
-    $password = (string)env('SMTP_PASSWORD', '');
+    /* LOGOWANIE A NADAWCA TO DWIE RÓŻNE RZECZY.
+       Skrzynka `info@` używa własnych danych logowania TYLKO wtedy, gdy ma
+       ustawione OBA: login i hasło. Sam login z hasłem konta głównego to
+       gwarantowane "SMTP Error: Could not authenticate" — i dokładnie tak
+       padła pierwsza wysyłka potwierdzenia zamówienia.
+
+       Bez własnego hasła logujemy się kontem głównym i zmieniamy wyłącznie
+       nagłówek From. Mailcow na to pozwala, o ile konto ma nadane prawo
+       wysyłki w imieniu tego adresu; jeśli nie ma, odrzuci wiadomość z błędem
+       o nadawcy, który zobaczymy w logu. */
+    $infoUser = (string)env('SMTP_INFO_USER', '');
+    $infoPass = (string)env('SMTP_INFO_PASSWORD', '');
+    $useInfoCredentials = $profile === 'info' && $infoUser !== '' && $infoPass !== '';
+
+    $user     = $useInfoCredentials ? $infoUser : (string)env('SMTP_USER', '');
+    $password = $useInfoCredentials ? $infoPass : (string)env('SMTP_PASSWORD', '');
+
     $mail->SMTPAuth = $user !== '';
     if ($mail->SMTPAuth) {
         $mail->Username = $user;
@@ -78,10 +93,21 @@ function mailer_factory(): PHPMailer
     $mail->CharSet = PHPMailer::CHARSET_UTF8;
     $mail->Encoding = PHPMailer::ENCODING_BASE64;
 
-    $mail->setFrom(
-        (string)env('SMTP_FROM_EMAIL', 'noreply@dnct.pl'),
-        (string)env('SMTP_FROM_NAME', 'DNCT Hosting')
-    );
+    /* Nadawca zależy od PROFILU. `register@` wysyła kody weryfikacyjne,
+       `info@` — sprawy zamówień i płatności. Rozdzielenie nie jest kosmetyką:
+       gdyby wszystko szło z jednego adresu, filtr antyspamowy uczyłby się na
+       kodach jednorazowych i potrafił wrzucić tam potwierdzenie zapłaty. */
+    if ($profile === 'info') {
+        $mail->setFrom(
+            (string)env('SMTP_INFO_FROM_EMAIL', 'info@dnct.pl'),
+            (string)env('SMTP_INFO_FROM_NAME', 'DNCT Hosting')
+        );
+    } else {
+        $mail->setFrom(
+            (string)env('SMTP_FROM_EMAIL', 'noreply@dnct.pl'),
+            (string)env('SMTP_FROM_NAME', 'DNCT Hosting')
+        );
+    }
 
     return $mail;
 }
@@ -92,29 +118,68 @@ function mailer_factory(): PHPMailer
  * @return array{ok:bool, error:string} - błędy raportujemy, nie rzucamy,
  *         bo warstwa API sama decyduje, co pokazać użytkownikowi.
  */
-function send_mail(string $to, string $subject, string $htmlBody, string $textBody): array
+function send_mail(string $to, string $subject, string $htmlBody, string $textBody, string $profile = 'default'): array
 {
     if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
         return ['ok' => false, 'error' => 'Nieprawidłowy adres odbiorcy.'];
     }
 
     try {
-        $mail = mailer_factory();
-        $mail->addAddress($to);
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body = $htmlBody;
-        $mail->AltBody = $textBody;
-        $mail->send();
-
-        return ['ok' => true, 'error' => ''];
+        return mail_deliver($to, $subject, $htmlBody, $textBody, $profile);
     } catch (Exception $e) {
+        /* AWARYJNY NADAWCA.
+           Serwer poczty odrzuca nadawcę, na którego konto logujące się nie ma
+           uprawnienia ("Sender address rejected: not owned by user ..."). Gdyby
+           to kończyło wysyłkę, klient po zapłaceniu nie dostałby ŻADNEGO
+           potwierdzenia — z powodu ustawienia skrzynki, nie płatności.
+
+           Wysyłamy więc ponownie z nadawcą domyślnym i głośno logujemy, co
+           trzeba naprawić. Lepiej dostarczyć wiadomość z innego adresu niż
+           nie dostarczyć jej wcale. */
+        $rejected = str_contains($e->getMessage(), 'Sender address rejected')
+            || str_contains($e->getMessage(), 'not owned by user');
+
+        if ($profile !== 'default' && $rejected) {
+            error_log(
+                'Mail: nadawca profilu "' . $profile . '" odrzucony przez serwer — '
+                . 'wysyłam z adresu domyślnego. NAPRAW: ustaw SMTP_' . strtoupper($profile)
+                . '_PASSWORD albo nadaj kontu ' . env('SMTP_USER', '?')
+                . ' prawo wysyłki w imieniu tego adresu.'
+            );
+
+            try {
+                return mail_deliver($to, $subject, $htmlBody, $textBody, 'default');
+            } catch (Throwable $inner) {
+                error_log('Mail: awaryjna wysyłka do ' . $to . ' też się nie udała: ' . $inner->getMessage());
+                return ['ok' => false, 'error' => $inner->getMessage()];
+            }
+        }
+
         error_log('Mail: nie udało się wysłać wiadomości do ' . $to . ': ' . $e->getMessage());
         return ['ok' => false, 'error' => $e->getMessage()];
     } catch (Throwable $e) {
         error_log('Mail: nieoczekiwany błąd wysyłki do ' . $to . ': ' . $e->getMessage());
         return ['ok' => false, 'error' => 'Nieoczekiwany błąd wysyłki.'];
     }
+}
+
+/**
+ * Jedno doręczenie, bez obsługi błędów — te są warstwę wyżej, w send_mail().
+ *
+ * @return array{ok:bool, error:string}
+ * @throws Exception gdy serwer poczty odmówi
+ */
+function mail_deliver(string $to, string $subject, string $htmlBody, string $textBody, string $profile): array
+{
+    $mail = mailer_factory($profile);
+    $mail->addAddress($to);
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = $htmlBody;
+    $mail->AltBody = $textBody;
+    $mail->send();
+
+    return ['ok' => true, 'error' => ''];
 }
 
 /**
