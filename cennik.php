@@ -21,6 +21,24 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/slot-configurator.php';
+require_once __DIR__ . '/components/game-decor.php';
+
+/**
+ * Zwiastun w paśmie "Panel".
+ *
+ * Pusty napis = pasmo pokazuje zamiast filmu animowaną konsolę. Tak jest dziś
+ * i tak ma zostać, dopóki nie ma czego wstawić — "wkrótce" w miejscu materiału
+ * wideo wygląda gorzej niż brak sekcji.
+ *
+ * Wstawić sam identyfikator z adresu YouTube (fragment po `v=`), nie cały link.
+ * Film ładuje się DOPIERO po kliknięciu w podgląd — osadzony od razu iframe
+ * zakłada ciasteczka YouTube'a jeszcze zanim odwiedzający zdąży odpowiedzieć
+ * na baner zgód, co przewraca całą zgodę na ciasteczka na tej stronie.
+ */
+const CENNIK_TRAILER_YT = '';
+
+/** Dokąd prowadzi przycisk demo. Panel wpuszcza przez to samo SSO co strona. */
+const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
 $pageTitle       = 'Cennik hostingu gier — DNCT Hosting';
 $metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.';
@@ -129,6 +147,21 @@ ob_start();
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
 
 <div class="cennik-page">
+
+<?php /* Warstwa dekoracji w marginesach bocznych. Wszystkie zestawy są w HTML-u
+         od razu, a zakładka tylko przełącza widoczny — dzięki temu zmiana gry
+         nie czeka na żadne pobieranie. Widoczna wyłącznie tam, gdzie naprawdę
+         jest na nią miejsce (patrz media query w cennik.css); na węższych
+         ekranach dekoracje wchodziłyby pod treść. */ ?>
+<div class="cnk-decor-layer" aria-hidden="true">
+    <?php foreach ($gamesWithPlans as $i => $game): ?>
+        <div class="cnk-decor-set<?php echo $i === 0 ? ' is-active' : ''; ?>"
+             data-decor-for="game-<?php echo htmlspecialchars($game['type']); ?>">
+            <?php render_game_decor((string)$game['type']); ?>
+        </div>
+    <?php endforeach; ?>
+</div>
+
 <div class="cnk-wrap">
 
 <!-- ============ HERO ============ -->
@@ -277,6 +310,84 @@ ob_start();
         <?php endforeach; ?>
 
     <?php endif; ?>
+
+    <!-- ============ PANEL: DEMO + ZWIASTUN ============ -->
+    <?php /* Największa dziura na tej stronie była właśnie tutaj: między
+             planami a stopką klient nie dostawał żadnego powodu, żeby uwierzyć,
+             że panel jest dobry. Cena i lista funkcji tego nie załatwiają —
+             panel trzeba zobaczyć. */ ?>
+    <section class="pnl-band">
+        <div class="pnl-copy">
+            <span class="cnk-eyebrow">Panel</span>
+            <h2 class="cnk-h2">Zobacz, zanim zapłacisz</h2>
+            <p class="pnl-lead">
+                Konsola na żywo, pliki, backupy i harmonogramy — wszystko w jednym
+                miejscu, po polsku. Wejdź i poklikaj, konto zakładasz dopiero wtedy,
+                gdy Ci się spodoba.
+            </p>
+
+            <ul class="pnl-points">
+                <li><span aria-hidden="true">▹</span> Konsola i FTP bez dodatkowych programów</li>
+                <li><span aria-hidden="true">▹</span> Backupy i przywracanie jednym kliknięciem</li>
+                <li><span aria-hidden="true">▹</span> Foldery na serwery i udostępnianie ich ekipie</li>
+            </ul>
+
+            <div class="pnl-actions">
+                <a class="pnl-demo" href="<?php echo htmlspecialchars(CENNIK_PANEL_URL); ?>"
+                   target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Otwórz demo panelu
+                </a>
+
+                <?php /* Odręczna strzałka z podpisem. Rysowana ścieżką SVG,
+                         nie obrazkiem — dzięki temu da się ją animować (linia
+                         "dopisuje się" po wejściu w kadr) i nie trzeba trzymać
+                         pliku. Podpis leci pod kątem, bo dopisek na marginesie
+                         ma wyglądać na dopisany, a nie zaprojektowany. */ ?>
+                <div class="pnl-scribble" aria-hidden="true">
+                    <?php /* Grot jest na GÓRZE ścieżki, nie na końcu — strzałka
+                             biegnie od podpisu w prawym dolnym rogu i celuje
+                             w przycisk leżący bezpośrednio nad nią. */ ?>
+                    <svg class="pnl-arrow" viewBox="0 0 160 90" fill="none">
+                        <path class="pnl-arrow-line"
+                              d="M156 78C124 86 86 83 58 70 34 59 21 41 22 16"
+                              stroke="currentColor" stroke-width="2.8"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                        <path class="pnl-arrow-head"
+                              d="M22 16 8 36M22 16l19 13"
+                              stroke="currentColor" stroke-width="2.8"
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="pnl-hand">sprawdź nasz panel!</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pnl-visual">
+            <?php if (CENNIK_TRAILER_YT !== ''): ?>
+                <?php /* Podgląd zamiast osadzonego filmu — patrz komentarz przy
+                         stałej CENNIK_TRAILER_YT. Iframe wstawia skrypt dopiero
+                         po kliknięciu. */ ?>
+                <button type="button" class="pnl-trailer" data-yt="<?php echo htmlspecialchars(CENNIK_TRAILER_YT); ?>">
+                    <span class="pnl-trailer-play" aria-hidden="true"></span>
+                    <span class="pnl-trailer-label">Obejrzyj zwiastun</span>
+                </button>
+            <?php else: ?>
+                <?php /* Makieta konsoli. Wiersze wypisuje skrypt, żeby pasmo
+                         żyło zamiast stać. Treść jest przykładowa i tak też jest
+                         opisana w nagłówku okna — udawanie logu z prawdziwej
+                         maszyny byłoby zwykłym kłamstwem. */ ?>
+                <div class="pnl-console" data-role="console">
+                    <div class="pnl-console-bar">
+                        <span class="pnl-dot r"></span><span class="pnl-dot y"></span><span class="pnl-dot g"></span>
+                        <span class="pnl-console-title">konsola — podgląd</span>
+                    </div>
+                    <pre class="pnl-console-body" data-role="consoleBody"></pre>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
 
     <?php if ($gamesSoon): ?>
         <div class="cennik-soon glass">

@@ -34,6 +34,13 @@
                     p.classList.toggle('is-active', p.id === targetId);
                 });
 
+                // Dekoracje boczne idą za zakładką. Zestawy wszystkich gier są
+                // już w HTML-u, więc przełączenie to sama zmiana klasy - nic
+                // się nie dociąga i nic nie mruga.
+                document.querySelectorAll('.cnk-decor-set').forEach(function (d) {
+                    d.classList.toggle('is-active', d.getAttribute('data-decor-for') === targetId);
+                });
+
                 // Zmiana gry unieważnia wcześniejszy wybór - inaczej w pasku
                 // zostaje plan z gry, której użytkownik już nie ogląda.
                 clearPick();
@@ -211,7 +218,156 @@
         render();
     }
 
+    /* ------------------------------------------------------------------
+       Paralaksa dekoracji bocznych
+
+       Klocki przesuwają się wolniej niż strona, przez co margines dostaje
+       głębię, a nie tylko ruch. Wartość ląduje w zmiennej --p, którą CSS
+       wstawia do `translate` - dzięki temu skrypt nie dotyka `transform`
+       i nie kasuje animacji unoszenia.
+       ------------------------------------------------------------------ */
+    function initParallax() {
+        if (reducedMotion()) return;
+
+        var items = document.querySelectorAll('.cnk-decor-item');
+        if (!items.length) return;
+
+        // Każdy element dostaje własne tempo, inaczej cała warstwa jedzie
+        // jak jeden sztywny obrazek i efektu głębi nie ma.
+        var speeds = [0.06, -0.05, 0.09, -0.07, 0.05, -0.08];
+
+        // Ograniczenie przesunięcia. Cennik ma ok. 5000 px wysokości, więc bez
+        // tego najszybszy element odjechałby o 450 px od miejsca, w którym
+        // ustawił go CSS - czyli poza swoje pasmo i pod obcięcie warstwy.
+        var LIMIT = 110;
+        var ticking = false;
+
+        function apply() {
+            var y = window.scrollY;
+            items.forEach(function (el, i) {
+                var shift = y * speeds[i % speeds.length];
+                shift = Math.max(-LIMIT, Math.min(LIMIT, shift));
+                el.style.setProperty('--p', shift.toFixed(1) + 'px');
+            });
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function () {
+            // Bez tego bloku przeglądarka liczyłaby pozycje przy każdym
+            // zdarzeniu przewijania, a nie raz na klatkę.
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(apply);
+        }, { passive: true });
+
+        apply();
+    }
+
+    function reducedMotion() {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    /* ------------------------------------------------------------------
+       Makieta konsoli
+
+       Wiersze wypisują się po kolei, żeby pasmo "Panel" żyło. Treść jest
+       przykładowa - okno jest podpisane "podgląd" właśnie po to, żeby nikt
+       nie wziął tego za log z działającej maszyny.
+       ------------------------------------------------------------------ */
+    var CONSOLE_LINES = [
+        ['12:04:01', 'Starting minecraft server version 1.21.4', ''],
+        ['12:04:01', 'Loading properties', ''],
+        ['12:04:02', 'Preparing level "world"', ''],
+        ['12:04:05', 'Preparing spawn area: 84%', ''],
+        ['12:04:08', 'Done (6.812s)! For help, type "help"', 'ok'],
+        ['12:04:19', 'Steve joined the game', 'i'],
+        ['12:05:02', 'Saving chunks for level "world"', ''],
+        ['12:05:02', 'Backup ukończony — 412 MB', 'ok']
+    ];
+
+    function initConsole() {
+        var body = document.querySelector('[data-role="consoleBody"]');
+        if (!body) return;
+
+        function line(entry) {
+            var row = document.createElement('div');
+
+            var time = document.createElement('span');
+            time.className = 't';
+            time.textContent = '[' + entry[0] + '] ';
+            row.appendChild(time);
+
+            var msg = document.createElement('span');
+            if (entry[2]) msg.className = entry[2];
+            // textContent, nie innerHTML - treść jest nasza, ale wstawianie
+            // znaczników do konsoli to nawyk, który kiedyś się zemści.
+            msg.textContent = entry[1];
+            row.appendChild(msg);
+
+            body.appendChild(row);
+        }
+
+        if (reducedMotion()) {
+            CONSOLE_LINES.forEach(line);
+            return;
+        }
+
+        var i = 0;
+        var cursor = document.createElement('span');
+        cursor.className = 'cur';
+
+        (function step() {
+            if (i >= CONSOLE_LINES.length) {
+                // Pętla: po chwili konsola zaczyna od nowa, żeby pasmo nie
+                // zastygało po pierwszym przejściu.
+                window.setTimeout(function () {
+                    body.textContent = '';
+                    i = 0;
+                    step();
+                }, 4000);
+                return;
+            }
+
+            if (cursor.parentNode) cursor.parentNode.removeChild(cursor);
+            line(CONSOLE_LINES[i]);
+            body.lastChild.appendChild(cursor);
+            i += 1;
+
+            window.setTimeout(step, 600 + Math.random() * 500);
+        })();
+    }
+
+    /* ------------------------------------------------------------------
+       Zwiastun: film wstawiamy dopiero po kliknięciu
+
+       Iframe YouTube'a osadzony od razu zakłada ciasteczka jeszcze zanim
+       odwiedzający odpowie na baner zgód. Podgląd jest zwykłym przyciskiem,
+       a domena nocookie ogranicza to, co zostaje po obejrzeniu.
+       ------------------------------------------------------------------ */
+    function initTrailer() {
+        var btn = document.querySelector('.pnl-trailer');
+        if (!btn) return;
+
+        btn.addEventListener('click', function () {
+            var id = btn.getAttribute('data-yt');
+            if (!id) return;
+
+            var frame = document.createElement('iframe');
+            frame.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
+            frame.title = 'Zwiastun DNCT Hosting';
+            frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+            frame.setAttribute('allowfullscreen', '');
+
+            btn.textContent = '';
+            btn.appendChild(frame);
+            btn.classList.add('is-playing');
+        }, { once: true });
+    }
+
     initTabs();
     initPlanPicks();
+    initParallax();
+    initConsole();
+    initTrailer();
     document.querySelectorAll('.cfg').forEach(initConfigurator);
 })();
