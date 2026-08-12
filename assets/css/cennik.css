@@ -1178,3 +1178,30 @@
     .cennik-page .cfg-select:hover { transform: none; }
 }
 
+
+/* Przycisk zamówienia w pasku wyboru. Pasek pokazywał dotąd co wybrano i nie
+   dawał z tym nic zrobić — droga do kasy prowadziła wyłącznie przez przycisk
+   na karcie, co przy przewiniętej stronie znaczyło "wróć w górę i szukaj". */
+.pick-bar-go {
+    flex-shrink: 0;
+    padding: 0.7rem 1.3rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 8px 22px rgba(139, 92, 246, 0.28);
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+.pick-bar-go:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+@media (max-width: 860px) {
+    .pick-bar-go { padding: 0.6rem 1rem; letter-spacing: 0.08em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pick-bar-go:hover { transform: none; }
+}

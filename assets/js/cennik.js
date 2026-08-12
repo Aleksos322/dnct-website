@@ -53,11 +53,17 @@
        ------------------------------------------------------------------ */
     var bar = document.getElementById('pick-bar');
 
-    function showPick(name, price, per) {
+    function showPick(name, price, per, url) {
         if (!bar) return;
         bar.querySelector('[data-role="pickName"]').textContent = name;
         bar.querySelector('[data-role="pickPrice"]').textContent = price;
         bar.querySelector('[data-role="pickPer"]').textContent = per || '';
+
+        // Przycisk w pasku istnieje tylko przy włączonej sprzedaży (PHP go nie
+        // wypisuje inaczej), więc podpinamy adres wyłącznie gdy jest co podpiąć.
+        var go = bar.querySelector('[data-role="pickGo"]');
+        if (go && url) go.setAttribute('href', url);
+
         bar.classList.add('is-visible');
     }
 
@@ -79,11 +85,24 @@
     function initPlanPicks() {
         document.querySelectorAll('.plan-pick').forEach(function (card) {
             function pick(e) {
-                // Karta jest klikalna jako całość (role="button"), więc spacja
-                // domyślnie przewinęłaby stronę zamiast zaznaczyć plan.
-                if (e) e.preventDefault();
+                if (card.getAttribute('data-plan-soldout') === '1') {
+                    if (e) e.preventDefault();
+                    return;
+                }
 
-                if (card.getAttribute('data-plan-soldout') === '1') return;
+                // Kliknięcie W PRZYCISK karty ma przejść do zamówienia, więc
+                // nie blokujemy zdarzenia. Wcześniej preventDefault leciało
+                // bezwarunkowo i zjadało nawigację razem z całą ścieżką zakupu:
+                // przycisk zaznaczał plan i nic więcej.
+                var cta = e && e.target && e.target.closest
+                    ? e.target.closest('a.pcard-cta')
+                    : null;
+
+                if (!cta) {
+                    // Karta jest klikalna jako całość (role="button"), więc bez
+                    // tego spacja przewinęłaby stronę zamiast zaznaczyć plan.
+                    if (e) e.preventDefault();
+                }
 
                 document.querySelectorAll('.plan-pick').forEach(function (c) {
                     c.classList.toggle('is-selected', c === card);
@@ -92,7 +111,8 @@
                 showPick(
                     card.getAttribute('data-plan-game') + ' · ' + card.getAttribute('data-plan-name'),
                     card.getAttribute('data-plan-price'),
-                    '/ mies.'
+                    '/ mies.',
+                    '/zamowienie?plan=' + encodeURIComponent(card.getAttribute('data-plan-id'))
                 );
             }
 
@@ -194,6 +214,11 @@
             if (root.classList.contains('is-selected')) select();
         }
 
+        function configUrl(tier) {
+            return '/zamowienie?game=' + encodeURIComponent(root.getAttribute('data-type') || '')
+                 + '&slots=' + encodeURIComponent(tier.slots);
+        }
+
         function select() {
             var tier = tiers[parseInt(range.value, 10)] || tiers[0];
             root.classList.add('is-selected');
@@ -201,8 +226,20 @@
             showPick(
                 tier.slots + ' slotów · ' + tier.ram + ' GB RAM',
                 money(priceFor(tier, current)),
-                '/ ' + current.label.toLowerCase()
+                '/ ' + current.label.toLowerCase(),
+                configUrl(tier)
             );
+        }
+
+        /* Kliknięcie przycisku ma PRZEJŚĆ do zamówienia. select() zostaje osobno,
+           bo woła go też render() przy każdym ruchu suwaka — gdyby to on
+           przenosił na inną stronę, konfigurator uciekałby przy pierwszym
+           przesunięciu. */
+        function chooseConfig() {
+            select();
+            if (document.querySelector('[data-role="pickGo"]')) {
+                window.location.href = configUrl(tiers[parseInt(range.value, 10)] || tiers[0]);
+            }
         }
 
         range.addEventListener('input', render);
@@ -218,7 +255,7 @@
             });
         });
 
-        if (btnSel) btnSel.addEventListener('click', select);
+        if (btnSel) btnSel.addEventListener('click', chooseConfig);
 
         render();
     }

@@ -175,8 +175,16 @@ function render_cennik_plan_card(array $p): void
             <span class="pcard-price-per">/ mies.</span>
         </div>
 
+        <?php /* Przycisk jest LINKIEM tylko wtedy, gdy sprzedaż działa i jest
+                 dokąd prowadzić. Przy wyłączonej sprzedaży zostaje <span>:
+                 element klikalny prowadzący donikąd to obietnica, której strona
+                 nie spełnia, a do tego psuje nawigację klawiaturą. */ ?>
         <?php if ($isSoldOut): ?>
             <button type="button" class="pcard-cta is-off" aria-disabled="true" tabindex="-1">Wyprzedane</button>
+        <?php elseif (!empty($p['href'])): ?>
+            <a class="pcard-cta" href="<?php echo htmlspecialchars((string)$p['href']); ?>">
+                <?php echo htmlspecialchars((string)($p['cta'] ?? 'Zamawiam')); ?>
+            </a>
         <?php else: ?>
             <span class="pcard-cta">Wybierz ten plan</span>
         <?php endif; ?>

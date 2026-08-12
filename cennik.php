@@ -22,6 +22,12 @@ require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/slot-configurator.php';
 require_once __DIR__ . '/components/game-decor.php';
+require_once __DIR__ . '/backend/lib/stripe.php';
+
+/* Czy karty mają prowadzić do zamówienia, czy tylko dawać się zaznaczać.
+   Jedna zmienna dla całej strony — inaczej łatwo o wersję, w której przycisk
+   na karcie prowadzi do kasy, a konfigurator obok nie. */
+$salesOn = stripe_sales_enabled();
 
 /**
  * Zwiastun w paśmie "Panel".
@@ -288,6 +294,9 @@ ob_start();
                                     'icon'       => $plan['icon_img'] ?? '',
                                     'fits'       => $plan['fits'] ?? null,
                                     'power'      => $ramPos,
+                                    // Przy wyłączonej sprzedaży brak adresu —
+                                    // karta zostaje wtedy tylko do zaznaczania.
+                                    'href'       => $salesOn ? '/zamowienie?plan=' . (int)$plan['id'] : null,
                                 ]);
                                 ?>
                             </div>
@@ -474,6 +483,9 @@ ob_start();
             <span class="pick-bar-cur">zł</span>
             <span class="pick-bar-per" data-role="pickPer"></span>
         </div>
+        <?php if ($salesOn): ?>
+            <a class="pick-bar-go" data-role="pickGo" href="#">Zamawiam</a>
+        <?php endif; ?>
         <button type="button" class="pick-bar-clear" data-role="pickClear" aria-label="Wyczyść wybór">✕</button>
     </div>
 </div>
