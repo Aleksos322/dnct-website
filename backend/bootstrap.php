@@ -19,6 +19,7 @@ require_once __DIR__ . '/lib/authentik.php';
 require_once __DIR__ . '/lib/oidc.php';
 require_once __DIR__ . '/lib/registration.php';
 require_once __DIR__ . '/lib/pterodactyl.php';
+require_once __DIR__ . '/lib/capacity.php';
 
 // ------------------------------------------------------------
 // Sesja - ciasteczko niedostępne dla JS i wysyłane tylko po HTTPS.

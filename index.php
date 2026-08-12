@@ -37,6 +37,12 @@ try {
     $showcasePlans = $pdo
         ->query('SELECT * FROM hosting_plans WHERE id IN (1, 3, 9) AND is_active = 1 ORDER BY price ASC')
         ->fetchAll();
+
+    /* Dostępność z realnej pojemności węzła klienckiego — ta sama funkcja, co
+       na cenniku. Wcześniej karty miały tu wymuszone `sold_out => true`, przez
+       co strona główna pokazywała wszystko jako wyprzedane, a cennik jako
+       dostępne. Dwie strony tego samego serwisu przeczyły sobie nawzajem. */
+    $showcasePlans = annotate_plan_availability($showcasePlans, node_capacity($pdo));
 } catch (Throwable $e) {
     error_log('index: nie udalo sie pobrac planow: ' . $e->getMessage());
 }
@@ -159,10 +165,10 @@ ob_start();
             render_plan_card((int)$row['id'], [
                 'name'     => $row['name'] ?? '',
                 'price'    => $row['price'] ?? '',
-                'popular'  => false,
-                // Wymuszone: nowa strona jeszcze nie sprzedaje. Zdejmij tę linię,
-                // gdy ruszy przyjmowanie zamówień, a karty wrócą do stanu z bazy.
-                'sold_out' => true,
+                'popular'  => !empty($row['popular']),
+                // Stan liczony z pojemności węzła (backend/lib/capacity.php),
+                // a nie wymuszony na sztywno.
+                'sold_out' => !empty($row['sold_out']),
                 'ram'      => $ramMb >= 1024 ? ($ramMb / 1024) . 'GB' : $ramMb . 'MB',
                 'cpu'      => ($row['cpu_cores'] ?? 0) . ' vCore',
                 'ssd'      => $ssdMb >= 1024 ? ($ssdMb / 1024) . 'GB' : $ssdMb . 'MB',

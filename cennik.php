@@ -54,6 +54,13 @@ try {
         'SELECT * FROM hosting_plans WHERE is_active = 1 ORDER BY price ASC'
     )->fetchAll();
 
+    /* Dostępność liczona z realnej pojemności węzła klienckiego. Plan znika
+       z oferty sam, gdy przestaje się na nim mieścić — bez ręcznego
+       przestawiania flagi w bazie. Ręczne `sold_out = 1` nadal działa jako
+       twarde wyłączenie. */
+    $capacity  = node_capacity($pdo);
+    $planRows  = annotate_plan_availability($planRows, $capacity);
+
     $plansByType = [];
     foreach ($planRows as $plan) {
         $plansByType[$plan['type']][] = $plan;
@@ -224,6 +231,7 @@ ob_start();
                                  data-plan-game="<?php echo htmlspecialchars((string)$game['name']); ?>"
                                  data-plan-price="<?php echo htmlspecialchars((string)$plan['price']); ?>"
                                  data-plan-soldout="<?php echo !empty($plan['sold_out']) ? '1' : '0'; ?>"
+                                 data-plan-fits="<?php echo $plan['fits'] ?? ''; ?>"
                                  tabindex="0" role="button"
                                  aria-label="Wybierz plan <?php echo htmlspecialchars((string)$plan['name']); ?>">
 
