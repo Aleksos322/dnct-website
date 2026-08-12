@@ -1,0 +1,44 @@
+# ============================================================================
+# beta.dnct.pl — SRODOWISKO TESTOWE (publiczne od 2026-08-12)
+# ============================================================================
+# BYLO tylko po LAN-ie. Zostalo wystawione publicznie, bo webhooki Stripe'a
+# przychodza z internetu i inaczej nie maja jak dojsc - platnosc konczyla sie
+# zamowieniem bez serwera. W Cloudflare jest rekord A `beta` (proxied).
+#
+# SKUTKI, o ktorych trzeba pamietac:
+#   - strona testowa jest widoczna dla kazdego, kto zna adres,
+#   - dlatego X-Robots-Tag nizej trzyma ja poza wyszukiwarkami,
+#   - SALES_ENABLED=1 dziala tu na kluczach sk_test_ (patrz beta.env),
+#     a backend/lib/stripe.php ODMAWIA startu z kluczem produkcyjnym
+#     na tej domenie.
+#
+# DocumentRoot to WORKTREE gita z galezi `dev` tego samego repozytorium, ktore
+# obsluguje produkcje (WEB/-dnct.pl, galaz `main`). Dzieki temu nie ma dwoch
+# rozjezdzajacych sie kopii - `git diff main dev` zawsze mowi, czym te dwa
+# srodowiska sie roznia.
+#
+# DNCT_ENV_FILE jest tu KLUCZOWE. Bez niego strona testowa czytalaby
+# produkcyjny .env - te same klucze Stripe i ta sama baza. Backend sprawdza te
+# zmienna jako pierwsza (backend/lib/env.php).
+# ============================================================================
+
+<VirtualHost *:8910>
+    ServerName beta.dnct.pl
+    DocumentRoot /var/www/dnct.pl/public_html/WEB/beta.dnct.pl
+
+    SetEnv DNCT_ENV_FILE /var/www/dnct.pl/config/beta.env
+
+    <Directory /var/www/dnct.pl/public_html/WEB/beta.dnct.pl>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Srodowisko testowe nie ma czego szukac w wynikach wyszukiwania: te same
+    # tresci co produkcja to duplikat, ktory potrafi wyprzedzic oryginal,
+    # a "beta" w wynikach obok dnct.pl wyglada jak dwie konkurencyjne firmy.
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+
+    ErrorLog ${APACHE_LOG_DIR}/beta-dnct-error.log
+    CustomLog ${APACHE_LOG_DIR}/beta-dnct-access.log combined
+</VirtualHost>
