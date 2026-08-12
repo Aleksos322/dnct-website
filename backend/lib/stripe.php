@@ -35,6 +35,38 @@ function stripe_is_test_mode(): bool
     return str_starts_with((string)env('STRIPE_SECRET_KEY', ''), 'sk_test_');
 }
 
+/** Adresy, na których wolno użyć klucza produkcyjnego. */
+const STRIPE_LIVE_HOSTS = ['dnct.pl', 'www.dnct.pl', 'shop.dnct.pl'];
+
+/**
+ * Bezpiecznik: klucz `sk_live_` działa WYŁĄCZNIE na produkcyjnej domenie.
+ *
+ * Na tej maszynie leżą oba komplety kluczy — produkcyjny w public_html/.env
+ * i testowy w config/beta.env. Beta ma dodatkowo SALES_ENABLED=1, bo służy do
+ * testowania zakupów. Wystarczyłaby jedna pomyłka przy kopiowaniu pliku
+ * konfiguracji, żeby testowe klikanie zaczęło pobierać PRAWDZIWE pieniądze
+ * z prawdziwych kart — i nikt by tego nie zauważył, bo wszystko działałoby
+ * poprawnie.
+ *
+ * Sprawdzenie jest po BASE_URL, a nie po nagłówku Host: konfiguracja ma
+ * rozstrzygać o tym, którym środowiskiem jesteśmy, a nie treść żądania.
+ */
+function stripe_guard_environment(string $key): void
+{
+    if (!str_starts_with($key, 'sk_live_')) {
+        return;
+    }
+
+    $host = parse_url((string)env('BASE_URL', ''), PHP_URL_HOST);
+
+    if (!in_array((string)$host, STRIPE_LIVE_HOSTS, true)) {
+        throw new RuntimeException(
+            'Klucz produkcyjny Stripe na środowisku "' . $host . '". '
+            . 'Odmawiam — to obciążałoby prawdziwe karty. Wstaw klucz sk_test_.'
+        );
+    }
+}
+
 /**
  * Ustawia klucz API. Wołane przez każdy endpoint dotykający Stripe'a.
  *
@@ -53,6 +85,8 @@ function stripe_init(): void
     if ($key === '') {
         throw new RuntimeException('Brak STRIPE_SECRET_KEY w konfiguracji.');
     }
+
+    stripe_guard_environment($key);
 
     \Stripe\Stripe::setApiKey($key);
     \Stripe\Stripe::setAppInfo('DNCT Hosting', '1.0', 'https://dnct.pl');
