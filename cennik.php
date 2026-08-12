@@ -22,6 +22,7 @@ require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/slot-configurator.php';
 require_once __DIR__ . '/components/game-decor.php';
+require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
 
 /* Czy karty mają prowadzić do zamówienia, czy tylko dawać się zaznaczać.
@@ -181,24 +182,37 @@ ob_start();
                 Serwer, który<br>
                 <span class="cnk-h1-accent">nie zwalnia</span>
             </h1>
-            <p class="cnk-lead">
-                Gwarantowany RAM i CPU, dyski NVMe i ochrona DDoS w każdym planie.
-                Płacisz za moc, nie za obietnicę.
-            </p>
         </div>
-
-        <?php if ($liveServers > 0): ?>
-            <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
-                     ozdobą: to jedyna liczba na tej stronie, której nie da się
-                     podważyć, bo pochodzi z działających maszyn. */ ?>
-            <aside class="cnk-live">
-                <span class="cnk-live-dot" aria-hidden="true"></span>
-                <span class="cnk-live-num"><?php echo $liveServers; ?></span>
-                <span class="cnk-live-label">serwerów działa<br>w tej chwili</span>
-            </aside>
-        <?php endif; ?>
     </div>
 </section>
+
+<?php /* BOCZNA SZYNA. Wcześniej stało tu zdanie o gwarantowanym RAM-ie i licznik
+         serwerów — obok siebie, w poprzek strony, spychając karty o pół ekranu
+         w dół. Na cenniku karty są treścią; wszystko, co je odsuwa, konkuruje
+         z jedyną rzeczą, po którą klient tu przyszedł.
+
+         Te same informacje leżą teraz w pionowej szynie przy prawej krawędzi.
+         Na szerokich ekranach jest PRZYKLEJONA (position: fixed), więc licznik
+         towarzyszy przewijaniu zamiast zniknąć po pierwszym geście. Poniżej
+         1400 px wraca do układu w treści, bo nie ma jej gdzie przykleić. */ ?>
+<aside class="cnk-rail" aria-label="Skrót informacji o hostingu">
+    <?php if ($liveServers > 0): ?>
+        <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
+                 ozdobą: to jedyna liczba na tej stronie, której nie da się
+                 podważyć, bo pochodzi z działających maszyn. */ ?>
+        <div class="cnk-live">
+            <span class="cnk-live-dot" aria-hidden="true"></span>
+            <span class="cnk-live-num"><?php echo $liveServers; ?></span>
+            <span class="cnk-live-label">serwerów działa<br>w tej chwili</span>
+        </div>
+    <?php endif; ?>
+
+    <ul class="cnk-rail-points">
+        <li><span aria-hidden="true">✓</span> Gwarantowany RAM i CPU</li>
+        <li><span aria-hidden="true">✓</span> Dyski NVMe, bez oversellingu</li>
+        <li><span aria-hidden="true">✓</span> Ochrona DDoS w każdym planie</li>
+    </ul>
+</aside>
 
     <?php if ($dbError): ?>
         <div class="cennik-info glass">
@@ -320,101 +334,33 @@ ob_start();
 
     <?php endif; ?>
 
-    <!-- ============ PANEL: DEMO + ZWIASTUN ============ -->
-    <?php /* Największa dziura na tej stronie była właśnie tutaj: między
-             planami a stopką klient nie dostawał żadnego powodu, żeby uwierzyć,
-             że panel jest dobry. Cena i lista funkcji tego nie załatwiają —
-             panel trzeba zobaczyć. */ ?>
-    <section class="pnl-band">
-        <div class="pnl-copy">
-            <span class="cnk-eyebrow">Panel</span>
-            <h2 class="cnk-h2">Zobacz, zanim zapłacisz</h2>
-            <p class="pnl-lead">
-                Konsola na żywo, pliki, backupy i harmonogramy — wszystko w jednym
-                miejscu, po polsku. Wejdź i poklikaj, konto zakładasz dopiero wtedy,
-                gdy Ci się spodoba.
+    <?php /* Pasmo wspólne ze stroną główną — patrz components/panel-band.php. */ ?>
+    <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => CENNIK_PANEL_URL]); ?>
+
+    <?php /* ZAPROSZENIE ZAMIAST OBIETNICY.
+             Wcześniej stało tu "Wkrótce" z listą gier, których nie hostujemy.
+             Zapowiedź bez terminu nic nie daje klientowi, a nam wisi nad głową:
+             im dłużej "wkrótce" nie nadchodzi, tym gorzej wygląda cała strona.
+             Zamiana na rozmowę kosztuje nas jedno kliknięcie, a daje realny
+             sygnał, o co ludzie pytają. */ ?>
+    <div class="cennik-ask glass">
+        <div class="cennik-ask-text">
+            <h2>Szukasz innej gry?</h2>
+            <p>
+                Napisz do nas na Discordzie — coś poradzimy. Postawimy serwer pod grę,
+                której nie ma w cenniku, albo powiemy wprost, że się nie da.
+                <?php if ($gamesSoon): ?>
+                    Najczęściej pytacie o:
+                    <?php echo htmlspecialchars(implode(', ', array_column($gamesSoon, 'name'))); ?>.
+                <?php endif; ?>
             </p>
-
-            <ul class="pnl-points">
-                <li><span aria-hidden="true">▹</span> Konsola i FTP bez dodatkowych programów</li>
-                <li><span aria-hidden="true">▹</span> Backupy i przywracanie jednym kliknięciem</li>
-                <li><span aria-hidden="true">▹</span> Foldery na serwery i udostępnianie ich ekipie</li>
-            </ul>
-
-            <div class="pnl-actions">
-                <a class="pnl-demo" href="<?php echo htmlspecialchars(CENNIK_PANEL_URL); ?>"
-                   target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Otwórz demo panelu
-                </a>
-
-                <?php /* Odręczna strzałka z podpisem. Rysowana ścieżką SVG,
-                         nie obrazkiem — dzięki temu da się ją animować (linia
-                         "dopisuje się" po wejściu w kadr) i nie trzeba trzymać
-                         pliku. Podpis leci pod kątem, bo dopisek na marginesie
-                         ma wyglądać na dopisany, a nie zaprojektowany. */ ?>
-                <div class="pnl-scribble" aria-hidden="true">
-                    <?php /* Grot jest na GÓRZE ścieżki, nie na końcu — strzałka
-                             biegnie od podpisu w prawym dolnym rogu i celuje
-                             w przycisk leżący bezpośrednio nad nią. */ ?>
-                    <svg class="pnl-arrow" viewBox="0 0 160 90" fill="none">
-                        <path class="pnl-arrow-line"
-                              d="M156 78C124 86 86 83 58 70 34 59 21 41 22 16"
-                              stroke="currentColor" stroke-width="2.8"
-                              stroke-linecap="round" stroke-linejoin="round"/>
-                        <path class="pnl-arrow-head"
-                              d="M22 16 8 36M22 16l19 13"
-                              stroke="currentColor" stroke-width="2.8"
-                              stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="pnl-hand">sprawdź nasz panel!</span>
-                </div>
-            </div>
         </div>
 
-        <div class="pnl-visual">
-            <?php if (CENNIK_TRAILER_YT !== ''): ?>
-                <?php /* Podgląd zamiast osadzonego filmu — patrz komentarz przy
-                         stałej CENNIK_TRAILER_YT. Iframe wstawia skrypt dopiero
-                         po kliknięciu. */ ?>
-                <button type="button" class="pnl-trailer" data-yt="<?php echo htmlspecialchars(CENNIK_TRAILER_YT); ?>">
-                    <span class="pnl-trailer-play" aria-hidden="true"></span>
-                    <span class="pnl-trailer-label">Obejrzyj zwiastun</span>
-                </button>
-            <?php else: ?>
-                <?php /* Makieta konsoli. Wiersze wypisuje skrypt, żeby pasmo
-                         żyło zamiast stać. Treść jest przykładowa i tak też jest
-                         opisana w nagłówku okna — udawanie logu z prawdziwej
-                         maszyny byłoby zwykłym kłamstwem. */ ?>
-                <div class="pnl-console" data-role="console">
-                    <div class="pnl-console-bar">
-                        <span class="pnl-dot r"></span><span class="pnl-dot y"></span><span class="pnl-dot g"></span>
-                        <span class="pnl-console-title">konsola — podgląd</span>
-                    </div>
-                    <pre class="pnl-console-body" data-role="consoleBody"></pre>
-                </div>
-            <?php endif; ?>
-        </div>
-    </section>
-
-    <?php if ($gamesSoon): ?>
-        <div class="cennik-soon glass">
-            <h2>Wkrótce</h2>
-            <p>Pracujemy nad planami dla kolejnych gier. Napisz na Discordzie, jeśli któraś Cię interesuje — kolejność ustalamy po zainteresowaniu.</p>
-            <div class="cennik-soon-list">
-                <?php foreach ($gamesSoon as $game): ?>
-                    <span class="cennik-soon-item">
-                        <?php if (!empty($game['icon_img'])): ?>
-                            <img src="/assets/media/Server_card/icons/<?php echo htmlspecialchars(basename($game['icon_img'])); ?>"
-                                 alt="" width="18" height="18" loading="lazy">
-                        <?php endif; ?>
-                        <?php echo htmlspecialchars($game['name']); ?>
-                    </span>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    <?php endif; ?>
+        <a class="cennik-ask-btn" href="https://discord.gg/r2SsJp9e" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            Napisz na Discordzie
+        </a>
+    </div>
 
     <!-- ============ CO ZAWSZE W CENIE / DLACZEGO MY ============ -->
     <?php /* Dwie kolumny zamiast rzędu kafelków na dole. Po lewej to, czego
@@ -491,6 +437,7 @@ ob_start();
 </div>
 
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 
 </div><!-- /.cennik-page -->
 <?php

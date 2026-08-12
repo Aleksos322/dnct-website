@@ -17,7 +17,26 @@
    i sekcji dolnej. Wcześniej hero było pełnoekranowe, a panele wcięte —
    przez co strona wyglądała, jakby rozjeżdżała się w lewo i w prawo.
    -------------------------------------------------------------------------- */
-.cennik-page { position: relative; }
+.cennik-page {
+    position: relative;
+
+    /* JEDEN ODSTĘP MIĘDZY PASMAMI.
+       Każda sekcja miała wcześniej własny margines: zakładki 1,25 rem, sekcja
+       "wkrótce" 1,25 rem, pasma dolne po 3 rem. Przy przewijaniu wyglądało to
+       jak przypadkowe przerwy, bo takie właśnie były. Teraz wszystkie pasma
+       biorą odstęp stąd i zmiana jednej liczby przestawia całą stronę. */
+    --cnk-band-gap: clamp(1.75rem, 3.5vw, 2.75rem);
+}
+
+/* Wspólny odstęp dla wszystkich pasm najwyższego poziomu. */
+.cennik-page .cnk-panel,
+.cennik-page .cennik-info,
+.cennik-page .cennik-ask,
+.cennik-page .pnl-band,
+.cennik-page .cnk-split,
+.cennik-page .cennik-note {
+    margin-top: var(--cnk-band-gap);
+}
 
 .cennik-page .cnk-wrap {
     position: relative;
@@ -138,7 +157,6 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     align-items: center;
     gap: clamp(1.5rem, 4vw, 3.5rem);
-    margin-top: 3rem;
     padding: clamp(1.75rem, 4vw, 3rem);
     border-radius: 28px;
     border: 1px solid rgba(255, 255, 255, 0.07);
@@ -423,7 +441,7 @@
    czemu nagłówek stoi w tej samej pionowej linii co panel z planami poniżej. */
 .cennik-page .cnk-hero {
     position: relative;
-    padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(2.5rem, 5vw, 4rem);
+    padding: clamp(1.75rem, 4vw, 2.75rem) 0 clamp(1.25rem, 2.5vw, 1.75rem);
 }
 
 /* Miękka poświata pod hero. Tło strony rysuje FinisherHeader (wspólne z całym
@@ -873,7 +891,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
-    margin-top: 3rem;
 }
 
 .cennik-page .cnk-split-col {
@@ -1004,7 +1021,6 @@
 .cennik-page .cennik-soon-item img { border-radius: 4px; object-fit: contain; opacity: 0.85; }
 
 .cennik-page .cennik-note {
-    margin-top: 3rem;
     text-align: center;
     font-size: 0.78rem;
     color: #64748b;
@@ -1204,4 +1220,138 @@
 
 @media (prefers-reduced-motion: reduce) {
     .pick-bar-go:hover { transform: none; }
+}
+
+/* ==========================================================================
+   BOCZNA SZYNA — licznik na żywo i gwarancje
+
+   Wcześniej te informacje stały w hero, w poprzek strony, i spychały karty
+   o pół ekranu w dół. Na cenniku treścią są karty; wszystko, co je odsuwa,
+   konkuruje z jedyną rzeczą, po którą klient tu przyszedł.
+
+   PRZYKLEJENIE jest sensowne tylko wtedy, gdy obok treści zostaje realne
+   miejsce. Treść ma 1240 px, szyna 190 px — przy 1400 px jeszcze się mieszczą,
+   niżej szyna wróciłaby na tekst. Dlatego poniżej tej szerokości leży
+   normalnie w treści, nad zakładkami.
+   ========================================================================== */
+.cennik-page .cnk-rail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-bottom: var(--cnk-band-gap);
+}
+
+.cennik-page .cnk-rail-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+}
+.cennik-page .cnk-rail-points li {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.cennik-page .cnk-rail-points span { color: #4ade80; font-weight: 900; }
+
+@media (min-width: 1400px) {
+    .cennik-page .cnk-rail {
+        position: fixed;
+        top: 50%;
+        right: clamp(0.75rem, 2vw, 2rem);
+        transform: translateY(-50%);
+        z-index: 20;
+        width: 190px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin: 0;
+        padding: 1.1rem 1.15rem;
+        border-radius: 20px;
+        background: rgba(10, 12, 20, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    /* W szynie licznik nie ma obok siebie nagłówka, więc może rozłożyć się
+       swobodniej — liczba pod kropką, opis pod liczbą. */
+    .cennik-page .cnk-rail .cnk-live {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        padding: 0;
+        background: none;
+        border: 0;
+    }
+    .cennik-page .cnk-rail .cnk-live-num { font-size: 2.4rem; }
+
+    .cennik-page .cnk-rail-points {
+        flex-direction: column;
+        gap: 0.55rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .cennik-page .cnk-rail-points li { font-size: 0.74rem; line-height: 1.4; align-items: flex-start; }
+}
+
+/* ==========================================================================
+   "SZUKASZ INNEJ GRY" — zaproszenie zamiast obietnicy
+
+   Zapowiedź bez terminu ("Wkrótce") nic nie daje klientowi, a nam wisi nad
+   głową: im dłużej nie nadchodzi, tym gorzej wygląda cała strona.
+   ========================================================================== */
+.cennik-page .cennik-ask {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 1.75rem;
+    padding: clamp(1.15rem, 2.5vw, 1.6rem) clamp(1.25rem, 3vw, 2rem);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cennik-page .cennik-ask-text { flex: 1 1 26rem; }
+.cennik-page .cennik-ask h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f1f5f9;
+}
+.cennik-page .cennik-ask p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #94a3b8;
+    max-width: 62ch;
+}
+
+.cennik-page .cennik-ask-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-shrink: 0;
+    padding: 0.85rem 1.4rem;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    background: #5865f2;              /* barwa Discorda — rozpoznawalna bez podpisu */
+    box-shadow: 0 10px 26px rgba(88, 101, 242, 0.3);
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+.cennik-page .cennik-ask-btn:hover { filter: brightness(1.12); transform: translateY(-2px); }
+.cennik-page .cennik-ask-btn svg { width: 1.15rem; height: 1.15rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cennik-ask-btn:hover { transform: none; }
 }

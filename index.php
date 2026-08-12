@@ -48,6 +48,7 @@ try {
 }
 
 require_once __DIR__ . '/components/plan-card.php';
+require_once __DIR__ . '/components/panel-band.php';
 
 $pageTitle       = 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story - Od 3.99 PLN';
 $metaDescription = 'DNCT Hosting to serwery Minecraft, Project Zomboid, Vintage Story, Hytale i innych gier z ochroną DDoS. Start od 3.99 PLN, szybkie NVMe i wsparcie 24/7.';
@@ -56,6 +57,8 @@ $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
 ob_start();
 ?>
+<?php /* Style pasma "Zobacz, zanim zapłacisz" mieszkają w cennik.css. */ ?>
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
 
 <!-- ============ HERO ============ -->
 <section class="relative pt-10 md:pt-16 pb-20 px-6 text-center overflow-hidden">
@@ -108,6 +111,21 @@ ob_start();
             </a>
         </div>
     </div>
+</section>
+
+<!-- ============ ZOBACZ, ZANIM ZAPŁACISZ ============ -->
+<?php /* Zaraz pod hero, PRZED opisem hostingu i przed planami. Odwiedzający
+         trafia tu z reklamy albo z wyszukiwarki i nie zna nas — najpierw
+         potrzebuje powodu, żeby uwierzyć, że panel jest dobry, a dopiero potem
+         cennika. Odwrotna kolejność każe mu ocenić cenę czegoś, czego jeszcze
+         nie widział.
+
+         Pasmo jest tym samym komponentem co w cenniku (components/panel-band.php),
+         a wygląd bierze z cennik.css — stąd klasa .cennik-page na opakowaniu.
+         Kopia markupu rozjechałaby się z oryginałem przy pierwszej poprawce. */ ?>
+<section class="px-6 max-w-7xl mx-auto w-full cennik-page">
+    <?php render_panel_band(); ?>
+<script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 </section>
 
 <!-- ============ O HOSTINGU (treść pod wyszukiwarki) ============ -->
