@@ -326,8 +326,61 @@
         }, { threshold: 0 }).observe(source);
     }
 
+
+    /* ------------------------------------------------------------------
+       Drobne reakcje na kursor
+
+       Zasada: animacja ma coś ZNACZYĆ, nie tylko się ruszać. Odliczanie do 24
+       pokazuje, że chodzi o dobę — liczbę, której nikt nie czyta uważnie,
+       dopóki nie zacznie się zmieniać.
+
+       Wszystko odpuszczamy przy prefers-reduced-motion: dla części osób ruch
+       na ekranie to nie ozdoba, tylko powód do mdłości.
+       ------------------------------------------------------------------ */
+    function initHoverBits() {
+        if (reducedMotion()) return;
+
+        var big = document.querySelector('.cnk-trust-big');
+        if (!big) return;
+
+        var target = parseInt(big.textContent, 10);
+        var suffix = big.textContent.replace(/[0-9\s]/g, '');   // "h" z "24 h"
+        if (!target) return;
+
+        var host = big.closest('.cnk-trust-item') || big;
+        var timer = null;
+
+        host.addEventListener('mouseenter', function () {
+            if (timer) return;   // ponowne najechanie w trakcie nie restartuje
+
+            var value = 1;
+            big.textContent = value + ' ' + suffix;
+
+            timer = window.setInterval(function () {
+                value += 1;
+                big.textContent = value + ' ' + suffix;
+
+                if (value >= target) {
+                    window.clearInterval(timer);
+                    timer = null;
+                }
+            }, 900 / target);   // całość zawsze ok. 0,9 s, niezależnie od liczby
+        });
+
+        // Zjechanie kursorem w trakcie odliczania zostawiłoby na ekranie
+        // przypadkową liczbę, np. "17 h" — a to już nieprawda o ofercie.
+        host.addEventListener('mouseleave', function () {
+            if (timer) {
+                window.clearInterval(timer);
+                timer = null;
+            }
+            big.textContent = target + ' ' + suffix;
+        });
+    }
+
     initTabs();
     initPlanPicks();
+    initHoverBits();
     initLiveFloat();
     initParallax();
     document.querySelectorAll('.cfg').forEach(initConfigurator);

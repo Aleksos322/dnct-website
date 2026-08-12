@@ -223,7 +223,7 @@ ob_start();
                 <div class="cnk-live">
                     <span class="cnk-live-dot" aria-hidden="true"></span>
                     <span class="cnk-live-num"><?php echo $liveServers; ?></span>
-                    <span class="cnk-live-label">serwerów działa<br>w tej chwili</span>
+                    <span class="cnk-live-label">serwerów działa w tej chwili</span>
                 </div>
             <?php endif; ?>
 

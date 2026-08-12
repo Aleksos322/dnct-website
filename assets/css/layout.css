@@ -139,3 +139,64 @@
     .cookie-consent-actions { justify-content: stretch; }
     .cookie-btn { flex: 1; }
 }
+
+/* ==========================================================================
+   PANEL POWIADOMIEŃ
+
+   Dzwonek siedzi przy DOLNEJ krawędzi okna, więc lista rozwija się w GÓRĘ
+   (`bottom: 100%` w markupie). Wcześniej miała `margin-top` i całą zawartość
+   wypychała poniżej widocznego obszaru — historia powiadomień istniała,
+   ale nie dało się jej zobaczyć.
+
+   Wygląd dociągnięty do reszty serwisu: to samo szkło i ta sama paleta,
+   zamiast szarości Tailwinda odziedziczonej z pierwszej wersji.
+   ========================================================================== */
+.dnct-notif-panel {
+    background: rgba(10, 12, 20, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+
+    /* Rozwinięcie od dołu — panel „wyrasta" z dzwonka, zamiast pojawiać się
+       znikąd. Przy `prefers-reduced-motion` animacja znika (niżej). */
+    animation: dnctNotifIn 0.22s ease;
+    transform-origin: bottom right;
+}
+
+@keyframes dnctNotifIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to   { opacity: 1; transform: none; }
+}
+
+.dnct-notif-head {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.dnct-notif-markall {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #a78bfa;
+    transition: color 0.2s ease;
+}
+.dnct-notif-markall:hover { color: #c4b5fd; }
+
+/* Rozdzielenie wpisów kreską zamiast `divide-y` Tailwinda — panel bywa
+   renderowany też tam, gdzie Tailwind nie doszedł. */
+.dnct-notif-item + .dnct-notif-item { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+.dnct-notif-item { transition: background 0.15s ease; }
+.dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; }
+
+/* Pasek przewijania w panelu — domyślny w ciemnym motywie wygląda jak usterka. */
+.dnct-notif-panel::-webkit-scrollbar { width: 8px; }
+.dnct-notif-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+}
+.dnct-notif-panel::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+    .dnct-notif-panel { animation: none; }
+}

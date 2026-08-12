@@ -1254,20 +1254,6 @@
     gap: 1rem 1.5rem;
 }
 
-/* Od tej szerokości szyna staje się prawą kolumną hero — mieści się obok
-   nagłówka i przestaje kosztować cokolwiek w pionie. */
-@media (min-width: 860px) {
-    .cennik-page .cnk-rail {
-        flex: 0 1 auto;
-        flex-direction: column;
-        align-items: flex-end;
-        text-align: right;
-        gap: 0.9rem;
-        max-width: 22rem;
-    }
-    .cennik-page .cnk-rail-points { flex-direction: column; align-items: flex-end; gap: 0.4rem; }
-}
-
 .cennik-page .cnk-rail-points {
     list-style: none;
     margin: 0;
@@ -1276,14 +1262,88 @@
     flex-wrap: wrap;
     gap: 0.5rem 1.25rem;
 }
+
+/* Od tej szerokości szyna staje się prawą kolumną hero — mieści się obok
+   nagłówka i przestaje kosztować cokolwiek w pionie.
+
+   TEKST ZAWSZE DO LEWEJ, mimo że sam blok stoi po prawej. Wyrównanie do prawej
+   łamało wiersze w przypadkowych miejscach ("Gwarantowany RAM i / CPU") i przy
+   ptaszkach po lewej dawało poszarpaną kolumnę. Punkt zaczepienia dla oka ma
+   być jeden. */
+@media (min-width: 860px) {
+    .cennik-page .cnk-rail {
+        flex: 0 0 auto;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: left;
+        gap: 0;
+        width: 17rem;
+        padding: 1.1rem 1.25rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .cennik-page .cnk-rail-points {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+        margin-top: 1.15rem;
+        padding-top: 1.15rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+}
+
 .cennik-page .cnk-rail-points li {
     display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.8rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
     color: #94a3b8;
+    transition: color 0.2s ease;
 }
-.cennik-page .cnk-rail-points span { color: #4ade80; font-weight: 900; }
+/* Drobna reakcja na kursor: punkt się rozjaśnia, ptaszek podskakuje.
+   Tyle wystarczy, żeby lista wyglądała na żywą, a nie na obrazek. */
+.cennik-page .cnk-rail-points li:hover { color: #e2e8f0; }
+.cennik-page .cnk-rail-points span {
+    color: #4ade80;
+    font-weight: 900;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+.cennik-page .cnk-rail-points li:hover span { transform: scale(1.25); }
+
+/* LICZNIK. Wcześniej podpis "serwerów działa w tej chwili" łamał się na dwie
+   linie OBOK liczby i wyglądał jak przypadkowo doklejony. Teraz liczba stoi
+   sama, a podpis leży pod nią jednym ciągiem. */
+.cennik-page .cnk-rail .cnk-live {
+    display: block;
+    padding: 0;
+    background: none;
+    border: 0;
+}
+.cennik-page .cnk-rail .cnk-live-dot {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+.cennik-page .cnk-rail .cnk-live-num {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 2.6rem;
+    letter-spacing: -0.03em;
+}
+.cennik-page .cnk-rail .cnk-live-label {
+    display: block;
+    margin-top: 0.45rem;
+    max-width: 11rem;
+    font-size: 0.74rem;
+    line-height: 1.4;
+    color: #64748b;
+}
+/* Podpis jest jednym zdaniem — łamanie zostawia przeglądarka. Ukrywanie <br>
+   przez CSS sklejało słowa ("działaw tej chwili"), bo znacznik nie zostawia po
+   sobie spacji; dlatego zniknął z markupu, a nie tylko z widoku. */
 
 @media (min-width: 1400px) {
     .cennik-page .cnk-rail {
@@ -1292,38 +1352,13 @@
         right: clamp(0.75rem, 2vw, 2rem);
         transform: translateY(-50%);
         z-index: 20;
-        width: 190px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
+        width: 15.5rem;
         margin: 0;
-        padding: 1.1rem 1.15rem;
-        border-radius: 20px;
-        background: rgba(10, 12, 20, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(10, 12, 20, 0.78);
+        border-color: rgba(255, 255, 255, 0.09);
         backdrop-filter: blur(14px);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
     }
-
-    /* W szynie licznik nie ma obok siebie nagłówka, więc może rozłożyć się
-       swobodniej — liczba pod kropką, opis pod liczbą. */
-    .cennik-page .cnk-rail .cnk-live {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.35rem;
-        padding: 0;
-        background: none;
-        border: 0;
-    }
-    .cennik-page .cnk-rail .cnk-live-num { font-size: 2.4rem; }
-
-    .cennik-page .cnk-rail-points {
-        flex-direction: column;
-        gap: 0.55rem;
-        padding-top: 0.9rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    .cennik-page .cnk-rail-points li { font-size: 0.74rem; line-height: 1.4; align-items: flex-start; }
 }
 
 /* ==========================================================================
@@ -1417,4 +1452,46 @@
 
 @media (prefers-reduced-motion: reduce) {
     .cnk-live-float { transition: none; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   DROBNE REAKCJE NA KURSOR
+
+   Każda z nich ma coś znaczyć, nie tylko się ruszać. Przy
+   prefers-reduced-motion wszystkie znikają — dla części osób ruch na ekranie
+   to nie ozdoba, tylko powód do mdłości.
+   -------------------------------------------------------------------------- */
+
+/* Pozycje "co zawsze w cenie": ptaszek przesuwa się w stronę tekstu. */
+.cennik-page .cnk-list li { transition: color 0.2s ease; }
+.cennik-page .cnk-list li:hover { color: #f1f5f9; }
+.cennik-page .cnk-check { transition: transform 0.2s ease; }
+.cennik-page .cnk-list li:hover .cnk-check { transform: translateX(3px) scale(1.1); }
+
+/* Bloki zaufania lekko się unoszą; ten z "24 h" dodatkowo odlicza (cennik.js). */
+.cennik-page .cnk-trust-item {
+    border-radius: 12px;
+    padding-left: 0.6rem;
+    margin-left: -0.6rem;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+.cennik-page .cnk-trust-item:hover {
+    background: rgba(139, 92, 246, 0.07);
+    transform: translateX(3px);
+}
+.cennik-page .cnk-trust-big {
+    font-variant-numeric: tabular-nums;   /* bez skakania szerokości przy odliczaniu */
+    transition: filter 0.25s ease;
+}
+.cennik-page .cnk-trust-hero:hover .cnk-trust-big { filter: brightness(1.25); }
+
+/* Zakładka gry lekko podnosi się przed kliknięciem. */
+.cennik-page .cennik-tab { transition: transform 0.18s ease, background 0.2s ease, border-color 0.2s ease; }
+.cennik-page .cennik-tab:hover:not(.is-active) { transform: translateY(-2px); }
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-list li:hover .cnk-check,
+    .cennik-page .cnk-trust-item:hover,
+    .cennik-page .cennik-tab:hover:not(.is-active),
+    .cennik-page .cnk-rail-points li:hover span { transform: none; }
 }

@@ -56,12 +56,16 @@ $isLoggedInForBell = isset($_SESSION['authentik_username']);
         <span id="dnct-bell-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center">0</span>
     </button>
 
-    <div id="dnct-bell-dropdown" class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-gray-900/95 border border-gray-800 rounded-xl shadow-2xl backdrop-blur-md">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-            <span class="font-semibold text-sm">Powiadomienia</span>
-            <button id="dnct-mark-all-read" type="button" class="text-xs text-blue-400 hover:text-blue-300">Oznacz wszystkie</button>
+    <?php /* Lista otwiera się W GÓRĘ, nie w dół.
+             Dzwonek jest przyklejony do DOLNEJ krawędzi ekranu, więc `mt-2`
+             rozwijało panel poniżej widocznego obszaru — historia powiadomień
+             istniała, ale nie dało się jej zobaczyć ani przewinąć do niej. */ ?>
+    <div id="dnct-bell-dropdown" class="hidden absolute right-0 bottom-full mb-3 w-80 max-h-[60vh] overflow-y-auto dnct-notif-panel">
+        <div class="dnct-notif-head flex items-center justify-between px-4 py-3">
+            <span class="font-bold text-sm tracking-wide">Powiadomienia</span>
+            <button id="dnct-mark-all-read" type="button" class="dnct-notif-markall">Oznacz wszystkie</button>
         </div>
-        <div id="dnct-bell-list" class="divide-y divide-gray-800">
+        <div id="dnct-bell-list">
             <div class="px-4 py-6 text-center text-gray-500 text-sm">Ładowanie...</div>
         </div>
     </div>
