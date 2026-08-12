@@ -10,6 +10,7 @@ declare(strict_types=1);
 define('DNCT_BASE_PATH', dirname(__DIR__));       // .../public_html/private
 define('DNCT_BACKEND_PATH', __DIR__);             // .../private/backend
 
+require_once __DIR__ . '/lib/assets.php';
 require_once __DIR__ . '/lib/env.php';
 require_once __DIR__ . '/lib/http.php';
 require_once __DIR__ . '/lib/csrf.php';

@@ -45,4 +45,4 @@
     </div>
 </div>
 
-<script src="/assets/js/cookie-consent.js" defer></script>
+<script src="<?php echo asset('/assets/js/cookie-consent.js'); ?>" defer></script>

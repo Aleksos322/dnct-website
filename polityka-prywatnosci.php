@@ -13,6 +13,10 @@
 
 declare(strict_types=1);
 
+// Wspólny start — te dwie strony jako jedyne go nie miały, przez co
+// pomocnicze funkcje z backend/lib (np. asset()) były tu niedostępne.
+require_once __DIR__ . '/backend/bootstrap.php';
+
 $pageTitle       = 'Polityka prywatności — DNCT Hosting';
 $metaDescription = 'Jak DNCT Hosting przetwarza dane osobowe: podstawy prawne, zakres danych, okres przechowywania, prawa użytkownika i cookies.';
 $canonicalUrl    = 'https://dnct.pl/polityka-prywatnosci';
@@ -20,7 +24,7 @@ $centerContent   = false;
 
 ob_start();
 ?>
-<link rel="stylesheet" href="/assets/css/legal.css">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">
 
 <div class="legal glass glass-content" style="border-radius: 22px; padding: clamp(1.25rem, 4vw, 3rem);">
     <div class="gdpr-badge">

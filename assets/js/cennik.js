@@ -72,8 +72,8 @@
     function initPlanPicks() {
         document.querySelectorAll('.plan-pick').forEach(function (card) {
             function pick(e) {
-                // Przycisk wewnątrz karty prowadzi do "#", więc bez tego strona
-                // skakałaby na górę przy każdym kliknięciu.
+                // Karta jest klikalna jako całość (role="button"), więc spacja
+                // domyślnie przewinęłaby stronę zamiast zaznaczyć plan.
                 if (e) e.preventDefault();
 
                 if (card.getAttribute('data-plan-soldout') === '1') return;

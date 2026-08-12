@@ -72,7 +72,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
     <!-- layout.css dokladamy dla banera zgody na cookies: rejestracja ma wlasny
          <head> i nie przechodzi przez assets/clear/clear.php, wiec nie dostaje
          wspolnych stylow automatycznie. -->
-    <link rel="stylesheet" href="/assets/css/layout.css">
+    <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
     <link rel="stylesheet" href="/auth/register/register.css">
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <link rel="apple-touch-icon" href="/assets/media/icons/favicon.png">

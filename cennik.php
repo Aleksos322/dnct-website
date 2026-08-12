@@ -19,7 +19,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/backend/bootstrap.php';
-require_once __DIR__ . '/components/plan-card.php';
+require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/slot-configurator.php';
 
 $pageTitle       = 'Cennik hostingu gier — DNCT Hosting';
@@ -126,7 +126,7 @@ $liveServers    = $liveServers ?? 0;
 
 ob_start();
 ?>
-<link rel="stylesheet" href="/assets/css/cennik.css">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
 
 <div class="cennik-page">
 <div class="cnk-wrap">
@@ -229,25 +229,18 @@ ob_start();
                                  data-plan-id="<?php echo (int)$plan['id']; ?>"
                                  data-plan-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
                                  data-plan-game="<?php echo htmlspecialchars((string)$game['name']); ?>"
-                                 data-plan-price="<?php echo htmlspecialchars((string)$plan['price']); ?>"
+                                 data-plan-price="<?php echo htmlspecialchars(cennik_price_label($plan['price'])); ?>"
                                  data-plan-soldout="<?php echo !empty($plan['sold_out']) ? '1' : '0'; ?>"
                                  data-plan-fits="<?php echo $plan['fits'] ?? ''; ?>"
                                  tabindex="0" role="button"
                                  aria-label="Wybierz plan <?php echo htmlspecialchars((string)$plan['name']); ?>">
 
-                                <?php /* Wskaźnik mocy. Sama liczba "8 GB" nic nie mówi
-                                         komuś, kto kupuje serwer pierwszy raz — pozycja
-                                         między najmniejszym a największym planem mówi
-                                         wszystko w ułamku sekundy. */ ?>
-                                <div class="plan-scale" title="Moc na tle pozostałych planów">
-                                    <span class="plan-scale-fill" style="width: <?php echo round(max($ramPos, 0.04) * 100); ?>%"></span>
-                                </div>
-
                                 <?php
-                                render_plan_card((int)$plan['id'], [
-                                    // Ciasna siatka 3x3 - karta nie animuje sie sama,
-                                    // ruch przejmuje kontener .plan-pick.
-                                    'compact'    => true,
+                                /* Wariant cennikowy: wysoka karta z ceną przy
+                                   dole. Karta nie jest linkiem — sprzedaż jest
+                                   wyłączona, a kliknięcie obsługuje skrypt
+                                   zaznaczania na kontenerze .plan-pick. */
+                                render_cennik_plan_card([
                                     'name'       => $plan['name'] ?? '',
                                     'price'      => $plan['price'] ?? '',
                                     'popular'    => !empty($plan['popular']),
@@ -257,14 +250,11 @@ ob_start();
                                     'ram'        => cennik_size((int)($plan['ram_mb'] ?? 0)),
                                     'cpu'        => ($plan['cpu_cores'] ?? 0) . ' vCore',
                                     'ssd'        => cennik_size((int)($plan['ssd_mb'] ?? 0)),
-                                    'backups'    => $plan['backups_limit'] ?? 0,
+                                    'backups'    => (string)($plan['backups_limit'] ?? 0),
                                     'bg'         => $plan['background_img'] ?? '',
                                     'icon'       => $plan['icon_img'] ?? '',
-                                    // Karta sluzy dzis WYLACZNIE do zaznaczania -
-                                    // sprzedaz jest wylaczona, wiec przycisk nie
-                                    // prowadzi nigdzie. Kliniecie obsluguje skrypt.
-                                    'href'       => '#',
-                                    'btn_text'   => 'Wybierz ten plan',
+                                    'fits'       => $plan['fits'] ?? null,
+                                    'power'      => $ramPos,
                                 ]);
                                 ?>
                             </div>
@@ -377,7 +367,7 @@ ob_start();
     </div>
 </div>
 
-<script src="/assets/js/cennik.js" defer></script>
+<script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
 
 </div><!-- /.cennik-page -->
 <?php

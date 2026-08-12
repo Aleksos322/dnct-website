@@ -81,8 +81,10 @@ if ($centerContent) {
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <link rel="apple-touch-icon" href="/assets/media/icons/favicon.png">
 
-    <link rel="stylesheet" href="/assets/navibar/navbar.css">
-    <link rel="stylesheet" href="/assets/css/layout.css">
+    <?php /* asset() dokleja czas modyfikacji pliku — bez tego przeglądarki
+             trzymają stary arkusz po wgraniu poprawki. Patrz backend/lib/assets.php. */ ?>
+    <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
+    <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
     <script src="/assets/js/tailwind.js"></script>
 
     <style>

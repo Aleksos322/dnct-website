@@ -243,69 +243,278 @@
 }
 
 /* --------------------------------------------------------------------------
-   KARTY PLANÓW — zagęszczone. Dziewięć kart w rozmiarze ze strony głównej
-   zamienia cennik w niekończące się przewijanie; tu liczy się porównywanie,
-   a nie prezentacja pojedynczego planu.
+   KARTY PLANÓW
+
+   Markup jest własny (components/plan-card-cennik.php), nie przerobiony
+   z komponentu strony głównej — dzięki temu nie ma tu ANI JEDNEGO !important.
+   Poprzednia wersja miała ich dwadzieścia, bo dociskała klasy Tailwinda
+   (`.h-44`, `.mb-8`, `.text-4xl`) do innego układu, niż zostały napisane.
    -------------------------------------------------------------------------- */
 .cennik-page .plan-pick {
     position: relative;
+    display: flex;              /* karta ma wypełnić komórkę siatki na wysokość */
     cursor: pointer;
-    border-radius: 22px;
+    border-radius: 26px;
     transition: transform 0.2s ease, box-shadow 0.25s ease;
     outline: none;
 }
-.cennik-page .plan-pick:hover { transform: translateY(-4px); }
 .cennik-page .plan-pick:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
 .cennik-page .plan-pick.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); }
 .cennik-page .plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
 .cennik-page .plan-pick[data-plan-soldout="1"]:hover { transform: none; }
 
-/* Zagęszczenie: mniejsze wypełnienie, niższa grafika, spokojniejsza typografia. */
-.cennik-page .plan-pick > .glass { padding: 1.35rem !important; border-radius: 22px !important; }
- /* Kadr grafiki. W oryginale ma 11 rem i na stronie głównej to działa, bo
-    karta jest jedna z trzech i ma oddychać. Tutaj kart jest dziewięć, a same
-    grafiki są ciemne i rozmyte — przy tej wysokości czytały się jako pusty
-    prostokąt z ikoną zawieszoną w środku. 5 rem robi z tego pasek, w którym
-    ikona wypełnia kadr. */
-.cennik-page .plan-pick .h-44 { height: 5rem !important; margin-bottom: 0.9rem !important; border-radius: 14px !important; }
-.cennik-page .plan-pick .h-44 .p-4 { padding: 0.5rem !important; border-radius: 12px !important; }
-.cennik-page .plan-pick .h-44 img[alt] { max-height: 2.4rem; }
-.cennik-page .plan-pick .text-3xl { font-size: 1.35rem !important; }
-.cennik-page .plan-pick .text-4xl { font-size: 2rem !important; }
-.cennik-page .plan-pick .mb-8 { margin-bottom: 1.1rem !important; }
-.cennik-page .plan-pick .mb-6 { margin-bottom: 0.9rem !important; }
-.cennik-page .plan-pick .mt-8 { margin-top: 1.1rem !important; }
-.cennik-page .plan-pick .py-4 { padding-top: 0.7rem !important; padding-bottom: 0.7rem !important; }
-.cennik-page .plan-pick .gap-4 { gap: 0.65rem !important; }
-.cennik-page .plan-pick .space-y-4 > * + * { margin-top: 0.5rem !important; }
-.cennik-page .plan-pick li { font-size: 0.8rem; }
-.cennik-page .plan-pick .p-4 { padding: 0.6rem !important; }
-.cennik-page .plan-pick .p-2 { padding: 0.35rem !important; }
+/* Sama karta. `min-height` daje jej pion nawet przy planie o krótkiej nazwie —
+   bez tego karty w rzędzie miały różną wysokość i siatka wyglądała na krzywą. */
+.cennik-page .pcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 33rem;
+    padding: 1.6rem 1.5rem 1.5rem;
+    border-radius: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
 
-/* SYGNATURA: wskaźnik mocy.
+.cennik-page .plan-pick:hover .pcard {
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45);
+}
+.cennik-page .plan-pick:hover { transform: translateY(-4px); }
+
+.cennik-page .pcard.is-popular {
+    border-color: rgba(139, 92, 246, 0.55);
+    box-shadow: 0 0 34px rgba(139, 92, 246, 0.14);
+}
+.cennik-page .pcard.is-sale { border-color: rgba(59, 130, 246, 0.4); }
+.cennik-page .pcard.is-soldout { border-color: rgba(239, 68, 68, 0.28); opacity: 0.72; }
+
+/* Odznaka. Jedna, w prawym górnym rogu — plan bywa i popularny, i przeceniony,
+   ale dwie naklejki obok siebie kasują się nawzajem, więc komponent wybiera
+   jedną w kolejności: wyprzedane > popularny > promocja. */
+.cennik-page .pcard-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    padding: 0.34rem 0.9rem;
+    border-radius: 0 0 0 14px;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.cennik-page .pcard-badge-hot  { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.cennik-page .pcard-badge-sale { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+.cennik-page .pcard-badge-out  { background: linear-gradient(135deg, #dc2626, #ea580c); }
+
+/* Kadr z grafiką gry. Grafiki w bazie są ciemne i rozmyte, więc służą za
+   podkład, a nie za ilustrację — czytelna jest dopiero ikona na wierzchu. */
+.cennik-page .pcard-art {
+    position: relative;
+    height: 7.5rem;
+    margin-bottom: 1.15rem;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: radial-gradient(circle at 50% 120%, rgba(139, 92, 246, 0.22), rgba(0, 0, 0, 0.45));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.cennik-page .pcard-art-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.22;
+    filter: blur(2px);
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+.cennik-page .plan-pick:hover .pcard-art-bg { transform: scale(1.08); opacity: 0.4; }
+.cennik-page .pcard.is-soldout .pcard-art-bg { filter: blur(2px) grayscale(1); opacity: 0.12; }
+
+.cennik-page .pcard-art-icon {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    padding: 0.7rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    transition: transform 0.4s ease, border-color 0.3s ease;
+}
+.cennik-page .plan-pick:hover .pcard-art-icon {
+    transform: scale(1.08) rotate(-4deg);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+.cennik-page .pcard-art-icon img { width: 3.25rem; height: 3.25rem; object-fit: contain; }
+.cennik-page .pcard.is-soldout .pcard-art-icon img { filter: grayscale(1); opacity: 0.6; }
+
+.cennik-page .pcard-name {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    text-align: center;
+}
+
+/* Parametry jako siatka 2x2, nie lista czterech wierszy. Cztery kafelki czytają
+   się jak tabliczka znamionowa i pozwalają porównać dwa plany rzutem oka —
+   lista wymagała czytania linia po linii. */
+.cennik-page .pcard-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.cennik-page .pcard-specs li {
+    position: relative;
+    padding: 0.7rem 0.7rem 0.65rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+.cennik-page .plan-pick:hover .pcard-specs li {
+    background: rgba(139, 92, 246, 0.07);
+    border-color: rgba(139, 92, 246, 0.18);
+}
+.cennik-page .pcard-specs svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #a78bfa;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+.cennik-page .pcard.is-soldout .pcard-specs svg { color: #64748b; }
+.cennik-page .pcard-spec-val {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #e2e8f0;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+.cennik-page .pcard-spec-lbl {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+/* Rozpórka — patrz komentarz w komponencie. Trzyma stopki kart równo. */
+.cennik-page .pcard-spacer { flex: 1 1 auto; min-height: 1.1rem; }
+
+.cennik-page .pcard-scarce {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.7rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #fbbf24;
+}
+.cennik-page .pcard-scarce svg { width: 0.85rem; height: 0.85rem; flex-shrink: 0; }
+
+/* Cena na dole karty, tuż nad przyciskiem. */
+.cennik-page .pcard-price {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.cennik-page .pcard-price-old {
+    width: 100%;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: rgba(248, 113, 113, 0.75);
+    text-decoration: line-through;
+}
+.cennik-page .pcard-price-now {
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.cennik-page .pcard.is-soldout .pcard-price-now { background: none; color: #475569; }
+.cennik-page .pcard-price-cur { font-size: 1rem; font-weight: 800; color: #a78bfa; }
+.cennik-page .pcard.is-soldout .pcard-price-cur { color: #475569; }
+/* "/ mies." trzyma się ceny. Wypchnięte marginesem na prawą krawędź karty
+   czytało się jak osobna informacja, a nie jak część kwoty. */
+.cennik-page .pcard-price-per { font-size: 0.72rem; color: #64748b; margin-left: 0.1rem; }
+
+/* Przycisk jest <span>, nie <a> — sprzedaż jest wyłączona, a klikalny jest
+   cały kafelek (zaznaczenie planu). Link prowadzący do "#" byłby obietnicą,
+   której strona dziś nie spełnia, i psułby nawigację klawiaturą. */
+.cennik-page .pcard-cta {
+    display: block;
+    margin-top: 0.9rem;
+    padding: 0.85rem 1rem;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25);
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+.cennik-page .plan-pick:hover .pcard-cta { filter: brightness(1.12); }
+.cennik-page .plan-pick.is-selected .pcard-cta { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.cennik-page .plan-pick.is-selected .pcard-cta::after { content: ' ✓'; }
+.cennik-page .pcard-cta.is-off {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* SYGNATURA: wskaźnik mocy przy dolnej krawędzi kadru z grafiką.
    Liczba "8 GB" nic nie mówi komuś, kto kupuje serwer pierwszy raz. Pozycja
    między najmniejszym a największym planem mówi wszystko od razu — i to jest
    informacja, której żadna inna część karty nie niesie. */
-.cennik-page .plan-scale {
+.cennik-page .pcard-power {
     position: absolute;
-    top: 0;
-    left: 1.35rem;
-    right: 1.35rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
     height: 3px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    z-index: 5;
 }
-
-.cennik-page .plan-scale-fill {
+.cennik-page .pcard-power > span {
     display: block;
     height: 100%;
-    border-radius: 999px;
+    border-radius: 0 999px 999px 0;
     background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.65);
     transition: width 0.5s ease;
 }
+.cennik-page .pcard.is-soldout .pcard-power > span { background: #475569; box-shadow: none; }
 
 /* --------------------------------------------------------------------------
    SEKCJA DWUKOLUMNOWA — specyfikacja po lewej, zaufanie po prawej.
@@ -470,7 +679,9 @@
     .cennik-page .cnk-live-dot { animation: none; }
     .cennik-page .cennik-panel.is-active { animation: none; }
     .cennik-page .plan-pick:hover { transform: none; }
-    .cennik-page .plan-scale-fill { transition: none; }
+    .cennik-page .plan-pick:hover .pcard-art-bg,
+    .cennik-page .plan-pick:hover .pcard-art-icon { transform: none; }
+    .cennik-page .pcard-power > span { transition: none; }
 }
 
 /* ==========================================================================
@@ -621,20 +832,3 @@
     .cennik-page .cfg-select:hover { transform: none; }
 }
 
-/* --------------------------------------------------------------------------
-   HOVER KARTY — jeden ruch zamiast trzech
-
-   Karta ma w komponencie hover:scale-[1.05] ORAZ hover:-translate-y-2. Przy
-   ciasnej siatce 3x3 rosnąca karta nachodziła na sąsiadki i wyglądało to jak
-   zepsuty układ. Wyłączamy to u ŹRÓDŁA (parametr `compact` w render_plan_card),
-   a nie nadpisaniem — walka na !important z klasami Tailwinda kończy się
-   regułami, których nikt później nie rozumie.
-
-   Tutaj zostaje tylko jeden, spokojny ruch całego kafelka.
-   -------------------------------------------------------------------------- */
-.cennik-page .plan-pick:hover { transform: translateY(-3px); }
-
-.cennik-page .plan-pick:hover > .glass {
-    border-color: rgba(139, 92, 246, 0.35);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
-}
