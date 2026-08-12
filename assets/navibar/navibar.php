@@ -28,6 +28,62 @@ if (!isset($isAdmin)) {
 $panelUrl = function_exists('env')
     ? (string)env('PANEL_SSO_URL', 'https://panel.dnct.pl/extensions/vikingsso/auth/auto')
     : 'https://panel.dnct.pl/extensions/vikingsso/auth/auto';
+/* ---------------------------------------------------------------------------
+   PODŚWIETLENIE AKTYWNEJ POZYCJI
+
+   Wcześniej "Strona Główna" miała klasę `text-white` wpisaną na sztywno, więc
+   navbar twierdził, że jesteś na stronie głównej ZAWSZE - także w cenniku
+   i w swoich serwerach. To jedyny element, po którym odwiedzający orientuje
+   się, gdzie jest; mylący jest gorszy niż żaden.
+
+   Dopasowanie idzie po ŚCIEŻCE, bez parametrów - /cennik i /cennik?x=1 to ta
+   sama pozycja menu. Podstrony liczą się do rodzica (np. /twoje-serwery/cos),
+   a `$extra` dokłada adresy, które należą do sekcji, choć mają inny prefiks:
+   zamówienie i strona po płatności to nadal ścieżka zakupu, czyli "Cennik".
+   --------------------------------------------------------------------------- */
+$navbarPath = rtrim((string)(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'), '/');
+if ($navbarPath === '') {
+    $navbarPath = '/';
+}
+
+/** @param string[] $extra dodatkowe ścieżki należące do tej samej pozycji */
+function navbar_active(string $href, array $extra = []): bool
+{
+    global $navbarPath;
+
+    foreach (array_merge([$href], $extra) as $candidate) {
+        $candidate = rtrim($candidate, '/');
+        if ($candidate === '') {
+            // Strona główna tylko przy dokładnym trafieniu - inaczej "/"
+            // pasowałoby do każdego adresu w serwisie.
+            if ($navbarPath === '/') {
+                return true;
+            }
+            continue;
+        }
+        if ($navbarPath === $candidate || str_starts_with($navbarPath, $candidate . '/')) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/** Klasy pozycji menu na komputerze. */
+function navbar_class(bool $active): string
+{
+    return $active
+        ? 'text-white font-semibold transition-colors'
+        : 'hover:text-white transition-colors';
+}
+
+/** Klasy pozycji w menu mobilnym. */
+function navbar_class_mobile(bool $active): string
+{
+    return ($active ? 'text-white font-semibold' : 'text-gray-400 hover:text-white')
+        . ' py-2 block border-b border-white/5 transition-colors';
+}
+
 ?>
 <nav class="fixed top-0 left-0 right-0 w-full z-50 glass glass-bottom-edge">
     <div class="glass-content max-w-7xl mx-auto px-6 py-4">
@@ -44,9 +100,9 @@ $panelUrl = function_exists('env')
 
             <!-- MENU DESKTOP -->
             <div class="nav-links-desktop space-x-8 font-medium text-gray-400">
-                <a href="/" class="text-white transition-colors">Strona Główna</a>
-                <a href="/cennik" class="hover:text-white transition-colors">Cennik</a>
-                <a href="/twoje-serwery" class="hover:text-white transition-colors">Twoje serwery</a>
+                <a href="/" class="<?php echo navbar_class(navbar_active('/', [])); ?>"<?php echo navbar_active('/', []) ? ' aria-current="page"' : ''; ?>>Strona Główna</a>
+                <a href="/cennik" class="<?php echo navbar_class(navbar_active('/cennik', ['/zamowienie', '/sukces'])); ?>"<?php echo navbar_active('/cennik', ['/zamowienie', '/sukces']) ? ' aria-current="page"' : ''; ?>>Cennik</a>
+                <a href="/twoje-serwery" class="<?php echo navbar_class(navbar_active('/twoje-serwery', [])); ?>"<?php echo navbar_active('/twoje-serwery', []) ? ' aria-current="page"' : ''; ?>>Twoje serwery</a>
                 <a href="https://discord.gg/r2SsJp9e" target="_blank" class="hover:text-white transition-colors">Pomoc</a>
             </div>
 
@@ -116,9 +172,9 @@ $panelUrl = function_exists('env')
     <!-- MENU MOBILE -->
     <div id="mobile-menu" class="nav-mobile-menu border-t border-white/5 absolute w-full left-0 top-full">
         <div class="flex flex-col p-6 space-y-6 text-center font-medium text-lg">
-            <a href="/" class="text-white py-2 block border-b border-white/5">Strona Główna</a>
-            <a href="/cennik" class="text-gray-400 hover:text-white py-2 block border-b border-white/5 transition-colors">Cennik</a>
-            <a href="/twoje-serwery" class="text-gray-400 hover:text-white py-2 block border-b border-white/5 transition-colors">Twoje serwery</a>
+            <a href="/" class="<?php echo navbar_class_mobile(navbar_active('/', [])); ?>"<?php echo navbar_active('/', []) ? ' aria-current="page"' : ''; ?>>Strona Główna</a>
+            <a href="/cennik" class="<?php echo navbar_class_mobile(navbar_active('/cennik', ['/zamowienie', '/sukces'])); ?>"<?php echo navbar_active('/cennik', ['/zamowienie', '/sukces']) ? ' aria-current="page"' : ''; ?>>Cennik</a>
+            <a href="/twoje-serwery" class="<?php echo navbar_class_mobile(navbar_active('/twoje-serwery', [])); ?>"<?php echo navbar_active('/twoje-serwery', []) ? ' aria-current="page"' : ''; ?>>Twoje serwery</a>
             <a href="https://discord.gg/r2SsJp9e" target="_blank" class="text-gray-400 hover:text-blue-400 py-2 block transition-colors flex justify-center items-center gap-2">
                 <svg class="nav-icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
