@@ -6,13 +6,13 @@
    na tę stronę: czy coś się pali.
    ========================================================================== */
 
-.cennik-page .srv-list { display: grid; gap: 1rem; }
+.cennik-page .srv-list { display: grid; gap: 1.1rem; }
 
 .cennik-page .srv {
     position: relative;
-    padding: clamp(1.2rem, 3vw, 1.8rem);
-    padding-left: clamp(1.5rem, 3.5vw, 2.1rem);
-    border-radius: 22px;
+    padding: clamp(1.2rem, 3vw, 1.9rem);
+    padding-left: clamp(1.5rem, 3.5vw, 2.2rem);
+    border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.07);
     overflow: hidden;
 }
@@ -27,6 +27,9 @@
 .cennik-page .srv.is-warn::before { background: linear-gradient(180deg, #fbbf24, #f59e0b); }
 .cennik-page .srv.is-bad::before  { background: linear-gradient(180deg, #ef4444, #dc2626); }
 
+/* --------------------------------------------------------------------------
+   Nagłówek karty
+   -------------------------------------------------------------------------- */
 .cennik-page .srv-head {
     display: flex;
     justify-content: space-between;
@@ -36,9 +39,22 @@
     margin-bottom: 1.1rem;
 }
 
+.cennik-page .srv-ident { display: flex; align-items: flex-start; gap: 0.9rem; }
+
+.cennik-page .srv-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    object-fit: contain;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
 .cennik-page .srv-name {
-    margin: 0 0 0.3rem;
-    font-size: 1.25rem;
+    margin: 0 0 0.25rem;
+    font-size: 1.2rem;
     font-weight: 900;
     color: #f8fafc;
     display: flex;
@@ -47,7 +63,7 @@
     flex-wrap: wrap;
 }
 .cennik-page .srv-spec {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -56,13 +72,14 @@
     border-radius: 999px;
     background: rgba(139, 92, 246, 0.12);
 }
-.cennik-page .srv-sub { margin: 0; font-size: 0.78rem; color: #64748b; }
+.cennik-page .srv-sub { margin: 0; font-size: 0.75rem; color: #64748b; }
+.cennik-page .srv-flag { color: #f87171; }
 
 .cennik-page .srv-state {
     flex-shrink: 0;
     padding: 0.35rem 0.85rem;
     border-radius: 999px;
-    font-size: 0.66rem;
+    font-size: 0.65rem;
     font-weight: 900;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -71,25 +88,85 @@
 .cennik-page .srv.is-warn .srv-state { background: rgba(251, 191, 36, 0.14); color: #fbbf24; }
 .cennik-page .srv.is-bad  .srv-state { background: rgba(239, 68, 68, 0.14);  color: #f87171; }
 
-/* Cztery fakty w rzędzie. `auto-fit` zamiast stałej liczby kolumn — na wąskim
-   ekranie zawijają się same, bez osobnego zapytania medialnego. */
-.cennik-page .srv-facts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+/* --------------------------------------------------------------------------
+   Adres serwera — pierwsza rzecz, po którą klient tu wchodzi
+   -------------------------------------------------------------------------- */
+.cennik-page .srv-address {
+    display: flex;
+    align-items: center;
     gap: 0.75rem;
-    padding: 0.95rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.cennik-page .srv-facts > div { display: flex; flex-direction: column; gap: 0.2rem; }
-.cennik-page .srv-facts span {
+.cennik-page .srv-address-label {
     font-size: 0.62rem;
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #52606d;
 }
+.cennik-page .srv-address code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    letter-spacing: 0.02em;
+}
+.cennik-page .srv-copy {
+    margin-left: auto;
+    padding: 0.3rem 0.75rem;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+.cennik-page .srv-copy:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+/* --------------------------------------------------------------------------
+   Parametry i fakty. `auto-fit` zamiast stałej liczby kolumn — na wąskim
+   ekranie zawijają się same, bez osobnego zapytania medialnego.
+   -------------------------------------------------------------------------- */
+.cennik-page .srv-specs,
+.cennik-page .srv-facts {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+}
+.cennik-page .srv-specs {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cennik-page .srv-facts {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cennik-page .srv-specs > div,
+.cennik-page .srv-facts > div { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.cennik-page .srv-specs span,
+.cennik-page .srv-facts span {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #52606d;
+}
+.cennik-page .srv-specs strong,
 .cennik-page .srv-facts strong { font-size: 0.9rem; font-weight: 800; color: #e2e8f0; }
+
+/* Data zawieszenia to jedyna wartość, przez którą klient traci serwer,
+   jeśli jej nie zauważy. */
+.cennik-page .srv-suspend { color: #f87171 !important; }
 
 .cennik-page .srv-alert,
 .cennik-page .srv-note {
@@ -101,57 +178,160 @@
 .cennik-page .srv.is-bad .srv-alert { color: #fca5a5; }
 .cennik-page .srv-note  { color: #64748b; }
 
-.cennik-page .srv-extend {
+/* --------------------------------------------------------------------------
+   Pasek akcji
+   -------------------------------------------------------------------------- */
+.cennik-page .srv-actions {
     display: flex;
-    align-items: center;
-    gap: 0.55rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
-    margin-top: 1.1rem;
+    margin-top: 1.2rem;
 }
-.cennik-page .srv-extend-label {
-    font-size: 0.7rem;
+
+.cennik-page .srv-btn {
+    padding: 0.7rem 1.25rem;
+    border-radius: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.15s ease, filter 0.2s ease;
+}
+.cennik-page .srv-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+.cennik-page .srv-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cennik-page .srv-btn.is-primary {
+    border-color: transparent;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 8px 22px rgba(139, 92, 246, 0.25);
+}
+.cennik-page .srv-btn.is-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.cennik-page .srv-btn.is-quiet { color: #94a3b8; }
+.cennik-page .srv-btn.is-link  { color: #a78bfa; background: none; border-color: rgba(167, 139, 250, 0.3); }
+/* Rozwinięty panel ma być widać po przycisku, który go otworzył. */
+.cennik-page .srv-btn.is-open { border-color: rgba(139, 92, 246, 0.5); background: rgba(139, 92, 246, 0.12); color: #fff; }
+
+.cennik-page .srv-error { margin: 0.8rem 0 0; font-size: 0.8rem; color: #f87171; }
+
+/* --------------------------------------------------------------------------
+   Panele rozwijane
+   -------------------------------------------------------------------------- */
+.cennik-page .srv-panel {
+    margin-top: 1.1rem;
+    padding: 1.15rem;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    animation: srvOpen 0.25s ease;
+}
+@keyframes srvOpen {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.cennik-page .srv-panel-h {
+    margin: 0 0 0.7rem;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: #64748b;
 }
-.cennik-page .srv-extend-btn {
-    padding: 0.55rem 1.1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    background: rgba(139, 92, 246, 0.1);
-    color: #c4b5fd;
-    font-size: 0.76rem;
-    font-weight: 800;
+.cennik-page .srv-panel-h:not(:first-child) { margin-top: 1.35rem; }
+.cennik-page .srv-panel-note { margin: 0 0 1rem; font-size: 0.76rem; line-height: 1.6; color: #64748b; }
+
+.cennik-page .srv-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.55rem; }
+.cennik-page .srv-opts-modes { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.cennik-page .srv-opt {
+    position: relative;
+    text-align: left;
+    padding: 0.8rem 0.95rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #cbd5e1;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.15s ease;
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
-.cennik-page .srv-extend-btn:hover:not(:disabled) { background: rgba(139, 92, 246, 0.22); transform: translateY(-2px); }
-.cennik-page .srv-extend-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.cennik-page .srv-opt:hover:not(:disabled) { border-color: rgba(139, 92, 246, 0.35); }
+.cennik-page .srv-opt.is-active { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.12); color: #fff; }
+.cennik-page .srv-opt:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.cennik-page .srv-error { margin: 0.7rem 0 0; font-size: 0.78rem; color: #f87171; }
+.cennik-page .srv-opt-label { display: block; font-weight: 800; font-size: 0.9rem; }
+.cennik-page .srv-opt-sub   { display: block; margin-top: 0.2rem; font-size: 0.72rem; color: #94a3b8; line-height: 1.45; }
+.cennik-page .srv-opt-badge {
+    display: inline-block;
+    margin-top: 0.35rem;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
 
-.cennik-page .srv-foot {
+/* Podsumowanie mówi wprost, ile dni dochodzi i do kiedy serwer będzie działał —
+   sama kwota nie odpowiada na pytanie, które klient ma w głowie. */
+.cennik-page .srv-summary {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
-    margin-top: 1.2rem;
-    padding-top: 0.9rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    margin-top: 1.35rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
-.cennik-page .srv-link {
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #a78bfa;
-    text-decoration: none;
+.cennik-page .srv-summary-text { flex: 1 1 16rem; }
+.cennik-page .srv-summary-text strong { display: block; font-size: 1.05rem; font-weight: 900; color: #4ade80; }
+.cennik-page .srv-summary-text span   { display: block; margin-top: 0.15rem; font-size: 0.78rem; color: #94a3b8; }
+
+.cennik-page .srv-summary-price { display: flex; align-items: baseline; gap: 0.25rem; }
+.cennik-page .srv-summary-price > span:first-child {
+    font-size: 1.9rem;
+    font-weight: 900;
+    line-height: 1;
+    color: #f8fafc;
+    font-variant-numeric: tabular-nums;
 }
-.cennik-page .srv-link:hover { text-decoration: underline; }
-.cennik-page .srv-id { font-size: 0.7rem; color: #475569; }
+.cennik-page .srv-summary-cur { font-size: 0.85rem; font-weight: 800; color: #a78bfa; }
+
+/* --------------------------------------------------------------------------
+   Lista pakietów do zmiany
+   -------------------------------------------------------------------------- */
+.cennik-page .srv-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0.6rem; }
+
+.cennik-page .srv-plan {
+    text-align: left;
+    padding: 0.9rem 1rem;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+.cennik-page .srv-plan:hover:not(:disabled) { transform: translateY(-2px); }
+/* Kolor mówi, w którą stronę idzie zmiana, zanim klient przeczyta kwotę. */
+.cennik-page .srv-plan.is-up:hover   { border-color: rgba(139, 92, 246, 0.45); background: rgba(139, 92, 246, 0.1); }
+.cennik-page .srv-plan.is-down:hover { border-color: rgba(34, 197, 94, 0.4);  background: rgba(34, 197, 94, 0.08); }
+
+.cennik-page .srv-plan-name    { display: block; font-size: 1rem; font-weight: 900; color: #f1f5f9; }
+.cennik-page .srv-plan-spec    { display: block; margin-top: 0.25rem; font-size: 0.72rem; color: #64748b; }
+.cennik-page .srv-plan-cost    { display: block; margin-top: 0.5rem; font-size: 0.8rem; font-weight: 800; }
+.cennik-page .srv-plan.is-up   .srv-plan-cost { color: #c4b5fd; }
+.cennik-page .srv-plan.is-down .srv-plan-cost { color: #4ade80; }
+.cennik-page .srv-plan-monthly { display: block; margin-top: 0.2rem; font-size: 0.68rem; color: #52606d; }
 
 @media (prefers-reduced-motion: reduce) {
-    .cennik-page .srv-extend-btn:hover:not(:disabled) { transform: none; }
+    .cennik-page .srv-btn:hover:not(:disabled),
+    .cennik-page .srv-plan:hover:not(:disabled) { transform: none; }
+    .cennik-page .srv-panel { animation: none; }
 }

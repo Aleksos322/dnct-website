@@ -5,10 +5,13 @@
  * Wejście:  { order_id, period_days, csrf_token }
  * Wyjście:  { ok: true, url: "https://checkout.stripe.com/..." }
  *
- * Przedłużenie jest ZAWSZE płatnością jednorazową. Klient, który ma abonament,
- * i tak dostanie kolejny okres automatycznie — dokupowanie dni obok
- * odnawiającej się subskrypcji dawałoby dwie równoległe płatności za ten sam
- * czas i pytanie "za co właściwie zapłaciłem" przy pierwszym rachunku.
+ * DWA MODELE, ALE NIE ZAWSZE OBA.
+ *
+ * Klient może dokupić okres jednorazowo albo przejść na abonament, który będzie
+ * się odnawiał sam. Abonament oferujemy WYŁĄCZNIE wtedy, gdy serwer jeszcze go
+ * nie ma: druga subskrypcja obok działającej to dwie równoległe płatności za ten
+ * sam czas i pytanie "za co właściwie zapłaciłem" przy pierwszym rachunku.
+ * Rezygnacja z istniejącej subskrypcji idzie przez api/subscription/cancel.php.
  *
  * Parametry serwera bierzemy ze STAREGO zamówienia, nie z cennika. Klient
  * przedłuża to, co ma — nawet jeśli plan zdążył podrożeć albo zniknąć z oferty.
@@ -54,6 +57,27 @@ if ($parent['status'] !== 'provisioned') {
     json_error('Ten serwer nie jest jeszcze gotowy — nie ma czego przedłużać.', 409, [], ['reason' => 'not_ready']);
 }
 
+$mode = request_string('billing_mode', 'payment');
+if (!in_array($mode, ['payment', 'subscription'], true)) {
+    json_error('Nieznany model rozliczenia.', 422);
+}
+
+/* Abonament tylko wtedy, gdy serwer jeszcze go nie ma — patrz nagłówek pliku.
+   Sprawdzamy stan zamówienia, a nie to, co przysłał front: przycisk mógł
+   zostać wyświetlony, zanim ktoś w innej karcie włączył odnawianie. */
+$hasActiveSubscription = $parent['billing_mode'] === 'subscription'
+    && $parent['status'] !== 'cancelled'
+    && !empty($parent['stripe_subscription_id']);
+
+if ($mode === 'subscription' && $hasActiveSubscription) {
+    json_error(
+        'Ten serwer już ma abonament — kolejny okres pobierze się sam.',
+        409,
+        [],
+        ['reason' => 'already_subscribed']
+    );
+}
+
 $panel = new PDO(
     'mysql:host=' . env('DB_HOST', 'localhost') . ';dbname=' . env('DB_DATABASE') . ';charset=utf8mb4',
     (string)env('DB_USERNAME'),
@@ -67,7 +91,7 @@ try {
         'plan_id'      => (int)($parent['plan_id'] ?? 0),
         'slots'        => (int)($parent['slots'] ?? 0),
         'period_days'  => (int)request_string('period_days', '0'),
-        'billing_mode' => 'payment',
+        'billing_mode' => $mode,
     ]);
 } catch (RuntimeException $e) {
     /* Plan mógł w międzyczasie zniknąć z cennika albo wyprzedać się na węźle.
@@ -96,40 +120,57 @@ try {
         'backups_limit'=> (int)$parent['backups_limit'],
         'period_days'  => $period['days'],
         'period_label' => $period['label'],
-        'billing_mode' => 'payment',
+        'billing_mode' => $mode,
         'amount_gross' => (int)round(pricing_apply_period($baseMonthly, $period) * 100),
         'currency'     => 'pln',
     ];
 }
 
 $orderId = order_create($dnct, $quote, $email, $name);
-$dnct->prepare('UPDATE orders SET extends_order_id = ? WHERE id = ?')->execute([$parentId, $orderId]);
+$dnct->prepare('UPDATE orders SET kind = "extension", extends_order_id = ? WHERE id = ?')
+     ->execute([$parentId, $orderId]);
 
 stripe_init();
 $base = stripe_base_url();
 
+$isSub = $mode === 'subscription';
+
+$priceData = [
+    'currency'     => $quote['currency'],
+    'unit_amount'  => $quote['amount_gross'],
+    'product_data' => [
+        'name'        => $isSub
+            ? 'DNCT Hosting — abonament serwera'
+            : 'DNCT Hosting — przedłużenie serwera',
+        'description' => sprintf('Zamówienie #%d · %s', $parentId, $quote['period_label']),
+    ],
+];
+
+if ($isSub) {
+    $priceData['recurring'] = stripe_interval_for_days((int)$quote['period_days']);
+}
+
 try {
-    $session = \Stripe\Checkout\Session::create([
-        'mode'                 => 'payment',
-        'payment_method_types' => ['card', 'blik', 'p24'],
-        'line_items' => [[
-            'price_data' => [
-                'currency'     => $quote['currency'],
-                'unit_amount'  => $quote['amount_gross'],
-                'product_data' => [
-                    'name'        => 'DNCT Hosting — przedłużenie serwera',
-                    'description' => sprintf('Zamówienie #%d · %s', $parentId, $quote['period_label']),
-                ],
-            ],
-            'quantity' => 1,
-        ]],
+    $params = [
+        'mode'                 => $isSub ? 'subscription' : 'payment',
+        // BLIK i Przelewy24 nie obsługują płatności cyklicznych — przy
+        // abonamencie zostaje karta, jedyna metoda, którą da się obciążyć
+        // bez udziału klienta.
+        'payment_method_types' => $isSub ? ['card'] : ['card', 'blik', 'p24'],
+        'line_items'           => [['price_data' => $priceData, 'quantity' => 1]],
         'allow_promotion_codes' => true,
         'customer_email'        => $email,
         'client_reference_id'   => (string)$orderId,
         'metadata'              => ['order_id' => (string)$orderId, 'extends' => (string)$parentId],
         'success_url'           => $base . '/sukces?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url'            => $base . '/twoje-serwery',
-    ]);
+    ];
+
+    if ($isSub) {
+        $params['subscription_data'] = ['metadata' => ['order_id' => (string)$orderId]];
+    }
+
+    $session = \Stripe\Checkout\Session::create($params);
 } catch (Throwable $e) {
     error_log('Przedłużenie: sesja nieutworzona dla zamówienia #' . $orderId . ' — ' . $e->getMessage());
     json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);

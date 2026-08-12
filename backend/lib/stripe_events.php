@@ -20,6 +20,7 @@ require_once __DIR__ . '/orders.php';
 require_once __DIR__ . '/provisioning.php';
 require_once __DIR__ . '/notifications.php';
 require_once __DIR__ . '/order_mail.php';
+require_once __DIR__ . '/plan_change.php';
 
 /**
  * Rozdzielenie zdarzeń.
@@ -83,7 +84,9 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
        serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
        tym, który ma. */
     if (!empty($order['extends_order_id'])) {
-        return webhook_extension_paid($dnct, $order);
+        return $order['kind'] === 'plan_change'
+            ? webhook_plan_change_paid($dnct, $order)
+            : webhook_extension_paid($dnct, $order, $session);
     }
 
     order_mark_paid(
@@ -185,7 +188,7 @@ function order_announce_paid(PDO $dnct, ?array $order): void
  * nie tworzy. To stan końcowy "zrobione" i dzięki temu strona powrotu ma co
  * pokazać, a lista zamówień nie zostaje z wiecznym „w trakcie".
  */
-function webhook_extension_paid(PDO $dnct, array $order): bool
+function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
 {
     $parent = order_by_id($dnct, (int)$order['extends_order_id']);
 
@@ -196,6 +199,24 @@ function webhook_extension_paid(PDO $dnct, array $order): bool
     }
 
     order_extend($dnct, (int)$parent['id'], (int)$order['period_days']);
+
+    /* PRZEJŚCIE NA ABONAMENT. Klient dokupił okres, wybierając odnawianie —
+       od teraz to zamówienie nadrzędne jest abonamentem i kolejne faktury mają
+       trafiać właśnie w nie. Bez przepisania identyfikatora subskrypcji
+       `invoice.paid` szukałby zamówienia-przedłużenia, które nie ma serwera. */
+    if ($order['billing_mode'] === 'subscription' && $session !== null && !empty($session->subscription)) {
+        $dnct->prepare(
+            'UPDATE orders
+                SET billing_mode = "subscription",
+                    stripe_subscription_id = ?,
+                    stripe_customer_id = COALESCE(?, stripe_customer_id)
+              WHERE id = ?'
+        )->execute([
+            (string)$session->subscription,
+            isset($session->customer) ? (string)$session->customer : null,
+            (int)$parent['id'],
+        ]);
+    }
 
     if (!empty($parent['ptero_server_id'])) {
         provision_unsuspend((int)$parent['ptero_server_id']);
@@ -210,6 +231,74 @@ function webhook_extension_paid(PDO $dnct, array $order): bool
         'success',
         'Serwer przedłużony',
         'Dopisaliśmy kolejny okres — serwer działa dalej bez przerwy.'
+    );
+
+    return true;
+}
+
+/**
+ * Opłacona dopłata za wyższy pakiet — dopiero teraz zmieniamy zasoby.
+ *
+ * Kolejność jest celowa: pieniądze najpierw, zasoby potem. Podniesienie pakietu
+ * przed zapłatą oznaczałoby oddanie RAM-u i dysku komuś, kto może nigdy nie
+ * dokończyć płatności — a odbieranie zasobów działającemu serwerowi to
+ * restart i utrata sesji graczy.
+ */
+function webhook_plan_change_paid(PDO $dnct, array $order): bool
+{
+    $parent = order_by_id($dnct, (int)$order['extends_order_id']);
+
+    if ($parent === null || empty($parent['ptero_server_id'])) {
+        error_log('Stripe webhook: zmiana pakietu #' . $order['id'] . ' bez działającego serwera');
+        order_mark_failed($dnct, (int)$order['id'], 'Brak serwera do przestawienia.');
+        return true;
+    }
+
+    /* Parametry docelowe siedzą w TYM zamówieniu — zapisał je endpoint zmiany
+       pakietu przy tworzeniu sesji. Nie pytamy ponownie cennika: plan mógł
+       w międzyczasie podrożeć, a klient zapłacił za konkretne zasoby. */
+    $plan = [
+        'id'            => (int)$order['plan_id'],
+        'ram_mb'        => (int)$order['ram_mb'],
+        'cpu_cores'     => (float)$order['cpu_cores'],
+        'ssd_mb'        => (int)$order['ssd_mb'],
+        'backups_limit' => (int)$order['backups_limit'],
+    ];
+
+    $applied = plan_change_apply_limits((int)$parent['ptero_server_id'], $plan);
+
+    if (!$applied['ok']) {
+        order_mark_failed($dnct, (int)$order['id'], (string)$applied['error']);
+
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'error',
+            'Pakiet nie został zmieniony',
+            'Płatność się powiodła, ale nie udało się przestawić zasobów serwera. '
+            . 'Zajmiemy się tym ręcznie — napisz na Discordzie, jeśli chcesz przyspieszyć.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Zamówienie #' . $order['id'] . ': opłacona zmiana pakietu NIE wykonana',
+            (string)$applied['error']
+        );
+
+        return true;
+    }
+
+    plan_change_store($dnct, (int)$parent['id'], $plan, 0);
+
+    $dnct->prepare('UPDATE orders SET status = "provisioned", expires_at = NOW() WHERE id = ?')
+         ->execute([(int)$order['id']]);
+
+    notify_user(
+        $dnct,
+        (string)$order['user_name'],
+        'success',
+        'Pakiet zmieniony',
+        'Serwer działa już na nowych zasobach. Data ważności bez zmian.'
     );
 
     return true;
