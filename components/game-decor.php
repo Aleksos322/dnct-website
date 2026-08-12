@@ -2,29 +2,28 @@
 /**
  * Dekoracje boczne cennika — po jednym zestawie na grę.
  *
- * DLACZEGO RYSOWANE, A NIE WGRANE
+ * DWA ŹRÓDŁA GRAFIKI, JEDEN KOD
  *
- * W assets/media nie ma żadnych grafik poza ikonami gier i tłami kart. Zamiast
- * ściągać cudze rendery (prawa autorskie do materiałów z gier są tu realnym
- * problemem — Mojang i The Indie Stone mają własne wytyczne), zestawy są
- * rysowane wektorowo w motywie, nie z materiałów wydawcy. Efekt uboczny jest
- * korzystny: cały zestaw waży kilka kilobajtów tekstu, skaluje się bez
- * rozmycia i przyjmuje kolory z CSS-a.
+ * MINECRAFT ma prawdziwe rendery (assets/media/minecraft): statek z End City,
+ * geodę ametystową, komnatę portalu, Creaking i spawner blaze'ów. Biją każdą
+ * wektorową imitację i były pod ręką, więc nie ma powodu ich udawać.
  *
- * DWIE TECHNIKI
+ * POZOSTAŁE GRY nie mają takich materiałów, więc zostają zestawy RYSOWANE —
+ * lepsze to niż puste marginesy albo cudze grafiki wzięte z sieci, do których
+ * nie mamy praw. Rysunki powstają dwiema technikami:
  *
  * 1. IZOMETRYCZNE BLOKI (decor_cube) — trzy równoległoboki: góra, lewy i prawy
  *    bok. Czytają się jako "klocek" bez ani jednego pliku graficznego.
  * 2. PIXEL ART (decor_pixels) — siatka kwadratów opisana tablicą napisów, gdzie
- *    znak wskazuje kolor z palety. Zapis jest czytelny w kodzie: obrazek widać
- *    wprost w źródle i poprawia się go, zmieniając litery.
+ *    znak wskazuje kolor z palety. Obrazek widać wprost w źródle i poprawia się
+ *    go, zmieniając litery.
  *
- * MOTYW
+ * Wybór jest DANYMI, nie rozgałęzieniem kodu: element zestawu z kluczem `img`
+ * renderuje się jako obrazek, napis — jako rysunek.
  *
- * Minecraft dostaje zestaw z Endu — purpur, kamień Kresu, kwiat chorusa,
- * kryształ. To nawiązanie do tego, jak strona i tak wygląda: ciemny fiolet
- * z poświatą. Pozostałe gry mają własne palety, żeby przełączenie zakładki
- * było widoczne kątem oka, a nie tylko w treści.
+ * ROZMIARY. Źródła miały po 2000 px i do megabajta; przeskalowane do realnych
+ * rozmiarów wyświetlania cały zestaw waży 110 KB zamiast 3,4 MB. Dekoracja,
+ * która kosztuje więcej niż reszta strony, przestaje być dekoracją.
  *
  * DOSTĘPNOŚĆ: cała warstwa jest aria-hidden i pointer-events:none. To czysta
  * ozdoba — nie może przechwytywać kliknięć ani trafiać do czytników ekranu.
@@ -87,7 +86,7 @@ function decor_pixels(array $rows, array $palette): string
  * robienia z nich tapety. Pozycje i rozmiary siedzą w CSS (klasy d1..d6), tutaj
  * jest wyłącznie treść graficzna.
  *
- * @return array<string,array<int,string>>
+ * @return array<string,array<int,string|array<string,mixed>>>
  */
 function decor_sets(): array
 {
@@ -203,8 +202,24 @@ function decor_sets(): array
         '...ac...',
     ], ['a' => '#e8c169', 'b' => '#d9a441', 'c' => '#a8761f']);
 
+    /* MINECRAFT MA PRAWDZIWE GRAFIKI, pozostałe gry rysowane klocki.
+       Dla Minecrafta dostaliśmy zestaw rendersów (End City, geoda ametystowa,
+       portal, spawner, Creaking, pufferfish) i one biją każdą wektorową
+       imitację. Dla Zomboida i Vintage Story takich materiałów nie ma, więc
+       zostają zestawy rysowane — lepsze to niż puste marginesy albo cudze
+       grafiki wzięte z sieci.
+
+       Rozdzielenie jest DANYMI, nie osobnym kodem: element z kluczem `img`
+       renderuje się jako obrazek, z kluczem `svg` jako rysunek. */
     return [
-        'minecraft'    => [$purpur, $chorus, $endStone, $crystal, $obsidian, $pearl],
+        'minecraft' => [
+            ['img' => 'End_City_Ship',                'alt' => 'Statek z End City'],
+            ['img' => 'Amethyst_Geode_3',             'alt' => 'Geoda ametystowa'],
+            ['img' => 'Stronghold_Portal_Room',       'alt' => 'Komnata portalu'],
+            ['img' => 'Creaking',                     'alt' => 'Creaking'],
+            ['img' => 'Nether_Fortress_Blaze_Spawner','alt' => 'Spawner blaze’ów'],
+            ['puffer' => true,                        'alt' => 'Rozdymka'],
+        ],
         'zomboid'      => [$plank, $medkit, $asphalt, $hazard, $plank, $barrel],
         'vintagestory' => [$copper, $ingot, $clay, $pot, $copper, $resin],
     ];
@@ -225,9 +240,25 @@ function render_game_decor(string $type): void
     }
     ?>
     <div class="cnk-decor" data-decor="<?php echo htmlspecialchars($type); ?>" aria-hidden="true">
-        <?php foreach ($set as $i => $svg): ?>
-            <span class="cnk-decor-item d<?php echo $i + 1; ?>">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><?php echo $svg; ?></svg>
+        <?php foreach ($set as $i => $item): ?>
+            <span class="cnk-decor-item d<?php echo $i + 1; ?><?php echo is_array($item) ? ' is-photo' : ''; ?>">
+                <?php if (is_array($item) && !empty($item['puffer'])): ?>
+                    <?php /* ROZDYMKA SIĘ NAPRAWDĘ ROZDYMA.
+                             Trzy warstwy jedna na drugiej; kursor przełącza, która
+                             jest widoczna. To nie ozdobnik — dokładnie tak działa
+                             ta ryba w grze, więc żart trafia tylko do tych, którzy
+                             grali, i nie przeszkadza reszcie. */ ?>
+                    <span class="cnk-puffer">
+                        <img src="/assets/media/minecraft/Pufferfish_Small.webp"  alt="" class="p1" loading="lazy" decoding="async">
+                        <img src="/assets/media/minecraft/Pufferfish_Medium.webp" alt="" class="p2" loading="lazy" decoding="async">
+                        <img src="/assets/media/minecraft/Pufferfish_Large.webp"  alt="" class="p3" loading="lazy" decoding="async">
+                    </span>
+                <?php elseif (is_array($item)): ?>
+                    <img src="/assets/media/minecraft/<?php echo htmlspecialchars($item['img']); ?>.webp"
+                         alt="" loading="lazy" decoding="async">
+                <?php else: ?>
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><?php echo $item; ?></svg>
+                <?php endif; ?>
             </span>
         <?php endforeach; ?>
     </div>

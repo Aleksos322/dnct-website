@@ -340,25 +340,27 @@
     function initHoverBits() {
         if (reducedMotion()) return;
 
-        var big = document.querySelector('.cnk-trust-big');
-        if (!big) return;
+        /* Podmieniamy WYŁĄCZNIE liczbę, nie cały napis. Jednostka siedzi
+           w osobnym elemencie o stałej pozycji, więc podczas odliczania nie
+           rusza się nic poza cyframi. */
+        var num = document.querySelector('[data-role="count"]');
+        if (!num) return;
 
-        var target = parseInt(big.textContent, 10);
-        var suffix = big.textContent.replace(/[0-9\s]/g, '');   // "h" z "24 h"
+        var target = parseInt(num.textContent, 10);
         if (!target) return;
 
-        var host = big.closest('.cnk-trust-item') || big;
+        var host = num.closest('.cnk-trust-item') || num;
         var timer = null;
 
         host.addEventListener('mouseenter', function () {
             if (timer) return;   // ponowne najechanie w trakcie nie restartuje
 
             var value = 1;
-            big.textContent = value + ' ' + suffix;
+            num.textContent = String(value);
 
             timer = window.setInterval(function () {
                 value += 1;
-                big.textContent = value + ' ' + suffix;
+                num.textContent = String(value);
 
                 if (value >= target) {
                     window.clearInterval(timer);
@@ -374,7 +376,7 @@
                 window.clearInterval(timer);
                 timer = null;
             }
-            big.textContent = target + ' ' + suffix;
+            num.textContent = String(target);
         });
     }
 

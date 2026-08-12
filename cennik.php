@@ -409,10 +409,29 @@ ob_start();
             <h2 class="cnk-h2">Ryzykujesz mniej, niż myślisz</h2>
 
             <div class="cnk-trust-item cnk-trust-hero">
-                <span class="cnk-trust-big">24 h</span>
+                <span class="cnk-trust-big"><span class="cnk-trust-num" data-role="count">24</span><span class="cnk-trust-unit">h</span></span>
                 <div>
                     <strong>na rezygnację</strong>
                     <span>Nie spodobało się? Piszesz na Discordzie i odzyskujesz pieniądze.</span>
+                </div>
+            </div>
+
+            <?php /* PING NA PASKACH Z GRY. Zamiast pisać "niski ping" — liczba,
+                     której i tak nikt nie sprawdzi — pokazujemy pasek, który
+                     każdy grający zna z listy serwerów. Napełnia się od jednej
+                     kreski do pięciu i wraca; ruch mówi to samo, co zdanie
+                     obok, tylko szybciej. */ ?>
+            <div class="cnk-trust-item cnk-ping-item">
+                <span class="cnk-ping" aria-hidden="true">
+                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                        <img src="/assets/media/minecraft/Server_Ping_<?php echo $i; ?>.webp"
+                             alt="" class="pg pg<?php echo $i; ?>" loading="lazy" decoding="async">
+                    <?php endfor; ?>
+                </span>
+                <div>
+                    <strong>Serwery stoją w Polsce</strong>
+                    <span>Nie w Niemczech ani w Finlandii. Do Warszawy czy Krakowa pakiet
+                          ma kilkanaście kilometrów, a nie pół kontynentu.</span>
                 </div>
             </div>
 

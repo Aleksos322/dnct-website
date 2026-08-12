@@ -942,7 +942,16 @@
     font-size: 0.9rem;
     margin-bottom: 0.2rem;
 }
-.cennik-page .cnk-trust-item span { color: #94a3b8; font-size: 0.82rem; line-height: 1.5; }
+/* Wyłączamy z tej reguły WSZYSTKIE elementy dużej liczby, także zagnieżdżone.
+   Selektor z elementem (`… span`) ma wyższą specyficzność niż sama klasa, więc
+   bez :not() liczba dostawała rozmiar zwykłego opisu — i tak było, zanim
+   ktokolwiek to zauważył. Pierwsza poprawka objęła tylko zewnętrzny span,
+   a cyfry siedzą w środku i dalej łapały 0,82 rem. */
+.cennik-page .cnk-trust-item span:not(.cnk-trust-big):not(.cnk-trust-num):not(.cnk-trust-unit) {
+    color: #94a3b8;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
 
 /* "24 h" wyrównane do GÓRY, nie do środka.
    Przy wyśrodkowaniu duża liczba lądowała obok DRUGIEGO wiersza opisu, przez co
@@ -968,7 +977,28 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     flex-shrink: 0;
+
+    display: flex;
+    align-items: baseline;
+    gap: 0.12em;
+    transition: filter 0.25s ease;
 }
+
+/* LICZBA MA WŁASNE, STAŁE POLE.
+   Sam `min-width` na całym napisie nie wystarczał: przy odliczaniu zmienia się
+   liczba CYFR, więc wyśrodkowana treść przesuwała literę "h" o pół znaku przy
+   każdym przejściu z jednocyfrowej na dwucyfrową. Rozdzielenie liczby
+   i jednostki sprawia, że rusza się wyłącznie to, co ma się ruszać.
+
+   `tabular-nums` domyka sprawę wewnątrz pola — bez tego "11" i "24" mają różną
+   szerokość i cyfry drgają nawet przy stałym pudełku. */
+.cennik-page .cnk-trust-num {
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    width: 2ch;
+    text-align: right;
+}
+.cennik-page .cnk-trust-unit { font-size: 0.62em; }
 
 /* --------------------------------------------------------------------------
    Komunikaty i sekcja "wkrótce"
@@ -1468,21 +1498,25 @@
 .cennik-page .cnk-check { transition: transform 0.2s ease; }
 .cennik-page .cnk-list li:hover .cnk-check { transform: translateX(3px) scale(1.1); }
 
-/* Bloki zaufania lekko się unoszą; ten z "24 h" dodatkowo odlicza (cennik.js). */
+/* Bloki zaufania podświetlają się na kursor; ten z "24 h" dodatkowo odlicza
+   (cennik.js).
+
+   NIC SIĘ TU NIE PRZESUWA i to jest celowe. Wcześniej blok jechał o 3 px
+   w bok, a liczba rosła z "1 h" do "24 h" — tekst obok skakał dwa razy naraz
+   i zamiast drobnego efektu wychodziło szarpanie. Zostaje samo tło. */
 .cennik-page .cnk-trust-item {
     border-radius: 12px;
     padding-left: 0.6rem;
     margin-left: -0.6rem;
-    transition: background 0.25s ease, transform 0.2s ease;
+    transition: background 0.25s ease;
 }
-.cennik-page .cnk-trust-item:hover {
-    background: rgba(139, 92, 246, 0.07);
-    transform: translateX(3px);
-}
-.cennik-page .cnk-trust-big {
-    font-variant-numeric: tabular-nums;   /* bez skakania szerokości przy odliczaniu */
-    transition: filter 0.25s ease;
-}
+.cennik-page .cnk-trust-item:hover { background: rgba(139, 92, 246, 0.07); }
+
+/* SZEROKOŚĆ ZAREZERWOWANA NA DWIE CYFRY.
+   `tabular-nums` wyrównuje szerokość cyfr między sobą, ale nie rezerwuje
+   miejsca na cyfrę, której jeszcze nie ma — przy przejściu z "1 h" na "24 h"
+   napis obok i tak przesuwał się o pełny znak. `min-width` w jednostkach `ch`
+   trzyma pole stałe przez całe odliczanie. */
 .cennik-page .cnk-trust-hero:hover .cnk-trust-big { filter: brightness(1.25); }
 
 /* Zakładka gry lekko podnosi się przed kliknięciem. */
@@ -1491,7 +1525,125 @@
 
 @media (prefers-reduced-motion: reduce) {
     .cennik-page .cnk-list li:hover .cnk-check,
-    .cennik-page .cnk-trust-item:hover,
     .cennik-page .cennik-tab:hover:not(.is-active),
     .cennik-page .cnk-rail-points li:hover span { transform: none; }
+}
+
+/* ==========================================================================
+   DEKORACJE Z PRAWDZIWYCH GRAFIK
+
+   Rendery Minecrafta zamiast rysowanych klocków. Cień i przygaszenie robią
+   z nich TŁO — pełna jasność ściągałaby wzrok z kart, a to one są treścią.
+   ========================================================================== */
+.cnk-decor-item.is-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Grafiki są znacznie bardziej "obecne" niż płaskie rysunki, więc dostają
+   własne, większe pola i niższą przezroczystość niż zestawy wektorowe. */
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d1 { width: 168px; height: 168px; --o: 0.5; }
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d2 { width: 118px; height: 118px; --o: 0.44; }
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d3 { width: 132px; height: 132px; --o: 0.4; }
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d4 { width: 96px;  height: 150px; --o: 0.42; }
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d5 { width: 124px; height: 124px; --o: 0.42; }
+.cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d6 { width: 104px; height: 112px; --o: 0.55; }
+
+@media (min-width: 1500px) {
+    .cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d1 { width: 190px; height: 190px; }
+    .cnk-decor-set[data-decor-for="game-minecraft"] .cnk-decor-item.d6 { width: 124px; height: 132px; }
+}
+
+/* --------------------------------------------------------------------------
+   ROZDYMKA
+
+   Trzy warstwy jedna na drugiej; kursor przełącza widoczną. To nie jest efekt
+   dla efektu — dokładnie tak zachowuje się ta ryba w grze, więc żart trafia do
+   tych, którzy grali, i nie przeszkadza reszcie.
+
+   Warstwa dekoracji ma pointer-events:none, więc sama rozdymka musi je sobie
+   przywrócić — inaczej nie da się na nią najechać.
+   -------------------------------------------------------------------------- */
+.cnk-puffer {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    cursor: pointer;
+}
+.cnk-puffer img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cnk-puffer .p1 { opacity: 1; transform: scale(1); }
+
+/* Najechanie: mała znika, duża wchodzi z lekkim przeskoczeniem skali. */
+.cnk-puffer:hover .p1 { opacity: 0; transform: scale(1.1); }
+.cnk-puffer:hover .p2 { opacity: 0; transform: scale(1.15); }
+.cnk-puffer:hover .p3 { opacity: 1; transform: scale(1.35); }
+
+/* Stan pośredni na starcie najechania — rozdymka nadyma się w dwóch krokach,
+   tak jak w grze, a nie skokiem od razu do największej. */
+.cnk-puffer:hover .p2 { transition-delay: 0.06s; }
+.cnk-puffer:hover .p3 { transition-delay: 0.12s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .cnk-puffer img { transition: opacity 0.15s ease; transform: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   PASEK PINGU
+
+   Pięć klatek z listy serwerów Minecrafta, przełączanych po kolei od jednej
+   kreski do pięciu. Zamiast pisać "niski ping" — liczbę, której i tak nikt nie
+   sprawdzi — pokazujemy obrazek, który każdy grający zna.
+
+   Przełączanie robi `steps(1)`: klatki mają się ZMIENIAĆ, nie przenikać.
+   Płynne przejście zamieniłoby czytelny wskaźnik w migającą plamę.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-ping-item { display: flex; align-items: flex-start; gap: 1rem; }
+
+.cennik-page .cnk-ping {
+    position: relative;
+    flex-shrink: 0;
+    width: 46px;
+    height: 32px;
+    margin-top: 0.15rem;
+}
+.cennik-page .cnk-ping .pg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    animation: pingStep 3s steps(1) infinite;
+}
+
+/* Każda klatka widoczna przez jedną piątą cyklu; opóźnienie ustawia kolejność. */
+.cennik-page .cnk-ping .pg1 { animation-delay: 0s; }
+.cennik-page .cnk-ping .pg2 { animation-delay: 0.6s; }
+.cennik-page .cnk-ping .pg3 { animation-delay: 1.2s; }
+.cennik-page .cnk-ping .pg4 { animation-delay: 1.8s; }
+.cennik-page .cnk-ping .pg5 { animation-delay: 2.4s; }
+
+@keyframes pingStep {
+    0%   { opacity: 1; }
+    20%  { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* Bez ruchu zostaje pełny pasek — to stan, który i tak opisuje zdanie obok. */
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-ping .pg  { animation: none; opacity: 0; }
+    .cennik-page .cnk-ping .pg5 { opacity: 1; }
 }
