@@ -1,0 +1,218 @@
+/* ==========================================================================
+   ZAMÓWIENIE I STRONA POWROTU
+
+   Dokładany na cennik.css, nie zamiast niego — pasma, szkło i typografia są
+   te same, bo to ta sama ścieżka zakupu. Nowy jest tylko układ dwukolumnowy:
+   wybory po lewej, niezmienne podsumowanie po prawej.
+   ========================================================================== */
+
+.cennik-page .ord-head { padding: clamp(2rem, 5vw, 3.5rem) 0 1.5rem; }
+
+.cennik-page .ord-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.25rem;
+}
+
+.cennik-page .ord-choices,
+.cennik-page .ord-summary {
+    padding: clamp(1.35rem, 3vw, 2rem);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Podsumowanie jedzie ze stroną — przy dłuższej liście wyborów kwota nie może
+   uciec za krawędź ekranu, bo to jedyna informacja, na którą klient patrzy
+   przed kliknięciem. */
+.cennik-page .ord-summary { position: sticky; top: 5.5rem; }
+
+.cennik-page .ord-h2 {
+    margin: 0 0 0.85rem;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+.cennik-page .ord-choices .ord-h2:not(:first-child) { margin-top: 1.9rem; }
+
+.cennik-page .ord-options { display: grid; gap: 0.6rem; }
+.cennik-page .ord-options-modes { grid-template-columns: 1fr 1fr; }
+
+.cennik-page .ord-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.95rem 1.1rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+.cennik-page .ord-option:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(139, 92, 246, 0.35); }
+.cennik-page .ord-option.is-active {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.12);
+    color: #fff;
+}
+/* Wyłączona opcja ma WYGLĄDAĆ na wyłączoną. Przycisk, który nic nie robi, ale
+   wygląda normalnie, czyta się jak zepsuta strona. */
+.cennik-page .ord-option:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.cennik-page .ord-option-label { display: block; font-weight: 800; font-size: 0.95rem; }
+.cennik-page .ord-option-note  { display: block; margin-top: 0.3rem; font-size: 0.75rem; color: #94a3b8; line-height: 1.5; }
+.cennik-page .ord-option-badge {
+    display: inline-block;
+    margin-top: 0.35rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cennik-page .ord-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cennik-page .ord-line strong { color: #e2e8f0; font-weight: 700; }
+
+.cennik-page .ord-total {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 1.35rem 0 1.1rem;
+}
+.cennik-page .ord-total > span:first-child {
+    font-size: 2.6rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+.cennik-page .ord-total-cur { font-size: 1.05rem; font-weight: 800; color: #a78bfa; }
+.cennik-page .ord-total-per { font-size: 0.72rem; color: #64748b; margin-left: 0.2rem; }
+
+.cennik-page .ord-cta {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: 0;
+    border-radius: 16px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.28);
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+.cennik-page .ord-cta:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-2px); }
+.cennik-page .ord-cta:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.cennik-page .ord-hint  { margin: 0.9rem 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.6; }
+.cennik-page .ord-error { margin: 0.9rem 0 0; font-size: 0.8rem; color: #f87171; line-height: 1.55; }
+.cennik-page .ord-legal { margin: 1rem 0 0; font-size: 0.7rem; color: #52606d; line-height: 1.7; }
+.cennik-page .ord-legal a { color: #94a3b8; }
+.cennik-page .ord-testmode { display: block; margin-top: 0.4rem; color: #fbbf24; font-weight: 700; }
+.cennik-page .ord-back { color: #a78bfa; font-weight: 700; }
+
+/* --------------------------------------------------------------------------
+   STRONA POWROTU
+   -------------------------------------------------------------------------- */
+.cennik-page .suc {
+    max-width: 640px;
+    margin: clamp(2.5rem, 7vw, 5rem) auto;
+    padding: clamp(1.75rem, 4vw, 3rem);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    text-align: center;
+}
+
+.cennik-page .suc-icon {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 1.35rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(139, 92, 246, 0.14);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+}
+.cennik-page .suc-icon svg { width: 34px; height: 34px; color: #a78bfa; }
+.cennik-page .suc.is-ready  .suc-icon { background: rgba(34, 197, 94, 0.14); border-color: rgba(34, 197, 94, 0.4); }
+.cennik-page .suc.is-ready  .suc-icon svg { color: #4ade80; }
+.cennik-page .suc.is-failed .suc-icon { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.4); }
+.cennik-page .suc.is-failed .suc-icon svg { color: #f87171; }
+
+.cennik-page .suc h1 { margin: 0 0 0.7rem; font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 900; color: #f8fafc; }
+.cennik-page .suc p  { margin: 0 auto 1.1rem; max-width: 46ch; color: #94a3b8; line-height: 1.7; font-size: 0.9rem; }
+
+/* Kręcący się pierścień pokazuje, że coś się dzieje. Serwer powstaje
+   w webhooku, a ten potrafi dojść kilka sekund po powrocie klienta — bez tego
+   strona wyglądałaby na zawieszoną. */
+.cennik-page .suc-spin {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.12);
+    border-top-color: #a78bfa;
+    animation: sucSpin 0.9s linear infinite;
+}
+@keyframes sucSpin { to { transform: rotate(360deg); } }
+
+.cennik-page .suc-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+.cennik-page .suc-actions a {
+    padding: 0.85rem 1.5rem;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.cennik-page .suc-primary { color: #fff; background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.cennik-page .suc-ghost   { color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+.cennik-page .suc-meta {
+    margin-top: 1.5rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+@media (max-width: 900px) {
+    .cennik-page .ord-grid { grid-template-columns: 1fr; }
+    .cennik-page .ord-summary { position: static; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .ord-option:hover:not(:disabled),
+    .cennik-page .ord-cta:hover:not(:disabled) { transform: none; }
+    .cennik-page .suc-spin { animation: none; }
+}

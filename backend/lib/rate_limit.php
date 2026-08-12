@@ -20,6 +20,10 @@ const RATE_LIMIT_AVAILABILITY = [40, 300];  // 40 zapytań o dostępność / 5 m
 const RATE_LIMIT_LOGIN        = [10, 900];  // 10 prób logowania / 15 min
 const RATE_LIMIT_OTP_SEND     = [8, 900];   // 8 wysyłek kodu / 15 min (anty-spam mailowy)
 const RATE_LIMIT_OTP_VERIFY   = [20, 900];  // 20 prób weryfikacji kodu / 15 min
+// Każde kliknięcie "kupuję" zakłada sesję po stronie Stripe'a i wiersz w bazie.
+// Limit jest niski celowo: nikt nie kupuje piętnastu serwerów w kwadrans,
+// a bez niego jedno kliknięcie w pętli zaśmieca konto Stripe'a i tabelę zamówień.
+const RATE_LIMIT_CHECKOUT     = [12, 900];  // 12 sesji płatności / 15 min
 
 function rate_limit_dir(): string
 {

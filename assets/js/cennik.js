@@ -144,9 +144,14 @@
 
         var current = periods.find(function (p) { return p.days === 30; }) || periods[0];
 
+        // Ten sam wzór co backend/lib/pricing.php: zaokrąglamy w dół TYLKO gdy
+        // okres ma własną końcówkę (adjust). Progi slotowe mają ceny całkowite,
+        // więc tutaj nic to nie zmienia - ale rozjazd wzorów między stroną
+        // a serwerem kończy się inną kwotą na ekranie niż na rachunku.
         function priceFor(tier, period) {
-            // Ta sama formuła co po stronie serwera: FLOOR(cena * mnożnik) + korekta.
-            return Math.floor(tier.price * period.multiplier) + period.adjust;
+            var scaled = tier.price * period.multiplier;
+            if (period.adjust > 0) return Math.floor(scaled) + period.adjust;
+            return Math.round(scaled * 100) / 100;
         }
 
         function render() {
