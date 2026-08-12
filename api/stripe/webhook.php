@@ -164,6 +164,14 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         return true;   // już obsłużone
     }
 
+    /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje — dokładamy dni do
+       zamówienia-rodzica i, jeśli trzeba, zdejmujemy zawieszenie. Tworzenie
+       serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
+       tym, który ma. */
+    if (!empty($order['extends_order_id'])) {
+        return webhook_extension_paid($dnct, $order);
+    }
+
     order_mark_paid(
         $dnct,
         (int)$order['id'],
@@ -217,6 +225,43 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         'success',
         'Serwer jest gotowy',
         'Twój serwer został utworzony i czeka w panelu. Miłej gry!'
+    );
+
+    return true;
+}
+
+/**
+ * Opłacone przedłużenie — dokładamy dni do serwera, który już działa.
+ *
+ * Samo zamówienie-przedłużenie oznaczamy jako `provisioned`, mimo że niczego
+ * nie tworzy. To stan końcowy "zrobione" i dzięki temu strona powrotu ma co
+ * pokazać, a lista zamówień nie zostaje z wiecznym „w trakcie".
+ */
+function webhook_extension_paid(PDO $dnct, array $order): bool
+{
+    $parent = order_by_id($dnct, (int)$order['extends_order_id']);
+
+    if ($parent === null) {
+        error_log('Stripe webhook: przedłużenie #' . $order['id'] . ' bez zamówienia nadrzędnego');
+        order_mark_failed($dnct, (int)$order['id'], 'Brak zamówienia nadrzędnego.');
+        return true;
+    }
+
+    order_extend($dnct, (int)$parent['id'], (int)$order['period_days']);
+
+    if (!empty($parent['ptero_server_id'])) {
+        provision_unsuspend((int)$parent['ptero_server_id']);
+    }
+
+    $dnct->prepare('UPDATE orders SET status = "provisioned", expires_at = NOW() WHERE id = ?')
+         ->execute([(int)$order['id']]);
+
+    notify_user(
+        $dnct,
+        (string)$order['user_name'],
+        'success',
+        'Serwer przedłużony',
+        'Dopisaliśmy kolejny okres — serwer działa dalej bez przerwy.'
     );
 
     return true;

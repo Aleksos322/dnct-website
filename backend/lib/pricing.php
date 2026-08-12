@@ -113,6 +113,25 @@ function pricing_apply_period(float $base, array $period): float
     return round($scaled, 2);
 }
 
+/**
+ * Działanie odwrotne do pricing_apply_period(): z kwoty za okres wyciąga cenę bazową.
+ *
+ * Potrzebne przy przedłużaniu serwera, którego planu nie ma już w cenniku —
+ * jedyne, co po nim zostało, to zapłacona kwota i okres, na jaki była. Bez tego
+ * przedłużenie rocznego serwera na miesiąc liczyłoby się od kwoty rocznej.
+ *
+ * Odtworzenie nie jest idealne — `floor` po drodze gubi grosze i nie da się ich
+ * odzyskać. Rozjazd sięga jednego złotego na okres i wychodzi na KORZYŚĆ
+ * klienta, bo cena bazowa wypada nie wyżej niż pierwotna.
+ */
+function pricing_unscale(float $paid, array $period): float
+{
+    $withoutAdjust = $paid - $period['adjust'];
+    $multiplier    = $period['multiplier'] > 0 ? $period['multiplier'] : 1.0;
+
+    return round($withoutAdjust / $multiplier, 2);
+}
+
 /** Okres rozliczeniowy z bazy. Nieaktywny okres traktujemy jak nieistniejący. */
 function pricing_period(PDO $panel, int $days): array
 {

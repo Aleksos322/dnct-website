@@ -46,7 +46,7 @@ $panelUrl = function_exists('env')
             <div class="nav-links-desktop space-x-8 font-medium text-gray-400">
                 <a href="/" class="text-white transition-colors">Strona Główna</a>
                 <a href="/cennik" class="nav-disabled" data-tooltip="Strona tymczasowo niedostępna">Cennik</a>
-                <a href="/uslugi?przedluzanie" class="nav-disabled" data-tooltip="Strona tymczasowo niedostępna">Twoje serwery</a>
+                <a href="/twoje-serwery" class="hover:text-white transition-colors">Twoje serwery</a>
                 <a href="https://discord.gg/r2SsJp9e" target="_blank" class="hover:text-white transition-colors">Pomoc</a>
             </div>
 
@@ -118,7 +118,7 @@ $panelUrl = function_exists('env')
         <div class="flex flex-col p-6 space-y-6 text-center font-medium text-lg">
             <a href="/" class="text-white py-2 block border-b border-white/5">Strona Główna</a>
             <a href="/cennik" class="nav-disabled py-2 block border-b border-white/5" data-tooltip="Strona tymczasowo niedostępna">Cennik</a>
-            <a href="/uslugi?przedluzanie" class="nav-disabled py-2 block border-b border-white/5" data-tooltip="Strona tymczasowo niedostępna">Twoje serwery</a>
+            <a href="/twoje-serwery" class="text-gray-400 hover:text-white py-2 block border-b border-white/5 transition-colors">Twoje serwery</a>
             <a href="https://discord.gg/r2SsJp9e" target="_blank" class="text-gray-400 hover:text-blue-400 py-2 block transition-colors flex justify-center items-center gap-2">
                 <svg class="nav-icon-inline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
