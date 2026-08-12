@@ -3,7 +3,7 @@
  *
  * Serwer zakłada webhook, który idzie do nas WŁASNYM kanałem, prosto od
  * Stripe'a. Klient wraca z Checkoutu zwykle szybciej, niż to zdarzenie zdąży
- * dojść — dlatego strona pyta o stan, zamiast od razu ogłaszać wynik.
+ * dojść - dlatego strona pyta o stan, zamiast od razu ogłaszać wynik.
  */
 (function () {
     'use strict';
@@ -20,7 +20,7 @@
     var elMeta    = card.querySelector('[data-role="meta"]');
 
     // Po tylu próbach przestajemy pytać. Minuta bez odpowiedzi znaczy, że coś
-    // wymaga człowieka — kręcący się w nieskończoność pierścień tylko
+    // wymaga człowieka - kręcący się w nieskończoność pierścień tylko
     // udawałby, że sprawa jest w toku.
     var MAX_TRIES = 40;
     var tries = 0;
@@ -50,13 +50,13 @@
                     // 404 tuż po powrocie znaczy najczęściej, że zamówienia
                     // jeszcze nie widać - próbujemy dalej, a poddajemy się
                     // dopiero po wyczerpaniu prób.
-                    return retryOrGiveUp('Nie znaleźliśmy tego zamówienia. Napisz do nas na Discordzie — sprawdzimy ręcznie.');
+                    return retryOrGiveUp('Nie znaleźliśmy tego zamówienia. Napisz do nas na Discordzie - sprawdzimy ręcznie.');
                 }
 
                 var b = res.body;
 
                 if (b.server_ready) {
-                    settle('ok', 'Serwer jest gotowy', 'Wszystko działa — serwer czeka w panelu.', true);
+                    settle('ok', 'Serwer jest gotowy', 'Wszystko działa - serwer czeka w panelu.', true);
                     showMeta(b);
                     return;
                 }
@@ -65,14 +65,14 @@
                     settle(
                         'warn',
                         'Płatność przyjęta, serwer w trakcie',
-                        'Pieniądze doszły, ale automat nie dokończył zakładania serwera. Wiemy o tym i zajmiemy się tym ręcznie — napisz na Discordzie, jeśli chcesz przyspieszyć.',
+                        'Pieniądze doszły, ale automat nie dokończył zakładania serwera. Wiemy o tym i zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.',
                         true
                     );
                     showMeta(b);
                     return;
                 }
 
-                retryOrGiveUp('Płatność jest przyjęta, ale serwer nadal się zakłada. Sprawdź panel za chwilę — albo napisz do nas.');
+                retryOrGiveUp('Płatność jest przyjęta, ale serwer nadal się zakłada. Sprawdź panel za chwilę - albo napisz do nas.');
             })
             .catch(function () {
                 retryOrGiveUp('Brak połączenia z serwerem. Sprawdź panel za chwilę.');

@@ -305,7 +305,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                                 </div>
                                 <div class="flex items-center justify-between gap-3 mt-1.5">
                                     <span class="pw-meter-label text-[0.65rem] font-bold uppercase tracking-widest text-gray-500" id="pw-strength-label">Siła hasła</span>
-                                    <span class="text-[0.65rem] text-gray-500 text-right" id="pw-crack-time" aria-live="polite">Złamanie: —</span>
+                                    <span class="text-[0.65rem] text-gray-500 text-right" id="pw-crack-time" aria-live="polite">Złamanie: -</span>
                                 </div>
                             </div>
 

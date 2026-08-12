@@ -4,7 +4,7 @@
 -- Do tej pory rozróżnialiśmy je po tym, czy `extends_order_id` jest ustawione.
 -- Przy trzecim rodzaju (zmiana pakietu) to przestaje wystarczać: przedłużenie
 -- i zmiana pakietu OBA wskazują zamówienie nadrzędne, a webhook ma zrobić po
--- nich zupełnie co innego — jedno dokłada dni, drugie przestawia zasoby.
+-- nich zupełnie co innego - jedno dokłada dni, drugie przestawia zasoby.
 --
 -- Jawna kolumna zamiast domyślania się ze zbiegu okoliczności.
 -- ---------------------------------------------------------------------------

@@ -3,11 +3,11 @@
  * GET /api/checkout/status.php?session_id=cs_...
  *
  * Stan zamówienia dla strony powrotu. Serwer powstaje w webhooku, a ten
- * przychodzi WŁASNYM kanałem — klient wraca z Checkoutu zwykle szybciej, niż
+ * przychodzi WŁASNYM kanałem - klient wraca z Checkoutu zwykle szybciej, niż
  * Stripe zdąży doręczyć zdarzenie. Strona sukcesu odpytuje więc ten endpoint,
  * zamiast cokolwiek tworzyć.
  *
- * Zwraca WYŁĄCZNIE zamówienie należące do zalogowanej osoby — identyfikator
+ * Zwraca WYŁĄCZNIE zamówienie należące do zalogowanej osoby - identyfikator
  * sesji Stripe'a bywa w historii przeglądarki i w logach, więc sam w sobie nie
  * jest tajemnicą i nie może wystarczać do odczytania cudzego zamówienia.
  */

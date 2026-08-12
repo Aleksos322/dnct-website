@@ -1,16 +1,16 @@
 <?php
 /**
- * POST /api/plan/change.php — przejście na inny pakiet.
+ * POST /api/plan/change.php - przejście na inny pakiet.
  *
  * Wejście:  { order_id, plan_id, csrf_token }
- * Wyjście:  { ok:true, direction:"down", applied:true, bonus_days:N }   — zejście niżej
- *           { ok:true, direction:"up", url:"https://checkout.stripe..." } — dopłata
+ * Wyjście:  { ok:true, direction:"down", applied:true, bonus_days:N }   - zejście niżej
+ *           { ok:true, direction:"up", url:"https://checkout.stripe..." } - dopłata
  *
  * DWIE RÓŻNE ŚCIEŻKI, bo to dwie różne operacje:
  *
- *   W DÓŁ  — nic nie kosztuje, więc wykonujemy od ręki. Przepuszczanie tego
+ *   W DÓŁ  - nic nie kosztuje, więc wykonujemy od ręki. Przepuszczanie tego
  *            przez bramkę płatności na kwotę 0 zł byłoby absurdem.
- *   W GÓRĘ — jest dopłata, więc zmiana zasobów następuje DOPIERO po zapłacie,
+ *   W GÓRĘ - jest dopłata, więc zmiana zasobów następuje DOPIERO po zapłacie,
  *            w webhooku. Podniesienie pakietu "na kredyt" oznaczałoby oddanie
  *            zasobów komuś, kto może nigdy nie dokończyć płatności.
  */
@@ -31,7 +31,7 @@ rate_limit_guard(
 );
 
 if (!stripe_sales_enabled()) {
-    json_error('Zmiana pakietu jest chwilowo wyłączona — trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
+    json_error('Zmiana pakietu jest chwilowo wyłączona - trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
 }
 
 $email = (string)($_SESSION['authentik_email'] ?? '');
@@ -48,13 +48,13 @@ if ($order === null || !hash_equals((string)$order['user_email'], $email)) {
     json_error('Nie znaleziono zamówienia.', 404, [], ['reason' => 'not_found']);
 }
 if ($order['status'] !== 'provisioned' || empty($order['ptero_server_id'])) {
-    json_error('Ten serwer nie jest gotowy — nie ma czego zmieniać.', 409, [], ['reason' => 'not_ready']);
+    json_error('Ten serwer nie jest gotowy - nie ma czego zmieniać.', 409, [], ['reason' => 'not_ready']);
 }
 if ($order['slots'] !== null) {
     // Gry rozliczane za sloty mają własny konfigurator; mieszanie tych dwóch
     // sposobów doboru zasobów w jednym przepływie skończyłoby się zamówieniem,
     // które ma jednocześnie plan i liczbę slotów.
-    json_error('Ta gra jest rozliczana za sloty — napisz do nas, przestawimy ręcznie.', 409, [], ['reason' => 'slot_based']);
+    json_error('Ta gra jest rozliczana za sloty - napisz do nas, przestawimy ręcznie.', 409, [], ['reason' => 'slot_based']);
 }
 
 $panel = new PDO(
@@ -71,14 +71,14 @@ try {
 }
 
 /* ---------------------------------------------------------------------------
-   ZEJŚCIE NIŻEJ — od ręki, bez płatności.
+   ZEJŚCIE NIŻEJ - od ręki, bez płatności.
    --------------------------------------------------------------------------- */
 if ($quote['direction'] === 'down') {
     $applied = plan_change_apply_limits((int)$order['ptero_server_id'], $quote['plan']);
 
     if (!$applied['ok']) {
         error_log('Zmiana pakietu #' . $order['id'] . ': ' . $applied['error']);
-        json_error('Nie udało się przestawić zasobów serwera. Napisz do nas — zrobimy to ręcznie.', 502, [], ['reason' => 'panel_error']);
+        json_error('Nie udało się przestawić zasobów serwera. Napisz do nas - zrobimy to ręcznie.', 502, [], ['reason' => 'panel_error']);
     }
 
     plan_change_store($dnct, (int)$order['id'], $quote['plan'], (int)$quote['bonus_days']);
@@ -99,7 +99,7 @@ if ($quote['direction'] === 'down') {
 }
 
 /* ---------------------------------------------------------------------------
-   PRZEJŚCIE WYŻEJ — najpierw dopłata, zasoby zmienia webhook.
+   PRZEJŚCIE WYŻEJ - najpierw dopłata, zasoby zmienia webhook.
    --------------------------------------------------------------------------- */
 $amount = (int)round($quote['price'] * 100);
 
@@ -132,7 +132,7 @@ try {
                 'currency'     => 'pln',
                 'unit_amount'  => $amount,
                 'product_data' => [
-                    'name'        => 'DNCT Hosting — zmiana pakietu na ' . $quote['plan']['name'],
+                    'name'        => 'DNCT Hosting - zmiana pakietu na ' . $quote['plan']['name'],
                     'description' => sprintf(
                         'Dopłata za pozostałe %d%% opłaconego okresu (zamówienie #%d)',
                         (int)round($quote['ratio'] * 100),
@@ -150,7 +150,7 @@ try {
         'cancel_url'            => $base . '/twoje-serwery',
     ]);
 } catch (Throwable $e) {
-    error_log('Zmiana pakietu: sesja nieutworzona dla zamówienia #' . $orderId . ' — ' . $e->getMessage());
+    error_log('Zmiana pakietu: sesja nieutworzona dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
     json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
 }
 

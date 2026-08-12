@@ -30,7 +30,7 @@
         var state = { days: periods.length ? periods[0].days : null, mode: 'payment' };
 
         /* ---------------------------------------------------------------
-           Rozwijanie paneli — naraz otwarty jest najwyżej jeden.
+           Rozwijanie paneli - naraz otwarty jest najwyżej jeden.
            Dwa rozwinięte panele na jednej karcie to ekran, z którego nie widać,
            co się właściwie wybiera.
            --------------------------------------------------------------- */
@@ -92,7 +92,7 @@
             elUntil.textContent = state.mode === 'subscription'
                 ? 'do ' + p.until + ', potem odnawia się sam'
                 : 'serwer będzie działał do ' + p.until;
-            elPrice.textContent = p.prices[state.mode] || '—';
+            elPrice.textContent = p.prices[state.mode] || '-';
         }
 
         card.querySelectorAll('[data-role="periods"] .srv-opt').forEach(function (btn) {
@@ -147,7 +147,7 @@
         var btnCancel = card.querySelector('[data-role="cancelSub"]');
         if (btnCancel) {
             btnCancel.addEventListener('click', function () {
-                if (!window.confirm('Wyłączyć automatyczne odnawianie?\n\nSerwer działa do końca opłaconego okresu — nic nie tracisz.')) {
+                if (!window.confirm('Wyłączyć automatyczne odnawianie?\n\nSerwer działa do końca opłaconego okresu - nic nie tracisz.')) {
                     return;
                 }
                 post('/api/subscription/cancel.php', { order_id: orderId }, btnCancel, 'Zrezygnuj z odnawiania');

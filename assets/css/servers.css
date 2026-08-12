@@ -1,7 +1,7 @@
 /* ==========================================================================
    TWOJE SERWERY
 
-   Karta na usługę. Lewa krawędź niesie stan — kolorowy pasek widać zanim
+   Karta na usługę. Lewa krawędź niesie stan - kolorowy pasek widać zanim
    klient przeczyta cokolwiek, a to jedyna informacja, której szuka wchodząc
    na tę stronę: czy coś się pali.
    ========================================================================== */
@@ -89,7 +89,7 @@
 .cennik-page .srv.is-bad  .srv-state { background: rgba(239, 68, 68, 0.14);  color: #f87171; }
 
 /* --------------------------------------------------------------------------
-   Adres serwera — pierwsza rzecz, po którą klient tu wchodzi
+   Adres serwera - pierwsza rzecz, po którą klient tu wchodzi
    -------------------------------------------------------------------------- */
 .cennik-page .srv-address {
     display: flex;
@@ -131,7 +131,7 @@
 .cennik-page .srv-copy:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 
 /* --------------------------------------------------------------------------
-   Parametry i fakty. `auto-fit` zamiast stałej liczby kolumn — na wąskim
+   Parametry i fakty. `auto-fit` zamiast stałej liczby kolumn - na wąskim
    ekranie zawijają się same, bez osobnego zapytania medialnego.
    -------------------------------------------------------------------------- */
 .cennik-page .srv-specs,
@@ -279,7 +279,7 @@
     text-transform: uppercase;
 }
 
-/* Podsumowanie mówi wprost, ile dni dochodzi i do kiedy serwer będzie działał —
+/* Podsumowanie mówi wprost, ile dni dochodzi i do kiedy serwer będzie działał -
    sama kwota nie odpowiada na pytanie, które klient ma w głowie. */
 .cennik-page .srv-summary {
     display: flex;

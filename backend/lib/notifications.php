@@ -2,7 +2,7 @@
 /**
  * backend/lib/notifications.php
  *
- * Trwałe powiadomienia (baza danych) — osobna warstwa od flash messages.
+ * Trwałe powiadomienia (baza danych) - osobna warstwa od flash messages.
  * Użyj tego gdy powiadomienie ma:
  *   - dotrzeć do konkretnego usera / adminów / wszystkich,
  *   - poczekać aż user je zobaczy (nie znika po odświeżeniu),
@@ -24,7 +24,7 @@
  *   notify_all(dnct_db(), 'info', 'Przerwa techniczna', 'Serwery będą offline 02:00-03:00.');
  *
  * event_key (opcjonalny) zabezpiecza przed wysłaniem tego samego powiadomienia
- * dwa razy (np. przy każdym uruchomieniu crona) — jeśli już istnieje, insert
+ * dwa razy (np. przy każdym uruchomieniu crona) - jeśli już istnieje, insert
  * jest po cichu pomijany.
  */
 

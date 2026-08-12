@@ -7,7 +7,7 @@
 -- transakcji, a to jest dokument księgowy, nie stan aplikacji.
 --
 -- `extends_order_id` wskazuje zamówienie, do którego dopisujemy czas. Webhook
--- po takiej płatności NIE tworzy serwera — przesuwa datę wygaśnięcia rodzica
+-- po takiej płatności NIE tworzy serwera - przesuwa datę wygaśnięcia rodzica
 -- i zdejmuje ewentualne zawieszenie.
 -- ---------------------------------------------------------------------------
 

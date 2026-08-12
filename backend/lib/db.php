@@ -3,7 +3,7 @@
  * backend/lib/db.php
  *
  * Jeśli masz już gdzieś w projekcie wspólne połączenie PDO (np. w bootstrap.php),
- * NIE dołączaj tego pliku — użyj istniejącego.
+ * NIE dołączaj tego pliku - użyj istniejącego.
  *
  * Zakłada, że backend/lib/env.php udostępnia funkcję env(string $key, $default = null),
  * czytającą zmienne w stylu .env: MY_DB_HOST, MY_DB_DATABASE, MY_DB_USERNAME,

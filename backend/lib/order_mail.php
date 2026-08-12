@@ -8,12 +8,12 @@
  * NAJWAŻNIEJSZA RZECZ W TYCH WIADOMOŚCIACH TO DATA ZAWIESZENIA.
  *
  * Klient ma wiedzieć DOKŁADNIE, do kiedy serwer działa i co się stanie, jeśli
- * kolejna płatność nie dojdzie. "Pamiętaj o przedłużeniu" nie jest informacją —
+ * kolejna płatność nie dojdzie. "Pamiętaj o przedłużeniu" nie jest informacją -
  * człowiek, który to czyta, nie wie, czy ma czas do jutra, czy do przyszłego
  * miesiąca, i dowiaduje się dopiero wtedy, gdy serwer przestaje odpowiadać.
  *
  * Daty liczymy TU, w jednym miejscu, i te same wartości trafiają do wiadomości
- * i na stronę — rozbieżność między mailem a panelem to najszybszy sposób na
+ * i na stronę - rozbieżność między mailem a panelem to najszybszy sposób na
  * utratę zaufania w sprawach pieniężnych.
  */
 
@@ -89,7 +89,7 @@ function send_order_paid_mail(array $order): array
 
     return send_mail(
         (string)$order['user_email'],
-        'Serwer gotowy — zamówienie #' . (int)$order['id'],
+        'Serwer gotowy - zamówienie #' . (int)$order['id'],
         $html,
         $text,
         'info'
@@ -119,25 +119,25 @@ function send_payment_failed_mail(array $order): array
         . "{$vars['amount']} zł).\n\n"
         . "SERWER ZOSTANIE ZAWIESZONY: {$vars['suspends']}\n\n"
         . "Do tego czasu działa normalnie. Popraw dane karty albo przedłuż jednorazowo: {$vars['accountUrl']}\n\n"
-        . "Zawieszenie nie kasuje danych — po opłaceniu serwer wraca w tym samym stanie.\n\n"
+        . "Zawieszenie nie kasuje danych - po opłaceniu serwer wraca w tym samym stanie.\n\n"
         . "DNCT Hosting";
 
     return send_mail(
         (string)$order['user_email'],
-        'Nie udało się pobrać opłaty — serwer zostanie zawieszony ' . $vars['suspends'],
+        'Nie udało się pobrać opłaty - serwer zostanie zawieszony ' . $vars['suspends'],
         $html,
         $text,
         'info'
     );
 }
 
-/** Wersja tekstowa potwierdzenia — czytana przez klientów bez HTML-a i przez filtry. */
+/** Wersja tekstowa potwierdzenia - czytana przez klientów bez HTML-a i przez filtry. */
 function order_paid_text(array $v): string
 {
     $renew = $v['isSub']
         ? "Abonament odnawia się sam. Jeśli kolejna płatność nie przejdzie, masz {$v['graceDays']} dni karencji,\n"
           . "a serwer zostanie zawieszony {$v['suspends']}."
-        : "To płatność jednorazowa — serwer NIE odnowi się sam.\n"
+        : "To płatność jednorazowa - serwer NIE odnowi się sam.\n"
           . "Jeśli nie przedłużysz, zostanie zawieszony {$v['suspends']}.";
 
     return "Cześć {$v['userName']},\n\n"

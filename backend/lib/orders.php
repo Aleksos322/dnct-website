@@ -1,6 +1,6 @@
 <?php
 /**
- * Zamówienia — zapis i zmiany stanu.
+ * Zamówienia - zapis i zmiany stanu.
  *
  * Zamówienie żyje w bazie `dnct` (własnej bazie strony), a nie w bazie panelu.
  * Jedno zamówienie = jedna próba zakupu, także nieudana: wiersz powstaje ZANIM
@@ -13,10 +13,10 @@
  *      │                                       │
  *      └──(porzucona sesja, zostaje)           └──(błąd Pterodactyla)──> failed
  *
- *   cancelled ustawia customer.subscription.deleted — abonament wygasa
+ *   cancelled ustawia customer.subscription.deleted - abonament wygasa
  *   z końcem opłaconego okresu, więc to NIE jest natychmiastowe wyłączenie.
  *
- * Serwer zakłada WYŁĄCZNIE webhook. Strona powrotu tylko odpytuje o stan —
+ * Serwer zakłada WYŁĄCZNIE webhook. Strona powrotu tylko odpytuje o stan -
  * inaczej wystarczyłoby odświeżenie strony sukcesu, żeby zamówić drugi serwer
  * za tę samą płatność. Stara wersja robiła to w success.php i broniła się
  * przed tym komentarzem, a nie kodem.
@@ -84,7 +84,7 @@ function order_by_session(PDO $dnct, string $sessionId): ?array
 /**
  * Zamówienie po identyfikatorze subskrypcji.
  *
- * Bierzemy NAJSTARSZE pasujące — subskrypcja rodzi kolejne faktury, ale serwer
+ * Bierzemy NAJSTARSZE pasujące - subskrypcja rodzi kolejne faktury, ale serwer
  * i data wygaśnięcia należą do zamówienia, które ją założyło.
  */
 function order_by_subscription(PDO $dnct, string $subscriptionId): ?array
@@ -107,7 +107,7 @@ function orders_for_user(PDO $dnct, string $userEmail, int $limit = 50): array
 /**
  * Oznacza zamówienie jako opłacone i zapisuje, co przyszło ze Stripe'a.
  *
- * Data wygaśnięcia liczona jest OD TERAZ, a nie od utworzenia zamówienia —
+ * Data wygaśnięcia liczona jest OD TERAZ, a nie od utworzenia zamówienia -
  * między kliknięciem "kupuję" a zapłatą klient może siedzieć w Checkoucie
  * dowolnie długo, a płaci za pełny okres.
  */
@@ -175,7 +175,7 @@ function order_extend(PDO $dnct, int $orderId, int $days): void
 }
 
 /**
- * Nieudana płatność cykliczna — karencja zamiast natychmiastowego wyłączenia.
+ * Nieudana płatność cykliczna - karencja zamiast natychmiastowego wyłączenia.
  *
  * Stripe sam ponawia obciążenie przez kilka dni. Zabranie serwera po pierwszej
  * odmowie banku ukarałoby klienta za rzecz, która najczęściej naprawia się

@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Wyślij powiadomienie — Admin';
+$pageTitle = 'Wyślij powiadomienie - Admin';
 
 ob_start();
 ?>

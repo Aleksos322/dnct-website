@@ -2,11 +2,11 @@
  * Cennik: przełączanie gier, konfigurator slotów i zaznaczanie wyboru.
  *
  * Skrypt jest DODATKIEM, nie warunkiem działania strony. Bez JavaScriptu
- * widoczny zostaje pierwszy panel gry, a ceny planów są w HTML-u — cennik
+ * widoczny zostaje pierwszy panel gry, a ceny planów są w HTML-u - cennik
  * nadal się czyta. Znika tylko przełączanie i konfigurator.
  *
  * Progi slotów i okresy przychodzą z PHP w atrybutach data-*, prosto z bazy.
- * Nie ma tu ani jednej ceny zapisanej na sztywno — w starej wersji ta sama
+ * Nie ma tu ani jednej ceny zapisanej na sztywno - w starej wersji ta sama
  * tabela żyła w trzech miejscach naraz i to jest dokładnie ten błąd, którego
  * tu nie powtarzamy.
  */
@@ -127,13 +127,13 @@
        Konfigurator slotów
        ------------------------------------------------------------------ */
 
-    /** Podpowiedź dobrana do liczby slotów — klient nietechniczny nie musi zgadywać. */
+    /** Podpowiedź dobrana do liczby slotów - klient nietechniczny nie musi zgadywać. */
     function slotHint(slots) {
         if (slots <= 5)  return 'W sam raz na granie ze znajomymi';
         if (slots <= 15) return 'Dobre na małą, stałą ekipę';
         if (slots <= 30) return 'Społeczność z regularnym ruchem';
         if (slots <= 50) return 'Duży serwer publiczny';
-        return 'Bardzo duży serwer — napisz, dobierzemy sprzęt';
+        return 'Bardzo duży serwer - napisz, dobierzemy sprzęt';
     }
 
     function money(v) {
@@ -232,7 +232,7 @@
         }
 
         /* Kliknięcie przycisku ma PRZEJŚĆ do zamówienia. select() zostaje osobno,
-           bo woła go też render() przy każdym ruchu suwaka — gdyby to on
+           bo woła go też render() przy każdym ruchu suwaka - gdyby to on
            przenosił na inną stronę, konfigurator uciekałby przy pierwszym
            przesunięciu. */
         function chooseConfig() {
@@ -313,7 +313,7 @@
     /* ------------------------------------------------------------------
        Pływająca plakietka z licznikiem
 
-       Pokazujemy ją DOPIERO gdy licznik z nagłówka wyjedzie z ekranu —
+       Pokazujemy ją DOPIERO gdy licznik z nagłówka wyjedzie z ekranu -
        dwie te same liczby naraz to nie jest przypomnienie, tylko bałagan.
        ------------------------------------------------------------------ */
     function initLiveFloat() {
@@ -331,7 +331,7 @@
        Drobne reakcje na kursor
 
        Zasada: animacja ma coś ZNACZYĆ, nie tylko się ruszać. Odliczanie do 24
-       pokazuje, że chodzi o dobę — liczbę, której nikt nie czyta uważnie,
+       pokazuje, że chodzi o dobę - liczbę, której nikt nie czyta uważnie,
        dopóki nie zacznie się zmieniać.
 
        Wszystko odpuszczamy przy prefers-reduced-motion: dla części osób ruch
@@ -370,7 +370,7 @@
         });
 
         // Zjechanie kursorem w trakcie odliczania zostawiłoby na ekranie
-        // przypadkową liczbę, np. "17 h" — a to już nieprawda o ofercie.
+        // przypadkową liczbę, np. "17 h" - a to już nieprawda o ofercie.
         host.addEventListener('mouseleave', function () {
             if (timer) {
                 window.clearInterval(timer);

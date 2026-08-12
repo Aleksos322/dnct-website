@@ -9,12 +9,12 @@
  *   $metaDescription   (opcjonalnie, zalecane dla SEO)
  *   $ogImage           (opcjonalnie, pełny URL obrazka do udostępniania)
  *   $canonicalUrl      (opcjonalnie, pełny URL bieżącej strony)
- *   $centerContent     (opcjonalnie, bool — true wycentrowuje $content pionowo,
+ *   $centerContent     (opcjonalnie, bool - true wycentrowuje $content pionowo,
  *                        false dla stron wielosekcyjnych jak landing page)
  *
  * Przykład:
  *   <?php
- *   $pageTitle = 'Cennik — DNCT Hosting';
+ *   $pageTitle = 'Cennik - DNCT Hosting';
  *   $metaDescription = 'Zobacz pełną ofertę hostingu Minecraft, Zomboid i Vintage Story.';
  *   ob_start();
  *   ?>
@@ -41,7 +41,7 @@ $isLoggedIn = isset($_SESSION['authentik_username']);
 $username   = $_SESSION['authentik_username'] ?? null;
 $email      = $_SESSION['authentik_email'] ?? null;
 
-// Domyślne wartości SEO — nadpisywane przez stronę wywołującą, jeśli ustawione wcześniej
+// Domyślne wartości SEO - nadpisywane przez stronę wywołującą, jeśli ustawione wcześniej
 $pageTitle       = $pageTitle       ?? 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story';
 $metaDescription = $metaDescription ?? 'DNCT Hosting to serwery Minecraft, Project Zomboid, Vintage Story i innych gier z ochroną DDoS. Start od 3.99 PLN, szybkie NVMe i wsparcie 24/7.';
 $ogImage         = $ogImage         ?? 'https://dnct.pl/assets/media/icons/LINKS.png';
@@ -81,7 +81,7 @@ if ($centerContent) {
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <link rel="apple-touch-icon" href="/assets/media/icons/favicon.png">
 
-    <?php /* asset() dokleja czas modyfikacji pliku — bez tego przeglądarki
+    <?php /* asset() dokleja czas modyfikacji pliku - bez tego przeglądarki
              trzymają stary arkusz po wgraniu poprawki. Patrz backend/lib/assets.php. */ ?>
     <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">

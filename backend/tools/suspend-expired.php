@@ -6,11 +6,11 @@
  *     php backend/tools/suspend-expired.php --apply    # zawiesza
  *
  * PO CO. Potwierdzenie zamówienia podaje klientowi DOKŁADNĄ datę zawieszenia.
- * Bez tego procesu ta data byłaby obietnicą, której nic nie pilnuje — serwery
+ * Bez tego procesu ta data byłaby obietnicą, której nic nie pilnuje - serwery
  * działałyby w nieskończoność, a wiadomość mówiłaby nieprawdę. To gorsze niż
  * brak terminu, bo uczy klientów, że nasze terminy nic nie znaczą.
  *
- * ZAWIESZAMY, NIE KASUJEMY. Świat, pliki i konfiguracja zostają — klient może
+ * ZAWIESZAMY, NIE KASUJEMY. Świat, pliki i konfiguracja zostają - klient może
  * wrócić i dopłacić. Kasowanie serwera automatem jest nieodwracalne i nie
  * powinno dziać się bez decyzji człowieka.
  *
@@ -87,7 +87,7 @@ foreach ($rows as $o) {
         (string)$o['user_name'],
         'error',
         'Serwer został zawieszony',
-        'Minął opłacony okres. Dane są nietknięte — po przedłużeniu serwer wraca w tym samym stanie.'
+        'Minął opłacony okres. Dane są nietknięte - po przedłużeniu serwer wraca w tym samym stanie.'
     );
 
     echo "      -> zawieszony\n";

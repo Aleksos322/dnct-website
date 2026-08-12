@@ -1,6 +1,6 @@
 <?php
 /**
- * Twoje serwery — /twoje-serwery
+ * Twoje serwery - /twoje-serwery
  *
  * Lista usług klienta: co ma, do kiedy, i co może z tym zrobić.
  * Zastępuje beta/przedluzenie.php (84 KB w jednym pliku, z formularzami,
@@ -14,7 +14,7 @@
  *
  * CO TU JEST, A CZEGO NIE MA. Strona pokazuje stan HANDLOWY: za co zapłacono,
  * do kiedy jest opłacone, czy abonament się odnawia. Konsola, pliki i backupy
- * są w panelu i mają tam zostać — dublowanie ich tutaj oznaczałoby dwa miejsca
+ * są w panelu i mają tam zostać - dublowanie ich tutaj oznaczałoby dwa miejsca
  * do utrzymania i dwa źródła prawdy o tym samym serwerze.
  */
 
@@ -25,7 +25,7 @@ require_once __DIR__ . '/backend/lib/stripe.php';
 require_once __DIR__ . '/backend/lib/order_mail.php';
 require_once __DIR__ . '/backend/lib/plan_change.php';
 
-$pageTitle       = 'Twoje serwery — DNCT Hosting';
+$pageTitle       = 'Twoje serwery - DNCT Hosting';
 $metaDescription = 'Twoje serwery, terminy ważności, przedłużanie i zmiana pakietu w DNCT Hosting.';
 $centerContent   = false;
 
@@ -39,7 +39,7 @@ if ($isLoggedIn) {
 
     /* Pokazujemy tylko zamówienia, które coś uruchomiły. Porzucone sesje
        płatności zostają w bazie jako ślad do diagnostyki, ale na liście klienta
-       byłyby wyłącznie zamieszaniem — nikt nie chce oglądać „zamówienia",
+       byłyby wyłącznie zamieszaniem - nikt nie chce oglądać „zamówienia",
        którego nie dokończył. Przedłużenia i zmiany pakietu też pomijamy: to
        zdarzenia w historii usługi, nie osobne usługi. */
     $stmt = $dnct->prepare(
@@ -61,7 +61,7 @@ if ($isLoggedIn) {
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
         );
     } catch (Throwable $e) {
-        error_log('twoje-serwery: baza panelu niedostępna — ' . $e->getMessage());
+        error_log('twoje-serwery: baza panelu niedostępna - ' . $e->getMessage());
     }
 
     foreach ($orders as $order) {
@@ -125,11 +125,11 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
     }
 
     if (!empty($order['ptero_server_id'])) {
-        /* Adres serwera to pierwsza rzecz, której klient tu szuka — rozdaje go
+        /* Adres serwera to pierwsza rzecz, której klient tu szuka - rozdaje go
            znajomym i nie chce po niego wchodzić do panelu. Bierzemy alokację
            domyślną, bo to ona jest adresem gry. */
         /* Zawieszenie trzyma kolumna `status` ('suspended' albo NULL), a nie
-           osobna flaga — starsze wersje Pterodactyla miały `suspended`
+           osobna flaga - starsze wersje Pterodactyla miały `suspended`
            i stąd łatwo o pomyłkę. */
         $q = $panel->prepare(
             'SELECT a.ip, a.ip_alias, a.port, s.status
@@ -150,7 +150,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
             }
         } catch (Throwable $e) {
             // Brak adresu nie może wywrócić całej listy usług.
-            error_log('twoje-serwery: adres serwera — ' . $e->getMessage());
+            error_log('twoje-serwery: adres serwera - ' . $e->getMessage());
         }
     }
 
@@ -170,7 +170,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
         return $card;
     }
 
-    /* WARIANTY PRZEDŁUŻENIA policzone po stronie serwera — każdy okres razy
+    /* WARIANTY PRZEDŁUŻENIA policzone po stronie serwera - każdy okres razy
        każdy dopuszczalny model rozliczenia. Front wybiera z gotowej listy. */
     $base = $expiresTs !== null ? max($expiresTs, time()) : time();
 
@@ -185,7 +185,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
         ];
 
         foreach (['payment', 'subscription'] as $mode) {
-            // Abonament ma sens tylko wtedy, gdy serwer jeszcze go nie ma —
+            // Abonament ma sens tylko wtedy, gdy serwer jeszcze go nie ma -
             // druga subskrypcja obok działającej to dwie płatności za ten sam czas.
             if ($mode === 'subscription' && $renews) {
                 continue;
@@ -245,7 +245,7 @@ ob_start();
 <?php if (!$isLoggedIn): ?>
     <div class="cennik-info glass">
         <h2>Zaloguj się, żeby zobaczyć swoje serwery</h2>
-        <p>Usługi przypisujemy do konta — bez logowania nie mamy czego pokazać.</p>
+        <p>Usługi przypisujemy do konta - bez logowania nie mamy czego pokazać.</p>
         <p><a class="ord-back" href="/login">Przejdź do logowania</a></p>
     </div>
 
@@ -291,7 +291,7 @@ ob_start();
                     <span class="srv-state"><?php echo htmlspecialchars($c['state']); ?></span>
                 </header>
 
-                <?php /* Adres to pierwsza rzecz, po którą klient tu wchodzi —
+                <?php /* Adres to pierwsza rzecz, po którą klient tu wchodzi -
                          rozdaje go znajomym i nie chce szukać w panelu. */ ?>
                 <?php if ($c['address']): ?>
                     <div class="srv-address">
@@ -314,13 +314,13 @@ ob_start();
                         <span>Opłacone do</span>
                         <strong><?php echo $o['expires_at'] !== null
                             ? htmlspecialchars(date('d.m.Y, H:i', strtotime((string)$o['expires_at'])))
-                            : '—'; ?></strong>
+                            : '-'; ?></strong>
                     </div>
                     <div>
                         <span>Pozostało</span>
                         <strong><?php
                             $d = $c['days_left'];
-                            if ($d === null)   { echo '—'; }
+                            if ($d === null)   { echo '-'; }
                             elseif ($d < 0)    { echo abs($d), ' dni po terminie'; }
                             elseif ($d === 0)  { echo 'ostatni dzień'; }
                             else               { echo $d, ' dni'; }
@@ -345,18 +345,18 @@ ob_start();
                 <?php if ($o['status'] === 'failed'): ?>
                     <p class="srv-alert">
                         Płatność doszła, ale serwer nie został utworzony automatycznie.
-                        Wiemy o tym i zajmiemy się tym ręcznie — napisz na Discordzie, jeśli chcesz przyspieszyć.
+                        Wiemy o tym i zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.
                     </p>
                 <?php elseif ($c['in_grace']): ?>
                     <p class="srv-alert">
                         Nie udało się pobrać opłaty. Serwer działa do
-                        <?php echo htmlspecialchars(date('d.m.Y, H:i', strtotime((string)$o['grace_until']))); ?> —
+                        <?php echo htmlspecialchars(date('d.m.Y, H:i', strtotime((string)$o['grace_until']))); ?> -
                         popraw dane karty albo przedłuż jednorazowo.
                     </p>
                 <?php elseif ($c['renews']): ?>
                     <p class="srv-note">Ten serwer odnawia się sam. Kolejny okres pobierze się automatycznie.</p>
                 <?php elseif ($c['is_subscription']): ?>
-                    <p class="srv-note">Abonament wyłączony — serwer działa do końca opłaconego okresu.</p>
+                    <p class="srv-note">Abonament wyłączony - serwer działa do końca opłaconego okresu.</p>
                 <?php endif; ?>
 
                 <?php /* --- PASEK AKCJI --- */ ?>
@@ -418,7 +418,7 @@ ob_start();
                                 <span data-role="sumUntil"></span>
                             </div>
                             <div class="srv-summary-price">
-                                <span data-role="sumPrice">—</span>
+                                <span data-role="sumPrice">-</span>
                                 <span class="srv-summary-cur">zł</span>
                             </div>
                             <button type="button" class="srv-btn is-primary" data-role="payExtend">Przejdź do płatności</button>
@@ -431,7 +431,7 @@ ob_start();
                     <div class="srv-panel" data-role="plansPanel" hidden>
                         <h3 class="srv-panel-h">Dostępne pakiety</h3>
                         <p class="srv-panel-note">
-                            Wyżej dopłacasz tylko za czas, który Ci został — data ważności zostaje bez zmian.
+                            Wyżej dopłacasz tylko za czas, który Ci został - data ważności zostaje bez zmian.
                             Niżej nie płacisz nic, a niewykorzystana różnica wraca jako dodatkowe dni.
                         </p>
 
@@ -465,7 +465,7 @@ ob_start();
     </div>
 
     <?php if (!$salesOn): ?>
-        <p class="ord-hint">Przedłużanie i zmiana pakietu są chwilowo wyłączone — trwa przerwa techniczna.</p>
+        <p class="ord-hint">Przedłużanie i zmiana pakietu są chwilowo wyłączone - trwa przerwa techniczna.</p>
     <?php endif; ?>
 
     <script id="srv-data" type="application/json"><?php

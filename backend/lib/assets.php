@@ -3,7 +3,7 @@
  * Adresy plików statycznych z odciskiem wersji.
  *
  * PROBLEM: przeglądarka trzyma CSS i JS w cache. Po wgraniu poprawki część
- * odwiedzających dostaje nowy HTML ze starym arkuszem — układ rozjeżdża się
+ * odwiedzających dostaje nowy HTML ze starym arkuszem - układ rozjeżdża się
  * dokładnie u tych osób, u których nie da się tego powtórzyć, bo autor ma już
  * świeże pliki. Kosztowało to raz pół godziny szukania błędu w CSS-ie, który
  * był poprawny; przeglądarka po prostu go nie pobrała.
@@ -14,7 +14,7 @@
  *
  * Zmiana pliku zmienia adres, więc cache unieważnia się sam. Adres jest stały,
  * dopóki plik się nie zmienia, więc powracający klienci nadal pobierają arkusz
- * raz. Nie ma tu żadnego kroku budowania do wykonania — wystarczy wgrać plik.
+ * raz. Nie ma tu żadnego kroku budowania do wykonania - wystarczy wgrać plik.
  *
  * Parametr zapytania jest tu wystarczający, bo pliki serwuje Apache prosto
  * z dysku. Gdyby przed nim stanął cache pomijający query string, trzeba by
@@ -28,12 +28,12 @@ declare(strict_types=1);
  */
 function asset(string $path): string
 {
-    // Znacznik czasu liczymy raz na plik — strona wywołuje asset() kilka razy
+    // Znacznik czasu liczymy raz na plik - strona wywołuje asset() kilka razy
     // na żądanie, a stat() na dysku nie jest darmowy.
     static $stamps = [];
 
     // Bez bootstrapu nie wiemy, gdzie leży katalog strony. Oddajemy wtedy adres
-    // bez znacznika — strona ma się wyświetlić, choćby ze starym arkuszem.
+    // bez znacznika - strona ma się wyświetlić, choćby ze starym arkuszem.
     // Wersjonowanie jest wygodą, a nie warunkiem działania widoku.
     if (!defined('DNCT_BASE_PATH')) {
         return $path;

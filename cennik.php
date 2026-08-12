@@ -1,17 +1,17 @@
 <?php
 /**
- * Cennik — pełna lista planów hostingowych.
+ * Cennik - pełna lista planów hostingowych.
  *
  * Docelowo pod adresem shop.dnct.pl; /cennik na stronie głównej będzie tu
  * przekierowywać. Do czasu podpięcia subdomeny strona żyje pod /cennik.
  *
  * Źródłem prawdy jest baza Pterodactyla (DB_*), czytana WYŁĄCZNIE do odczytu:
- *   - hosting_games — lista gier, kolejność i domyślne grafiki,
- *   - hosting_plans — plany przypisane do gry przez kolumnę `type`.
+ *   - hosting_games - lista gier, kolejność i domyślne grafiki,
+ *   - hosting_plans - plany przypisane do gry przez kolumnę `type`.
  *
  * Świadomie NIE MA tu żadnej edycji planów. W starej wersji (beta/cennik.php)
  * ta sama strona zawierała formularze INSERT/UPDATE i upload plików za
- * warunkiem `$_SESSION['root_admin']` — czyli publiczny cennik i panel
+ * warunkiem `$_SESSION['root_admin']` - czyli publiczny cennik i panel
  * administracyjny w jednym pliku na 624 linie. Edycja planów należy do
  * admin.dnct.pl, po stronie dostępnej wyłącznie z LAN-u.
  */
@@ -26,7 +26,7 @@ require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
 
 /* Czy karty mają prowadzić do zamówienia, czy tylko dawać się zaznaczać.
-   Jedna zmienna dla całej strony — inaczej łatwo o wersję, w której przycisk
+   Jedna zmienna dla całej strony - inaczej łatwo o wersję, w której przycisk
    na karcie prowadzi do kasy, a konfigurator obok nie. */
 $salesOn = stripe_sales_enabled();
 
@@ -34,11 +34,11 @@ $salesOn = stripe_sales_enabled();
  * Zwiastun w paśmie "Panel".
  *
  * Pusty napis = pasmo pokazuje zamiast filmu animowaną konsolę. Tak jest dziś
- * i tak ma zostać, dopóki nie ma czego wstawić — "wkrótce" w miejscu materiału
+ * i tak ma zostać, dopóki nie ma czego wstawić - "wkrótce" w miejscu materiału
  * wideo wygląda gorzej niż brak sekcji.
  *
  * Wstawić sam identyfikator z adresu YouTube (fragment po `v=`), nie cały link.
- * Film ładuje się DOPIERO po kliknięciu w podgląd — osadzony od razu iframe
+ * Film ładuje się DOPIERO po kliknięciu w podgląd - osadzony od razu iframe
  * zakłada ciasteczka YouTube'a jeszcze zanim odwiedzający zdąży odpowiedzieć
  * na baner zgód, co przewraca całą zgodę na ciasteczka na tej stronie.
  */
@@ -47,7 +47,7 @@ const CENNIK_TRAILER_YT = '';
 /** Dokąd prowadzi przycisk demo. Panel wpuszcza przez to samo SSO co strona. */
 const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
-$pageTitle       = 'Cennik hostingu gier — DNCT Hosting';
+$pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
 $metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.';
 $canonicalUrl    = 'https://dnct.pl/cennik';
 $centerContent   = false;
@@ -55,7 +55,7 @@ $centerContent   = false;
 /**
  * Gry wraz z przypisanymi planami.
  *
- * Błąd bazy nie może położyć całej strony — w najgorszym razie pokażemy
+ * Błąd bazy nie może położyć całej strony - w najgorszym razie pokażemy
  * komunikat zamiast cennika. Cennik to strona marketingowa, a nie krytyczna
  * ścieżka; biały ekran kosztowałby więcej niż brak tabeli.
  */
@@ -72,7 +72,7 @@ try {
 
     $gameRows = $pdo->query('SELECT type, name, icon_img FROM hosting_games WHERE is_active = 1 ORDER BY id')->fetchAll();
 
-    // Jedno zapytanie na wszystkie plany zamiast jednego na grę — przy czterech
+    // Jedno zapytanie na wszystkie plany zamiast jednego na grę - przy czterech
     // grach różnica jest bez znaczenia, ale wzorzec "zapytanie w pętli" ma
     // paskudny zwyczaj przeżywać do czasu, gdy gier jest czterdzieści.
     $planRows = $pdo->query(
@@ -80,7 +80,7 @@ try {
     )->fetchAll();
 
     /* Dostępność liczona z realnej pojemności węzła klienckiego. Plan znika
-       z oferty sam, gdy przestaje się na nim mieścić — bez ręcznego
+       z oferty sam, gdy przestaje się na nim mieścić - bez ręcznego
        przestawiania flagi w bazie. Ręczne `sold_out = 1` nadal działa jako
        twarde wyłączenie. */
     $capacity  = node_capacity($pdo);
@@ -156,7 +156,7 @@ ob_start();
 <div class="cennik-page">
 
 <?php /* Warstwa dekoracji w marginesach bocznych. Wszystkie zestawy są w HTML-u
-         od razu, a zakładka tylko przełącza widoczny — dzięki temu zmiana gry
+         od razu, a zakładka tylko przełącza widoczny - dzięki temu zmiana gry
          nie czeka na żadne pobieranie. Widoczna wyłącznie tam, gdzie naprawdę
          jest na nią miejsce (patrz media query w cennik.css); na węższych
          ekranach dekoracje wchodziłyby pod treść. */ ?>
@@ -171,13 +171,13 @@ ob_start();
 
 <?php /* PŁYWAJĄCA PLAKIETKA Z LICZNIKIEM.
          Szyna obok nagłówka przykleja się do krawędzi dopiero od 1400 px, bo
-         niżej nie ma marginesu, w którym mogłaby stanąć — przy typowych 1000 px
+         niżej nie ma marginesu, w którym mogłaby stanąć - przy typowych 1000 px
          CSS zostaje go szesnaście pikseli. Licznik zniknąłby więc po pierwszym
          geście przewijania u niemal wszystkich odwiedzających.
 
          Ta plakietka jest odpowiedzią: mała, w rogu, pokazuje się DOPIERO gdy
          licznik z hero wyjedzie z ekranu. Ma aria-hidden, bo powtarza liczbę,
-         która jest już na stronie — czytnik ekranu przeczytałby ją dwa razy. */ ?>
+         która jest już na stronie - czytnik ekranu przeczytałby ją dwa razy. */ ?>
 <?php if ($liveServers > 0): ?>
     <div class="cnk-live-float" data-role="liveFloat" aria-hidden="true">
         <span class="cnk-live-dot"></span>
@@ -203,18 +203,18 @@ ob_start();
 
         <?php /* SZYNA OBOK NAGŁÓWKA, nie pod nim.
                  Wcześniej stał tu akapit o gwarantowanym RAM-ie, a licznik
-                 serwerów wisiał osobno — razem spychały karty o pół ekranu
+                 serwerów wisiał osobno - razem spychały karty o pół ekranu
                  w dół. Przeniesienie tych informacji pod nagłówek nic by nie
                  dało: zajęłyby dokładnie ten sam pion.
 
                  Po prawej stronie nagłówka jest puste miejsce i to ono je
-                 przyjmuje — karty idą w górę o całą wysokość tego bloku,
+                 przyjmuje - karty idą w górę o całą wysokość tego bloku,
                  a nie o różnicę w wysokości akapitu.
 
                  Od 1400 px szyna ODKLEJA SIĘ od hero i przywiera do prawej
                  krawędzi okna (position: fixed), więc licznik towarzyszy
                  przewijaniu zamiast zniknąć po pierwszym geście. Niżej nie ma
-                 jej gdzie przykleić — weszłaby na treść. */ ?>
+                 jej gdzie przykleić - weszłaby na treść. */ ?>
         <aside class="cnk-rail" aria-label="Skrót informacji o hostingu">
             <?php if ($liveServers > 0): ?>
                 <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
@@ -239,7 +239,7 @@ ob_start();
     <?php if ($dbError): ?>
         <div class="cennik-info glass">
             <h2>Cennik chwilowo niedostępny</h2>
-            <p>Nie udało się pobrać listy planów. Spróbuj za chwilę albo napisz do nas na Discordzie — podamy ceny ręcznie.</p>
+            <p>Nie udało się pobrać listy planów. Spróbuj za chwilę albo napisz do nas na Discordzie - podamy ceny ręcznie.</p>
         </div>
 
     <?php elseif (!$gamesWithPlans): ?>
@@ -251,7 +251,7 @@ ob_start();
     <?php else: ?>
 
         <?php /* Zakładki gier. Pokazujemy je zawsze, gdy gier jest więcej niż
-                 jedna — to jedyny sposób, żeby klient w ogóle zauważył, że
+                 jedna - to jedyny sposób, żeby klient w ogóle zauważył, że
                  hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
             <div class="cennik-tabs" role="tablist">
@@ -283,10 +283,10 @@ ob_start();
                     <div class="cnk-panel">
                     <div class="cnk-panel-head">
                         <h2>Gotowe plany</h2>
-                        <p>Wybierz rozmiar — resztę mamy taką samą w każdym.</p>
+                        <p>Wybierz rozmiar - resztę mamy taką samą w każdym.</p>
                     </div>
                     <?php /* Gotowe plany. Każda karta ma własne id planu i daje się
-                             zaznaczyć — zaznaczenie ląduje w pasku podsumowania
+                             zaznaczyć - zaznaczenie ląduje w pasku podsumowania
                              na dole ekranu. */ ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                         <?php foreach ($game['plans'] as $plan): ?>
@@ -312,7 +312,7 @@ ob_start();
 
                                 <?php
                                 /* Wariant cennikowy: wysoka karta z ceną przy
-                                   dole. Karta nie jest linkiem — sprzedaż jest
+                                   dole. Karta nie jest linkiem - sprzedaż jest
                                    wyłączona, a kliknięcie obsługuje skrypt
                                    zaznaczania na kontenerze .plan-pick. */
                                 render_cennik_plan_card([
@@ -330,7 +330,7 @@ ob_start();
                                     'icon'       => $plan['icon_img'] ?? '',
                                     'fits'       => $plan['fits'] ?? null,
                                     'power'      => $ramPos,
-                                    // Przy wyłączonej sprzedaży brak adresu —
+                                    // Przy wyłączonej sprzedaży brak adresu -
                                     // karta zostaje wtedy tylko do zaznaczania.
                                     'href'       => $salesOn ? '/zamowienie?plan=' . (int)$plan['id'] : null,
                                 ]);
@@ -346,7 +346,7 @@ ob_start();
                     <div class="cnk-panel cnk-panel-cfg">
                     <div class="cfg-intro">
                         <h2>Zbuduj serwer pod swoją ekipę</h2>
-                        <p>Przesuń suwak i ustaw liczbę graczy — resztę dobierzemy automatycznie.</p>
+                        <p>Przesuń suwak i ustaw liczbę graczy - resztę dobierzemy automatycznie.</p>
                     </div>
                     <?php render_slot_configurator($game['type'], $game['tiers'], $periods); ?>
                     </div>
@@ -356,7 +356,7 @@ ob_start();
 
     <?php endif; ?>
 
-    <?php /* Pasmo wspólne ze stroną główną — patrz components/panel-band.php. */ ?>
+    <?php /* Pasmo wspólne ze stroną główną - patrz components/panel-band.php. */ ?>
     <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => CENNIK_PANEL_URL]); ?>
 
     <?php /* ZAPROSZENIE ZAMIAST OBIETNICY.
@@ -369,7 +369,7 @@ ob_start();
         <div class="cennik-ask-text">
             <h2>Szukasz innej gry?</h2>
             <p>
-                Napisz do nas na Discordzie — coś poradzimy. Postawimy serwer pod grę,
+                Napisz do nas na Discordzie - coś poradzimy. Postawimy serwer pod grę,
                 której nie ma w cenniku, albo powiemy wprost, że się nie da.
                 <?php if ($gamesSoon): ?>
                     Najczęściej pytacie o:
@@ -416,8 +416,8 @@ ob_start();
                 </div>
             </div>
 
-            <?php /* PING NA PASKACH Z GRY. Zamiast pisać "niski ping" — liczba,
-                     której i tak nikt nie sprawdzi — pokazujemy pasek, który
+            <?php /* PING NA PASKACH Z GRY. Zamiast pisać "niski ping" - liczba,
+                     której i tak nikt nie sprawdzi - pokazujemy pasek, który
                      każdy grający zna z listy serwerów. Napełnia się od jednej
                      kreski do pięciu i wraca; ruch mówi to samo, co zdanie
                      obok, tylko szybciej. */ ?>
@@ -429,15 +429,15 @@ ob_start();
                     <?php endfor; ?>
                 </span>
                 <div>
-                    <strong>Serwery stoją w Polsce</strong>
-                    <span>Nie w Niemczech ani w Finlandii. Do Warszawy czy Krakowa pakiet
-                          ma kilkanaście kilometrów, a nie pół kontynentu.</span>
+                    <strong>Serwery w Polsce</strong>
+                    <span>Stoją u nas, nie za granicą. Krótsza droga do serwera to niższy
+                          ping i mniej lagów w grze.</span>
                 </div>
             </div>
 
             <div class="cnk-trust-item">
                 <strong>Zasoby są Twoje</strong>
-                <span>Zero oversellingu — RAM i CPU nie są dzielone z nikim innym.</span>
+                <span>Zero oversellingu - RAM i CPU nie są dzielone z nikim innym.</span>
             </div>
 
             <div class="cnk-trust-item">

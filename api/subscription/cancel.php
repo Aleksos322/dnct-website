@@ -1,6 +1,6 @@
 <?php
 /**
- * POST /api/subscription/cancel.php — rezygnacja z odnawiania.
+ * POST /api/subscription/cancel.php - rezygnacja z odnawiania.
  *
  * Wejście:  { order_id, csrf_token }
  * Wyjście:  { ok:true, works_until: "2026-09-11 17:20:00" }
@@ -8,7 +8,7 @@
  * ANULUJEMY NA KONIEC OPŁACONEGO OKRESU, nie natychmiast.
  *
  * Stripe potrafi jedno i drugie. Natychmiastowe zakończenie zabrałoby klientowi
- * czas, za który już zapłacił — i wymagałoby zwrotu części kwoty, żeby było
+ * czas, za który już zapłacił - i wymagałoby zwrotu części kwoty, żeby było
  * uczciwe. `cancel_at_period_end` daje ten sam efekt bez zabierania czegokolwiek:
  * serwer działa do końca, a kolejne obciążenie się nie odbędzie.
  *
@@ -45,11 +45,11 @@ if ($order === null || !hash_equals((string)$order['user_email'], $email)) {
 }
 
 if ($order['billing_mode'] !== 'subscription' || empty($order['stripe_subscription_id'])) {
-    json_error('To zamówienie nie jest abonamentem — nie ma z czego rezygnować.', 409, [], ['reason' => 'not_subscription']);
+    json_error('To zamówienie nie jest abonamentem - nie ma z czego rezygnować.', 409, [], ['reason' => 'not_subscription']);
 }
 
 if ($order['status'] === 'cancelled') {
-    // Powtórne kliknięcie nie jest błędem — odpowiadamy tak, jakby się udało.
+    // Powtórne kliknięcie nie jest błędem - odpowiadamy tak, jakby się udało.
     json_ok(['works_until' => $order['expires_at'], 'already' => true]);
 }
 
@@ -59,12 +59,12 @@ try {
         'cancel_at_period_end' => true,
     ]);
 } catch (Throwable $e) {
-    error_log('Rezygnacja z abonamentu #' . $order['id'] . ' — ' . $e->getMessage());
+    error_log('Rezygnacja z abonamentu #' . $order['id'] . ' - ' . $e->getMessage());
     json_error('Nie udało się zapisać rezygnacji. Spróbuj ponownie albo napisz do nas.', 502, [], ['reason' => 'stripe_error']);
 }
 
 /* Stan zmieniamy OD RAZU, nie czekając na zdarzenie
-   `customer.subscription.deleted` — to przyjdzie dopiero z końcem okresu,
+   `customer.subscription.deleted` - to przyjdzie dopiero z końcem okresu,
    czyli za tydzień albo za rok. Klient ma zobaczyć skutek swojego kliknięcia
    teraz, a nie po odświeżeniu za miesiąc. */
 order_cancel_renewals($dnct, (int)$order['id']);
@@ -74,7 +74,7 @@ notify_user(
     $name,
     'info',
     'Abonament nie będzie odnawiany',
-    'Serwer działa do końca opłaconego okresu. Możesz wznowić w każdej chwili — wystarczy przedłużyć.'
+    'Serwer działa do końca opłaconego okresu. Możesz wznowić w każdej chwili - wystarczy przedłużyć.'
 );
 
 json_ok(['works_until' => $order['expires_at']]);

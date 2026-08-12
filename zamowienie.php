@@ -4,7 +4,7 @@
  *
  * Wejście z cennika: /zamowienie?plan=3  albo  /zamowienie?game=vintagestory&slots=20
  *
- * Strona NIE liczy ceny sama — pyta o nią backend/lib/pricing.php, ten sam
+ * Strona NIE liczy ceny sama - pyta o nią backend/lib/pricing.php, ten sam
  * kod, który potem wystawia kwotę Stripe'owi. Dzięki temu to, co klient widzi
  * w podsumowaniu, jest z definicji tym, co zapłaci: nie ma dwóch wzorów, które
  * mogłyby się rozjechać.
@@ -19,7 +19,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
 
-$pageTitle       = 'Zamówienie — DNCT Hosting';
+$pageTitle       = 'Zamówienie - DNCT Hosting';
 $metaDescription = 'Podsumowanie zamówienia serwera gry w DNCT Hosting.';
 $centerContent   = false;
 
@@ -44,7 +44,7 @@ try {
     $slots  = (int)($_GET['slots'] ?? 0);
     $game   = (string)($_GET['game'] ?? '');
 
-    // Przy wejściu z karty planu gra wynika z samego planu — nie każemy jej
+    // Przy wejściu z karty planu gra wynika z samego planu - nie każemy jej
     // podawać w adresie, bo to tylko okazja do niespójnego żądania.
     if ($planId > 0 && $game === '') {
         $stmt = $panel->prepare('SELECT type FROM hosting_plans WHERE id = ? AND is_active = 1');
@@ -57,7 +57,7 @@ try {
     )->fetchAll();
 
     /* Wyceniamy KAŻDY okres i KAŻDY model rozliczenia od razu. Wariantów jest
-       sześć, więc to sześć tanich zapytań przy wejściu na stronę — w zamian
+       sześć, więc to sześć tanich zapytań przy wejściu na stronę - w zamian
        przełączanie opcji nie wymaga ani jednego żądania i nie da się nim
        podmienić kwoty. */
     foreach ($periods as $p) {
@@ -116,7 +116,7 @@ ob_start();
              który i tak odbije się od API. */ ?>
     <div class="cennik-info glass">
         <h2>Sprzedaż jest chwilowo wyłączona</h2>
-        <p>Trwa przerwa techniczna — nie przyjmujemy w tej chwili nowych zamówień.
+        <p>Trwa przerwa techniczna - nie przyjmujemy w tej chwili nowych zamówień.
            Konfigurację poniżej możesz sobie obejrzeć, ale przycisk płatności jest nieaktywny.</p>
         <p><a class="ord-back" href="/cennik">Wróć do cennika</a></p>
     </div>
@@ -170,14 +170,14 @@ ob_start();
         <div class="ord-line"><span>Okres</span><strong data-role="sumPeriod"></strong></div>
 
         <div class="ord-total">
-            <span data-role="sumPrice">—</span>
+            <span data-role="sumPrice">-</span>
             <span class="ord-total-cur">zł</span>
             <span class="ord-total-per" data-role="sumPer"></span>
         </div>
 
         <?php if (!$isLoggedIn): ?>
             <a class="ord-cta" href="/login">Zaloguj się, żeby zamówić</a>
-            <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu — dlatego potrzebujemy logowania.</p>
+            <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu - dlatego potrzebujemy logowania.</p>
         <?php else: ?>
             <button type="button" class="ord-cta" data-role="pay"
                     <?php echo stripe_sales_enabled() ? '' : 'disabled'; ?>>
@@ -188,9 +188,9 @@ ob_start();
 
         <p class="ord-legal">
             Klikając, akceptujesz <a href="/regulamin">Regulamin</a>.
-            Płatność obsługuje Stripe — nie przechowujemy danych Twojej karty.
+            Płatność obsługuje Stripe - nie przechowujemy danych Twojej karty.
             <?php if (stripe_is_test_mode()): ?>
-                <span class="ord-testmode">Tryb testowy — żadne pieniądze nie są pobierane.</span>
+                <span class="ord-testmode">Tryb testowy - żadne pieniądze nie są pobierane.</span>
             <?php endif; ?>
         </p>
     </aside>

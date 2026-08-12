@@ -1,13 +1,13 @@
 <?php
 /**
- * Wycena zamówienia — JEDYNE miejsce, w którym powstaje kwota do zapłaty.
+ * Wycena zamówienia - JEDYNE miejsce, w którym powstaje kwota do zapłaty.
  *
  * ZASADA NADRZĘDNA: cena NIGDY nie przychodzi z formularza.
  *
  * Klient przysyła wyłącznie to, CO wybrał (gra, plan albo liczba slotów, okres,
  * model rozliczenia). Ile to kosztuje, liczy ten plik na podstawie bazy. Gdyby
  * kwota szła z przeglądarki, wystarczyłoby narzędzie deweloperskie i podmiana
- * jednego pola, żeby kupić serwer za grosz — i nic po stronie serwera by tego
+ * jednego pola, żeby kupić serwer za grosz - i nic po stronie serwera by tego
  * nie zauważyło, bo Stripe policzyłby dokładnie tyle, ile mu każemy.
  *
  * WZÓR JEST WSPÓLNY Z FRONTENDEM. Konfigurator w assets/js/cennik.js liczy:
@@ -15,7 +15,7 @@
  *     floor(cena_bazowa * multiplier) + adjust
  *
  * i tutaj MUSI być tak samo, co do grosza. Rozjazd nie skończy się wyjątkiem,
- * tylko klientem, któremu strona pokazała 32,99 zł, a Stripe policzył 33,49 —
+ * tylko klientem, któremu strona pokazała 32,99 zł, a Stripe policzył 33,49 -
  * czyli reklamacją i utratą zaufania przy pierwszym zakupie.
  *
  * Kwota wychodzi stąd w GROSZACH (int). Stripe przyjmuje `unit_amount` właśnie
@@ -34,7 +34,7 @@ const PRICING_DEFAULT_BACKUPS    = 1;
  *
  * @param array{game_type:string,plan_id?:int|null,slots?:int|null,period_days:int,billing_mode:string} $input
  * @return array<string,mixed> Pełna specyfikacja zamówienia gotowa do zapisu
- * @throws RuntimeException gdy wybór jest niespójny — wołający ma to zamienić
+ * @throws RuntimeException gdy wybór jest niespójny - wołający ma to zamienić
  *                          na 400, a nie na zamówienie z domyślnymi wartościami
  */
 function pricing_quote(PDO $panel, array $input): array
@@ -50,7 +50,7 @@ function pricing_quote(PDO $panel, array $input): array
     $period = pricing_period($panel, $periodDays);
     $game   = pricing_game($panel, $gameType);
 
-    // Gotowy plan czy konfigurator slotów — rozstrzyga to, co przyszło,
+    // Gotowy plan czy konfigurator slotów - rozstrzyga to, co przyszło,
     // ale WERYFIKUJEMY w bazie, że taki wybór dla tej gry w ogóle istnieje.
     $planId = isset($input['plan_id']) ? (int)$input['plan_id'] : 0;
     $slots  = isset($input['slots'])   ? (int)$input['slots']   : 0;
@@ -93,13 +93,13 @@ function pricing_quote(PDO $panel, array $input): array
  * ZAOKRĄGLENIE W DÓŁ TYLKO WTEDY, GDY OKRES MA WŁASNĄ KOŃCÓWKĘ (`adjust`).
  *
  * `floor` istnieje po to, żeby po przemnożeniu przez ułamek dostać równą kwotę,
- * do której dokleja się końcówkę z `adjust` — tydzień: 65 * 0,5 = 32,5 → 32
+ * do której dokleja się końcówkę z `adjust` - tydzień: 65 * 0,5 = 32,5 → 32
  * → 32,99. Stosowanie go ZAWSZE psuło ceny gotowych planów, bo te już mają
  * końcówkę w bazie: plan za 6,99 zł miesięcznie wychodził 6,00 zł
  * (floor(6,99 * 1,0) + 0), czyli o 99 groszy za tanio na KAŻDYM zamówieniu.
  *
  * Progi slotowe mają ceny całkowite (19, 35, 65), więc dla nich obie wersje
- * dają identyczny wynik — ten warunek niczego tam nie zmienia.
+ * dają identyczny wynik - ten warunek niczego tam nie zmienia.
  */
 function pricing_apply_period(float $base, array $period): float
 {
@@ -116,11 +116,11 @@ function pricing_apply_period(float $base, array $period): float
 /**
  * Działanie odwrotne do pricing_apply_period(): z kwoty za okres wyciąga cenę bazową.
  *
- * Potrzebne przy przedłużaniu serwera, którego planu nie ma już w cenniku —
+ * Potrzebne przy przedłużaniu serwera, którego planu nie ma już w cenniku -
  * jedyne, co po nim zostało, to zapłacona kwota i okres, na jaki była. Bez tego
  * przedłużenie rocznego serwera na miesiąc liczyłoby się od kwoty rocznej.
  *
- * Odtworzenie nie jest idealne — `floor` po drodze gubi grosze i nie da się ich
+ * Odtworzenie nie jest idealne - `floor` po drodze gubi grosze i nie da się ich
  * odzyskać. Rozjazd sięga jednego złotego na okres i wychodzi na KORZYŚĆ
  * klienta, bo cena bazowa wypada nie wyżej niż pierwotna.
  */
@@ -188,7 +188,7 @@ function pricing_from_plan(PDO $panel, int $planId, string $gameType): array
     }
 
     /* Dostępność sprawdzamy TU, a nie tylko przy rysowaniu karty. Klient mógł
-       otworzyć cennik godzinę temu i kliknąć teraz, gdy miejsca już nie ma —
+       otworzyć cennik godzinę temu i kliknąć teraz, gdy miejsca już nie ma -
        a między kartą a płatnością nie ma żadnego innego strażnika. */
     $capacity = node_capacity($panel);
     [$checked] = annotate_plan_availability([$plan], $capacity);
@@ -213,7 +213,7 @@ function pricing_from_plan(PDO $panel, int $planId, string $gameType): array
  *
  * Liczba slotów musi trafić DOKŁADNIE w próg z tabeli. Suwak na stronie i tak
  * skacze po progach, więc wartość spoza listy oznacza albo ręczne majstrowanie
- * przy żądaniu, albo rozjazd z bazą — w obu przypadkach nie ma czego sprzedać.
+ * przy żądaniu, albo rozjazd z bazą - w obu przypadkach nie ma czego sprzedać.
  */
 function pricing_from_tier(PDO $panel, int $slots, string $gameType): array
 {
@@ -230,7 +230,7 @@ function pricing_from_tier(PDO $panel, int $slots, string $gameType): array
 
     $ramMb = (int)round((float)$tier['ram_gb'] * 1024);
 
-    /* Konfigurator nie ma miejsca na dysk ani backupy — tabela progów ich nie
+    /* Konfigurator nie ma miejsca na dysk ani backupy - tabela progów ich nie
        trzyma, bo klient ich nie wybiera. Wartości są stałe i świadomie
        zadeklarowane u góry tego pliku, a nie rozsypane po kodzie tworzącym
        serwer, jak to było w starej wersji. */

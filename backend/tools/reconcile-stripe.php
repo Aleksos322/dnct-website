@@ -10,7 +10,7 @@
  *
  * PO CO TO ISTNIEJE. Webhook jest doręczeniem z zewnątrz i potrafi nie dojść:
  * padnie DNS, wygaśnie certyfikat, ktoś zmieni adres, proxy zwróci 502 przez
- * kilka godzin. Stripe ponawia przez trzy doby, ale po tym czasie odpuszcza —
+ * kilka godzin. Stripe ponawia przez trzy doby, ale po tym czasie odpuszcza -
  * a po naszej stronie zostaje zamówienie opłacone i bez serwera. Bez tego
  * narzędzia jedynym wyjściem byłoby ręczne klikanie w bazie.
  *

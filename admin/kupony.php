@@ -1,6 +1,6 @@
 <?php
 /**
- * Panel kuponów promocyjnych — /admin/kupony
+ * Panel kuponów promocyjnych - /admin/kupony
  *
  * Generowanie kodów i podgląd istniejących. Kody są zakładane W STRIPE, więc
  * działają naprawdę: klient wpisuje je w Checkoucie, a zniżkę, limit użyć
@@ -8,7 +8,7 @@
  *
  * DOSTĘP: wyłącznie superuser z Authentika, ta sama zasada co w
  * admin/notifications/send.php. Docelowo ta strona ma zamieszkać na
- * admin.dnct.pl, wystawionym tylko po LAN-ie — do tego czasu jedyną barierą
+ * admin.dnct.pl, wystawionym tylko po LAN-ie - do tego czasu jedyną barierą
  * jest logowanie, więc trzymamy ją poza indeksowaniem i bez odnośników
  * z żadnej publicznej podstrony.
  */
@@ -37,17 +37,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $res = coupon_create($dnct, $_POST, (string)$_SESSION['authentik_username']);
         $res['ok']
-            ? $notice = 'Kupon ' . $res['code'] . ' gotowy — można go już wpisywać przy płatności.'
+            ? $notice = 'Kupon ' . $res['code'] . ' gotowy - można go już wpisywać przy płatności.'
             : $problem = $res['error'];
     }
 }
 
 // Licznik użyć rośnie po stronie Stripe'a i nie ma zdarzenia, które by o nim
-// mówiło — odświeżamy go przy wejściu na listę.
+// mówiło - odświeżamy go przy wejściu na listę.
 coupons_sync($dnct);
 $coupons = coupons_list($dnct);
 
-$pageTitle     = 'Kupony — DNCT';
+$pageTitle     = 'Kupony - DNCT';
 $centerContent = false;
 
 ob_start();
@@ -63,7 +63,7 @@ ob_start();
         <span class="cnk-eyebrow">Administracja</span>
         <h1 class="cnk-h1">Kupony promocyjne</h1>
         <?php if (stripe_is_test_mode()): ?>
-            <p class="adm-testbadge">Klucze testowe — kupony powstają na testowym koncie Stripe.</p>
+            <p class="adm-testbadge">Klucze testowe - kupony powstają na testowym koncie Stripe.</p>
         <?php endif; ?>
     </section>
 
@@ -88,7 +88,7 @@ ob_start();
             </label>
 
             <?php /* Dwa pola, z których wypełnia się DOKŁADNIE jedno. Walidacja
-                     po stronie serwera i tak to sprawdza — tutaj chodzi tylko
+                     po stronie serwera i tak to sprawdza - tutaj chodzi tylko
                      o to, żeby było widać, że to alternatywa. */ ?>
             <div class="adm-pair">
                 <label class="adm-field">
@@ -106,9 +106,9 @@ ob_start();
             <label class="adm-field">
                 <span>Jak długo obowiązuje</span>
                 <select name="duration">
-                    <option value="once">Jednorazowo — tylko pierwsza płatność</option>
+                    <option value="once">Jednorazowo - tylko pierwsza płatność</option>
                     <option value="repeating">Przez kilka miesięcy abonamentu</option>
-                    <option value="forever">Zawsze — każde odnowienie</option>
+                    <option value="forever">Zawsze - każde odnowienie</option>
                 </select>
                 <small>Przy płatności jednorazowej wszystkie trzy działają tak samo.</small>
             </label>
@@ -140,7 +140,7 @@ ob_start();
             </p>
             <p class="ord-hint">
                 Wyłączenie kuponu blokuje kod dla nowych zakupów. Osoby, które mają już
-                abonament z tą zniżką, zachowują ją do końca — dlatego wyłączamy kod,
+                abonament z tą zniżką, zachowują ją do końca - dlatego wyłączamy kod,
                 a nie kasujemy zniżki.
             </p>
         </aside>
@@ -170,7 +170,7 @@ ob_start();
                                 <?php echo $c['max_redemptions'] !== null ? ' / ' . (int)$c['max_redemptions'] : ''; ?>
                             </td>
                             <td><?php echo $c['redeem_by'] !== null ? htmlspecialchars((string)$c['redeem_by']) : 'bezterminowo'; ?></td>
-                            <td><?php echo htmlspecialchars((string)($c['created_by'] ?? '—')); ?></td>
+                            <td><?php echo htmlspecialchars((string)($c['created_by'] ?? '-')); ?></td>
                             <td>
                                 <span class="adm-pill <?php echo $c['active'] ? 'is-ok' : 'is-off'; ?>">
                                     <?php echo $c['active'] ? 'aktywny' : 'wyłączony'; ?>

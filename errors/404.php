@@ -6,7 +6,7 @@
 
 http_response_code(404);
 
-$pageTitle       = 'Strona nie znaleziona (404) — DNCT Hosting';
+$pageTitle       = 'Strona nie znaleziona (404) - DNCT Hosting';
 $metaDescription = 'Ta strona nie istnieje lub została przeniesiona.';
 $centerContent   = true;
 

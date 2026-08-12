@@ -27,10 +27,10 @@ rate_limit_guard(
     'Zbyt wiele prób rozpoczęcia płatności z tego adresu IP. Odczekaj kilkanaście minut.'
 );
 
-/* Sprzedaż wyłączona to nie awaria — to stan, w którym strona jest dzisiaj
+/* Sprzedaż wyłączona to nie awaria - to stan, w którym strona jest dzisiaj
    (przerwa techniczna). Odpowiadamy wprost, zamiast udawać błąd. */
 if (!stripe_sales_enabled()) {
-    json_error('Sprzedaż jest chwilowo wyłączona — trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
+    json_error('Sprzedaż jest chwilowo wyłączona - trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
 }
 
 $email = (string)($_SESSION['authentik_email'] ?? '');
@@ -57,7 +57,7 @@ try {
     ]);
 } catch (RuntimeException $e) {
     // Komunikaty z wyceny są pisane pod klienta ("Ten plan jest już
-    // niedostępny"), więc idą wprost — nie ma tu nic wrażliwego.
+    // niedostępny"), więc idą wprost - nie ma tu nic wrażliwego.
     json_error($e->getMessage(), 422, [], ['reason' => 'invalid_selection']);
 }
 
@@ -67,13 +67,13 @@ $orderId = order_create($dnct, $quote, $email, $name);
 stripe_init();
 
 /* METODY PŁATNOŚCI ZALEŻĄ OD TRYBU.
-   BLIK i Przelewy24 obsługują wyłącznie płatność jednorazową — Stripe odrzuca
+   BLIK i Przelewy24 obsługują wyłącznie płatność jednorazową - Stripe odrzuca
    sesję subskrypcyjną, która je wymienia. Przy abonamencie zostaje karta, bo
    tylko ona daje się obciążyć cyklicznie bez udziału klienta. */
 $isSubscription = $quote['billing_mode'] === 'subscription';
 $methods = $isSubscription ? ['card'] : ['card', 'blik', 'p24'];
 
-$productName = sprintf('DNCT Hosting — %s (%s)', $quote['game_name'], $quote['label']);
+$productName = sprintf('DNCT Hosting - %s (%s)', $quote['game_name'], $quote['label']);
 $productDesc = sprintf(
     '%d MB RAM · %s vCore · %d MB NVMe · %s',
     $quote['ram_mb'],
@@ -102,7 +102,7 @@ try {
 
         // Kupony obsługuje Stripe. Włączenie tego pola daje w Checkoucie pole
         // "kod rabatowy", a poprawność kodu, limity i termin ważności sprawdza
-        // Stripe — my nie liczymy zniżek u siebie (patrz migracja 001).
+        // Stripe - my nie liczymy zniżek u siebie (patrz migracja 001).
         'allow_promotion_codes' => true,
 
         'customer_email'      => $email,
@@ -114,7 +114,7 @@ try {
     ];
 
     /* Metadane trafiają TAKŻE na subskrypcję. Zdarzenia `invoice.*` przychodzą
-       z identyfikatorem subskrypcji, nie sesji — bez tego przy pierwszym
+       z identyfikatorem subskrypcji, nie sesji - bez tego przy pierwszym
        odnowieniu nie byłoby po czym odnaleźć zamówienia, gdyby zapis
        identyfikatora przy checkout.session.completed się nie powiódł. */
     if ($isSubscription) {
@@ -123,7 +123,7 @@ try {
 
     $session = \Stripe\Checkout\Session::create($params);
 } catch (Throwable $e) {
-    error_log('Checkout: nie udało się utworzyć sesji dla zamówienia #' . $orderId . ' — ' . $e->getMessage());
+    error_log('Checkout: nie udało się utworzyć sesji dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
     json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
 }
 

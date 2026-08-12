@@ -1267,7 +1267,7 @@
                     els.meterLabel.textContent = 'Siła hasła';
                 }
                 if (els.crackTime) {
-                    els.crackTime.textContent = 'Złamanie: —';
+                    els.crackTime.textContent = 'Złamanie: -';
                 }
                 return;
             }

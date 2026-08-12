@@ -2,22 +2,22 @@
 /**
  * Regulamin świadczenia usług
  *
- * Treść przeniesiona 1:1 ze starej strony (beta/regulamin.html) — dokument prawny,
+ * Treść przeniesiona 1:1 ze starej strony (beta/regulamin.html) - dokument prawny,
  * więc jego brzmienie zostaje nietknięte. Zmienia się wyłącznie oprawa: strona
  * korzysta teraz ze wspólnego layoutu (navbar, stopka, tło, SEO), a wygląd
  * bloków i tabel opisuje assets/css/legal.css.
  *
- * $centerContent = false, bo to długi dokument wielosekcyjny — wycentrowanie
+ * $centerContent = false, bo to długi dokument wielosekcyjny - wycentrowanie
  * w pionie ma sens przy krótkich stronach, tutaj rozjechałoby odczyt.
  */
 
 declare(strict_types=1);
 
-// Wspólny start — te dwie strony jako jedyne go nie miały, przez co
+// Wspólny start - te dwie strony jako jedyne go nie miały, przez co
 // pomocnicze funkcje z backend/lib (np. asset()) były tu niedostępne.
 require_once __DIR__ . '/backend/bootstrap.php';
 
-$pageTitle       = 'Regulamin — DNCT Hosting';
+$pageTitle       = 'Regulamin - DNCT Hosting';
 $metaDescription = 'Regulamin świadczenia usług hostingu serwerów gier DNCT: zakres usług, płatności, SLA, backupy, RODO i reklamacje.';
 $canonicalUrl    = 'https://dnct.pl/regulamin';
 $centerContent   = false;
@@ -32,14 +32,14 @@ ob_start();
         <p>DNCT to polski dostawca hostingu gier (Minecraft, Hytale, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
       </div>
 
-      <h1>Regulamin świadczenia usług hostingu gier — DNCT</h1>
+      <h1>Regulamin świadczenia usług hostingu gier - DNCT</h1>
       <p><strong>Data wejścia w życie:</strong> 7 lutego 2026</p>
       <p>Ten dokument określa zasady świadczenia usług przez DNCT (dalej: „DNCT”, „Dostawca”). Korzystając z usług, Klient akceptuje poniższe postanowienia.</p>
 
       <section>
         <h2>1. Dane Dostawcy</h2>
         <p>
-          <strong>DNCT</strong> — działalność nierejestrowana prowadzona przez Aleksa Osińskiego zgodnie z <strong>art. 5 ustawy Prawo przedsiębiorców</strong>.<br>
+          <strong>DNCT</strong> - działalność nierejestrowana prowadzona przez Aleksa Osińskiego zgodnie z <strong>art. 5 ustawy Prawo przedsiębiorców</strong>.<br>
           Adres korespondencyjny: Puławy, woj. lubelskie, 24-100.<br>
           Telefon: 536 180 706<br>
           E-mail kontaktowy: <a href="mailto:support@dnct.pl">support@dnct.pl</a>
@@ -51,7 +51,7 @@ ob_start();
         <h2>2. Zakres usług i Specyfikacja Techniczna</h2>
         <ol>
           <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Hytale, Vintage Story, Project Zomboid oraz inne na życzenie).</li>
-          <li>Szczegółowe plany i ceny dostępne na: <a href="https://dnct.pl/cennik">dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan — pytaj śmiało przez support!</li>
+          <li>Szczegółowe plany i ceny dostępne na: <a href="https://dnct.pl/cennik">dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
           <div class="tech-box">
             <strong>Gwarancje techniczne:</strong>
             <ul>
@@ -144,7 +144,7 @@ ob_start();
         <ol>
           <li>Płatności: Stripe (BLIK, karty, Przelewy24).</li>
           <li>Brak faktur VAT (działalność nierejestrowana).</li>
-          <li>Subskrypcje nie odnawiają się automatycznie — wymagane ręczne przedłużenie (możliwe do 3 lat).</li>
+          <li>Subskrypcje nie odnawiają się automatycznie - wymagane ręczne przedłużenie (możliwe do 3 lat).</li>
           <li><strong>Polityka zwrotów:</strong> Możliwość zwrotu środków w ciągu <strong>24 godzin</strong> od zakupu po kontakcie przez ticket na Discordzie: <a href="https://discord.gg/juwUYaQV">Otwórz ticket</a>. Po tym terminie lub przy częściowym wykorzystaniu miesiąca zwroty nie przysługują.</li>
         </ol>
       </section>

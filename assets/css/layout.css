@@ -1,5 +1,5 @@
 /* assets/css/layout.css
-   Wspólne style layoutu (clear.php) — wyniesione z inline <style> */
+   Wspólne style layoutu (clear.php) - wyniesione z inline <style> */
 
 .btn-panel {
     display: inline-block;
@@ -28,7 +28,7 @@
    BANER ZGODY NA COOKIES
 
    Znaczniki: assets/clear/cookie-banner.php, logika: assets/js/cookie-consent.js.
-   Baner startuje ukryty i przezroczysty — skrypt pokazuje go dopiero, gdy
+   Baner startuje ukryty i przezroczysty - skrypt pokazuje go dopiero, gdy
    użytkownik nie ma jeszcze zapisanego wyboru. Animacja wjazdu jest w
    transition, bo skrypt zmienia tylko opacity i transform.
    ========================================================================== */
@@ -94,7 +94,7 @@
     white-space: nowrap;
 }
 
-/* Odrzucenie musi być równie widoczne i łatwe jak akceptacja — inaczej zgoda
+/* Odrzucenie musi być równie widoczne i łatwe jak akceptacja - inaczej zgoda
    przestaje być dobrowolna. Stąd oba przyciski tej samej wielkości, różnią się
    wyłącznie wypełnieniem. */
 .cookie-btn-reject {
@@ -145,7 +145,7 @@
 
    Dzwonek siedzi przy DOLNEJ krawędzi okna, więc lista rozwija się w GÓRĘ
    (`bottom: 100%` w markupie). Wcześniej miała `margin-top` i całą zawartość
-   wypychała poniżej widocznego obszaru — historia powiadomień istniała,
+   wypychała poniżej widocznego obszaru - historia powiadomień istniała,
    ale nie dało się jej zobaczyć.
 
    Wygląd dociągnięty do reszty serwisu: to samo szkło i ta sama paleta,
@@ -159,7 +159,7 @@
     backdrop-filter: blur(16px);
     overflow: hidden;
 
-    /* Rozwinięcie od dołu — panel „wyrasta" z dzwonka, zamiast pojawiać się
+    /* Rozwinięcie od dołu - panel „wyrasta" z dzwonka, zamiast pojawiać się
        znikąd. Przy `prefers-reduced-motion` animacja znika (niżej). */
     animation: dnctNotifIn 0.22s ease;
     transform-origin: bottom right;
@@ -183,13 +183,13 @@
 }
 .dnct-notif-markall:hover { color: #c4b5fd; }
 
-/* Rozdzielenie wpisów kreską zamiast `divide-y` Tailwinda — panel bywa
+/* Rozdzielenie wpisów kreską zamiast `divide-y` Tailwinda - panel bywa
    renderowany też tam, gdzie Tailwind nie doszedł. */
 .dnct-notif-item + .dnct-notif-item { border-top: 1px solid rgba(255, 255, 255, 0.05); }
 .dnct-notif-item { transition: background 0.15s ease; }
 .dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; }
 
-/* Pasek przewijania w panelu — domyślny w ciemnym motywie wygląda jak usterka. */
+/* Pasek przewijania w panelu - domyślny w ciemnym motywie wygląda jak usterka. */
 .dnct-notif-panel::-webkit-scrollbar { width: 8px; }
 .dnct-notif-panel::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.14);

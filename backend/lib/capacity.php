@@ -4,13 +4,13 @@
  *
  * Zamiast ręcznego przestawiania flagi `sold_out` w bazie, plan robi się
  * niedostępny sam, gdy na węźle przestaje się mieścić. Ręczna flaga zostaje
- * jako TWARDE wyłączenie — jeśli ustawisz `sold_out = 1`, plan jest niedostępny
+ * jako TWARDE wyłączenie - jeśli ustawisz `sold_out = 1`, plan jest niedostępny
  * niezależnie od tego, ile miejsca zostało.
  *
  * Dwie rzeczy, które łatwo tu przeoczyć, a bez nich wynik jest bez sensu:
  *
  * 1. NADSUBSKRYPCJA. Pterodactyl pozwala przydzielić więcej, niż węzeł ma
- *    fizycznie — kolumny `memory_overallocate` i `disk_overallocate` (w procentach).
+ *    fizycznie - kolumny `memory_overallocate` i `disk_overallocate` (w procentach).
  *    User node ma 40 000 MiB RAM i 200% nadsubskrypcji, czyli realny limit to
  *    120 000 MiB. Bez uwzględnienia tego węzeł wyglądałby na przepełniony przy
  *    43 968 MiB przydzielonego RAM-u i CAŁY cennik pokazałby się jako wyprzedany.
@@ -27,7 +27,7 @@ declare(strict_types=1);
 /**
  * Ile wolnych miejsc danego planu musi zostać, żeby dało się go jeszcze kupić.
  *
- * Przy wartości 2 plan znika z oferty, gdy zmieści się już tylko jeden — zostaje
+ * Przy wartości 2 plan znika z oferty, gdy zmieści się już tylko jeden - zostaje
  * zapas na jedno wdrożenie awaryjne albo na klienta, który właśnie klika zakup.
  * Sprzedawanie ostatniego wolnego miejsca kończy się wyścigiem dwóch zamówień
  * o ten sam kawałek węzła.
@@ -41,7 +41,7 @@ const CAPACITY_DEFAULT_NODE = 'User node';
  * Wolne zasoby węzła, z uwzględnieniem nadsubskrypcji.
  *
  * @return array{name:string,free_memory:int,free_disk:int,servers:int}|null
- *         null, gdy węzła nie ma w bazie — wtedy wywołujący nie powinien
+ *         null, gdy węzła nie ma w bazie - wtedy wywołujący nie powinien
  *         niczego wyłączać, bo brak danych to nie to samo co brak miejsca.
  */
 function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
@@ -89,7 +89,7 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
 /**
  * Ile serwerów danego planu jeszcze się zmieści.
  *
- * Decyduje zasób, który skończy się pierwszy — plan z dużym dyskiem potrafi się
+ * Decyduje zasób, który skończy się pierwszy - plan z dużym dyskiem potrafi się
  * nie mieścić, mimo że RAM-u jest pod dostatkiem.
  */
 function plan_fits(array $plan, array $capacity): int
@@ -120,7 +120,7 @@ function annotate_plan_availability(array $plans, ?array $capacity): array
         $manual = !empty($plan['sold_out']);
 
         if ($capacity === null) {
-            // Nie znamy węzła — zostawiamy stan z bazy. Zgadywanie w drugą
+            // Nie znamy węzła - zostawiamy stan z bazy. Zgadywanie w drugą
             // stronę oznaczałoby wyłączenie całej sprzedaży przez literówkę
             // w nazwie węzła.
             $plans[$i]['fits']            = null;

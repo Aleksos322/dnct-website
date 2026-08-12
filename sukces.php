@@ -1,13 +1,13 @@
 <?php
 /**
- * Strona powrotu ze Stripe Checkout — /sukces?session_id=cs_...
+ * Strona powrotu ze Stripe Checkout - /sukces?session_id=cs_...
  *
  * TA STRONA NICZEGO NIE TWORZY. Serwer zakłada webhook; tutaj tylko odpytujemy
  * o stan zamówienia i pokazujemy, na czym stoi.
  *
  * Stara wersja robiła odwrotnie: cała logika zakładania serwera siedziała
  * w success.php i wykonywała się przy WYŚWIETLENIU strony. Konsekwencje były
- * dwie i obie bolały klienta — kto zamknął kartę zaraz po zapłaceniu, nie
+ * dwie i obie bolały klienta - kto zamknął kartę zaraz po zapłaceniu, nie
  * dostawał nic, a odświeżenie strony potrafiło ruszyć zakładanie po raz drugi.
  *
  * Webhook często przychodzi po powrocie klienta, więc strona odpytuje stan co
@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/backend/bootstrap.php';
 
-$pageTitle       = 'Dziękujemy za zamówienie — DNCT Hosting';
+$pageTitle       = 'Dziękujemy za zamówienie - DNCT Hosting';
 $metaDescription = 'Potwierdzenie zamówienia serwera gry w DNCT Hosting.';
 $centerContent   = false;
 
@@ -50,7 +50,7 @@ ob_start();
         </div>
 
         <h1 data-role="title">Płatność przyjęta</h1>
-        <p data-role="text">Zakładamy Twój serwer — to zwykle kilkanaście sekund. Nie zamykaj tej strony.</p>
+        <p data-role="text">Zakładamy Twój serwer - to zwykle kilkanaście sekund. Nie zamykaj tej strony.</p>
 
         <div class="suc-actions" data-role="actions" hidden>
             <a class="suc-primary" href="https://panel.dnct.pl" target="_blank" rel="noopener">Otwórz panel</a>

@@ -1,7 +1,7 @@
 /**
  * Pasmo "Zobacz, zanim zapłacisz": animowana konsola i podgląd zwiastuna.
  *
- * Wydzielone z cennik.js, bo pasmo żyje teraz na DWÓCH stronach — w cenniku
+ * Wydzielone z cennik.js, bo pasmo żyje teraz na DWÓCH stronach - w cenniku
  * i na stronie głównej (components/panel-band.php). Ładowanie całego skryptu
  * cennika na stronie głównej ciągnęłoby ze sobą zakładki gier, konfigurator
  * slotów i paralaksę dekoracji, czyli kod, który nie ma tam czego obsługiwać.
@@ -21,7 +21,7 @@
         ['12:04:08', 'Done (6.812s)! For help, type "help"', 'ok'],
         ['12:04:19', 'Steve joined the game', 'i'],
         ['12:05:02', 'Saving chunks for level "world"', ''],
-        ['12:05:02', 'Backup ukończony — 412 MB', 'ok']
+        ['12:05:02', 'Backup ukończony - 412 MB', 'ok']
     ];
 
     function initConsole() {

@@ -2,7 +2,7 @@
    Styl dokumentów prawnych (regulamin, polityka prywatności).
 
    Treść przeniesiona 1:1 ze starej strony, więc nazwy klas (.ai-summary,
-   .info-box, .warning-box, .tech-box, .price-cell...) zostały takie same —
+   .info-box, .warning-box, .tech-box, .price-cell...) zostały takie same -
    zmienia się wyłącznie ich wygląd, żeby pasował do reszty serwisu.
    Dzięki temu ewentualna aktualizacja treści z beta/ nie wymaga przepisywania
    znaczników. */
@@ -133,7 +133,7 @@
     margin-bottom: 1.25rem;
 }
 
-/* Data ostatniej aktualizacji — czytelnik ma od razu wiedzieć, jak świeży
+/* Data ostatniej aktualizacji - czytelnik ma od razu wiedzieć, jak świeży
    jest dokument, bez szukania na końcu strony. */
 .legal-meta {
     font-size: 0.8rem;

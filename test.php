@@ -1,11 +1,11 @@
 <?php
 /**
  * 
- * index.php — strona główna, korzysta ze wspólnego layoutu assets/clear/clear.php
+ * index.php - strona główna, korzysta ze wspólnego layoutu assets/clear/clear.php
  */
 
 // Sesja musi być odpalona przed jakimkolwiek dostępem do $_SESSION,
-// ale clear.php i tak to obsłuży — tu potrzebujemy $isLoggedIn PRZED
+// ale clear.php i tak to obsłuży - tu potrzebujemy $isLoggedIn PRZED
 // zbudowaniem treści, więc odpalamy sesję lokalnie też.
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();

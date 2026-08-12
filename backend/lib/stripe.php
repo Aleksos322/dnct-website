@@ -4,13 +4,13 @@
  *
  * SDK jest wendorowane w backend/vendor/stripe-php (przeniesione z beta/).
  * Katalog `backend/` ma własne `Require all denied`, więc biblioteki nie da się
- * pobrać po HTTP — a leży tam kod, który zna klucz tajny.
+ * pobrać po HTTP - a leży tam kod, który zna klucz tajny.
  *
  * SPRZEDAŻ JEST DOMYŚLNIE WYŁĄCZONA. `SALES_ENABLED` w .env musi być ustawione
  * jawnie na 1, żeby cokolwiek dało się kupić. Powód jest wprost z CLAUDE.md:
  * hosting ma przerwę techniczną i brak możliwości zakupu jest ZAMIERZONY.
  * Gdyby ten kod wjechał na produkcję bez takiej blokady, wystarczyłby jeden
- * merge, żeby sklep otworzył się sam — bez niczyjej decyzji.
+ * merge, żeby sklep otworzył się sam - bez niczyjej decyzji.
  */
 
 declare(strict_types=1);
@@ -41,11 +41,11 @@ const STRIPE_LIVE_HOSTS = ['dnct.pl', 'www.dnct.pl', 'shop.dnct.pl'];
 /**
  * Bezpiecznik: klucz `sk_live_` działa WYŁĄCZNIE na produkcyjnej domenie.
  *
- * Na tej maszynie leżą oba komplety kluczy — produkcyjny w public_html/.env
+ * Na tej maszynie leżą oba komplety kluczy - produkcyjny w public_html/.env
  * i testowy w config/beta.env. Beta ma dodatkowo SALES_ENABLED=1, bo służy do
  * testowania zakupów. Wystarczyłaby jedna pomyłka przy kopiowaniu pliku
  * konfiguracji, żeby testowe klikanie zaczęło pobierać PRAWDZIWE pieniądze
- * z prawdziwych kart — i nikt by tego nie zauważył, bo wszystko działałoby
+ * z prawdziwych kart - i nikt by tego nie zauważył, bo wszystko działałoby
  * poprawnie.
  *
  * Sprawdzenie jest po BASE_URL, a nie po nagłówku Host: konfiguracja ma
@@ -62,7 +62,7 @@ function stripe_guard_environment(string $key): void
     if (!in_array((string)$host, STRIPE_LIVE_HOSTS, true)) {
         throw new RuntimeException(
             'Klucz produkcyjny Stripe na środowisku "' . $host . '". '
-            . 'Odmawiam — to obciążałoby prawdziwe karty. Wstaw klucz sk_test_.'
+            . 'Odmawiam - to obciążałoby prawdziwe karty. Wstaw klucz sk_test_.'
         );
     }
 }
@@ -70,7 +70,7 @@ function stripe_guard_environment(string $key): void
 /**
  * Ustawia klucz API. Wołane przez każdy endpoint dotykający Stripe'a.
  *
- * @throws RuntimeException gdy klucza nie ma — cicha awaria płatności jest
+ * @throws RuntimeException gdy klucza nie ma - cicha awaria płatności jest
  *                          gorsza niż błąd 500, bo klient zobaczyłby pustą
  *                          stronę zamiast informacji, że nie zapłacił
  */
@@ -98,7 +98,7 @@ function stripe_webhook_secret(): string
 {
     $secret = (string)env('STRIPE_WEBHOOK_SECRET', '');
     if ($secret === '') {
-        throw new RuntimeException('Brak STRIPE_WEBHOOK_SECRET — webhook nie może zweryfikować podpisu.');
+        throw new RuntimeException('Brak STRIPE_WEBHOOK_SECRET - webhook nie może zweryfikować podpisu.');
     }
     return $secret;
 }
@@ -127,7 +127,7 @@ function stripe_interval_for_days(int $days): array
  * Adres bazowy do budowania powrotów z Checkoutu.
  *
  * Bierzemy go z konfiguracji, a NIE z nagłówka Host. Adres powrotu wskazuje
- * miejsce, do którego trafia klient po zapłaceniu — sterowanie nim z nagłówka
+ * miejsce, do którego trafia klient po zapłaceniu - sterowanie nim z nagłówka
  * żądania oznaczałoby, że podrobiony Host przekierowuje płacących ludzi na
  * cudzą stronę.
  */

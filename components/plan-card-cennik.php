@@ -1,24 +1,24 @@
 <?php
 /**
- * Karta planu — wariant cennikowy (wysoki).
+ * Karta planu - wariant cennikowy (wysoki).
  *
  * DLACZEGO OSOBNY KOMPONENT, A NIE TRYB `compact` W plan-card.php
  *
  * Karta ze strony głównej jest zbudowana z klas Tailwinda i zaprojektowana pod
  * ekspozycję JEDNEGO planu z trzech. Dociskanie jej do siatki 3x3 skończyło się
  * dwudziestoma regułami `!important` nadpisującymi `.h-44`, `.mb-8`, `.text-4xl`
- * — czyli CSS-em, który opisuje cudzy układ zamiast własnego. Każda zmiana
+ * - czyli CSS-em, który opisuje cudzy układ zamiast własnego. Każda zmiana
  * w komponencie po cichu psuła cennik.
  *
  * Tutaj markup jest własny i semantyczny (`.pcard-*`), więc CSS mówi wprost,
  * co stylizuje. Strona główna zostaje na starym komponencie bez zmian.
  *
- * UKŁAD — kolejność jest celowa:
+ * UKŁAD - kolejność jest celowa:
  *
  *   grafika → nazwa → siatka parametrów → [rozpórka] → cena → przycisk
  *
  * Cena siedzi NA DOLE, tuż nad przyciskiem. Klient najpierw czyta, co dostaje,
- * a dopiero potem ile to kosztuje — przy dziewięciu kartach obok siebie cena
+ * a dopiero potem ile to kosztuje - przy dziewięciu kartach obok siebie cena
  * na górze zamienia porównywanie ofert w porównywanie samych liczb.
  *
  * Rozpórka (`.pcard-spacer`, `flex: 1`) sprawia, że stopki wszystkich kart
@@ -26,7 +26,7 @@
  * Bez niej ceny skakały o kilkanaście pikseli i rząd wyglądał na krzywy.
  *
  * Ikony rysowane są inline. `<i data-lucide>` bez wykonanego `createIcons()`
- * zostaje pustym elementem o zerowym rozmiarze — parametr planu zniknąłby
+ * zostaje pustym elementem o zerowym rozmiarze - parametr planu zniknąłby
  * bez śladu (patrz CLAUDE.md).
  */
 
@@ -50,10 +50,10 @@ function cennik_card_media(?string $file, string $subdir): string
 /**
  * Cena w zapisie polskim: 6.99 -> "6,99", 65.00 -> "65".
  *
- * W bazie ceny są kolumną DECIMAL, więc PHP dostaje je jako "6.99" — z kropką
+ * W bazie ceny są kolumną DECIMAL, więc PHP dostaje je jako "6.99" - z kropką
  * i, przy okrągłych kwotach, z zerowymi końcówkami ("65.00"). Wyświetlanie
  * tego wprost daje cennik w zapisie, którego nie używa żaden polski sklep.
- * Wartość nieliczbowa przechodzi bez zmian — lepiej pokazać dziwny napis
+ * Wartość nieliczbowa przechodzi bez zmian - lepiej pokazać dziwny napis
  * z bazy niż zamienić go w "0".
  */
 function cennik_price_label(mixed $price): string
@@ -124,7 +124,7 @@ function render_cennik_plan_card(array $p): void
             <?php endif; ?>
 
             <?php /* Wskaźnik mocy przy dolnej krawędzi kadru. Sama liczba "8 GB"
-                     nic nie mówi komuś, kto kupuje serwer pierwszy raz — pozycja
+                     nic nie mówi komuś, kto kupuje serwer pierwszy raz - pozycja
                      między najmniejszym a największym planem mówi wszystko od razu.
 
                      Wcześniej ten pasek leżał na górnej krawędzi karty i wchodził
@@ -155,7 +155,7 @@ function render_cennik_plan_card(array $p): void
         <div class="pcard-spacer"></div>
 
         <?php /* Niedobór na ŻYWYCH danych z węzła. Liczba pojawia się dopiero,
-                 gdy naprawdę robi się ciasno — stale wyświetlany komunikat
+                 gdy naprawdę robi się ciasno - stale wyświetlany komunikat
                  "zostały 3 sztuki" przestaje znaczyć cokolwiek po drugiej
                  wizycie, a klienci to wychwytują. */ ?>
         <?php if (!$isSoldOut && isset($p['fits']) && $p['fits'] !== null && $p['fits'] <= 4): ?>

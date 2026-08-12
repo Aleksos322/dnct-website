@@ -1,13 +1,13 @@
 <?php
 /**
- * POST /api/stripe/webhook.php — jedyne miejsce, w którym powstaje serwer.
+ * POST /api/stripe/webhook.php - jedyne miejsce, w którym powstaje serwer.
  *
  * TRZY RZECZY, KTÓRYCH STARA WERSJA NIE MIAŁA, A BEZ KTÓRYCH TO NIE DZIAŁA:
  *
  * 1. WERYFIKACJA PODPISU. beta/webhook.php robiło `json_decode` na treści
  *    żądania i ufało jej. Adres webhooka jest publiczny, więc dowolna osoba
  *    mogła wysłać własne "zdarzenie" i dostać serwer za darmo. Tutaj treść
- *    przechodzi przez \Stripe\Webhook::constructEvent z sekretem podpisu —
+ *    przechodzi przez \Stripe\Webhook::constructEvent z sekretem podpisu -
  *    bez poprawnego nagłówka Stripe-Signature nie dzieje się nic.
  *
  * 2. IDEMPOTENCJA. Stripe POWTARZA doręczenia: po każdym błędzie, po każdym
@@ -17,12 +17,12 @@
  *    pierwsze doręczenie jeszcze się liczy.
  *
  * 3. TWORZENIE SERWERA PO STRONIE SERWERA. Stara wersja robiła to w success.php,
- *    czyli przy WYŚWIETLENIU strony powrotu — kto zamknął kartę po zapłaceniu,
+ *    czyli przy WYŚWIETLENIU strony powrotu - kto zamknął kartę po zapłaceniu,
  *    nie dostawał nic, a kto odświeżył, mógł dostać drugi serwer.
  *
  * ODPOWIEDZI: 200 znaczy "przyjąłem, nie ponawiaj". 500 znaczy "spróbuj
  * jeszcze raz". Dlatego błąd bazy oddaje 500 (chcemy powtórki), a zdarzenie,
- * którym się nie zajmujemy — 200 (powtórka niczego nie zmieni).
+ * którym się nie zajmujemy - 200 (powtórka niczego nie zmieni).
  */
 
 declare(strict_types=1);
@@ -38,7 +38,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     exit('{"error":"method_not_allowed"}');
 }
 
-/* Surowa treść żądania, nie request_payload(). Podpis liczony jest z BAJTÓW —
+/* Surowa treść żądania, nie request_payload(). Podpis liczony jest z BAJTÓW -
    każde przepuszczenie ich przez dekodowanie i ponowne zakodowanie zmienia
    choćby kolejność kluczy i podpis przestaje się zgadzać. */
 $payload   = (string)file_get_contents('php://input');
@@ -48,17 +48,17 @@ try {
     stripe_init();
     $event = \Stripe\Webhook::constructEvent($payload, $signature, stripe_webhook_secret());
 } catch (\UnexpectedValueException $e) {
-    error_log('Stripe webhook: nieczytelna treść — ' . $e->getMessage());
+    error_log('Stripe webhook: nieczytelna treść - ' . $e->getMessage());
     http_response_code(400);
     exit('{"error":"invalid_payload"}');
 } catch (\Stripe\Exception\SignatureVerificationException $e) {
     // Najczęstsza przyczyna to zły sekret w .env, ale to samo widać przy
     // próbie podszycia się. W obu przypadkach: nie ruszamy niczego.
-    error_log('Stripe webhook: podpis się nie zgadza — ' . $e->getMessage());
+    error_log('Stripe webhook: podpis się nie zgadza - ' . $e->getMessage());
     http_response_code(400);
     exit('{"error":"invalid_signature"}');
 } catch (Throwable $e) {
-    error_log('Stripe webhook: konfiguracja — ' . $e->getMessage());
+    error_log('Stripe webhook: konfiguracja - ' . $e->getMessage());
     http_response_code(500);
     exit('{"error":"misconfigured"}');
 }
@@ -67,7 +67,7 @@ $dnct = dnct_db();
 
 /* Zamek idempotencji. INSERT, a nie SELECT-potem-INSERT: sprawdzenie i zapis
    w dwóch krokach zostawia okno, w które trafiają dwa równoległe doręczenia
-   tego samego zdarzenia — a Stripe potrafi je wysłać dokładnie tak. */
+   tego samego zdarzenia - a Stripe potrafi je wysłać dokładnie tak. */
 try {
     $lock = $dnct->prepare('INSERT INTO stripe_events (event_id, type) VALUES (?, ?)');
     $lock->execute([$event->id, $event->type]);
@@ -77,7 +77,7 @@ try {
         echo '{"ok":true,"duplicate":true}';
         exit;
     }
-    error_log('Stripe webhook: baza niedostępna — ' . $e->getMessage());
+    error_log('Stripe webhook: baza niedostępna - ' . $e->getMessage());
     http_response_code(500);
     exit('{"error":"database"}');
 }
@@ -90,9 +90,9 @@ try {
 
     echo json_encode(['ok' => true, 'handled' => $handled]);
 } catch (Throwable $e) {
-    error_log('Stripe webhook: błąd obsługi ' . $event->type . ' (' . $event->id . ') — ' . $e->getMessage());
+    error_log('Stripe webhook: błąd obsługi ' . $event->type . ' (' . $event->id . ') - ' . $e->getMessage());
 
-    /* Zdarzenie zostaje oznaczone jako błędne, ale WIERSZ ZOSTAJE — inaczej
+    /* Zdarzenie zostaje oznaczone jako błędne, ale WIERSZ ZOSTAJE - inaczej
        powtórka trafiłaby na czysto i mogła powtórzyć część, która się udała.
        Zwracamy 500, więc Stripe spróbuje ponownie; przy powtórce zadziała
        blokada powyżej, a ślad błędu zostaje do ręcznego rozpatrzenia. */

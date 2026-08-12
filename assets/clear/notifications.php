@@ -3,9 +3,9 @@
  * assets/clear/notifications.php
  *
  * Dwie warstwy powiadomień:
- *  1. Flash (sesja) — jednorazowe komunikaty po akcji. Bez zmian względem
+ *  1. Flash (sesja) - jednorazowe komunikaty po akcji. Bez zmian względem
  *     poprzedniej wersji, patrz $_SESSION['flash'][] = [...]
- *  2. Trwałe (baza danych) — dzwoneczek w prawym górnym rogu + dropdown +
+ *  2. Trwałe (baza danych) - dzwoneczek w prawym górnym rogu + dropdown +
  *     toast dla nowych. Wysyłane przez backend/lib/notifications.php
  *     (notify_user / notify_admins / notify_all).
  */
@@ -58,7 +58,7 @@ $isLoggedInForBell = isset($_SESSION['authentik_username']);
 
     <?php /* Lista otwiera się W GÓRĘ, nie w dół.
              Dzwonek jest przyklejony do DOLNEJ krawędzi ekranu, więc `mt-2`
-             rozwijało panel poniżej widocznego obszaru — historia powiadomień
+             rozwijało panel poniżej widocznego obszaru - historia powiadomień
              istniała, ale nie dało się jej zobaczyć ani przewinąć do niej. */ ?>
     <div id="dnct-bell-dropdown" class="hidden absolute right-0 bottom-full mb-3 w-80 max-h-[60vh] overflow-y-auto dnct-notif-panel">
         <div class="dnct-notif-head flex items-center justify-between px-4 py-3">

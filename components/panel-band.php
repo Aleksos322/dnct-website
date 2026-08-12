@@ -1,10 +1,10 @@
 <?php
 /**
- * Pasmo "Zobacz, zanim zapłacisz" — demo panelu, odręczny dopisek i konsola.
+ * Pasmo "Zobacz, zanim zapłacisz" - demo panelu, odręczny dopisek i konsola.
  *
  * Wspólne dla cennika i strony głównej. Wcześniej istniało tylko w cennik.php;
  * skopiowanie go na stronę główną dałoby dwie kopie tego samego bloku, a takie
- * pary rozjeżdżają się przy pierwszej poprawce — zwykle tak, że nikt tego nie
+ * pary rozjeżdżają się przy pierwszej poprawce - zwykle tak, że nikt tego nie
  * zauważa, dopóki klient nie zapyta, czemu na jednej podstronie pisze co innego.
  *
  * @param array{trailer?:string,panelUrl?:string} $opts
@@ -22,14 +22,14 @@ function render_panel_band(array $opts = []): void
     <!-- ============ PANEL: DEMO + ZWIASTUN ============ -->
     <?php /* Największa dziura na tej stronie była właśnie tutaj: między
              planami a stopką klient nie dostawał żadnego powodu, żeby uwierzyć,
-             że panel jest dobry. Cena i lista funkcji tego nie załatwiają —
+             że panel jest dobry. Cena i lista funkcji tego nie załatwiają -
              panel trzeba zobaczyć. */ ?>
     <section class="pnl-band">
         <div class="pnl-copy">
             <span class="cnk-eyebrow">Panel</span>
             <h2 class="cnk-h2">Zobacz, zanim zapłacisz</h2>
             <p class="pnl-lead">
-                Konsola na żywo, pliki, backupy i harmonogramy — wszystko w jednym
+                Konsola na żywo, pliki, backupy i harmonogramy - wszystko w jednym
                 miejscu, po polsku. Wejdź i poklikaj, konto zakładasz dopiero wtedy,
                 gdy Ci się spodoba.
             </p>
@@ -49,12 +49,12 @@ function render_panel_band(array $opts = []): void
                 </a>
 
                 <?php /* Odręczna strzałka z podpisem. Rysowana ścieżką SVG,
-                         nie obrazkiem — dzięki temu da się ją animować (linia
+                         nie obrazkiem - dzięki temu da się ją animować (linia
                          "dopisuje się" po wejściu w kadr) i nie trzeba trzymać
                          pliku. Podpis leci pod kątem, bo dopisek na marginesie
                          ma wyglądać na dopisany, a nie zaprojektowany. */ ?>
                 <div class="pnl-scribble" aria-hidden="true">
-                    <?php /* Grot jest na GÓRZE ścieżki, nie na końcu — strzałka
+                    <?php /* Grot jest na GÓRZE ścieżki, nie na końcu - strzałka
                              biegnie od podpisu w prawym dolnym rogu i celuje
                              w przycisk leżący bezpośrednio nad nią. */ ?>
                     <svg class="pnl-arrow" viewBox="0 0 160 90" fill="none">
@@ -74,7 +74,7 @@ function render_panel_band(array $opts = []): void
 
         <div class="pnl-visual">
             <?php if ($trailerId !== ''): ?>
-                <?php /* Podgląd zamiast osadzonego filmu — patrz komentarz przy
+                <?php /* Podgląd zamiast osadzonego filmu - patrz komentarz przy
                          stałej CENNIK_TRAILER_YT. Iframe wstawia skrypt dopiero
                          po kliknięciu. */ ?>
                 <button type="button" class="pnl-trailer" data-yt="<?php echo htmlspecialchars($trailerId); ?>">
@@ -84,12 +84,12 @@ function render_panel_band(array $opts = []): void
             <?php else: ?>
                 <?php /* Makieta konsoli. Wiersze wypisuje skrypt, żeby pasmo
                          żyło zamiast stać. Treść jest przykładowa i tak też jest
-                         opisana w nagłówku okna — udawanie logu z prawdziwej
+                         opisana w nagłówku okna - udawanie logu z prawdziwej
                          maszyny byłoby zwykłym kłamstwem. */ ?>
                 <div class="pnl-console" data-role="console">
                     <div class="pnl-console-bar">
                         <span class="pnl-dot r"></span><span class="pnl-dot y"></span><span class="pnl-dot g"></span>
-                        <span class="pnl-console-title">konsola — podgląd</span>
+                        <span class="pnl-console-title">konsola - podgląd</span>
                     </div>
                     <pre class="pnl-console-body" data-role="consoleBody"></pre>
                 </div>

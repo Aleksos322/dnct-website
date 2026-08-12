@@ -38,7 +38,7 @@ try {
         ->query('SELECT * FROM hosting_plans WHERE id IN (1, 3, 9) AND is_active = 1 ORDER BY price ASC')
         ->fetchAll();
 
-    /* Dostępność z realnej pojemności węzła klienckiego — ta sama funkcja, co
+    /* Dostępność z realnej pojemności węzła klienckiego - ta sama funkcja, co
        na cenniku. Wcześniej karty miały tu wymuszone `sold_out => true`, przez
        co strona główna pokazywała wszystko jako wyprzedane, a cennik jako
        dostępne. Dwie strony tego samego serwisu przeczyły sobie nawzajem. */
@@ -115,13 +115,13 @@ ob_start();
 
 <!-- ============ ZOBACZ, ZANIM ZAPŁACISZ ============ -->
 <?php /* Zaraz pod hero, PRZED opisem hostingu i przed planami. Odwiedzający
-         trafia tu z reklamy albo z wyszukiwarki i nie zna nas — najpierw
+         trafia tu z reklamy albo z wyszukiwarki i nie zna nas - najpierw
          potrzebuje powodu, żeby uwierzyć, że panel jest dobry, a dopiero potem
          cennika. Odwrotna kolejność każe mu ocenić cenę czegoś, czego jeszcze
          nie widział.
 
          Pasmo jest tym samym komponentem co w cenniku (components/panel-band.php),
-         a wygląd bierze z cennik.css — stąd klasa .cennik-page na opakowaniu.
+         a wygląd bierze z cennik.css - stąd klasa .cennik-page na opakowaniu.
          Kopia markupu rozjechałaby się z oryginałem przy pierwszej poprawce. */ ?>
 <section class="px-6 max-w-7xl mx-auto w-full cennik-page">
     <?php render_panel_band(); ?>
@@ -137,11 +137,11 @@ ob_start();
             </h2>
             <p class="text-gray-400 mb-4">
                 DNCT Hosting to serwery gier dla Minecraft, Project Zomboid, Vintage Story i Hytale.
-                Hosting gier od 3.99 PLN — stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
+                Hosting gier od 3.99 PLN - stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
             </p>
             <p class="text-gray-400">
                 Polska infrastruktura, ochrona DDoS, codzienne backupy i wsparcie 24/7 przez Discord.
-                Hosting Minecraft z modami, hosting Project Zomboid, hosting Vintage Story — wszystko w jednym miejscu.
+                Hosting Minecraft z modami, hosting Project Zomboid, hosting Vintage Story - wszystko w jednym miejscu.
             </p>
         </div>
 
@@ -217,7 +217,7 @@ ob_start();
             <div class="text-center md:text-left">
                 <h2 class="text-2xl md:text-3xl font-bold mb-4">Dołącz do społeczności</h2>
                 <p class="text-gray-400 mb-8 text-sm md:text-base">
-                    Masz pytania? Potrzebujesz pomocy technicznej? Jesteśmy na Discordzie —
+                    Masz pytania? Potrzebujesz pomocy technicznej? Jesteśmy na Discordzie -
                     zwykle odpisujemy w kilka minut.
                 </p>
                 <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener"

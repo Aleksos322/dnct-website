@@ -1,7 +1,7 @@
 -- ---------------------------------------------------------------------------
 -- Płatności Stripe: zamówienia, idempotencja webhooka, kupony.
 --
--- BAZA: `dnct` (MY_DB_*), czyli WŁASNA baza strony — nie `panel`.
+-- BAZA: `dnct` (MY_DB_*), czyli WŁASNA baza strony - nie `panel`.
 -- Baza Pterodactyla jest z tej strony tylko do odczytu (patrz CLAUDE.md).
 -- Stara wersja pisała zamówienia prosto do `panel.rented_servers`, w dodatku
 -- wyłączając na czas zapisu kontrolę kluczy obcych (`SET FOREIGN_KEY_CHECKS=0`).
@@ -15,7 +15,7 @@
 CREATE TABLE IF NOT EXISTS orders (
     id                      INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    -- Kto kupuje. Strona nie ma własnej tabeli kont — tożsamość trzyma
+    -- Kto kupuje. Strona nie ma własnej tabeli kont - tożsamość trzyma
     -- Authentik, a wspólnym mianownikiem z Pterodactylem jest ADRES E-MAIL
     -- (tak samo dopasowuje konta rozszerzenie SSO panelu).
     user_email              VARCHAR(190) NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS orders (
 -- ---------------------------------------------------------------------------
 -- Idempotencja webhooka.
 --
--- Stripe POWTARZA doręczenia — przy każdym błędzie i przy przekroczeniu czasu
+-- Stripe POWTARZA doręczenia - przy każdym błędzie i przy przekroczeniu czasu
 -- odpowiedzi, nawet jeśli zdarzenie zostało już obsłużone. Bez tej tabeli
 -- jedna płatność potrafi założyć trzy serwery.
 --
@@ -89,11 +89,11 @@ CREATE TABLE IF NOT EXISTS stripe_events (
 -- Kupony.
 --
 -- ŹRÓDŁEM PRAWDY JEST STRIPE, nie ta tabela. Zniżkę nalicza Checkout, a kod
--- sprawdza Stripe — my trzymamy tylko odbicie, żeby dało się zrobić listę
+-- sprawdza Stripe - my trzymamy tylko odbicie, żeby dało się zrobić listę
 -- w panelu bez odpytywania API przy każdym odświeżeniu strony.
 --
 -- Własna implementacja rabatów oznaczałaby liczenie kwoty po naszej stronie
--- i podawanie Stripe'owi gotowej ceny — czyli dokładnie ten wariant, w którym
+-- i podawanie Stripe'owi gotowej ceny - czyli dokładnie ten wariant, w którym
 -- błąd w mnożeniu zamienia się w realną stratę.
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS coupons (

@@ -44,11 +44,11 @@ function csrf_check_request(): bool
  *
  * DLACZEGO 403, A NIE 419.
  *
- * Wcześniej było tu 419 ("Page Expired" — konwencja Laravela) z komentarzem,
+ * Wcześniej było tu 419 ("Page Expired" - konwencja Laravela) z komentarzem,
  * że front rozpoznaje ten kod. Dwie rzeczy się nie zgadzały:
  *
  *   1. 419 nie jest zarejestrowanym kodem HTTP i ten stos zamienia go po
- *      drodze na 500 — sprawdzone: 400, 422, 451 i 503 przechodzą nietknięte,
+ *      drodze na 500 - sprawdzone: 400, 422, 451 i 503 przechodzą nietknięte,
  *      419 wraca do przeglądarki jako 500. Nieudany token wyglądał więc jak
  *      awaria serwera.
  *   2. Żaden plik w assets/js nigdy tego kodu nie sprawdzał, więc obiecana
@@ -56,7 +56,7 @@ function csrf_check_request(): bool
  *
  * 403 przechodzi bez zmian i znaczy dokładnie to, co się stało: żądanie było
  * zrozumiałe, ale nie zostało wpuszczone. Rozpoznanie po stronie frontu opiera
- * się na polu `reason` w treści, a nie na kodzie — pole przeżyje każdy proxy.
+ * się na polu `reason` w treści, a nie na kodzie - pole przeżyje każdy proxy.
  */
 function csrf_guard(): void
 {

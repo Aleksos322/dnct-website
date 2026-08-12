@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CENNIK — układ i rytm strony
+   CENNIK - układ i rytm strony
 
    Wszystko jest zagnieżdżone pod .cennik-page. To nie ozdobnik: reguły niżej
    zagęszczają karty planów, a te same karty żyją też na stronie głównej, gdzie
@@ -14,7 +14,7 @@
    KONTENER STRONY
 
    Jedna szerokość i jedne marginesy dla WSZYSTKIEGO: hero, zakładek, paneli
-   i sekcji dolnej. Wcześniej hero było pełnoekranowe, a panele wcięte —
+   i sekcji dolnej. Wcześniej hero było pełnoekranowe, a panele wcięte -
    przez co strona wyglądała, jakby rozjeżdżała się w lewo i w prawo.
    -------------------------------------------------------------------------- */
 .cennik-page {
@@ -50,11 +50,11 @@
    DEKORACJE BOCZNE
 
    Klocki i drobiazgi w motywie gry, unoszące się w marginesach po obu stronach
-   treści. Zestaw zmienia się razem z zakładką — to jedyny element strony, po
+   treści. Zestaw zmienia się razem z zakładką - to jedyny element strony, po
    którym widać kątem oka, że przełączyło się grę.
 
    DWA TRYBY ROZSTAWIENIA. Treść ma 1240 px, więc na typowym ekranie nie ma
-   po bokach ŻADNEGO marginesu — przy skalowaniu systemu 125% laptopowe 1280 px
+   po bokach ŻADNEGO marginesu - przy skalowaniu systemu 125% laptopowe 1280 px
    to niecałe 1000 px CSS. Dekoracje ustawione wyłącznie w marginesach nie
    pokazałyby się prawie nikomu.
 
@@ -63,7 +63,7 @@
    Dopiero od 1500 px, gdy margines naprawdę istnieje, przesuwają się do środka
    i robią się większe.
 
-   Poniżej 900 px znikają całkiem — na telefonie karta zajmuje całą szerokość
+   Poniżej 900 px znikają całkiem - na telefonie karta zajmuje całą szerokość
    i nie ma czego dekorować.
    ========================================================================== */
 .cnk-decor-layer {
@@ -83,7 +83,7 @@
 /* PODZIAŁ PRACY MIĘDZY WARSTWAMI. Element zewnętrzny odpowiada za pojawienie
    się i paralaksę, wewnętrzny <svg> za unoszenie. Gdyby obie animacje siedziały
    na jednym elemencie, druga z listy nadpisywałaby `transform` pierwszej
-   i wejście w ogóle by się nie pokazało — animacje nie sumują tej właściwości. */
+   i wejście w ogóle by się nie pokazało - animacje nie sumują tej właściwości. */
 .cnk-decor-item {
     position: absolute;
     display: block;
@@ -150,7 +150,7 @@
 }
 
 /* ==========================================================================
-   PASMO "PANEL" — demo, odręczna strzałka i makieta konsoli
+   PASMO "PANEL" - demo, odręczna strzałka i makieta konsoli
    ========================================================================== */
 .cennik-page .pnl-band {
     display: grid;
@@ -222,11 +222,11 @@
    Ma wyglądać na dorysowany długopisem na wydruku, nie na element interfejsu.
    Stąd obrót, kolor inny niż cała reszta strony i pismo odręczne.
 
-   O KROJU: nie ładujemy żadnego pliku fontu — to byłoby kolejne pobranie
+   O KROJU: nie ładujemy żadnego pliku fontu - to byłoby kolejne pobranie
    z zewnętrznego serwera na stronie, która pilnuje zgód na ciasteczka.
    Zamiast tego lecimy po krojach odręcznych obecnych w systemach (Windows,
    macOS) z ogólnym `cursive` na końcu. Napis zawsze wygląda na pisany ręcznie,
-   choć na różnych systemach nieco inaczej — i to jest tu akceptowalne, bo
+   choć na różnych systemach nieco inaczej - i to jest tu akceptowalne, bo
    dopisek na marginesie ma prawo wyglądać za każdym razem trochę inaczej.
    -------------------------------------------------------------------------- */
 .cennik-page .pnl-scribble {
@@ -241,7 +241,7 @@
 }
 
 /* Szerokość dobrana tak, żeby grot (punkt 22,16 w viewBox) wypadł pod lewą
-   częścią przycisku — strzałka ma wskazywać konkretny element, a nie okolicę. */
+   częścią przycisku - strzałka ma wskazywać konkretny element, a nie okolicę. */
 .cennik-page .pnl-arrow { width: 96px; height: 54px; flex-shrink: 0; overflow: visible; }
 
 /* Linia "dopisuje się" sama: kreskę o długości całej ścieżki przesuwamy
@@ -433,11 +433,11 @@
 }
 
 /* --------------------------------------------------------------------------
-   HERO — asymetryczny. Wycentrowany nagłówek nad siatką kart to układ, który
+   HERO - asymetryczny. Wycentrowany nagłówek nad siatką kart to układ, który
    ma każdy cennik w internecie; przesunięcie treści w lewo i postawienie obok
    niej żywego licznika daje stronie punkt zaczepienia dla wzroku.
    -------------------------------------------------------------------------- */
-/* Hero nie ma własnych marginesów bocznych — bierze je z .cnk-wrap, dzięki
+/* Hero nie ma własnych marginesów bocznych - bierze je z .cnk-wrap, dzięki
    czemu nagłówek stoi w tej samej pionowej linii co panel z planami poniżej. */
 .cennik-page .cnk-hero {
     position: relative;
@@ -446,7 +446,7 @@
 
 /* Miękka poświata pod hero. Tło strony rysuje FinisherHeader (wspólne z całym
    serwisem); to jest warstwa sekcyjna, która oddziela pasma od siebie. */
-/* Poświata jest tylko tłem — nie może rozpychać strony ani łapać kliknięć. */
+/* Poświata jest tylko tłem - nie może rozpychać strony ani łapać kliknięć. */
 .cennik-page .cnk-hero-glow {
     position: absolute;
     top: -30%;
@@ -470,7 +470,7 @@
 
 .cennik-page .cnk-hero-text { flex: 1 1 24rem; }
 
-/* Licznik na żywo — jedyna liczba na stronie, której nie da się podważyć. */
+/* Licznik na żywo - jedyna liczba na stronie, której nie da się podważyć. */
 .cennik-page .cnk-live {
     display: flex;
     align-items: center;
@@ -515,7 +515,7 @@
    PRZEŁĄCZNIK GIER
 
    Zwykły rząd pigułek NAD panelem. Wcześniej zakładki wchodziły w powierzchnię
-   pod spodem ujemnym marginesem — w zamyśle miało to je z nią spiąć, w praktyce
+   pod spodem ujemnym marginesem - w zamyśle miało to je z nią spiąć, w praktyce
    czytało się jak błąd renderowania. Efekt usunięty; czytelność wygrywa.
    -------------------------------------------------------------------------- */
 .cennik-page .cennik-tabs {
@@ -577,7 +577,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   POWIERZCHNIE SEKCJI — karty przestają wisieć w próżni, bo dostają
+   POWIERZCHNIE SEKCJI - karty przestają wisieć w próżni, bo dostają
    ograniczone tło, na którym leżą.
    -------------------------------------------------------------------------- */
 .cennik-page .cnk-panel {
@@ -610,7 +610,7 @@
    KARTY PLANÓW
 
    Markup jest własny (components/plan-card-cennik.php), nie przerobiony
-   z komponentu strony głównej — dzięki temu nie ma tu ANI JEDNEGO !important.
+   z komponentu strony głównej - dzięki temu nie ma tu ANI JEDNEGO !important.
    Poprzednia wersja miała ich dwadzieścia, bo dociskała klasy Tailwinda
    (`.h-44`, `.mb-8`, `.text-4xl`) do innego układu, niż zostały napisane.
    -------------------------------------------------------------------------- */
@@ -627,7 +627,7 @@
 .cennik-page .plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
 .cennik-page .plan-pick[data-plan-soldout="1"]:hover { transform: none; }
 
-/* Sama karta. `min-height` daje jej pion nawet przy planie o krótkiej nazwie —
+/* Sama karta. `min-height` daje jej pion nawet przy planie o krótkiej nazwie -
    bez tego karty w rzędzie miały różną wysokość i siatka wyglądała na krzywą. */
 .cennik-page .pcard {
     position: relative;
@@ -655,7 +655,7 @@
 .cennik-page .pcard.is-sale { border-color: rgba(59, 130, 246, 0.4); }
 .cennik-page .pcard.is-soldout { border-color: rgba(239, 68, 68, 0.28); opacity: 0.72; }
 
-/* Odznaka. Jedna, w prawym górnym rogu — plan bywa i popularny, i przeceniony,
+/* Odznaka. Jedna, w prawym górnym rogu - plan bywa i popularny, i przeceniony,
    ale dwie naklejki obok siebie kasują się nawzajem, więc komponent wybiera
    jedną w kolejności: wyprzedane > popularny > promocja. */
 .cennik-page .pcard-badge {
@@ -676,7 +676,7 @@
 .cennik-page .pcard-badge-out  { background: linear-gradient(135deg, #dc2626, #ea580c); }
 
 /* Kadr z grafiką gry. Grafiki w bazie są ciemne i rozmyte, więc służą za
-   podkład, a nie za ilustrację — czytelna jest dopiero ikona na wierzchu. */
+   podkład, a nie za ilustrację - czytelna jest dopiero ikona na wierzchu. */
 .cennik-page .pcard-art {
     position: relative;
     height: 7.5rem;
@@ -730,7 +730,7 @@
 }
 
 /* Parametry jako siatka 2x2, nie lista czterech wierszy. Cztery kafelki czytają
-   się jak tabliczka znamionowa i pozwalają porównać dwa plany rzutem oka —
+   się jak tabliczka znamionowa i pozwalają porównać dwa plany rzutem oka -
    lista wymagała czytania linia po linii. */
 .cennik-page .pcard-specs {
     display: grid;
@@ -778,7 +778,7 @@
     color: #64748b;
 }
 
-/* Rozpórka — patrz komentarz w komponencie. Trzyma stopki kart równo. */
+/* Rozpórka - patrz komentarz w komponencie. Trzyma stopki kart równo. */
 .cennik-page .pcard-spacer { flex: 1 1 auto; min-height: 1.1rem; }
 
 .cennik-page .pcard-scarce {
@@ -826,7 +826,7 @@
    czytało się jak osobna informacja, a nie jak część kwoty. */
 .cennik-page .pcard-price-per { font-size: 0.72rem; color: #64748b; margin-left: 0.1rem; }
 
-/* Przycisk jest <span>, nie <a> — sprzedaż jest wyłączona, a klikalny jest
+/* Przycisk jest <span>, nie <a> - sprzedaż jest wyłączona, a klikalny jest
    cały kafelek (zaznaczenie planu). Link prowadzący do "#" byłby obietnicą,
    której strona dziś nie spełnia, i psułby nawigację klawiaturą. */
 .cennik-page .pcard-cta {
@@ -858,7 +858,7 @@
 
 /* SYGNATURA: wskaźnik mocy przy dolnej krawędzi kadru z grafiką.
    Liczba "8 GB" nic nie mówi komuś, kto kupuje serwer pierwszy raz. Pozycja
-   między najmniejszym a największym planem mówi wszystko od razu — i to jest
+   między najmniejszym a największym planem mówi wszystko od razu - i to jest
    informacja, której żadna inna część karty nie niesie. */
 .cennik-page .pcard-power {
     position: absolute;
@@ -881,11 +881,11 @@
 .cennik-page .pcard.is-soldout .pcard-power > span { background: #475569; box-shadow: none; }
 
 /* --------------------------------------------------------------------------
-   SEKCJA DWUKOLUMNOWA — specyfikacja po lewej, zaufanie po prawej.
+   SEKCJA DWUKOLUMNOWA - specyfikacja po lewej, zaufanie po prawej.
    Rozdzielone celowo: to dwa różne rodzaje argumentu i mieszanie ich osłabia
    oba.
    -------------------------------------------------------------------------- */
-/* Jedna skala odstępów dla wszystkich pasm — wcześniej każde miało własny
+/* Jedna skala odstępów dla wszystkich pasm - wcześniej każde miało własny
    margines i strona rwała się w pionie. */
 .cennik-page .cnk-split {
     display: grid;
@@ -903,7 +903,7 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.008) 100%);
 }
 
-/* Prawa kolumna dostaje delikatny fiolet — to strona argumentów, nie danych,
+/* Prawa kolumna dostaje delikatny fiolet - to strona argumentów, nie danych,
    i ma się różnić w odbiorze, a nie tylko treścią. */
 .cennik-page .cnk-trust {
     background: linear-gradient(180deg, rgba(139, 92, 246, 0.09) 0%, rgba(59, 130, 246, 0.04) 100%);
@@ -944,7 +944,7 @@
 }
 /* Wyłączamy z tej reguły WSZYSTKIE elementy dużej liczby, także zagnieżdżone.
    Selektor z elementem (`… span`) ma wyższą specyficzność niż sama klasa, więc
-   bez :not() liczba dostawała rozmiar zwykłego opisu — i tak było, zanim
+   bez :not() liczba dostawała rozmiar zwykłego opisu - i tak było, zanim
    ktokolwiek to zauważył. Pierwsza poprawka objęła tylko zewnętrzny span,
    a cyfry siedzą w środku i dalej łapały 0,82 rem. */
 .cennik-page .cnk-trust-item span:not(.cnk-trust-big):not(.cnk-trust-num):not(.cnk-trust-unit) {
@@ -957,7 +957,7 @@
    Przy wyśrodkowaniu duża liczba lądowała obok DRUGIEGO wiersza opisu, przez co
    nagłówek "na rezygnację" wisiał sam nad nią i para czytała się jak dwie
    niezwiązane rzeczy. Od góry liczba stoi przy swoim podpisie i spływa wzdłuż
-   opisu — tak, jak działa każdy tego typu układ. */
+   opisu - tak, jak działa każdy tego typu układ. */
 .cennik-page .cnk-trust-hero {
     display: flex;
     align-items: flex-start;
@@ -966,12 +966,12 @@
 }
 
 .cennik-page .cnk-trust-big {
-    font-size: 2.4rem;
+    font-size: 1.65rem;
     font-weight: 900;
     /* Wersalikowa wysokość cyfr jest mniejsza niż pole tekstu, więc bez tego
        przesunięcia liczba wyrównana "do góry" siedzi optycznie za nisko. */
     line-height: 1;
-    margin-top: -0.15rem;
+    margin-top: 0.1rem;
     background: linear-gradient(135deg, #8b5cf6, #06b6d4);
     -webkit-background-clip: text;
     background-clip: text;
@@ -990,7 +990,7 @@
    każdym przejściu z jednocyfrowej na dwucyfrową. Rozdzielenie liczby
    i jednostki sprawia, że rusza się wyłącznie to, co ma się ruszać.
 
-   `tabular-nums` domyka sprawę wewnątrz pola — bez tego "11" i "24" mają różną
+   `tabular-nums` domyka sprawę wewnątrz pola - bez tego "11" i "24" mają różną
    szerokość i cyfry drgają nawet przy stałym pudełku. */
 .cennik-page .cnk-trust-num {
     font-variant-numeric: tabular-nums;
@@ -1092,7 +1092,7 @@
 /* ==========================================================================
    KONFIGURATOR SLOTÓW
    Układ asymetryczny: sterowanie po lewej, wynik po prawej. Celowo inny rytm
-   niż siatka kart — druga gra ma się różnić w odbiorze, nie tylko treścią.
+   niż siatka kart - druga gra ma się różnić w odbiorze, nie tylko treścią.
    ========================================================================== */
 .cennik-page .cnk-panel-cfg { max-width: 940px; margin: 0 auto; }
 
@@ -1138,7 +1138,7 @@
     font-size: 0.7rem; color: #475569; font-family: ui-monospace, monospace; margin-top: 0.5rem;
 }
 
-/* Podpowiedź kontekstowa — klient nietechniczny nie musi zgadywać liczby slotów. */
+/* Podpowiedź kontekstowa - klient nietechniczny nie musi zgadywać liczby slotów. */
 .cennik-page .cfg-hint { margin-top: 0.85rem; font-size: 0.8rem; color: #a78bfa; min-height: 1.2em; }
 
 .cennik-page .cfg-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
@@ -1191,7 +1191,7 @@
 .cennik-page .cfg-select:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45); }
 
 /* ==========================================================================
-   PASEK WYBORU — bez przycisku zakupu; sprzedaż jest wyłączona, a przycisk
+   PASEK WYBORU - bez przycisku zakupu; sprzedaż jest wyłączona, a przycisk
    prowadzący donikąd szkodzi bardziej niż jego brak.
    ========================================================================== */
 .pick-bar {
@@ -1239,7 +1239,7 @@
 
 
 /* Przycisk zamówienia w pasku wyboru. Pasek pokazywał dotąd co wybrano i nie
-   dawał z tym nic zrobić — droga do kasy prowadziła wyłącznie przez przycisk
+   dawał z tym nic zrobić - droga do kasy prowadziła wyłącznie przez przycisk
    na karcie, co przy przewiniętej stronie znaczyło "wróć w górę i szukaj". */
 .pick-bar-go {
     flex-shrink: 0;
@@ -1266,14 +1266,14 @@
 }
 
 /* ==========================================================================
-   BOCZNA SZYNA — licznik na żywo i gwarancje
+   BOCZNA SZYNA - licznik na żywo i gwarancje
 
    Wcześniej te informacje stały w hero, w poprzek strony, i spychały karty
    o pół ekranu w dół. Na cenniku treścią są karty; wszystko, co je odsuwa,
    konkuruje z jedyną rzeczą, po którą klient tu przyszedł.
 
    PRZYKLEJENIE jest sensowne tylko wtedy, gdy obok treści zostaje realne
-   miejsce. Treść ma 1240 px, szyna 190 px — przy 1400 px jeszcze się mieszczą,
+   miejsce. Treść ma 1240 px, szyna 190 px - przy 1400 px jeszcze się mieszczą,
    niżej szyna wróciłaby na tekst. Dlatego poniżej tej szerokości leży
    normalnie w treści, nad zakładkami.
    ========================================================================== */
@@ -1293,7 +1293,7 @@
     gap: 0.5rem 1.25rem;
 }
 
-/* Od tej szerokości szyna staje się prawą kolumną hero — mieści się obok
+/* Od tej szerokości szyna staje się prawą kolumną hero - mieści się obok
    nagłówka i przestaje kosztować cokolwiek w pionie.
 
    TEKST ZAWSZE DO LEWEJ, mimo że sam blok stoi po prawej. Wyrównanie do prawej
@@ -1371,7 +1371,7 @@
     line-height: 1.4;
     color: #64748b;
 }
-/* Podpis jest jednym zdaniem — łamanie zostawia przeglądarka. Ukrywanie <br>
+/* Podpis jest jednym zdaniem - łamanie zostawia przeglądarka. Ukrywanie <br>
    przez CSS sklejało słowa ("działaw tej chwili"), bo znacznik nie zostawia po
    sobie spacji; dlatego zniknął z markupu, a nie tylko z widoku. */
 
@@ -1392,7 +1392,7 @@
 }
 
 /* ==========================================================================
-   "SZUKASZ INNEJ GRY" — zaproszenie zamiast obietnicy
+   "SZUKASZ INNEJ GRY" - zaproszenie zamiast obietnicy
 
    Zapowiedź bez terminu ("Wkrótce") nic nie daje klientowi, a nam wisi nad
    głową: im dłużej nie nadchodzi, tym gorzej wygląda cała strona.
@@ -1436,7 +1436,7 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #fff;
-    background: #5865f2;              /* barwa Discorda — rozpoznawalna bez podpisu */
+    background: #5865f2;              /* barwa Discorda - rozpoznawalna bez podpisu */
     box-shadow: 0 10px 26px rgba(88, 101, 242, 0.3);
     transition: filter 0.2s ease, transform 0.2s ease;
 }
@@ -1447,7 +1447,7 @@
     .cennik-page .cennik-ask-btn:hover { transform: none; }
 }
 
-/* Pływająca plakietka z licznikiem — patrz komentarz w cennik.php.
+/* Pływająca plakietka z licznikiem - patrz komentarz w cennik.php.
    Powyżej 1400 px jest zbędna, bo tam przykleja się cała szyna. */
 .cnk-live-float {
     position: fixed;
@@ -1488,7 +1488,7 @@
    DROBNE REAKCJE NA KURSOR
 
    Każda z nich ma coś znaczyć, nie tylko się ruszać. Przy
-   prefers-reduced-motion wszystkie znikają — dla części osób ruch na ekranie
+   prefers-reduced-motion wszystkie znikają - dla części osób ruch na ekranie
    to nie ozdoba, tylko powód do mdłości.
    -------------------------------------------------------------------------- */
 
@@ -1502,7 +1502,7 @@
    (cennik.js).
 
    NIC SIĘ TU NIE PRZESUWA i to jest celowe. Wcześniej blok jechał o 3 px
-   w bok, a liczba rosła z "1 h" do "24 h" — tekst obok skakał dwa razy naraz
+   w bok, a liczba rosła z "1 h" do "24 h" - tekst obok skakał dwa razy naraz
    i zamiast drobnego efektu wychodziło szarpanie. Zostaje samo tło. */
 .cennik-page .cnk-trust-item {
     border-radius: 12px;
@@ -1514,7 +1514,7 @@
 
 /* SZEROKOŚĆ ZAREZERWOWANA NA DWIE CYFRY.
    `tabular-nums` wyrównuje szerokość cyfr między sobą, ale nie rezerwuje
-   miejsca na cyfrę, której jeszcze nie ma — przy przejściu z "1 h" na "24 h"
+   miejsca na cyfrę, której jeszcze nie ma - przy przejściu z "1 h" na "24 h"
    napis obok i tak przesuwał się o pełny znak. `min-width` w jednostkach `ch`
    trzyma pole stałe przez całe odliczanie. */
 .cennik-page .cnk-trust-hero:hover .cnk-trust-big { filter: brightness(1.25); }
@@ -1533,7 +1533,7 @@
    DEKORACJE Z PRAWDZIWYCH GRAFIK
 
    Rendery Minecrafta zamiast rysowanych klocków. Cień i przygaszenie robią
-   z nich TŁO — pełna jasność ściągałaby wzrok z kart, a to one są treścią.
+   z nich TŁO - pełna jasność ściągałaby wzrok z kart, a to one są treścią.
    ========================================================================== */
 .cnk-decor-item.is-photo img {
     width: 100%;
@@ -1560,11 +1560,11 @@
    ROZDYMKA
 
    Trzy warstwy jedna na drugiej; kursor przełącza widoczną. To nie jest efekt
-   dla efektu — dokładnie tak zachowuje się ta ryba w grze, więc żart trafia do
+   dla efektu - dokładnie tak zachowuje się ta ryba w grze, więc żart trafia do
    tych, którzy grali, i nie przeszkadza reszcie.
 
    Warstwa dekoracji ma pointer-events:none, więc sama rozdymka musi je sobie
-   przywrócić — inaczej nie da się na nią najechać.
+   przywrócić - inaczej nie da się na nią najechać.
    -------------------------------------------------------------------------- */
 .cnk-puffer {
     position: relative;
@@ -1591,7 +1591,7 @@
 .cnk-puffer:hover .p2 { opacity: 0; transform: scale(1.15); }
 .cnk-puffer:hover .p3 { opacity: 1; transform: scale(1.35); }
 
-/* Stan pośredni na starcie najechania — rozdymka nadyma się w dwóch krokach,
+/* Stan pośredni na starcie najechania - rozdymka nadyma się w dwóch krokach,
    tak jak w grze, a nie skokiem od razu do największej. */
 .cnk-puffer:hover .p2 { transition-delay: 0.06s; }
 .cnk-puffer:hover .p3 { transition-delay: 0.12s; }
@@ -1604,20 +1604,20 @@
    PASEK PINGU
 
    Pięć klatek z listy serwerów Minecrafta, przełączanych po kolei od jednej
-   kreski do pięciu. Zamiast pisać "niski ping" — liczbę, której i tak nikt nie
-   sprawdzi — pokazujemy obrazek, który każdy grający zna.
+   kreski do pięciu. Zamiast pisać "niski ping" - liczbę, której i tak nikt nie
+   sprawdzi - pokazujemy obrazek, który każdy grający zna.
 
    Przełączanie robi `steps(1)`: klatki mają się ZMIENIAĆ, nie przenikać.
    Płynne przejście zamieniłoby czytelny wskaźnik w migającą plamę.
    -------------------------------------------------------------------------- */
-.cennik-page .cnk-ping-item { display: flex; align-items: flex-start; gap: 1rem; }
+.cennik-page .cnk-ping-item { display: flex; align-items: flex-start; gap: 0.8rem; }
 
 .cennik-page .cnk-ping {
     position: relative;
     flex-shrink: 0;
-    width: 46px;
-    height: 32px;
-    margin-top: 0.15rem;
+    width: 30px;
+    height: 21px;
+    margin-top: 0.3rem;
 }
 .cennik-page .cnk-ping .pg {
     position: absolute;
@@ -1642,7 +1642,7 @@
     100% { opacity: 0; }
 }
 
-/* Bez ruchu zostaje pełny pasek — to stan, który i tak opisuje zdanie obok. */
+/* Bez ruchu zostaje pełny pasek - to stan, który i tak opisuje zdanie obok. */
 @media (prefers-reduced-motion: reduce) {
     .cennik-page .cnk-ping .pg  { animation: none; opacity: 0; }
     .cennik-page .cnk-ping .pg5 { opacity: 1; }

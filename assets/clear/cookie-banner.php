@@ -5,7 +5,7 @@
  * Dołączany przez clear.php do KAŻDEJ podstrony, nie tylko do rejestracji.
  * To nie jest kwestia wygody: zgoda na analitykę musi być zebrana od każdego
  * odwiedzającego, ZANIM ciasteczko powstanie. Zgoda „przy rejestracji” nie
- * obejmuje osób, które nigdy się nie rejestrują — a to większość ruchu — i nie
+ * obejmuje osób, które nigdy się nie rejestrują - a to większość ruchu - i nie
  * byłaby dobrowolna w rozumieniu art. 7 ust. 4 RODO, bo analityka nie jest
  * niezbędna do świadczenia hostingu.
  *
@@ -13,7 +13,7 @@
  * dopiero po kliknięciu „Akceptuję”, a odrzucenie kasuje ciasteczka _ga*.
  * Ten plik dostarcza wyłącznie znaczniki, których ten skrypt szuka po id.
  *
- * Baner startuje z display:none — pokazuje go dopiero skrypt i tylko wtedy,
+ * Baner startuje z display:none - pokazuje go dopiero skrypt i tylko wtedy,
  * gdy wyboru jeszcze nie ma. Dzięki temu wracający użytkownik nie widzi
  * mignięcia banera przed jego ukryciem.
  */

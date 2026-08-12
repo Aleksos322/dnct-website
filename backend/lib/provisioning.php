@@ -2,14 +2,14 @@
 /**
  * Zakładanie serwera gry w Pterodactylu po opłaconym zamówieniu.
  *
- * WOŁANE WYŁĄCZNIE Z WEBHOOKA. Nigdy ze strony powrotu — patrz nagłówek
+ * WOŁANE WYŁĄCZNIE Z WEBHOOKA. Nigdy ze strony powrotu - patrz nagłówek
  * backend/lib/orders.php.
  *
  * JEDNA ŚCIEŻKA ZAMIAST TRZECH KOPII. Stara wersja miała w success.php trzy
  * niemal identyczne bloki (Minecraft, Project Zomboid, Vintage Story) po
- * ok. 120 linii każdy, rozróżniane przez `if ($planId == 0)` i `== 27` —
+ * ok. 120 linii każdy, rozróżniane przez `if ($planId == 0)` i `== 27` -
  * czyli przez magiczne numery planów z cennika. Dodanie czwartej gry oznaczało
- * czwartą kopię, a poprawka błędu — trzy poprawki albo dwie i jeden
+ * czwartą kopię, a poprawka błędu - trzy poprawki albo dwie i jeden
  * przeoczony. Tutaj różnice między grami są DANYMI (provision_game_map),
  * a kod tworzący serwer jest jeden.
  */
@@ -25,7 +25,7 @@ const PROVISION_NODE_ID = 4;
 const PROVISION_GRACE_DAYS = 3;
 
 /**
- * Różnice między grami — wszystko, czym Minecraft różni się od Zomboida.
+ * Różnice między grami - wszystko, czym Minecraft różni się od Zomboida.
  *
  * `env` to funkcja, bo część zmiennych zależy od zamówienia (liczba slotów)
  * albo od przydzielonego portu, którego przed alokacją jeszcze nie znamy.
@@ -61,7 +61,7 @@ function provision_game_map(): array
                 'AUTO_UPDATE'   => '1',
                 'SRCDS_BETAID'  => 'unstable',
                 // Port, a nie identyfikator alokacji. Stara wersja wstawiała
-                // tu `$freeAllocationId`, czyli numer wiersza w bazie — serwer
+                // tu `$freeAllocationId`, czyli numer wiersza w bazie - serwer
                 // dostawał zupełnie inny port, niż faktycznie nasłuchiwał.
                 'STEAM_PORT'    => (string)$alloc['port'],
             ],
@@ -83,7 +83,7 @@ function provision_game_map(): array
 /**
  * Wolna alokacja (para adres:port) na węźle klienckim.
  *
- * Pterodactyl stronicuje wyniki po 50, a węzeł ma ich blisko tysiąc — bez
+ * Pterodactyl stronicuje wyniki po 50, a węzeł ma ich blisko tysiąc - bez
  * `filter[assigned]` pierwsza strona potrafi być w całości zajęta i kod
  * uznałby, że portów nie ma, mając ich setki.
  *
@@ -114,7 +114,7 @@ function provision_free_allocation(int $nodeId = PROVISION_NODE_ID): ?array
  *
  * Czytamy je z Pterodactyla zamiast wpisywać na sztywno: zmiana jajka w panelu
  * (np. nowa wersja Javy) ma od razu obowiązywać nowe serwery. Wartości zapasowe
- * są tylko na wypadek niedostępności API — serwer z zapasową komendą wciąż
+ * są tylko na wypadek niedostępności API - serwer z zapasową komendą wciąż
  * powstanie, a to lepsze niż nieudany zakup po pobraniu pieniędzy.
  *
  * @return array{startup:string,image:string}
@@ -131,7 +131,7 @@ function provision_egg_defaults(int $nestId, int $eggId, string $fallbackImage):
         ];
     }
 
-    error_log("Provisioning: nie udało się pobrać jajka {$eggId} — używam wartości zapasowych");
+    error_log("Provisioning: nie udało się pobrać jajka {$eggId} - używam wartości zapasowych");
     return ['startup' => '', 'image' => $fallbackImage];
 }
 
@@ -175,7 +175,7 @@ function provision_server(array $order): array
         : 'plan #' . (int)$order['plan_id'];
 
     $payload = [
-        'name'        => ucfirst($gameType) . ' — ' . $order['user_name'],
+        'name'        => ucfirst($gameType) . ' - ' . $order['user_name'],
         'description' => sprintf(
             'Zamówienie #%d · %s · %d dni',
             (int)$order['id'],
@@ -203,7 +203,7 @@ function provision_server(array $order): array
         'allocation' => ['default' => $alloc['id']],
     ];
 
-    // Pustą komendę pomijamy — Pterodactyl podstawi wtedy własną z jajka.
+    // Pustą komendę pomijamy - Pterodactyl podstawi wtedy własną z jajka.
     // Wysłanie pustego napisu daje serwer, który nie ma czym wystartować.
     if ($egg['startup'] !== '') {
         $payload['startup'] = $egg['startup'];
@@ -213,7 +213,7 @@ function provision_server(array $order): array
 
     if ($res['http_code'] !== 201 || !isset($res['body']['attributes'])) {
         $details = provision_error_details($res);
-        error_log('Provisioning: serwer nieutworzony dla zamówienia #' . $order['id'] . ' — ' . $details);
+        error_log('Provisioning: serwer nieutworzony dla zamówienia #' . $order['id'] . ' - ' . $details);
         return ['ok' => false, 'error' => $details];
     }
 

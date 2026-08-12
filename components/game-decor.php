@@ -1,6 +1,6 @@
 <?php
 /**
- * Dekoracje boczne cennika — po jednym zestawie na grę.
+ * Dekoracje boczne cennika - po jednym zestawie na grę.
  *
  * DWA ŹRÓDŁA GRAFIKI, JEDEN KOD
  *
@@ -8,25 +8,25 @@
  * geodę ametystową, komnatę portalu, Creaking i spawner blaze'ów. Biją każdą
  * wektorową imitację i były pod ręką, więc nie ma powodu ich udawać.
  *
- * POZOSTAŁE GRY nie mają takich materiałów, więc zostają zestawy RYSOWANE —
+ * POZOSTAŁE GRY nie mają takich materiałów, więc zostają zestawy RYSOWANE -
  * lepsze to niż puste marginesy albo cudze grafiki wzięte z sieci, do których
  * nie mamy praw. Rysunki powstają dwiema technikami:
  *
- * 1. IZOMETRYCZNE BLOKI (decor_cube) — trzy równoległoboki: góra, lewy i prawy
+ * 1. IZOMETRYCZNE BLOKI (decor_cube) - trzy równoległoboki: góra, lewy i prawy
  *    bok. Czytają się jako "klocek" bez ani jednego pliku graficznego.
- * 2. PIXEL ART (decor_pixels) — siatka kwadratów opisana tablicą napisów, gdzie
+ * 2. PIXEL ART (decor_pixels) - siatka kwadratów opisana tablicą napisów, gdzie
  *    znak wskazuje kolor z palety. Obrazek widać wprost w źródle i poprawia się
  *    go, zmieniając litery.
  *
  * Wybór jest DANYMI, nie rozgałęzieniem kodu: element zestawu z kluczem `img`
- * renderuje się jako obrazek, napis — jako rysunek.
+ * renderuje się jako obrazek, napis - jako rysunek.
  *
  * ROZMIARY. Źródła miały po 2000 px i do megabajta; przeskalowane do realnych
  * rozmiarów wyświetlania cały zestaw waży 110 KB zamiast 3,4 MB. Dekoracja,
  * która kosztuje więcej niż reszta strony, przestaje być dekoracją.
  *
  * DOSTĘPNOŚĆ: cała warstwa jest aria-hidden i pointer-events:none. To czysta
- * ozdoba — nie może przechwytywać kliknięć ani trafiać do czytników ekranu.
+ * ozdoba - nie może przechwytywać kliknięć ani trafiać do czytników ekranu.
  */
 
 declare(strict_types=1);
@@ -36,7 +36,7 @@ if (!function_exists('render_game_decor')) {
 /**
  * Izometryczny klocek w kwadracie 100x100.
  *
- * Wierzchołki są stałe — zmieniają się wyłącznie kolory ścianek. Górna ścianka
+ * Wierzchołki są stałe - zmieniają się wyłącznie kolory ścianek. Górna ścianka
  * jest najjaśniejsza, prawa najciemniejsza; to wystarcza, żeby płaskie
  * wielokąty odczytać jako bryłę.
  */
@@ -82,7 +82,7 @@ function decor_pixels(array $rows, array $palette): string
 /**
  * Zestawy dekoracji. Klucz to `type` z tabeli hosting_games.
  *
- * Każdy zestaw to sześć elementów — tyle wypełnia obie kolumny marginesu bez
+ * Każdy zestaw to sześć elementów - tyle wypełnia obie kolumny marginesu bez
  * robienia z nich tapety. Pozycje i rozmiary siedzą w CSS (klasy d1..d6), tutaj
  * jest wyłącznie treść graficzna.
  *
@@ -206,7 +206,7 @@ function decor_sets(): array
        Dla Minecrafta dostaliśmy zestaw rendersów (End City, geoda ametystowa,
        portal, spawner, Creaking, pufferfish) i one biją każdą wektorową
        imitację. Dla Zomboida i Vintage Story takich materiałów nie ma, więc
-       zostają zestawy rysowane — lepsze to niż puste marginesy albo cudze
+       zostają zestawy rysowane - lepsze to niż puste marginesy albo cudze
        grafiki wzięte z sieci.
 
        Rozdzielenie jest DANYMI, nie osobnym kodem: element z kluczem `img`
@@ -229,7 +229,7 @@ function decor_sets(): array
  * Warstwa dekoracji dla jednej gry.
  *
  * Zestawy dla WSZYSTKICH gier trafiają do HTML-a naraz i przełączają się klasą
- * — dzięki temu zmiana zakładki nie czeka na nic i nie miga. Sześć drobnych
+ * - dzięki temu zmiana zakładki nie czeka na nic i nie miga. Sześć drobnych
  * SVG na grę to nadal mniej bajtów niż jedna ikona PNG.
  */
 function render_game_decor(string $type): void
@@ -245,7 +245,7 @@ function render_game_decor(string $type): void
                 <?php if (is_array($item) && !empty($item['puffer'])): ?>
                     <?php /* ROZDYMKA SIĘ NAPRAWDĘ ROZDYMA.
                              Trzy warstwy jedna na drugiej; kursor przełącza, która
-                             jest widoczna. To nie ozdobnik — dokładnie tak działa
+                             jest widoczna. To nie ozdobnik - dokładnie tak działa
                              ta ryba w grze, więc żart trafia tylko do tych, którzy
                              grali, i nie przeszkadza reszcie. */ ?>
                     <span class="cnk-puffer">

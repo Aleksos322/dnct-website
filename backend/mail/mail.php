@@ -46,7 +46,7 @@ function mailer_factory(string $profile = 'default'): PHPMailer
     /* LOGOWANIE A NADAWCA TO DWIE RÓŻNE RZECZY.
        Skrzynka `info@` używa własnych danych logowania TYLKO wtedy, gdy ma
        ustawione OBA: login i hasło. Sam login z hasłem konta głównego to
-       gwarantowane "SMTP Error: Could not authenticate" — i dokładnie tak
+       gwarantowane "SMTP Error: Could not authenticate" - i dokładnie tak
        padła pierwsza wysyłka potwierdzenia zamówienia.
 
        Bez własnego hasła logujemy się kontem głównym i zmieniamy wyłącznie
@@ -94,7 +94,7 @@ function mailer_factory(string $profile = 'default'): PHPMailer
     $mail->Encoding = PHPMailer::ENCODING_BASE64;
 
     /* Nadawca zależy od PROFILU. `register@` wysyła kody weryfikacyjne,
-       `info@` — sprawy zamówień i płatności. Rozdzielenie nie jest kosmetyką:
+       `info@` - sprawy zamówień i płatności. Rozdzielenie nie jest kosmetyką:
        gdyby wszystko szło z jednego adresu, filtr antyspamowy uczyłby się na
        kodach jednorazowych i potrafił wrzucić tam potwierdzenie zapłaty. */
     if ($profile === 'info') {
@@ -131,7 +131,7 @@ function send_mail(string $to, string $subject, string $htmlBody, string $textBo
            Serwer poczty odrzuca nadawcę, na którego konto logujące się nie ma
            uprawnienia ("Sender address rejected: not owned by user ..."). Gdyby
            to kończyło wysyłkę, klient po zapłaceniu nie dostałby ŻADNEGO
-           potwierdzenia — z powodu ustawienia skrzynki, nie płatności.
+           potwierdzenia - z powodu ustawienia skrzynki, nie płatności.
 
            Wysyłamy więc ponownie z nadawcą domyślnym i głośno logujemy, co
            trzeba naprawić. Lepiej dostarczyć wiadomość z innego adresu niż
@@ -141,7 +141,7 @@ function send_mail(string $to, string $subject, string $htmlBody, string $textBo
 
         if ($profile !== 'default' && $rejected) {
             error_log(
-                'Mail: nadawca profilu "' . $profile . '" odrzucony przez serwer — '
+                'Mail: nadawca profilu "' . $profile . '" odrzucony przez serwer - '
                 . 'wysyłam z adresu domyślnego. NAPRAW: ustaw SMTP_' . strtoupper($profile)
                 . '_PASSWORD albo nadaj kontu ' . env('SMTP_USER', '?')
                 . ' prawo wysyłki w imieniu tego adresu.'
@@ -164,7 +164,7 @@ function send_mail(string $to, string $subject, string $htmlBody, string $textBo
 }
 
 /**
- * Jedno doręczenie, bez obsługi błędów — te są warstwę wyżej, w send_mail().
+ * Jedno doręczenie, bez obsługi błędów - te są warstwę wyżej, w send_mail().
  *
  * @return array{ok:bool, error:string}
  * @throws Exception gdy serwer poczty odmówi

@@ -11,7 +11,7 @@
  * @var string $accountUrl
  *
  * Ton jest rzeczowy, nie straszący. Najczęstsza przyczyna odmowy to wygasła
- * karta albo limit — nie złe intencje. Wiadomość ma dać KONKRETNĄ datę i jedno
+ * karta albo limit - nie złe intencje. Wiadomość ma dać KONKRETNĄ datę i jedno
  * kliknięcie do naprawy, a nie budować napięcie.
  */
 
@@ -24,7 +24,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nie udało się pobrać opłaty — DNCT Hosting</title>
+    <title>Nie udało się pobrać opłaty - DNCT Hosting</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f4f7; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#333333;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
@@ -48,7 +48,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                     <p style="margin:0 0 20px; font-size:15px; line-height:1.6; color:#555555;">
                         nie udało się pobrać opłaty <strong><?= $e($amount) ?> zł</strong> za serwer
                         <strong><?= $e($gameName) ?></strong> (zamówienie #<?= (int)$orderId ?>).
-                        Najczęściej to wygasła karta albo limit transakcji — nic poważnego.
+                        Najczęściej to wygasła karta albo limit transakcji - nic poważnego.
                     </p>
                 </td>
             </tr>
@@ -65,7 +65,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                                     <?= $e($suspends) ?>
                                 </div>
                                 <div style="font-size:13px; color:#7f1d1d; margin-top:10px; line-height:1.6;">
-                                    Do tego czasu działa normalnie — masz <?= (int)$graceDays ?> dni na reakcję.
+                                    Do tego czasu działa normalnie - masz <?= (int)$graceDays ?> dni na reakcję.
                                 </div>
                             </td>
                         </tr>
@@ -79,7 +79,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                         Co możesz zrobić:
                     </p>
                     <ul style="margin:10px 0 0; padding-left:20px; font-size:14px; line-height:1.8; color:#555555;">
-                        <li>poprawić dane karty — kolejne obciążenie spróbuje samo,</li>
+                        <li>poprawić dane karty - kolejne obciążenie spróbuje samo,</li>
                         <li>albo przedłużyć serwer jednorazowo, bez abonamentu.</li>
                     </ul>
                 </td>
@@ -96,7 +96,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
             <tr>
                 <td align="center" style="background-color:#f9fafb; padding:20px 32px; border-top:1px solid #f0f0f3;">
                     <div style="font-size:12px; color:#9ca3af; line-height:1.6;">
-                        Zawieszenie nie kasuje danych — po opłaceniu serwer wraca w tym samym stanie.
+                        Zawieszenie nie kasuje danych - po opłaceniu serwer wraca w tym samym stanie.
                     </div>
                 </td>
             </tr>

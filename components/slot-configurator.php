@@ -8,7 +8,7 @@
  *
  * Progi i okresy przychodzą z bazy (hosting_slot_tiers, hosting_periods).
  * W starej wersji ta sama tabela była zaszyta w dwóch plikach PHP i jeszcze
- * raz w JavaScripcie karty — trzy kopie, które prędzej czy później musiały się
+ * raz w JavaScripcie karty - trzy kopie, które prędzej czy później musiały się
  * rozjechać. Tutaj JavaScript dostaje dane z PHP, więc źródło jest jedno.
  *
  * @param string $type    Typ gry (hosting_games.type)
@@ -21,7 +21,7 @@ function render_slot_configurator(string $type, array $tiers, array $periods): v
         return;
     }
 
-    // Domyślnie środkowy próg — start od najtańszego zaniża postrzeganą wartość,
+    // Domyślnie środkowy próg - start od najtańszego zaniża postrzeganą wartość,
     // a od najdroższego odstrasza ceną, zanim klient zdąży cokolwiek policzyć.
     $defaultIndex = (int)floor(count($tiers) / 3);
     $defaultTier  = $tiers[$defaultIndex];

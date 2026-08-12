@@ -7,15 +7,15 @@
  * dzięki któremu lista w panelu nie wymaga odpytywania API przy każdym
  * odświeżeniu strony.
  *
- * Alternatywa — własne liczenie rabatu i podawanie Stripe'owi gotowej,
- * obniżonej kwoty — wygląda prościej i jest gorsza pod każdym względem:
+ * Alternatywa - własne liczenie rabatu i podawanie Stripe'owi gotowej,
+ * obniżonej kwoty - wygląda prościej i jest gorsza pod każdym względem:
  * pomyłka w mnożeniu staje się realną stratą, limit użyć trzeba by pilnować
  * samemu z ryzykiem wyścigu przy dwóch równoczesnych zakupach, a Checkout
  * i tak nie pokazałby klientowi, ile zaoszczędził.
  *
  * DWA OBIEKTY NA JEDEN KUPON. Stripe rozdziela:
- *   - Coupon         — sama zniżka (ile procent / ile złotych, jak długo),
- *   - PromotionCode  — kod, który klient wpisuje, wraz z limitami użycia.
+ *   - Coupon         - sama zniżka (ile procent / ile złotych, jak długo),
+ *   - PromotionCode  - kod, który klient wpisuje, wraz z limitami użycia.
  * Robimy oba naraz, bo osobno nie mają sensu dla nikogo poza Stripe'em.
  */
 
@@ -24,7 +24,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/stripe.php';
 require_once __DIR__ . '/db.php';
 
-/** Kody piszemy wielkimi literami — Stripe rozróżnia wielkość znaków. */
+/** Kody piszemy wielkimi literami - Stripe rozróżnia wielkość znaków. */
 function coupon_normalize_code(string $code): string
 {
     return strtoupper(preg_replace('/[^A-Za-z0-9_-]/', '', $code) ?? '');
@@ -50,9 +50,9 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
 
     /* Dokładnie jedna forma zniżki. Stripe odrzuca kupon z obiema naraz,
        ale komunikat z API jest po angielsku i mówi o polach, których nie ma
-       w naszym formularzu — lepiej powiedzieć to po swojemu i od razu. */
+       w naszym formularzu - lepiej powiedzieć to po swojemu i od razu. */
     if (($percent === null) === ($amount === null)) {
-        return ['ok' => false, 'error' => 'Podaj albo procent, albo kwotę zniżki — dokładnie jedno z dwóch.'];
+        return ['ok' => false, 'error' => 'Podaj albo procent, albo kwotę zniżki - dokładnie jedno z dwóch.'];
     }
     if ($percent !== null && ($percent <= 0 || $percent > 100)) {
         return ['ok' => false, 'error' => 'Procent zniżki musi mieścić się w zakresie 1–100.'];
@@ -81,7 +81,7 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
         $redeemBy = $ts;
     }
 
-    // Kod zajęty u nas sprawdzamy PRZED wołaniem Stripe'a — inaczej zostawałby
+    // Kod zajęty u nas sprawdzamy PRZED wołaniem Stripe'a - inaczej zostawałby
     // tam osierocony kupon po każdej nieudanej próbie.
     $exists = $dnct->prepare('SELECT 1 FROM coupons WHERE code = ?');
     $exists->execute([$code]);
@@ -114,7 +114,7 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
 
         $promo = \Stripe\PromotionCode::create($promoParams);
     } catch (Throwable $e) {
-        error_log('Kupony: Stripe odmówił — ' . $e->getMessage());
+        error_log('Kupony: Stripe odmówił - ' . $e->getMessage());
         return ['ok' => false, 'error' => 'Stripe odrzucił kupon: ' . $e->getMessage()];
     }
 
@@ -152,7 +152,7 @@ function coupons_list(PDO $dnct): array
  *
  * Licznik rośnie po ICH stronie, przy każdym udanym zakupie z kodem, i nie ma
  * zdarzenia webhooka, które mówiłoby wprost "kod użyty". Zamiast zgadywać
- * z zamówień, pytamy o prawdę tam, gdzie ona jest — przy otwarciu listy.
+ * z zamówień, pytamy o prawdę tam, gdzie ona jest - przy otwarciu listy.
  */
 function coupons_sync(PDO $dnct): void
 {
@@ -176,7 +176,7 @@ function coupons_sync(PDO $dnct): void
         } catch (Throwable $e) {
             // Kupon skasowany ręcznie w panelu Stripe'a albo chwilowy błąd API.
             // Jedno i drugie nie może wywrócić listy pozostałych kuponów.
-            error_log('Kupony: nie odświeżono ' . $row['stripe_promo_id'] . ' — ' . $e->getMessage());
+            error_log('Kupony: nie odświeżono ' . $row['stripe_promo_id'] . ' - ' . $e->getMessage());
         }
     }
 }
@@ -186,7 +186,7 @@ function coupons_sync(PDO $dnct): void
  *
  * Wyłączamy KOD (PromotionCode), nie kasujemy zniżki. Skasowanie kuponu
  * w Stripe zabiera zniżkę także trwającym abonamentom, które ją mają
- * przypisaną — czyli podniosłoby rachunek ludziom, którzy nic nie zrobili.
+ * przypisaną - czyli podniosłoby rachunek ludziom, którzy nic nie zrobili.
  */
 function coupon_deactivate(PDO $dnct, int $id): array
 {
@@ -223,5 +223,5 @@ function coupon_describe(array $c): string
         default     => 'jednorazowo',
     };
 
-    return $what . ' — ' . $how;
+    return $what . ' - ' . $how;
 }

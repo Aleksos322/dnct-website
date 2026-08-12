@@ -31,7 +31,7 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
 {
     switch ($event->type) {
         /* Płatność kartą kończy sesję od razu. BLIK i Przelewy24 to metody
-           z opóźnionym potwierdzeniem — dla nich sesja domyka się dopiero
+           z opóźnionym potwierdzeniem - dla nich sesja domyka się dopiero
            zdarzeniem async_payment_succeeded. Obsługa jest ta sama, bo w obu
            przypadkach warunkiem jest payment_status = paid. */
         case 'checkout.session.completed':
@@ -52,13 +52,13 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
     }
 }
 
-/** Opłacona sesja — oznaczamy zamówienie i zakładamy serwer. */
+/** Opłacona sesja - oznaczamy zamówienie i zakładamy serwer. */
 function webhook_checkout_completed(PDO $dnct, $session): bool
 {
     /* Sesja bywa "completed" bez zapłaty (metody z opóźnionym potwierdzeniem).
        Serwer należy się dopiero po pieniądzach, nie po domknięciu formularza. */
     if (($session->payment_status ?? '') !== 'paid') {
-        error_log('Stripe webhook: sesja ' . $session->id . ' domknięta bez zapłaty — czekam na potwierdzenie');
+        error_log('Stripe webhook: sesja ' . $session->id . ' domknięta bez zapłaty - czekam na potwierdzenie');
         return true;
     }
 
@@ -79,7 +79,7 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         return true;   // już obsłużone
     }
 
-    /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje — dokładamy dni do
+    /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje - dokładamy dni do
        zamówienia-rodzica i, jeśli trzeba, zdejmujemy zawieszenie. Tworzenie
        serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
        tym, który ma. */
@@ -114,7 +114,7 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
             'error',
             'Serwer nie został jeszcze utworzony',
             'Płatność się powiodła, ale automatyczne zakładanie serwera nie doszło do skutku. '
-            . 'Zajmiemy się tym ręcznie — napisz na Discordzie, jeśli chcesz przyspieszyć.'
+            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
         );
         notify_admins(
             $dnct,
@@ -142,7 +142,7 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
 }
 
 /**
- * Powiadomienie o gotowym serwerze — na stronie ORAZ mailem z info@dnct.pl.
+ * Powiadomienie o gotowym serwerze - na stronie ORAZ mailem z info@dnct.pl.
  *
  * Oba kanały niosą TĘ SAMĄ datę zawieszenia, liczoną w jednym miejscu
  * (order_deadlines). Rozbieżność między mailem a panelem w sprawie terminu
@@ -167,22 +167,22 @@ function order_announce_paid(PDO $dnct, ?array $order): void
         'Serwer jest gotowy',
         'Opłacone do ' . $d['expires'] . '. '
         . ($order['billing_mode'] === 'subscription'
-            ? 'Abonament odnawia się sam — przy nieudanej płatności serwer zostanie zawieszony ' . $d['suspends'] . '.'
-            : 'To płatność jednorazowa — bez przedłużenia serwer zostanie zawieszony ' . $d['suspends'] . '.')
+            ? 'Abonament odnawia się sam - przy nieudanej płatności serwer zostanie zawieszony ' . $d['suspends'] . '.'
+            : 'To płatność jednorazowa - bez przedłużenia serwer zostanie zawieszony ' . $d['suspends'] . '.')
     );
 
     try {
         $sent = send_order_paid_mail($order);
         if (!$sent['ok']) {
-            error_log('Zamówienie #' . $order['id'] . ': mail potwierdzający nie wyszedł — ' . $sent['error']);
+            error_log('Zamówienie #' . $order['id'] . ': mail potwierdzający nie wyszedł - ' . $sent['error']);
         }
     } catch (Throwable $e) {
-        error_log('Zamówienie #' . $order['id'] . ': błąd wysyłki potwierdzenia — ' . $e->getMessage());
+        error_log('Zamówienie #' . $order['id'] . ': błąd wysyłki potwierdzenia - ' . $e->getMessage());
     }
 }
 
 /**
- * Opłacone przedłużenie — dokładamy dni do serwera, który już działa.
+ * Opłacone przedłużenie - dokładamy dni do serwera, który już działa.
  *
  * Samo zamówienie-przedłużenie oznaczamy jako `provisioned`, mimo że niczego
  * nie tworzy. To stan końcowy "zrobione" i dzięki temu strona powrotu ma co
@@ -200,7 +200,7 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
 
     order_extend($dnct, (int)$parent['id'], (int)$order['period_days']);
 
-    /* PRZEJŚCIE NA ABONAMENT. Klient dokupił okres, wybierając odnawianie —
+    /* PRZEJŚCIE NA ABONAMENT. Klient dokupił okres, wybierając odnawianie -
        od teraz to zamówienie nadrzędne jest abonamentem i kolejne faktury mają
        trafiać właśnie w nie. Bez przepisania identyfikatora subskrypcji
        `invoice.paid` szukałby zamówienia-przedłużenia, które nie ma serwera. */
@@ -230,18 +230,18 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
         (string)$order['user_name'],
         'success',
         'Serwer przedłużony',
-        'Dopisaliśmy kolejny okres — serwer działa dalej bez przerwy.'
+        'Dopisaliśmy kolejny okres - serwer działa dalej bez przerwy.'
     );
 
     return true;
 }
 
 /**
- * Opłacona dopłata za wyższy pakiet — dopiero teraz zmieniamy zasoby.
+ * Opłacona dopłata za wyższy pakiet - dopiero teraz zmieniamy zasoby.
  *
  * Kolejność jest celowa: pieniądze najpierw, zasoby potem. Podniesienie pakietu
  * przed zapłatą oznaczałoby oddanie RAM-u i dysku komuś, kto może nigdy nie
- * dokończyć płatności — a odbieranie zasobów działającemu serwerowi to
+ * dokończyć płatności - a odbieranie zasobów działającemu serwerowi to
  * restart i utrata sesji graczy.
  */
 function webhook_plan_change_paid(PDO $dnct, array $order): bool
@@ -254,7 +254,7 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
         return true;
     }
 
-    /* Parametry docelowe siedzą w TYM zamówieniu — zapisał je endpoint zmiany
+    /* Parametry docelowe siedzą w TYM zamówieniu - zapisał je endpoint zmiany
        pakietu przy tworzeniu sesji. Nie pytamy ponownie cennika: plan mógł
        w międzyczasie podrożeć, a klient zapłacił za konkretne zasoby. */
     $plan = [
@@ -276,7 +276,7 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
             'error',
             'Pakiet nie został zmieniony',
             'Płatność się powiodła, ale nie udało się przestawić zasobów serwera. '
-            . 'Zajmiemy się tym ręcznie — napisz na Discordzie, jeśli chcesz przyspieszyć.'
+            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
         );
         notify_admins(
             $dnct,
@@ -305,10 +305,10 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
 }
 
 /**
- * Kolejna opłacona faktura abonamentu — przedłużenie.
+ * Kolejna opłacona faktura abonamentu - przedłużenie.
  *
  * PIERWSZĄ fakturę pomijamy. Powstaje razem z subskrypcją i dotyczy okresu,
- * który zaliczyło już checkout.session.completed — bez tego warunku pierwszy
+ * który zaliczyło już checkout.session.completed - bez tego warunku pierwszy
  * zakup dawałby klientowi podwójny okres.
  */
 function webhook_invoice_paid(PDO $dnct, $invoice): bool
@@ -331,7 +331,7 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
     order_extend($dnct, (int)$order['id'], (int)$order['period_days']);
 
     /* Serwer mógł zostać zawieszony po nieudanej płatności. Skoro zaległość
-       jest opłacona, przywracamy go od razu — czekanie na ręczne odwieszenie
+       jest opłacona, przywracamy go od razu - czekanie na ręczne odwieszenie
        oznaczałoby, że klient zapłacił i nadal nie gra. */
     if (!empty($order['ptero_server_id'])) {
         provision_unsuspend((int)$order['ptero_server_id']);
@@ -342,13 +342,13 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
         (string)$order['user_name'],
         'success',
         'Abonament przedłużony',
-        'Płatność się powiodła — serwer działa dalej przez kolejny okres.'
+        'Płatność się powiodła - serwer działa dalej przez kolejny okres.'
     );
 
     return true;
 }
 
-/** Nieudane obciążenie — karencja zamiast natychmiastowego wyłączenia. */
+/** Nieudane obciążenie - karencja zamiast natychmiastowego wyłączenia. */
 function webhook_invoice_failed(PDO $dnct, $invoice): bool
 {
     $subscriptionId = (string)($invoice->subscription ?? '');
@@ -381,16 +381,16 @@ function webhook_invoice_failed(PDO $dnct, $invoice): bool
         'warning',
         'Nie udało się pobrać opłaty',
         'Bank odrzucił płatność za serwer. Serwer zostanie zawieszony ' . $when
-        . ' — do tego czasu działa normalnie. Popraw dane karty albo przedłuż jednorazowo.'
+        . ' - do tego czasu działa normalnie. Popraw dane karty albo przedłuż jednorazowo.'
     );
 
     try {
         $sent = send_payment_failed_mail($order);
         if (!$sent['ok']) {
-            error_log('Zamówienie #' . $order['id'] . ': ostrzeżenie o płatności nie wyszło — ' . $sent['error']);
+            error_log('Zamówienie #' . $order['id'] . ': ostrzeżenie o płatności nie wyszło - ' . $sent['error']);
         }
     } catch (Throwable $e) {
-        error_log('Zamówienie #' . $order['id'] . ': błąd wysyłki ostrzeżenia — ' . $e->getMessage());
+        error_log('Zamówienie #' . $order['id'] . ': błąd wysyłki ostrzeżenia - ' . $e->getMessage());
     }
 
     return true;
@@ -400,7 +400,7 @@ function webhook_invoice_failed(PDO $dnct, $invoice): bool
  * Koniec subskrypcji.
  *
  * NIE wyłączamy serwera. Klient zapłacił za bieżący okres i ma go dostać
- * w całości — wygaszaniem po `expires_at` zajmuje się osobny proces, który
+ * w całości - wygaszaniem po `expires_at` zajmuje się osobny proces, który
  * patrzy na daty, a nie na to zdarzenie.
  */
 function webhook_subscription_deleted(PDO $dnct, $subscription): bool

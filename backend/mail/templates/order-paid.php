@@ -17,7 +17,7 @@
  * @var string $panelUrl
  * @var string $accountUrl
  *
- * Layout na tabelach i style inline — Outlook i Gmail nie obsługują ani
+ * Layout na tabelach i style inline - Outlook i Gmail nie obsługują ani
  * zewnętrznych arkuszy, ani nowoczesnego CSS-a.
  *
  * RAMKA Z DATĄ ZAWIESZENIA jest najbardziej wyróżnionym elementem po kwocie.
@@ -33,7 +33,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serwer gotowy — DNCT Hosting</title>
+    <title>Serwer gotowy - DNCT Hosting</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f4f4f7; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#333333;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
@@ -92,7 +92,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                         <tr>
                             <td style="padding:18px 20px;">
                                 <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#92400e; margin-bottom:12px;">
-                                    Terminy — zapisz sobie
+                                    Terminy - zapisz sobie
                                 </div>
 
                                 <div style="font-size:14px; color:#78350f; margin-bottom:8px;">
@@ -108,10 +108,10 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                                 <div style="font-size:13px; line-height:1.6; color:#78350f; margin-top:12px; padding-top:12px; border-top:1px solid #fcd34d;">
                                     <?php if ($isSub): ?>
                                         Abonament odnawia się sam. Jeśli kolejna płatność nie przejdzie,
-                                        masz <strong><?= (int)$graceDays ?> dni</strong> na poprawienie danych karty —
+                                        masz <strong><?= (int)$graceDays ?> dni</strong> na poprawienie danych karty -
                                         przez ten czas serwer działa normalnie.
                                     <?php else: ?>
-                                        To płatność jednorazowa — <strong>serwer nie odnowi się sam</strong>.
+                                        To płatność jednorazowa - <strong>serwer nie odnowi się sam</strong>.
                                         Przedłuż go przed tą datą, żeby działał bez przerwy.
                                     <?php endif; ?>
                                 </div>
@@ -120,7 +120,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                     </table>
 
                     <p style="margin:14px 0 0; font-size:13px; line-height:1.6; color:#6b7280;">
-                        Zawieszenie nie kasuje danych — świat, pliki i konfiguracja zostają.
+                        Zawieszenie nie kasuje danych - świat, pliki i konfiguracja zostają.
                         Po opłaceniu serwer wraca w tym samym stanie.
                     </p>
                 </td>

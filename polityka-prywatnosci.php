@@ -2,22 +2,22 @@
 /**
  * Polityka prywatności
  *
- * Treść przeniesiona 1:1 ze starej strony (beta/privacy-policy.html) — dokument prawny,
+ * Treść przeniesiona 1:1 ze starej strony (beta/privacy-policy.html) - dokument prawny,
  * więc jego brzmienie zostaje nietknięte. Zmienia się wyłącznie oprawa: strona
  * korzysta teraz ze wspólnego layoutu (navbar, stopka, tło, SEO), a wygląd
  * bloków i tabel opisuje assets/css/legal.css.
  *
- * $centerContent = false, bo to długi dokument wielosekcyjny — wycentrowanie
+ * $centerContent = false, bo to długi dokument wielosekcyjny - wycentrowanie
  * w pionie ma sens przy krótkich stronach, tutaj rozjechałoby odczyt.
  */
 
 declare(strict_types=1);
 
-// Wspólny start — te dwie strony jako jedyne go nie miały, przez co
+// Wspólny start - te dwie strony jako jedyne go nie miały, przez co
 // pomocnicze funkcje z backend/lib (np. asset()) były tu niedostępne.
 require_once __DIR__ . '/backend/bootstrap.php';
 
-$pageTitle       = 'Polityka prywatności — DNCT Hosting';
+$pageTitle       = 'Polityka prywatności - DNCT Hosting';
 $metaDescription = 'Jak DNCT Hosting przetwarza dane osobowe: podstawy prawne, zakres danych, okres przechowywania, prawa użytkownika i cookies.';
 $canonicalUrl    = 'https://dnct.pl/polityka-prywatnosci';
 $centerContent   = false;

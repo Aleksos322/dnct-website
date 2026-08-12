@@ -3,7 +3,7 @@
  * errors/500.php
  * Podepnij w .htaccess: ErrorDocument 500 /errors/500.php
  *
- * CELOWO nie używa clear.php / navbar.php — jeśli przyczyną 500 jest awaria
+ * CELOWO nie używa clear.php / navbar.php - jeśli przyczyną 500 jest awaria
  * bazy danych czy backendu, layout (który zależy od sesji/navbar/powiadomień)
  * mógłby wywalić kolejny błąd przy próbie renderowania strony błędu.
  * Ta strona jest w pełni samodzielna, żeby zawsze się wyświetliła.
@@ -15,7 +15,7 @@ http_response_code(500);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coś poszło nie tak (500) — DNCT Hosting</title>
+    <title>Coś poszło nie tak (500) - DNCT Hosting</title>
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <style>
@@ -60,7 +60,7 @@ http_response_code(500);
     <div>
         <p class="code">500</p>
         <h1>Coś poszło nie tak po naszej stronie</h1>
-        <p>Wystąpił nieoczekiwany błąd serwera. Już o tym wiemy albo właśnie sprawdzamy — spróbuj ponownie za chwilę.</p>
+        <p>Wystąpił nieoczekiwany błąd serwera. Już o tym wiemy albo właśnie sprawdzamy - spróbuj ponownie za chwilę.</p>
         <div class="actions">
             <a href="/" class="btn btn-primary">Strona główna</a>
             <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" class="btn btn-secondary">Zgłoś na Discordzie</a>

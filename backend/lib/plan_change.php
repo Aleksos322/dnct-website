@@ -3,7 +3,7 @@
  * Zmiana pakietu działającego serwera.
  *
  * ZASADA ROZLICZENIA (przeniesiona z beta/process_downgrade.php i z kalkulatora
- * w beta/przedluzenie.php, ale policzona w JEDNYM miejscu zamiast w dwóch —
+ * w beta/przedluzenie.php, ale policzona w JEDNYM miejscu zamiast w dwóch -
  * stara wersja liczyła to samo raz w PHP, raz w JavaScripcie i obie wersje
  * musiały się zgadzać z pamięci):
  *
@@ -91,7 +91,7 @@ function plan_change_quote(PDO $panel, array $order, int $newPlanId): array
 
     if ($newPrice > $currentPrice) {
         /* W GÓRĘ. Dopłata proporcjonalna do pozostałego czasu, zaokrąglona
-           w górę do końcówki 99 gr — ta sama zasada, co w cenniku, żeby kwota
+           w górę do końcówki 99 gr - ta sama zasada, co w cenniku, żeby kwota
            na rachunku wyglądała jak cena, a nie jak wynik dzielenia. */
         $raw   = ($newPrice - $currentPrice) * $ratio;
         $price = max(PLAN_CHANGE_MIN_CHARGE, plan_change_round99($raw));
@@ -108,7 +108,7 @@ function plan_change_quote(PDO $panel, array $order, int $newPlanId): array
     }
 
     /* W DÓŁ. Niewykorzystana różnica przeliczona na dni NOWEGO, tańszego
-       pakietu — dlatego dzielimy przez jego cenę dzienną, a nie starą. */
+       pakietu - dlatego dzielimy przez jego cenę dzienną, a nie starą. */
     $bonusDays = 0;
     if ($newPrice > 0) {
         $unusedValue = ($currentPrice - $newPrice) * $ratio;
@@ -164,7 +164,7 @@ function plan_change_round99(float $value): float
  * Pakiety, na które da się przejść z bieżącego zamówienia.
  *
  * Zwracamy WSZYSTKIE aktywne plany tej gry poza obecnym, każdy z gotową
- * wyceną — dzięki temu strona nie musi liczyć niczego sama i nie ma drugiego
+ * wyceną - dzięki temu strona nie musi liczyć niczego sama i nie ma drugiego
  * wzoru, który mógłby się rozjechać z tym powyżej.
  *
  * @return array<int,array<string,mixed>>
@@ -190,7 +190,7 @@ function plan_change_options(PDO $panel, array $order): array
 
         /* Przy przejściu W GÓRĘ sprawdzamy, czy większy pakiet w ogóle zmieści
            się na węźle. Klient siedzi już na maszynie, ale różnicę w zasobach
-           trzeba skądś wziąć — obietnica upgrade'u, którego nie da się wykonać,
+           trzeba skądś wziąć - obietnica upgrade'u, którego nie da się wykonać,
            kończy się pobraną opłatą i zwrotem. */
         if ($q['direction'] === 'up' && $capacity !== null) {
             $needed = [
@@ -222,7 +222,7 @@ function plan_change_options(PDO $panel, array $order): array
 /**
  * Przestawia zasoby serwera w Pterodactylu.
  *
- * Endpoint `build` wymaga KOMPLETU limitów i alokacji — pominięcie
+ * Endpoint `build` wymaga KOMPLETU limitów i alokacji - pominięcie
  * `allocation` kasuje przypisany port i serwer przestaje być osiągalny pod
  * adresem, który klient rozdał znajomym. Dlatego najpierw czytamy obecny stan.
  *
@@ -240,7 +240,7 @@ function plan_change_apply_limits(int $serverId, array $plan): array
     $alloc = (int)($attr['allocation'] ?? 0);
 
     if ($alloc === 0) {
-        return ['ok' => false, 'error' => 'Serwer nie ma przypisanego portu — zmiana pakietu wymaga kontaktu z administracją.'];
+        return ['ok' => false, 'error' => 'Serwer nie ma przypisanego portu - zmiana pakietu wymaga kontaktu z administracją.'];
     }
 
     $res = pterodactyl_api_request('PATCH', "/api/application/servers/{$serverId}/build", [
@@ -267,7 +267,7 @@ function plan_change_apply_limits(int $serverId, array $plan): array
 /**
  * Zapisuje nowy pakiet w zamówieniu.
  *
- * Parametry KOPIUJEMY do zamówienia, tak samo jak przy zakupie — zamówienie
+ * Parametry KOPIUJEMY do zamówienia, tak samo jak przy zakupie - zamówienie
  * ma pozostać czytelne razem z tym, co obiecaliśmy, nawet gdy plan zniknie
  * z cennika.
  */

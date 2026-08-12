@@ -4,7 +4,7 @@
  * Skrypt NIE LICZY CEN. Wszystkie warianty przyszły policzone z serwera
  * w <script id="ord-data">, a tutaj jest tylko wybieranie z gotowej listy.
  * Mnożenie po stronie przeglądarki oznaczałoby drugi wzór obok tego
- * w backend/lib/pricing.php — i pewność, że kiedyś się rozjadą.
+ * w backend/lib/pricing.php - i pewność, że kiedyś się rozjadą.
  */
 (function () {
     'use strict';
@@ -50,7 +50,7 @@
         });
 
         if (!q) {
-            elPrice.textContent = '—';
+            elPrice.textContent = '-';
             if (btnPay) btnPay.disabled = true;
             return;
         }
@@ -60,7 +60,7 @@
         elPer.textContent    = state.mode === 'subscription' ? '/ ' + q.label.toLowerCase() : 'jednorazowo';
 
         elHint.textContent = state.mode === 'subscription'
-            ? 'Abonament obsługuje wyłącznie karta — BLIK i Przelewy24 nie pozwalają na płatności cykliczne.'
+            ? 'Abonament obsługuje wyłącznie karta - BLIK i Przelewy24 nie pozwalają na płatności cykliczne.'
             : 'Zapłacisz kartą, BLIK-iem albo przez Przelewy24.';
 
         if (btnPay && !btnPay.hasAttribute('data-locked')) btnPay.disabled = false;
@@ -131,7 +131,7 @@
         btnPay.textContent = 'Przejdź do płatności';
     }
 
-    // Start: miesiąc, jeśli jest — to najczęstszy wybór i domyślny w cenniku.
+    // Start: miesiąc, jeśli jest - to najczęstszy wybór i domyślny w cenniku.
     var days = availableDays();
     state.days = days.indexOf(30) !== -1 ? 30 : days[0];
     render();

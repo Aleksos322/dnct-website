@@ -1,6 +1,6 @@
 <?php
 /**
- * POST /api/checkout/extend.php — dokupienie kolejnego okresu do serwera.
+ * POST /api/checkout/extend.php - dokupienie kolejnego okresu do serwera.
  *
  * Wejście:  { order_id, period_days, csrf_token }
  * Wyjście:  { ok: true, url: "https://checkout.stripe.com/..." }
@@ -14,7 +14,7 @@
  * Rezygnacja z istniejącej subskrypcji idzie przez api/subscription/cancel.php.
  *
  * Parametry serwera bierzemy ze STAREGO zamówienia, nie z cennika. Klient
- * przedłuża to, co ma — nawet jeśli plan zdążył podrożeć albo zniknąć z oferty.
+ * przedłuża to, co ma - nawet jeśli plan zdążył podrożeć albo zniknąć z oferty.
  * Zmiana pakietu to osobna decyzja i osobna ścieżka.
  */
 
@@ -32,7 +32,7 @@ rate_limit_guard(
 );
 
 if (!stripe_sales_enabled()) {
-    json_error('Sprzedaż jest chwilowo wyłączona — trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
+    json_error('Sprzedaż jest chwilowo wyłączona - trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
 }
 
 $email = (string)($_SESSION['authentik_email'] ?? '');
@@ -54,7 +54,7 @@ if ($parent === null || !hash_equals((string)$parent['user_email'], $email)) {
 }
 
 if ($parent['status'] !== 'provisioned') {
-    json_error('Ten serwer nie jest jeszcze gotowy — nie ma czego przedłużać.', 409, [], ['reason' => 'not_ready']);
+    json_error('Ten serwer nie jest jeszcze gotowy - nie ma czego przedłużać.', 409, [], ['reason' => 'not_ready']);
 }
 
 $mode = request_string('billing_mode', 'payment');
@@ -62,7 +62,7 @@ if (!in_array($mode, ['payment', 'subscription'], true)) {
     json_error('Nieznany model rozliczenia.', 422);
 }
 
-/* Abonament tylko wtedy, gdy serwer jeszcze go nie ma — patrz nagłówek pliku.
+/* Abonament tylko wtedy, gdy serwer jeszcze go nie ma - patrz nagłówek pliku.
    Sprawdzamy stan zamówienia, a nie to, co przysłał front: przycisk mógł
    zostać wyświetlony, zanim ktoś w innej karcie włączył odnawianie. */
 $hasActiveSubscription = $parent['billing_mode'] === 'subscription'
@@ -71,7 +71,7 @@ $hasActiveSubscription = $parent['billing_mode'] === 'subscription'
 
 if ($mode === 'subscription' && $hasActiveSubscription) {
     json_error(
-        'Ten serwer już ma abonament — kolejny okres pobierze się sam.',
+        'Ten serwer już ma abonament - kolejny okres pobierze się sam.',
         409,
         [],
         ['reason' => 'already_subscribed']
@@ -96,14 +96,14 @@ try {
 } catch (RuntimeException $e) {
     /* Plan mógł w międzyczasie zniknąć z cennika albo wyprzedać się na węźle.
        Odmowa przedłużenia komuś, kto już tam siedzi i zajmuje miejsce, byłaby
-       absurdem — wyceniamy więc po zapisanej cenie zamówienia. */
+       absurdem - wyceniamy więc po zapisanej cenie zamówienia. */
     try {
         $period = pricing_period($panel, (int)request_string('period_days', '0'));
     } catch (RuntimeException $inner) {
         json_error($inner->getMessage(), 422, [], ['reason' => 'invalid_period']);
     }
 
-    // Cena bazowa odtworzona z pierwotnego zamówienia i JEGO okresu — inaczej
+    // Cena bazowa odtworzona z pierwotnego zamówienia i JEGO okresu - inaczej
     // przedłużenie rocznego serwera na miesiąc kosztowałoby jak cały rok.
     $parentPeriod = pricing_period($panel, (int)$parent['period_days']);
     $baseMonthly  = pricing_unscale((int)$parent['amount_gross'] / 100, $parentPeriod);
@@ -140,8 +140,8 @@ $priceData = [
     'unit_amount'  => $quote['amount_gross'],
     'product_data' => [
         'name'        => $isSub
-            ? 'DNCT Hosting — abonament serwera'
-            : 'DNCT Hosting — przedłużenie serwera',
+            ? 'DNCT Hosting - abonament serwera'
+            : 'DNCT Hosting - przedłużenie serwera',
         'description' => sprintf('Zamówienie #%d · %s', $parentId, $quote['period_label']),
     ],
 ];
@@ -153,7 +153,7 @@ if ($isSub) {
 try {
     $params = [
         'mode'                 => $isSub ? 'subscription' : 'payment',
-        // BLIK i Przelewy24 nie obsługują płatności cyklicznych — przy
+        // BLIK i Przelewy24 nie obsługują płatności cyklicznych - przy
         // abonamencie zostaje karta, jedyna metoda, którą da się obciążyć
         // bez udziału klienta.
         'payment_method_types' => $isSub ? ['card'] : ['card', 'blik', 'p24'],
@@ -172,7 +172,7 @@ try {
 
     $session = \Stripe\Checkout\Session::create($params);
 } catch (Throwable $e) {
-    error_log('Przedłużenie: sesja nieutworzona dla zamówienia #' . $orderId . ' — ' . $e->getMessage());
+    error_log('Przedłużenie: sesja nieutworzona dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
     json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
 }
 
