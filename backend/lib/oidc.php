@@ -337,25 +337,15 @@ function oidc_public_base(): string
         . (isset($parts['port']) ? ':' . $parts['port'] : '');
 }
 
-/**
- * Adres procesu logowania w Authentiku, który po zakończeniu wraca do naszego
- * przepływu OIDC.
- *
- * `next` MUSI być ścieżką lokalną Authentika - adresy na obce domeny Authentik
- * odrzuca (sprawdzone: zwraca wtedy "to: /"). Dlatego podajemy tam ścieżkę
- * jego własnego endpointu autoryzacji, a dopiero on odsyła do nas.
+/*
+ * Był tu oidc_flow_url() - wejście na konto demo przez osobny proces
+ * w Authentiku. Usunięte świadomie i NIE należy do tego wracać: każde
+ * logowanie przez Authentika zakłada sesję SSO wspólną dla przeglądarki,
+ * więc po obejrzeniu demo kliknięcie "Zaloguj" wpuszczało z powrotem na
+ * konto demo, a dnct.pl uznawało gościa za zalogowanego jako demo.
+ * Demo chodzi teraz jednorazowym biletem prosto do panelu - patrz
+ * backend/lib/panel_sso.php.
  */
-function oidc_flow_url(string $flowSlug, ?string $returnTo = null): string
-{
-    // Ta sama funkcja co przy zwykłym logowaniu - zapisuje state/nonce/verifier
-    // w sesji, więc callback.php zweryfikuje powrót dokładnie tak samo.
-    $authorizeUrl = oidc_authorize_url($returnTo);
-
-    $parts = parse_url($authorizeUrl);
-    $authorizePath = ($parts['path'] ?? '') . (isset($parts['query']) ? '?' . $parts['query'] : '');
-
-    return oidc_public_base() . '/if/flow/' . rawurlencode($flowSlug) . '/?next=' . rawurlencode($authorizePath);
-}
 
 /** Pełny adres strony głównej bieżącego hosta (do powrotu po wylogowaniu). */
 function oidc_site_home_url(): string

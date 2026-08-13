@@ -18,6 +18,25 @@ function render_panel_band(array $opts = []): void
 {
     $trailerId = (string)($opts['trailer'] ?? '');
     $panelUrl  = (string)($opts['panelUrl'] ?? 'https://panel.dnct.pl');
+
+    /* Zalogowanemu NIE proponujemy demo. Panel trzyma jedną sesję na
+       przeglądarkę, więc wejście na demo wyrzuciłoby go z własnego konta -
+       a i tak ma pod ręką coś lepszego niż konto poglądowe. */
+    $panelLoggedIn = isset($_SESSION['authentik_username']);
+    $demoReady     = function_exists('panel_demo_email') && panel_demo_email() !== '';
+
+    if ($panelLoggedIn) {
+        $ctaHref  = '/panel';
+        $ctaLabel = 'Otwórz swój panel';
+    } elseif ($demoReady) {
+        // /demo wystawia jednorazowy bilet do panelu - patrz auth/demo.php.
+        $ctaHref  = '/demo';
+        $ctaLabel = 'Otwórz demo panelu';
+    } else {
+        // Demo nieskonfigurowane: zostaje sam panel, czyli ekran logowania.
+        $ctaHref  = $panelUrl;
+        $ctaLabel = 'Przejdź do panelu';
+    }
 ?>
     <!-- ============ PANEL: DEMO + ZWIASTUN ============ -->
     <?php /* Największa dziura na tej stronie była właśnie tutaj: między
@@ -41,11 +60,11 @@ function render_panel_band(array $opts = []): void
             </ul>
 
             <div class="pnl-actions">
-                <a class="pnl-demo" href="<?php echo htmlspecialchars($panelUrl); ?>"
+                <a class="pnl-demo" href="<?php echo htmlspecialchars($ctaHref); ?>"
                    target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Otwórz demo panelu
+                    <?php echo htmlspecialchars($ctaLabel); ?>
                 </a>
 
                 <?php /* Odręczna strzałka z podpisem. Rysowana ścieżką SVG,

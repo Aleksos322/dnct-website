@@ -2,28 +2,45 @@
 /**
  * Wejście na konto poglądowe (demo).
  *
- * Kieruje do osobnego procesu w Authentiku (`demo-login`), który loguje na
- * konto demo bez pytania o hasło, a następnie wraca do naszego zwykłego
- * przepływu OIDC. Dzięki temu demo przechodzi tą samą drogą co normalny
- * użytkownik - dostaje sesję Authentika, więc panel wpuszcza je bez pytania.
+ * Demo pokazuje PANEL i tylko panel - nie loguje nikogo na dnct.pl i nie
+ * zakłada sesji w Authentiku. Odwiedzający dostaje jednorazowy bilet
+ * (backend/lib/panel_sso.php), wymienia go w panelu na sesję konta demo
+ * i wraca do nas jako ten sam anonimowy gość, którym był.
  *
- * BEZPIECZEŃSTWO: proces po stronie Authentika ma nazwę konta zapisaną na
- * sztywno w polityce, więc nie da się nim wejść na cudze konto. Samo konto demo
- * nie jest administratorem panelu i nie ma żadnych serwerów.
+ * Dlaczego nie zwykłe logowanie na konto demo:
+ *
+ *   1. Rozdawanie loginu i hasła odpada. Authentik zapamiętałby demo jako
+ *      zalogowanego, więc kliknięcie "Zaloguj" wpuszczałoby z powrotem na
+ *      demo - bez pytania o hasło i bez żadnego sygnału, że to nie jest
+ *      konto tej osoby. Przeglądarka dorzuciłaby do tego zapamiętane hasło.
+ *   2. To samo dotyczy logowania demo przez osobny proces w Authentiku:
+ *      sesja SSO jest wspólna dla przeglądarki, więc skutek byłby ten sam,
+ *      a dodatkowo dnct.pl uznałoby gościa za zalogowanego i zamówienie
+ *      poszłoby na konto demo.
+ *
+ * BEZPIECZEŃSTWO: konto bierzemy z DEMO_PANEL_EMAIL, nigdy z żądania. Samo
+ * konto nie jest administratorem panelu.
  */
 
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
-// Zalogowanego nie przelogowujemy - poszedłby prosto do panelu na swoim koncie.
+/* Zalogowanego nie wpuszczamy na demo. Panel trzyma jedną sesję na
+   przeglądarkę, więc bilet demo WYRZUCIŁBY go z jego własnego konta -
+   klient kliknąłby "zobacz demo" z ciekawości i wylądował wylogowany
+   ze swojego panelu. Prawdziwy panel jest dla niego lepszy niż demo. */
 if (isset($_SESSION['authentik_username'])) {
+    $_SESSION['flash'][] = [
+        'type'    => 'info',
+        'message' => 'Jesteś zalogowany - zamiast demo otwieramy Twój własny panel.',
+    ];
     header('Location: /panel');
     exit();
 }
 
 // Ten sam limit co przy zwykłym logowaniu - przycisk jest publiczny, więc nie
-// może służyć do zasypywania Authentika żądaniami.
+// może służyć do zasypywania panelu żądaniami ani do pompowania tabeli biletów.
 $limit = rate_limit_hit('login', RATE_LIMIT_LOGIN);
 if (!$limit['allowed']) {
     $_SESSION['flash'][] = [
@@ -34,14 +51,23 @@ if (!$limit['allowed']) {
     exit();
 }
 
-$flowSlug = (string)env('DEMO_FLOW_SLUG', 'demo-login');
+$demoEmail = panel_demo_email();
+
+if ($demoEmail === '') {
+    error_log('Demo: DEMO_PANEL_EMAIL jest puste - konto pogladowe nie jest skonfigurowane.');
+    $_SESSION['flash'][] = [
+        'type'    => 'error',
+        'message' => 'Konto demonstracyjne jest chwilowo niedostępne.',
+    ];
+    header('Location: /');
+    exit();
+}
 
 try {
-    // Po zalogowaniu wracamy na stronę, która przerzuca prosto do panelu.
-    header('Location: ' . oidc_flow_url($flowSlug, '/panel'));
+    header('Location: ' . panel_sso_ticket($demoEmail, 'demo'));
     exit();
-} catch (RuntimeException $e) {
-    error_log('Demo: nie udalo sie zbudowac adresu: ' . $e->getMessage());
+} catch (Throwable $e) {
+    error_log('Demo: nie udalo sie wystawic biletu do panelu: ' . $e->getMessage());
     $_SESSION['flash'][] = [
         'type'    => 'error',
         'message' => 'Konto demonstracyjne jest chwilowo niedostępne.',
