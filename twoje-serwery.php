@@ -240,6 +240,12 @@ ob_start();
 <section class="ord-head">
     <span class="cnk-eyebrow">Twoje konto</span>
     <h1 class="cnk-h1">Twoje serwery</h1>
+    <?php /* Historia opłat to osobna strona, bo odpowiada na inne pytanie:
+             ta lista mówi "co mam", tamta "za co zapłaciłem". Odnośnik stoi
+             tutaj, bo właśnie tu klient przychodzi ze sprawami rozliczeń. */ ?>
+    <?php if ($isLoggedIn): ?>
+        <p class="srv-lead-link"><a href="/oplaty">Historia opłat →</a></p>
+    <?php endif; ?>
 </section>
 
 <?php if (!$isLoggedIn): ?>

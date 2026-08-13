@@ -335,3 +335,21 @@
     .cennik-page .srv-plan:hover:not(:disabled) { transform: none; }
     .cennik-page .srv-panel { animation: none; }
 }
+
+/* Przejście do historii opłat spod nagłówka "Twoje serwery".
+   Dyskretne, bo to nie jest główna czynność na tej stronie - ale widoczne,
+   bo bez niego historia byłaby dostępna wyłącznie z adresu wpisanego ręcznie. */
+.srv-lead-link {
+    margin: 0.6rem 0 0;
+    font-size: 0.9rem;
+}
+
+.srv-lead-link a {
+    color: rgba(196, 181, 253, 0.9);
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.srv-lead-link a:hover {
+    color: #ddd6fe;
+}

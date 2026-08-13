@@ -1,0 +1,172 @@
+/* ---------------------------------------------------------------------------
+   Historia opłat - /oplaty
+   ---------------------------------------------------------------------------
+   Tabela, która na telefonie przestaje być tabelą.
+
+   Pięć kolumn nie zmieści się na 360 px w sposób, który da się przeczytać -
+   albo tekst się łamie na sylaby, albo strona jedzie w bok. Poniżej progu
+   każdy wiersz staje się więc kartą, a nazwy kolumn wracają jako etykiety
+   z atrybutu `data-label`. Ta sama treść, dwa układy, jeden HTML.
+   --------------------------------------------------------------------------- */
+
+.op-sum {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 5vw, 3.5rem);
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px;
+}
+
+.op-sum-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.op-sum-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(226, 232, 240, 0.55);
+}
+
+.op-sum-value {
+    font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+    font-weight: 800;
+    color: #f8fafc;
+    line-height: 1;
+}
+
+.op-sum-value span {
+    font-size: 0.75em;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.6);
+}
+
+/* --------------------------------------------------------------------------
+   Lista
+   -------------------------------------------------------------------------- */
+
+.op-list {
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 0.25rem 0;
+}
+
+.op-row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 7rem 7.5rem 6.5rem;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.95rem 1.5rem;
+    font-size: 0.9rem;
+    color: rgba(226, 232, 240, 0.85);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.op-row:last-child { border-bottom: none; }
+
+.op-head {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(226, 232, 240, 0.45);
+    padding-top: 1.1rem;
+    padding-bottom: 0.75rem;
+}
+
+.op-right { text-align: right; }
+
+.op-date {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    color: #e2e8f0;
+}
+
+.op-date small {
+    font-size: 0.75rem;
+    color: rgba(226, 232, 240, 0.45);
+}
+
+.op-what {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.op-kind {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* Kolory niosą znaczenie, ale nie są jedynym nośnikiem - obok stoi nazwa
+   słowna, więc osoba nierozróżniająca barw traci wyłącznie skrót. */
+.op-kind-new  { background: rgba(139, 92, 246, 0.18); color: #c4b5fd; }
+.op-kind-ext  { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; }
+.op-kind-plan { background: rgba(59, 130, 246, 0.16); color: #93c5fd; }
+
+.op-game {
+    font-weight: 600;
+    color: #f1f5f9;
+}
+
+.op-amount {
+    font-weight: 700;
+    color: #f8fafc;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.op-note {
+    margin: 1.25rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(226, 232, 240, 0.55);
+}
+
+.op-note strong { color: rgba(226, 232, 240, 0.8); }
+
+/* --------------------------------------------------------------------------
+   Telefon: wiersz staje się kartą
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 780px) {
+    .op-head { display: none; }
+
+    .op-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 1.1rem 1.25rem;
+    }
+
+    /* Etykiety wracają z HTML-a, więc kolumna „Okres" nie zamienia się
+       w samotne „miesiąc" bez wyjaśnienia, czego dotyczy. */
+    .op-row > span[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(226, 232, 240, 0.4);
+        margin-bottom: 0.15rem;
+    }
+
+    .op-date { flex-direction: row; align-items: baseline; gap: 0.4rem; }
+    .op-right { text-align: left; }
+
+    .op-amount {
+        font-size: 1.1rem;
+        padding-top: 0.35rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.08);
+    }
+}
