@@ -393,6 +393,9 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
 
     <!-- Konfiguracja tła identyczna z assets/clear/clear.php -->
     <script src="/assets/js/finisher-header.es5.min.js" type="text/javascript"></script>
+    <?php /* Rozsynchronizowanie przebłysku na taflach .glass - bez tego
+             wszystkie błyskają w tej samej sekundzie. */ ?>
+    <script src="<?php echo asset('/assets/js/glass-sheen.js'); ?>" defer></script>
     <script type="text/javascript">
     new FinisherHeader({
       "count": 6,

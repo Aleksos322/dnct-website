@@ -163,6 +163,9 @@ if ($centerContent) {
     <div class="header finisher-header fixed inset-0 pointer-events-none z-0"></div>
 
     <script src="/assets/js/finisher-header.es5.min.js" type="text/javascript"></script>
+    <?php /* Rozsynchronizowanie przebłysku na taflach .glass - bez tego
+             wszystkie błyskają w tej samej sekundzie. */ ?>
+    <script src="<?php echo asset('/assets/js/glass-sheen.js'); ?>" defer></script>
     <script type="text/javascript">
     new FinisherHeader({
       "count": 6,

@@ -35,9 +35,24 @@
 }
 
 /* Rzadki, delikatny przebłysk przesuwający się po tafli.
-   Cykl trwa 5 minut, ale sam przejazd zajmuje tylko ~2% tego czasu (ok. 6s) -
+   Cykl trwa kilka minut, ale sam przejazd zajmuje ~2% tego czasu (ok. 6 s) -
    resztę pasmo stoi poza kadrem. Dzięki temu efekt jest niespodzianką raz na
-   kilka minut, a nie tapetą migającą w kółko. */
+   kilka minut, a nie tapetą migającą w kółko.
+
+   KAŻDA TAFLA MA WŁASNY RYTM. Wcześniej wszystkie dzieliły jedną animację
+   o stałym czasie, więc błyskały DOKŁADNIE w tej samej sekundzie - navbar,
+   karty planów i panele naraz. Zamiast wrażenia szkła wychodziło mrugnięcie
+   całej strony, bo oko wyłapuje synchroniczny ruch natychmiast.
+
+   Wartości ustawia skrypt (assets/js/glass-sheen.js) w zmiennych CSS:
+     --sheen-duration  długość cyklu, losowa w zakresie 4-6 min. Różne długości
+                       są istotne: przy równych czasach same opóźnienia
+                       zsynchronizowałyby się z powrotem po pierwszym cyklu.
+     --sheen-delay     UJEMNE opóźnienie, czyli start w losowym miejscu cyklu.
+                       Dodatnie kazałoby czekać kilka minut na pierwszy błysk.
+
+   Wartości zapasowe w var() sprawiają, że bez JavaScriptu efekt nadal działa -
+   po prostu wspólnie, jak wcześniej. */
 .glass::after {
     content: '';
     position: absolute;
@@ -49,9 +64,14 @@
         transparent 58%
     );
     background-size: 250% 100%;
-    animation: glassSheen 300s linear infinite;
+    animation: glassSheen var(--sheen-duration, 300s) var(--sheen-delay, 0s) linear infinite;
     pointer-events: none;
     z-index: 0;
+}
+
+/* Przebłysk to czysta ozdoba - przy wyłączonych animacjach znika bez śladu. */
+@media (prefers-reduced-motion: reduce) {
+    .glass::after { animation: none; }
 }
 
 @keyframes glassSheen {
