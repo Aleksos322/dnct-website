@@ -66,12 +66,16 @@ $orderId = order_create($dnct, $quote, $email, $name);
 
 stripe_init();
 
-/* METODY PŁATNOŚCI ZALEŻĄ OD TRYBU.
-   BLIK i Przelewy24 obsługują wyłącznie płatność jednorazową - Stripe odrzuca
-   sesję subskrypcyjną, która je wymienia. Przy abonamencie zostaje karta, bo
-   tylko ona daje się obciążyć cyklicznie bez udziału klienta. */
+/* METOD PŁATNOŚCI NIE WYMIENIAMY - WYBIERA JE STRIPE.
+   Sztywna lista `['card','blik','p24']` wywracała cały zakup: konto
+   produkcyjne nie miało włączonych Przelewów24, więc Stripe odrzucał sesję
+   ("payment method type provided: p24 is invalid"), a front pokazywał
+   klientowi "Brak połączenia z serwerem".
+   Bez tego pola Stripe bierze metody włączone w panelu i sam odsiewa te,
+   które nie pasują do trybu - przy abonamencie znikają BLIK i Przelewy24,
+   bo nie umieją płatności cyklicznych. Włączenie nowej metody to odtąd
+   zmiana w panelu Stripe, nie w kodzie. */
 $isSubscription = $quote['billing_mode'] === 'subscription';
-$methods = $isSubscription ? ['card'] : ['card', 'blik', 'p24'];
 
 $productName = sprintf('DNCT Hosting - %s (%s)', $quote['game_name'], $quote['label']);
 $productDesc = sprintf(
@@ -96,9 +100,8 @@ $base = stripe_base_url();
 
 try {
     $params = [
-        'mode'                 => $isSubscription ? 'subscription' : 'payment',
-        'payment_method_types' => $methods,
-        'line_items'           => [['price_data' => $priceData, 'quantity' => 1]],
+        'mode'       => $isSubscription ? 'subscription' : 'payment',
+        'line_items' => [['price_data' => $priceData, 'quantity' => 1]],
 
         // Kupony obsługuje Stripe. Włączenie tego pola daje w Checkoucie pole
         // "kod rabatowy", a poprawność kodu, limity i termin ważności sprawdza
@@ -124,7 +127,12 @@ try {
     $session = \Stripe\Checkout\Session::create($params);
 } catch (Throwable $e) {
     error_log('Checkout: nie udało się utworzyć sesji dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
-    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
+    /* 503, NIGDY 502. Cloudflare traktuje 502 jako wlasny blad bramy i podmienia
+       tresc odpowiedzi na "error code: 502". Front dostaje wtedy cos, co nie jest
+       JSON-em, i zamiast prawdziwego powodu pokazuje "Brak polaczenia z serwerem"
+       - czyli odsyla klienta do sprawdzania wlasnego internetu, choc problem jest
+       po naszej stronie. Sprawdzone: 403, 500 i 503 przechodza nietkniete. */
+    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 503, [], ['reason' => 'stripe_error']);
 }
 
 order_attach_session($dnct, $orderId, $session->id);

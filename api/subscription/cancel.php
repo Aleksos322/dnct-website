@@ -60,7 +60,7 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log('Rezygnacja z abonamentu #' . $order['id'] . ' - ' . $e->getMessage());
-    json_error('Nie udało się zapisać rezygnacji. Spróbuj ponownie albo napisz do nas.', 502, [], ['reason' => 'stripe_error']);
+    json_error('Nie udało się zapisać rezygnacji. Spróbuj ponownie albo napisz do nas.', 503, [], ['reason' => 'stripe_error']);
 }
 
 /* Stan zmieniamy OD RAZU, nie czekając na zdarzenie

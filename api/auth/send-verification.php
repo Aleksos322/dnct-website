@@ -85,7 +85,7 @@ if ($mode === 'resend') {
 
     $result = send_verification_code_mail($identity['email'], $code, $identity['first_name'], (int)(OTP_TTL / 60));
     if (!$result['ok']) {
-        json_error('Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.', 502);
+        json_error('Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.', 503);
     }
 
     respond_with_state($identity['email'], true);

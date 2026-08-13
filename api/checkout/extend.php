@@ -152,12 +152,11 @@ if ($isSub) {
 
 try {
     $params = [
-        'mode'                 => $isSub ? 'subscription' : 'payment',
-        // BLIK i Przelewy24 nie obsługują płatności cyklicznych - przy
-        // abonamencie zostaje karta, jedyna metoda, którą da się obciążyć
-        // bez udziału klienta.
-        'payment_method_types' => $isSub ? ['card'] : ['card', 'blik', 'p24'],
-        'line_items'           => [['price_data' => $priceData, 'quantity' => 1]],
+        'mode'       => $isSub ? 'subscription' : 'payment',
+        // Metod nie wymieniamy - bierze je Stripe z panelu i sam odsiewa te,
+        // które nie umieją płatności cyklicznych. Sztywna lista wywracała
+        // zakup, gdy któraś nie była aktywowana na koncie (patrz create.php).
+        'line_items' => [['price_data' => $priceData, 'quantity' => 1]],
         'allow_promotion_codes' => true,
         'customer_email'        => $email,
         'client_reference_id'   => (string)$orderId,
@@ -173,7 +172,7 @@ try {
     $session = \Stripe\Checkout\Session::create($params);
 } catch (Throwable $e) {
     error_log('Przedłużenie: sesja nieutworzona dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
-    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
+    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 503, [], ['reason' => 'stripe_error']);
 }
 
 order_attach_session($dnct, $orderId, $session->id);

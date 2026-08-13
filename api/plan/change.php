@@ -78,7 +78,7 @@ if ($quote['direction'] === 'down') {
 
     if (!$applied['ok']) {
         error_log('Zmiana pakietu #' . $order['id'] . ': ' . $applied['error']);
-        json_error('Nie udało się przestawić zasobów serwera. Napisz do nas - zrobimy to ręcznie.', 502, [], ['reason' => 'panel_error']);
+        json_error('Nie udało się przestawić zasobów serwera. Napisz do nas - zrobimy to ręcznie.', 503, [], ['reason' => 'panel_error']);
     }
 
     plan_change_store($dnct, (int)$order['id'], $quote['plan'], (int)$quote['bonus_days']);
@@ -125,8 +125,8 @@ $base = stripe_base_url();
 
 try {
     $session = \Stripe\Checkout\Session::create([
+        // Metod nie wymieniamy - bierze je Stripe z panelu (patrz create.php).
         'mode'                 => 'payment',
-        'payment_method_types' => ['card', 'blik', 'p24'],
         'line_items' => [[
             'price_data' => [
                 'currency'     => 'pln',
@@ -151,7 +151,7 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log('Zmiana pakietu: sesja nieutworzona dla zamówienia #' . $orderId . ' - ' . $e->getMessage());
-    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 502, [], ['reason' => 'stripe_error']);
+    json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 503, [], ['reason' => 'stripe_error']);
 }
 
 order_attach_session($dnct, $orderId, $session->id);

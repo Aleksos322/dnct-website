@@ -59,9 +59,15 @@
         elPeriod.textContent = q.label;
         elPer.textContent    = state.mode === 'subscription' ? '/ ' + q.label.toLowerCase() : 'jednorazowo';
 
+        /* Nie wyliczamy tu wszystkich metod co do jednej. Listę ustala panel
+           Stripe'a (patrz api/checkout/create.php) i zmienia się bez udziału
+           tego pliku - obiecywanie tu Przelewów24, których konto nie ma
+           włączonych, kończyło się rozczarowaniem w Checkoucie. Mówimy więc
+           o tym, co dla klienta naprawdę istotne: czy BLIK w ogóle wchodzi
+           w grę, bo przy abonamencie nie wchodzi. */
         elHint.textContent = state.mode === 'subscription'
-            ? 'Abonament obsługuje wyłącznie karta - BLIK i Przelewy24 nie pozwalają na płatności cykliczne.'
-            : 'Zapłacisz kartą, BLIK-iem albo przez Przelewy24.';
+            ? 'Abonament wymaga karty - BLIK i przelewy nie obsługują płatności cyklicznych.'
+            : 'Zapłacisz kartą lub BLIK-iem. Pełną listę metod zobaczysz w Checkoucie.';
 
         if (btnPay && !btnPay.hasAttribute('data-locked')) btnPay.disabled = false;
     }
