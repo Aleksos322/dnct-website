@@ -56,8 +56,16 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
 function webhook_checkout_completed(PDO $dnct, $session): bool
 {
     /* Sesja bywa "completed" bez zapłaty (metody z opóźnionym potwierdzeniem).
-       Serwer należy się dopiero po pieniądzach, nie po domknięciu formularza. */
-    if (($session->payment_status ?? '') !== 'paid') {
+       Serwer należy się dopiero po pieniądzach, nie po domknięciu formularza.
+
+       WYJĄTEK: `no_payment_required`. Tę wartość Stripe ustawia, gdy do zapłaty
+       zostało 0 zł - czyli po kuponie 100%. Żaden pieniądz nie płynie, bo nie
+       ma czego pobrać, ale zamówienie jest jak najbardziej ważne. Bez tego
+       warunku darmowy kod domykałby płatność i NIE zakładał serwera, a klient
+       zostawałby z potwierdzeniem i bez usługi. */
+    $paid = (string)($session->payment_status ?? '');
+
+    if ($paid !== 'paid' && $paid !== 'no_payment_required') {
         error_log('Stripe webhook: sesja ' . $session->id . ' domknięta bez zapłaty - czekam na potwierdzenie');
         return true;
     }
