@@ -138,6 +138,15 @@ AddDefaultCharset UTF-8
     RewriteCond %{ENV:REDIRECT_STATUS} ^$
     RewriteRule ^privacy-policy\.html$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/polityka-prywatnosci [R=301,L]
 
+    # /uslugi ze starej witryny - przedłużanie (?przedluzanie) i zmiana pakietu
+    # (?zmiana) mieszkają dziś w /twoje-serwery. Panel już tam nie linkuje, ale
+    # ten adres siedzi w zakładkach klientów i w mailach wysłanych z bety, więc
+    # musi prowadzić dalej, a nie w 404 - i to akurat w chwili, gdy ktoś chce
+    # zapłacić. Parametry zapytania pomijamy: obie funkcje są na tej samej
+    # stronie, więc nie ma czego przenosić.
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^uslugi/?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/twoje-serwery [R=301,L,QSD]
+
     # --- (a) nazwane trasy --------------------------------------------------
     RewriteRule ^login/?$        auth/login/login.php       [L]
     RewriteRule ^logowanie/?$    auth/login/login.php       [L]
