@@ -25,7 +25,7 @@ require_once __DIR__ . '/provisioning.php';
 /**
  * Terminy dla zamówienia.
  *
- * @return array{expires:string,suspends:string,expires_raw:?string,suspends_raw:?string,grace_days:int}
+ * @return array{expires:string,suspends:string,expires_raw:?string,suspends_raw:?string,grace_hours:int}
  */
 function order_deadlines(array $order): array
 {
@@ -35,7 +35,7 @@ function order_deadlines(array $order): array
         return [
             'expires' => 'nieustalone', 'suspends' => 'nieustalone',
             'expires_raw' => null, 'suspends_raw' => null,
-            'grace_days' => PROVISION_GRACE_DAYS,
+            'grace_hours' => PROVISION_GRACE_HOURS,
         ];
     }
 
@@ -44,11 +44,11 @@ function order_deadlines(array $order): array
     /* KIEDY SERWER ZOSTANIE ZAWIESZONY.
        - Płatność jednorazowa: z chwilą wygaśnięcia. Nikt nie obciąży karty,
          więc nie ma na co czekać.
-       - Abonament: Stripe obciąża w dniu wygaśnięcia i ponawia przy odmowie,
-         więc doliczamy karencję. Zabranie serwera po pierwszej odmowie banku
-         karałoby klienta za rzecz, która zwykle naprawia się sama. */
+       - Abonament: Stripe obciąża w dniu wygaśnięcia, a przy odmowie klient
+         dostaje dobę na poprawienie karty. Zabranie serwera w sekundzie po
+         odmowie banku karałoby go za rzecz, która zwykle naprawia się sama. */
     $suspends = $order['billing_mode'] === 'subscription'
-        ? $expires->modify('+' . PROVISION_GRACE_DAYS . ' days')
+        ? $expires->modify('+' . PROVISION_GRACE_HOURS . ' hours')
         : $expires;
 
     return [
@@ -56,7 +56,7 @@ function order_deadlines(array $order): array
         'suspends'     => $suspends->format('d.m.Y \o H:i'),
         'expires_raw'  => $expires->format('Y-m-d H:i:s'),
         'suspends_raw' => $suspends->format('Y-m-d H:i:s'),
-        'grace_days'   => PROVISION_GRACE_DAYS,
+        'grace_hours'  => PROVISION_GRACE_HOURS,
     ];
 }
 
@@ -79,7 +79,7 @@ function send_order_paid_mail(array $order): array
         'isSub'       => $order['billing_mode'] === 'subscription',
         'expires'     => $d['expires'],
         'suspends'    => $d['suspends'],
-        'graceDays'   => $d['grace_days'],
+        'graceHours'  => $d['grace_hours'],
         'panelUrl'    => 'https://panel.dnct.pl',
         'accountUrl'  => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',
     ];
@@ -109,7 +109,7 @@ function send_payment_failed_mail(array $order): array
         'suspends'   => $order['grace_until'] !== null
             ? (new DateTimeImmutable((string)$order['grace_until']))->format('d.m.Y \o H:i')
             : $d['suspends'],
-        'graceDays'  => $d['grace_days'],
+        'graceHours' => $d['grace_hours'],
         'accountUrl' => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',
     ];
 
@@ -135,7 +135,7 @@ function send_payment_failed_mail(array $order): array
 function order_paid_text(array $v): string
 {
     $renew = $v['isSub']
-        ? "Abonament odnawia się sam. Jeśli kolejna płatność nie przejdzie, masz {$v['graceDays']} dni karencji,\n"
+        ? "Abonament odnawia się sam. Jeśli kolejna płatność nie przejdzie, masz {$v['graceHours']} h na poprawienie karty,\n"
           . "a serwer zostanie zawieszony {$v['suspends']}."
         : "To płatność jednorazowa - serwer NIE odnowi się sam.\n"
           . "Jeśli nie przedłużysz, zostanie zawieszony {$v['suspends']}.";

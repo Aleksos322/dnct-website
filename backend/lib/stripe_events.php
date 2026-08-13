@@ -364,7 +364,7 @@ function webhook_invoice_failed(PDO $dnct, $invoice): bool
     order_set_grace(
         $dnct,
         (int)$order['id'],
-        PROVISION_GRACE_DAYS,
+        PROVISION_GRACE_HOURS,
         'Nieudana płatność cykliczna (faktura ' . ($invoice->id ?? '?') . ')'
     );
 

@@ -13,7 +13,7 @@
  * @var bool   $isSub
  * @var string $expires      data, do kiedy opłacone
  * @var string $suspends     data zawieszenia, gdy nie będzie kolejnej wpłaty
- * @var int    $graceDays
+ * @var int    $graceHours
  * @var string $panelUrl
  * @var string $accountUrl
  *
@@ -108,7 +108,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                                 <div style="font-size:13px; line-height:1.6; color:#78350f; margin-top:12px; padding-top:12px; border-top:1px solid #fcd34d;">
                                     <?php if ($isSub): ?>
                                         Abonament odnawia się sam. Jeśli kolejna płatność nie przejdzie,
-                                        masz <strong><?= (int)$graceDays ?> dni</strong> na poprawienie danych karty -
+                                        masz <strong><?= (int)$graceHours ?> h</strong> na poprawienie danych karty -
                                         przez ten czas serwer działa normalnie.
                                     <?php else: ?>
                                         To płatność jednorazowa - <strong>serwer nie odnowi się sam</strong>.

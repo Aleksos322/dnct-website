@@ -21,8 +21,22 @@ require_once __DIR__ . '/pterodactyl.php';
 /** Węzeł, na którym lądują serwery klientów (ten sam, co liczy capacity.php). */
 const PROVISION_NODE_ID = 4;
 
-/** Ile dni serwer działa po nieudanej płatności cyklicznej. */
-const PROVISION_GRACE_DAYS = 3;
+/**
+ * Ile GODZIN serwer działa po nieudanej płatności cyklicznej.
+ *
+ * Było 3 dni, licząc na to, że Stripe zdąży ponowić obciążenie. Doba wynika
+ * z przyjętego cyklu życia: po nieudanej płatności klient ma 24 h na reakcję,
+ * potem serwer jest zawieszany, a po kolejnych 48 h kasowany. Ta liczba
+ * pojawia się w mailu potwierdzającym i w ostrzeżeniu o nieudanej płatności,
+ * więc jest obietnicą - zmieniasz ją tu i cron od razu jej pilnuje.
+ */
+const PROVISION_GRACE_HOURS = 24;
+
+/** Ile godzin od zawieszenia do bezpowrotnego usunięcia serwera. */
+const PROVISION_DELETE_AFTER_HOURS = [
+    'payment'      => 24,  // jednorazowa: termin był znany od początku
+    'subscription' => 48,  // abonament: doba karencji już minęła przed zawieszeniem
+];
 
 /**
  * Różnice między grami - wszystko, czym Minecraft różni się od Zomboida.

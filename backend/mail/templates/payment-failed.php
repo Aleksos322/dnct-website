@@ -7,7 +7,7 @@
  * @var string $gameName
  * @var string $amount
  * @var string $suspends    dokładna data zawieszenia
- * @var int    $graceDays
+ * @var int    $graceHours
  * @var string $accountUrl
  *
  * Ton jest rzeczowy, nie straszący. Najczęstsza przyczyna odmowy to wygasła
@@ -65,7 +65,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                                     <?= $e($suspends) ?>
                                 </div>
                                 <div style="font-size:13px; color:#7f1d1d; margin-top:10px; line-height:1.6;">
-                                    Do tego czasu działa normalnie - masz <?= (int)$graceDays ?> dni na reakcję.
+                                    Do tego czasu działa normalnie - masz <?= (int)$graceHours ?> h na reakcję.
                                 </div>
                             </td>
                         </tr>

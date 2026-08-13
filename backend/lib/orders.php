@@ -181,14 +181,17 @@ function order_extend(PDO $dnct, int $orderId, int $days): void
  * odmowie banku ukarałoby klienta za rzecz, która najczęściej naprawia się
  * sama, a dane serwera znikają nieodwracalnie.
  */
-function order_set_grace(PDO $dnct, int $orderId, int $graceDays, string $reason): void
+function order_set_grace(PDO $dnct, int $orderId, int $graceHours, string $reason): void
 {
+    /* Karencję liczymy w GODZINACH od nieudanej płatności, nie w dniach od
+       wygaśnięcia. Klientowi obiecujemy "masz 24 h na reakcję" i ta doba ma
+       biec od chwili, w której dostał wiadomość - a nie od północy. */
     $stmt = $dnct->prepare(
         'UPDATE orders
-            SET grace_until = DATE_ADD(NOW(), INTERVAL ? DAY), failure_reason = ?
+            SET grace_until = DATE_ADD(NOW(), INTERVAL ? HOUR), failure_reason = ?
           WHERE id = ?'
     );
-    $stmt->execute([$graceDays, mb_substr($reason, 0, 500), $orderId]);
+    $stmt->execute([$graceHours, mb_substr($reason, 0, 500), $orderId]);
 }
 
 /**
