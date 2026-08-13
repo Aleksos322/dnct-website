@@ -45,22 +45,34 @@ function oidc_discovery_url(): string
 /**
  * Adres, pod który Authentik odsyła przeglądarkę po zalogowaniu.
  *
- * Budujemy go z bieżącego hosta, żeby ta sama instalacja działała i na
- * beta.dnct.pl, i na dnct.pl bez przestawiania konfiguracji. Oba adresy są
- * zarejestrowane w Authentiku; host spoza tej listy zostanie przez niego
- * odrzucony, więc nie da się tędy przekierować użytkownika gdzie indziej.
+ * Budujemy go z bieżącego hosta, żeby ta sama instalacja działała na dnct.pl,
+ * beta.dnct.pl i w panelu administracyjnym bez przestawiania konfiguracji.
+ * Wszystkie te adresy są zarejestrowane w Authentiku; host spoza listy
+ * zostanie przez niego odrzucony, więc nie da się tędy przekierować
+ * użytkownika gdzie indziej.
+ *
+ * Schemat jest przypisany do hosta, a nie zgadywany z żądania. `admin.lan.dnct.pl`
+ * to jedyny wpis po HTTP i tak ma zostać: panel administracyjny stoi wewnątrz
+ * LAN-u, poza reverse proxy, więc nie ma tam czym zakończyć TLS-a. Gdyby schemat
+ * brał się z nagłówków, wystarczyłby jeden `X-Forwarded-Proto` od klienta,
+ * żeby zbudować adres powrotu, którego Authentik nie rozpozna - i logowanie
+ * przestałoby działać w sposób trudny do wyśledzenia.
  */
 function oidc_redirect_uri(): string
 {
-    $host = (string)($_SERVER['HTTP_HOST'] ?? 'dnct.pl');
-
     // Twarda lista dozwolonych hostów - nagłówek Host pochodzi od klienta.
-    $allowed = ['dnct.pl', 'beta.dnct.pl'];
-    if (!in_array($host, $allowed, true)) {
+    $allowed = [
+        'dnct.pl'           => 'https',
+        'beta.dnct.pl'      => 'https',
+        'admin.lan.dnct.pl' => 'http',
+    ];
+
+    $host = (string)($_SERVER['HTTP_HOST'] ?? 'dnct.pl');
+    if (!isset($allowed[$host])) {
         $host = 'dnct.pl';
     }
 
-    return 'https://' . $host . '/auth/callback.php';
+    return $allowed[$host] . '://' . $host . '/auth/callback.php';
 }
 
 /**
