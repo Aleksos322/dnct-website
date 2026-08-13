@@ -24,6 +24,29 @@ $centerContent   = false;
 
 $sessionId = trim((string)($_GET['session_id'] ?? ''));
 
+/* Rodzaj zamówienia ustalamy JUŻ TERAZ, po stronie serwera.
+   Wiersz zamówienia powstaje w api/checkout/create.php, czyli zanim klient
+   w ogóle trafi do Stripe'a - jest więc na pewno, gdy tu wraca. Bez tego
+   strona witałaby każdego "zakładamy Twój serwer", także tego, kto właśnie
+   dokupił miesiąc do działającej maszyny, a poprawny tekst pojawiałby się
+   dopiero po pierwszej odpowiedzi z API. */
+$kind = 'new';
+
+if ($sessionId !== '') {
+    $ownEmail = (string)($_SESSION['authentik_email'] ?? '');
+    $o        = order_by_session(dnct_db(), $sessionId);
+
+    if ($o !== null && $ownEmail !== '' && hash_equals((string)$o['user_email'], $ownEmail)) {
+        $kind = (string)$o['kind'];
+    }
+}
+
+$startCopy = [
+    'new'         => ['Płatność przyjęta', 'Zakładamy Twój serwer - to zwykle kilkanaście sekund. Nie zamykaj tej strony.'],
+    'extension'   => ['Płatność przyjęta', 'Dopisujemy kolejny okres do Twojego serwera - to potrwa chwilę.'],
+    'plan_change' => ['Płatność przyjęta', 'Przestawiamy zasoby Twojego serwera - to potrwa chwilę.'],
+][$kind] ?? ['Płatność przyjęta', 'Kończymy zamówienie - to potrwa chwilę.'];
+
 ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
@@ -49,12 +72,18 @@ ob_start();
             <span class="suc-spin"></span>
         </div>
 
-        <h1 data-role="title">Płatność przyjęta</h1>
-        <p data-role="text">Zakładamy Twój serwer - to zwykle kilkanaście sekund. Nie zamykaj tej strony.</p>
+        <h1 data-role="title"><?php echo htmlspecialchars($startCopy[0]); ?></h1>
+        <p data-role="text"><?php echo htmlspecialchars($startCopy[1]); ?></p>
 
         <div class="suc-actions" data-role="actions" hidden>
             <a class="suc-primary" href="https://panel.dnct.pl" target="_blank" rel="noopener">Otwórz panel</a>
-            <a class="suc-ghost" href="/cennik">Wróć do cennika</a>
+            <?php /* Po przedłużeniu i zmianie pakietu klient wraca do swoich
+                     serwerów, nie do cennika - kupił już to, po co przyszedł. */ ?>
+            <?php if ($kind === 'new'): ?>
+                <a class="suc-ghost" href="/cennik">Wróć do cennika</a>
+            <?php else: ?>
+                <a class="suc-ghost" href="/twoje-serwery">Twoje serwery</a>
+            <?php endif; ?>
         </div>
 
         <div class="suc-meta" data-role="meta" hidden></div>
