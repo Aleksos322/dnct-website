@@ -27,6 +27,13 @@ $centerContent   = false;
    dopasowanym po adresie e-mail. Bez logowania nie ma czego dopasować. */
 $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
 
+/* Adres, pod który logowanie ma odesłać z powrotem - z parametrami, więc
+   po zalogowaniu wraca ten sam plan i te same sloty. Wiodące "//" byłoby
+   już innym hostem, więc normalizujemy je do jednego ukośnika (i tak
+   odrzuciłoby je oidc_safe_return_to, ale wtedy klient wylądowałby na
+   stronie głównej zamiast na swoim zamówieniu). */
+$returnTo = '/' . ltrim((string)($_SERVER['REQUEST_URI'] ?? '/zamowienie'), '/');
+
 $error   = null;
 $quotes  = [];
 $spec    = null;
@@ -88,6 +95,18 @@ try {
 } catch (Throwable $e) {
     error_log('zamowienie: ' . $e->getMessage());
     $error = 'Nie udało się wczytać oferty. Spróbuj ponownie za chwilę.';
+}
+
+/* Niezalogowanego odsyłamy do logowania OD RAZU, zamiast pokazywać mu
+   podsumowanie z przyciskiem "zaloguj się". Wybór planu jest w adresie,
+   a return_to sprowadza go tu z powrotem dokładnie na to samo zamówienie.
+
+   Dwa wyjątki, w których redirect byłby wysyłaniem po nic: gdy oferty nie
+   udało się wczytać i gdy sprzedaż jest wyłączona. Wtedy lepiej od razu
+   pokazać powód - po zalogowaniu i tak nie byłoby czego kupić. */
+if (!$isLoggedIn && $error === null && stripe_sales_enabled()) {
+    header('Location: /login?return_to=' . rawurlencode($returnTo));
+    exit();
 }
 
 ob_start();
@@ -176,7 +195,11 @@ ob_start();
         </div>
 
         <?php if (!$isLoggedIn): ?>
-            <a class="ord-cta" href="/login">Zaloguj się, żeby zamówić</a>
+            <?php /* Tu trafia tylko ktoś, kogo redirect wyżej przepuścił, czyli
+                     przy wyłączonej sprzedaży. Mimo to niesiemy return_to -
+                     żeby po włączeniu sprzedaży ta ścieżka też wracała na
+                     właściwe zamówienie, a nie na stronę główną. */ ?>
+            <a class="ord-cta" href="/login?return_to=<?php echo htmlspecialchars(rawurlencode($returnTo)); ?>">Zaloguj się, żeby zamówić</a>
             <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu - dlatego potrzebujemy logowania.</p>
         <?php else: ?>
             <button type="button" class="ord-cta" data-role="pay"
