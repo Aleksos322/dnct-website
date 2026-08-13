@@ -215,14 +215,22 @@ ob_start();
                  krawędzi okna (position: fixed), więc licznik towarzyszy
                  przewijaniu zamiast zniknąć po pierwszym geście. Niżej nie ma
                  jej gdzie przykleić - weszłaby na treść. */ ?>
-        <aside class="cnk-rail" aria-label="Skrót informacji o hostingu">
+        <aside class="cnk-rail glass" aria-label="Skrót informacji o hostingu">
             <?php if ($liveServers > 0): ?>
                 <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
                          ozdobą: to jedyna liczba na tej stronie, której nie da się
-                         podważyć, bo pochodzi z działających maszyn. */ ?>
+                         podważyć, bo pochodzi z działających maszyn.
+
+                         `data-count-to` uruchamia naliczanie od zera po wejściu
+                         w kadr (cennik.js). Liczba, która się DOLICZA, czyta się
+                         jak odczyt z żywego systemu; ta sama liczba wpisana na
+                         sztywno wygląda jak element grafiki. */ ?>
                 <div class="cnk-live">
-                    <span class="cnk-live-dot" aria-hidden="true"></span>
-                    <span class="cnk-live-num"><?php echo $liveServers; ?></span>
+                    <span class="cnk-live-eyebrow">
+                        <span class="cnk-live-dot" aria-hidden="true"></span>
+                        Na żywo
+                    </span>
+                    <span class="cnk-live-num" data-count-to="<?php echo $liveServers; ?>"><?php echo $liveServers; ?></span>
                     <span class="cnk-live-label">serwerów działa w tej chwili</span>
                 </div>
             <?php endif; ?>

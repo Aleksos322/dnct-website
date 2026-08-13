@@ -326,6 +326,54 @@
         }, { threshold: 0 }).observe(source);
     }
 
+    /* ------------------------------------------------------------------
+       Licznik serwerów: naliczanie po wejściu w kadr
+
+       Liczba, która się DOLICZA, czyta się jak odczyt z żywego systemu; ta sama
+       liczba wpisana na sztywno wygląda jak element grafiki. Efekt odpala się
+       RAZ - powtarzanie przy każdym przewinięciu zamienia dowód w gadżet.
+
+       Wartość docelowa jest już w HTML-u, więc bez JavaScriptu (i przy
+       prefers-reduced-motion) po prostu od razu widać prawidłową liczbę.
+       ------------------------------------------------------------------ */
+    function initLiveCount() {
+        var rail = document.querySelector('.cnk-rail');
+        if (!rail || !window.IntersectionObserver) return;
+
+        var num = rail.querySelector('[data-count-to]');
+        var target = num ? parseInt(num.getAttribute('data-count-to'), 10) : 0;
+
+
+        var observer = new IntersectionObserver(function (entries) {
+            if (!entries[0].isIntersecting) return;
+            observer.disconnect();
+
+            if (!num || !target || reducedMotion()) return;
+
+            var started = null;
+            var DURATION = 900;
+
+            window.requestAnimationFrame(function step(now) {
+                if (started === null) started = now;
+
+                var p = Math.min(1, (now - started) / DURATION);
+                // Wyhamowanie na końcu - liczba dobija do celu, zamiast
+                // ucinać się w połowie ruchu.
+                var eased = 1 - Math.pow(1 - p, 3);
+
+                num.textContent = String(Math.round(target * eased));
+
+                if (p < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    num.textContent = String(target);
+                }
+            });
+        }, { threshold: 0.4 });
+
+        observer.observe(rail);
+    }
+
 
     /* ------------------------------------------------------------------
        Drobne reakcje na kursor
@@ -384,6 +432,7 @@
     initPlanPicks();
     initHoverBits();
     initLiveFloat();
+    initLiveCount();
     initParallax();
     document.querySelectorAll('.cfg').forEach(initConfigurator);
 })();

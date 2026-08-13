@@ -1293,13 +1293,11 @@
     gap: 0.5rem 1.25rem;
 }
 
-/* Od tej szerokości szyna staje się prawą kolumną hero - mieści się obok
-   nagłówka i przestaje kosztować cokolwiek w pionie.
+/* Od tej szerokosci szyna staje sie prawa kolumna hero - miesci sie obok
+   naglowka i przestaje kosztowac cokolwiek w pionie.
 
-   TEKST ZAWSZE DO LEWEJ, mimo że sam blok stoi po prawej. Wyrównanie do prawej
-   łamało wiersze w przypadkowych miejscach ("Gwarantowany RAM i / CPU") i przy
-   ptaszkach po lewej dawało poszarpaną kolumnę. Punkt zaczepienia dla oka ma
-   być jeden. */
+   TEKST ZAWSZE DO LEWEJ, mimo ze sam blok stoi po prawej. Wyrownanie do prawej
+   lamalo wiersze w przypadkowych miejscach ("Gwarantowany RAM i / CPU"). */
 @media (min-width: 860px) {
     .cennik-page .cnk-rail {
         flex: 0 0 auto;
@@ -1308,33 +1306,115 @@
         text-align: left;
         gap: 0;
         width: 17rem;
-        padding: 1.1rem 1.25rem;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 1.35rem 1.4rem;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
     }
     .cennik-page .cnk-rail-points {
         flex-direction: column;
         align-items: stretch;
-        gap: 0.6rem;
-        margin-top: 1.15rem;
-        padding-top: 1.15rem;
+        gap: 0.65rem;
+        margin-top: 1.2rem;
+        padding-top: 1.2rem;
         border-top: 1px solid rgba(255, 255, 255, 0.07);
     }
 }
 
+/* Delikatna poswiata pod liczba - ten sam fiolet, co reszta strony.
+   Zostaje POD trescia i nie lapie kliknięć. */
+.cennik-page .cnk-rail::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -20%;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.16), transparent 70%);
+    filter: blur(30px);
+    pointer-events: none;
+    z-index: 0;
+}
+.cennik-page .cnk-rail > * { position: relative; z-index: 1; }
+
+/* --------------------------------------------------------------------------
+   LICZNIK
+
+   "Na zywo" z pulsujaca kropka nad liczba, zamiast kropki doklejonej z boku.
+   Podpis stanu nalezy do calego bloku, nie do samej cyfry.
+   -------------------------------------------------------------------------- */
+.cennik-page .cnk-rail .cnk-live { display: block; padding: 0; background: none; border: 0; }
+
+.cennik-page .cnk-live-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #4ade80;
+}
+
+.cennik-page .cnk-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+    /* Poswiata pulsuje razem z kropka - sama zmiana przezroczystosci gubi sie
+       na ciemnym tle. */
+    animation: cnkPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes cnkPulse {
+    0%, 100% { opacity: 1;    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+    70%      { opacity: 0.55; box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+}
+
+/* Liczba w tym samym gradiencie, co naglowki i ceny na calej stronie.
+   Wczesniej byla plaska biel - stad wrazenie, ze blok jest z innej strony. */
+.cennik-page .cnk-live-num {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 55%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.cennik-page .cnk-live-label {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.74rem;
+    line-height: 1.4;
+    color: #64748b;
+    max-width: 11rem;
+}
+
+/* --------------------------------------------------------------------------
+   GWARANCJE
+
+   Wjezdzaja po kolei po wejsciu w kadr (klasa `is-in` z cennik.js). Ruch jest
+   jednorazowy i trwa ulamek sekundy - ma zwrocic uwage na liste, a nie
+   zabawiac przy kazdym przewinieciu.
+   -------------------------------------------------------------------------- */
 .cennik-page .cnk-rail-points li {
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.55rem;
     font-size: 0.78rem;
     line-height: 1.45;
     color: #94a3b8;
     transition: color 0.2s ease;
 }
-/* Drobna reakcja na kursor: punkt się rozjaśnia, ptaszek podskakuje.
-   Tyle wystarczy, żeby lista wyglądała na żywą, a nie na obrazek. */
 .cennik-page .cnk-rail-points li:hover { color: #e2e8f0; }
+
 .cennik-page .cnk-rail-points span {
     color: #4ade80;
     font-weight: 900;
@@ -1343,37 +1423,15 @@
 }
 .cennik-page .cnk-rail-points li:hover span { transform: scale(1.25); }
 
-/* LICZNIK. Wcześniej podpis "serwerów działa w tej chwili" łamał się na dwie
-   linie OBOK liczby i wyglądał jak przypadkowo doklejony. Teraz liczba stoi
-   sama, a podpis leży pod nią jednym ciągiem. */
-.cennik-page .cnk-rail .cnk-live {
-    display: block;
-    padding: 0;
-    background: none;
-    border: 0;
-}
-.cennik-page .cnk-rail .cnk-live-dot {
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 0.5rem;
-}
-.cennik-page .cnk-rail .cnk-live-num {
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 2.6rem;
-    letter-spacing: -0.03em;
-}
-.cennik-page .cnk-rail .cnk-live-label {
-    display: block;
-    margin-top: 0.45rem;
-    max-width: 11rem;
-    font-size: 0.74rem;
-    line-height: 1.4;
-    color: #64748b;
-}
-/* Podpis jest jednym zdaniem - łamanie zostawia przeglądarka. Ukrywanie <br>
-   przez CSS sklejało słowa ("działaw tej chwili"), bo znacznik nie zostawia po
-   sobie spacji; dlatego zniknął z markupu, a nie tylko z widoku. */
+/* CELOWO BEZ WJAZDU POZYCJI.
+   Były tu dwa podejścia - klatki kluczowe, potem przejścia - i oba miały tę
+   samą wadę: ukrywały treść na starcie i pokazywały ją dopiero po zakończeniu
+   animacji. Wystarczy, że animacja nie ruszy (karta w tle ma wstrzymane
+   klatki, co sprawdziłem), a lista gwarancji zostaje niewidoczna.
+   Ozdoba nie może decydować o tym, czy treść w ogóle widać.
+
+   Ruch na tej karcie niosą rzeczy, które nic nie chowają: pulsująca kropka,
+   naliczanie liczby i reakcja na kursor niżej. */
 
 @media (min-width: 1400px) {
     .cennik-page .cnk-rail {
@@ -1384,11 +1442,11 @@
         z-index: 20;
         width: 15.5rem;
         margin: 0;
-        background: rgba(10, 12, 20, 0.78);
-        border-color: rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(14px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-live-dot { animation: none; }
 }
 
 /* ==========================================================================
@@ -1474,7 +1532,17 @@
     transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .cnk-live-float.is-visible { opacity: 1; transform: none; }
-.cnk-live-float strong { font-size: 1.05rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+.cnk-live-float strong {
+    font-size: 1.05rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    /* Ten sam gradient co licznik w szynie - plakietka jest jego przedłużeniem,
+       nie osobnym elementem. */
+    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
 @media (min-width: 1400px) {
     .cnk-live-float { display: none; }
