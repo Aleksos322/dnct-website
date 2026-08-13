@@ -24,6 +24,10 @@ const RATE_LIMIT_OTP_VERIFY   = [20, 900];  // 20 prób weryfikacji kodu / 15 mi
 // Limit jest niski celowo: nikt nie kupuje piętnastu serwerów w kwadrans,
 // a bez niego jedno kliknięcie w pętli zaśmieca konto Stripe'a i tabelę zamówień.
 const RATE_LIMIT_CHECKOUT     = [12, 900];  // 12 sesji płatności / 15 min
+// Paczka z plikami skasowanego serwera. Limit jest hojny, bo pobieranie bywa
+// wznawiane, a token i tak jest nie do zgadnięcia - chodzi o zapętlony skrypt
+// ciągnący te same 400 MB w kółko, nie o zgadywanie adresu.
+const RATE_LIMIT_DOWNLOAD     = [30, 600];  // 30 pobrań / 10 min
 
 function rate_limit_dir(): string
 {

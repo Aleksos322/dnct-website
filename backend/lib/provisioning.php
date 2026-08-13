@@ -286,3 +286,23 @@ function provision_unsuspend(int $serverId): bool
     $res = pterodactyl_api_request('POST', "/api/application/servers/{$serverId}/unsuspend");
     return in_array((int)$res['http_code'], [204, 200], true);
 }
+
+/**
+ * Bezpowrotne usunięcie serwera z panelu.
+ *
+ * JEDYNE miejsce w projekcie, które kasuje cudze dane. Wywołuje je wyłącznie
+ * etap `delete` w backend/tools/lifecycle.php - i tylko wtedy, gdy paczka
+ * z plikami leży już na naszym dysku i ma niezerowy rozmiar.
+ *
+ * Kasujemy MIĘKKO (bez `/force`): gdy węzeł nie odpowiada, Pterodactyl odmawia
+ * zamiast zostawić osierocone pliki na dysku i wpis w bazie wskazujący na nic.
+ * Wolimy, żeby proces stanął i został zauważony, niż żeby "posprzątał" tak,
+ * że nikt nie wie, co zniknęło.
+ *
+ * 404 traktujemy jak sukces - serwera już nie ma, czyli cel osiągnięty.
+ */
+function provision_delete(int $serverId): bool
+{
+    $res = pterodactyl_api_request('DELETE', "/api/application/servers/{$serverId}");
+    return in_array((int)$res['http_code'], [204, 200, 404], true);
+}

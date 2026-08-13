@@ -62,6 +62,26 @@ function env_all(): array
 
     $values = [];
 
+    /* WSKAZANY PLIK, KTÓREGO NIE DA SIĘ ODCZYTAĆ, TO AWARIA - NIE POWÓD DO
+       CICHEGO SIĘGNIĘCIA PO NASTĘPNY.
+
+       Kosztowało to już raz: `beta.env` stracił grupę `www-data` po edycji,
+       PHP-FPM przestał go czytać i beta po cichu zjechała na produkcyjny
+       `.env` - czyli na PRAWDZIWE klucze Stripe. Nic tego nie zgłosiło,
+       bo pętla niżej po prostu brała kolejny czytelny plik z listy.
+
+       Ścieżki domyślne mogą nie istnieć i to normalne. Ale jeśli ktoś podał
+       DNCT_ENV_FILE, to znaczy, że chce DOKŁADNIE tego środowiska. */
+    $explicit = $_SERVER['DNCT_ENV_FILE'] ?? getenv('DNCT_ENV_FILE') ?: null;
+    if ($explicit !== null && !is_readable((string)$explicit)) {
+        error_log(
+            'env: KRYTYCZNE - wskazany plik ' . $explicit . ' jest nieczytelny dla '
+            . (function_exists('posix_geteuid') ? 'uid ' . posix_geteuid() : 'tego procesu')
+            . '. Sięgam po plik domyślny, co oznacza CUDZE ustawienia (klucze płatności, adresy baz). '
+            . 'Napraw uprawnienia: chown deployer:www-data ' . $explicit
+        );
+    }
+
     $path = null;
     foreach (env_candidate_paths() as $candidate) {
         if (is_readable($candidate)) {
