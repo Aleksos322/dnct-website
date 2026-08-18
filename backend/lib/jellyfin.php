@@ -111,6 +111,15 @@ function jellyfin_username_from_authentik(string $username): string
 /**
  * ZAWSZE tworzy NOWE konto - patrz nagłówek pliku. Wołać wyłącznie z rejestracji.
  *
+ * Jellyfin traktuje nazwy bez rozróżniania wielkości liter i na kolizję
+ * odpowiada gołym `400 Error processing request.` (bez treści JSON) - nie da
+ * się tego odróżnić od innego błędu inaczej niż po kodzie HTTP. Skoro nie ma
+ * find-or-create (brak e-maila w API), a nowy klient regularnie trafi na login
+ * pokrywający się z jednym z kont sprzed tego systemu (np. zarejestruje się
+ * jako "kimor" albo "root"), retry z dopiskiem jest jedynym bezpiecznym
+ * wyjściem - NIE wolno przy kolizji cicho "połączyć" konta z cudzym Jellyfinem,
+ * bo to obcy człowiek, nie ten sam użytkownik pod inną wielkością liter.
+ *
  * @return array{id:string,name:string,password:string}|null
  */
 function jellyfin_create_user(string $username, string $password = ''): ?array
@@ -119,23 +128,33 @@ function jellyfin_create_user(string $username, string $password = ''): ?array
         $password = jellyfin_generate_password(16);
     }
 
-    $result = jellyfin_api_request('POST', '/Users/New', [
-        'Name'     => $username,
-        'Password' => $password,
-    ]);
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        $tryName = $attempt === 0 ? $username : $username . '_' . bin2hex(random_bytes(2));
 
-    if (!in_array($result['http_code'], [200, 201], true) || !is_array($result['body'])) {
-        error_log('Jellyfin: nie udało się utworzyć użytkownika ' . $username . ' (HTTP ' . $result['http_code'] . '): ' . json_encode($result['body']));
-        return null;
+        $result = jellyfin_api_request('POST', '/Users/New', [
+            'Name'     => $tryName,
+            'Password' => $password,
+        ]);
+
+        if (in_array($result['http_code'], [200, 201], true) && is_array($result['body'])) {
+            $id = $result['body']['Id'] ?? null;
+            if (is_string($id) && $id !== '') {
+                return ['id' => $id, 'name' => (string)($result['body']['Name'] ?? $tryName), 'password' => $password];
+            }
+            error_log('Jellyfin: odpowiedź /Users/New bez Id dla ' . $tryName);
+            return null;
+        }
+
+        // 400 bez treści = najpewniej kolizja nazwy - spróbuj z dopiskiem.
+        // Inny kod błędu (autoryzacja, sieć) nie ma sensu ponawiać w kółko.
+        if ($result['http_code'] !== 400) {
+            error_log('Jellyfin: nie udało się utworzyć użytkownika ' . $tryName . ' (HTTP ' . $result['http_code'] . '): ' . json_encode($result['body']));
+            return null;
+        }
     }
 
-    $id = $result['body']['Id'] ?? null;
-    if (!is_string($id) || $id === '') {
-        error_log('Jellyfin: odpowiedź /Users/New bez Id dla ' . $username);
-        return null;
-    }
-
-    return ['id' => $id, 'name' => (string)($result['body']['Name'] ?? $username), 'password' => $password];
+    error_log('Jellyfin: nie udało się utworzyć użytkownika ' . $username . ' po 3 próbach (same kolizje nazw)');
+    return null;
 }
 
 /**
