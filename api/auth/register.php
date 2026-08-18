@@ -13,6 +13,9 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/jellyfin.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/jellyfin_mail.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/user_profiles.php';
 
 require_method('POST');
 csrf_guard();
@@ -145,6 +148,34 @@ if ($pterodactylUser === null) {
     // Użytkownik może się zalogować, a administrator rozwiąże problem
     error_log('Rejestracja: JIT provisioning zawiódł dla ' . $identity['email']);
 }
+
+// ------------------------------------------------------------
+// 4.6. JUST-IN-TIME PROVISIONING - stwórz konto w Jellyfinie
+// ------------------------------------------------------------
+// W przeciwieństwie do Pterodactyla NIE MA find-or-create po e-mailu (Jellyfin
+// nie zwraca e-maila w /Users) - dlatego to woła się WYŁĄCZNIE tutaj, raz,
+// przy zakładaniu konta, nigdy przy logowaniu (patrz backend/lib/jellyfin.php).
+$jellyfinAccount = jellyfin_create_user(
+    jellyfin_username_from_authentik($identity['username'])
+);
+
+if ($jellyfinAccount === null) {
+    error_log('Rejestracja: tworzenie konta Jellyfin zawiodło dla ' . $identity['email']);
+} else {
+    $mailResult = send_jellyfin_credentials_mail($identity['email'], $identity['first_name'], $jellyfinAccount);
+    if (!$mailResult['ok']) {
+        error_log('Rejestracja: mail z danymi Jellyfina nie dotarł do ' . $identity['email'] . ': ' . $mailResult['error']);
+    }
+}
+
+user_profile_create(dnct_db(), [
+    'authentik_username'   => $identity['username'],
+    'authentik_email'      => $identity['email'],
+    'pterodactyl_user_id'  => $pterodactylUser['id'] ?? null,
+    'jellyfin_user_id'     => $jellyfinAccount['id'] ?? null,
+    'jellyfin_linked_at'   => $jellyfinAccount !== null ? gmdate('Y-m-d H:i:s') : null,
+    'jellyfin_link_source' => $jellyfinAccount !== null ? 'created' : null,
+]);
 
 // ------------------------------------------------------------
 // 5. Sukces - czyścimy stan rejestracji i przekazujemy komunikat na logowanie.
