@@ -48,7 +48,7 @@ ob_start();
 <div class="bg-gray-900/70 border border-gray-800 rounded-2xl p-8 max-w-md w-full backdrop-blur-md">
     <h1 class="text-2xl font-bold mb-3">Logowanie</h1>
     <p class="text-red-400 text-sm mb-6"><?php echo htmlspecialchars($error ?? 'Wystąpił nieoczekiwany błąd.'); ?></p>
-    <a href="/login" class="inline-block px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-full font-bold text-sm text-white transition">
+    <a href="/login" class="inline-block px-5 py-2.5 bg-gradient-main hover:scale-105 rounded-full font-bold text-sm text-white shadow-lg shadow-purple-500/20 transition-transform">
         Spróbuj ponownie
     </a>
 </div>

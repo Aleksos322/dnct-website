@@ -110,7 +110,7 @@ ob_start();
             <textarea name="message" required rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white"></textarea>
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-2 transition">
+        <button type="submit" class="w-full bg-gradient-main hover:scale-[1.02] text-white font-semibold rounded-lg px-4 py-2 shadow-lg shadow-purple-500/20 transition-transform">
             Wyślij
         </button>
     </form>
