@@ -34,7 +34,7 @@ http_response_code(500);
         .code {
             font-size: 5rem;
             font-weight: 900;
-            background: linear-gradient(90deg, #8b5cf6, #4f7cfa);
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;

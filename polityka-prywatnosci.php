@@ -26,7 +26,7 @@ ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">
 
-<div class="legal glass glass-content" style="border-radius: 22px; padding: clamp(1.25rem, 4vw, 3rem);">
+<div class="legal glass glass-content" style="padding: clamp(1.25rem, 4vw, 3rem);">
     <div class="gdpr-badge">
           🔒 Zgodność z RODO/GDPR (Rozporządzenie UE 2016/679)
         </div>
