@@ -137,8 +137,16 @@ function authentik_create_user(array $data): array
 
     if ($create['http_code'] !== 201 || !isset($create['body']['pk'])) {
         error_log('Authentik: nie udało się utworzyć użytkownika ' . $data['username'] . ': ' . json_encode($create));
-        // 400 = wyścig: konto powstało między naszym sprawdzeniem a zapisem.
-        return ['ok' => false, 'code' => $create['http_code'] === 400 ? 'conflict' : 'create_failed'];
+        // 400 z polami username/email = wyścig (konto powstało między naszym
+        // sprawdzeniem a zapisem) - Authentik zwraca błędy walidacji DRF-style,
+        // kluczowane nazwą pola. Każdy INNY kształt 400 (np. odrzucone hasło
+        // mimo przejścia naszej walidacji, zbyt długie pole) NIE jest
+        // konfliktem - traktowanie go jako "zajęty login" pokazywałoby
+        // klientowi mylący komunikat i utrudniało diagnozę zgłoszeń.
+        $body = is_array($create['body'] ?? null) ? $create['body'] : [];
+        $isConflict = $create['http_code'] === 400
+            && (isset($body['username']) || isset($body['email']));
+        return ['ok' => false, 'code' => $isConflict ? 'conflict' : 'create_failed'];
     }
 
     $userId = $create['body']['pk'];

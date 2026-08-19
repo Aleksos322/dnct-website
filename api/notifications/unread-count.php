@@ -1,22 +1,23 @@
 <?php
 declare(strict_types=1);
-header('Content-Type: application/json; charset=utf-8');
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
 
-require_once __DIR__ . '/../../backend/lib/notifications.php';
+require_method('GET');
+rate_limit_guard(
+    'notifications',
+    RATE_LIMIT_NOTIFICATIONS,
+    'Zbyt wiele odświeżeń powiadomień z tego adresu IP. Odczekaj chwilę.'
+);
 
 if (!isset($_SESSION['authentik_username'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'unauthorized']);
-    exit;
+    json_error('Musisz być zalogowany.', 401, [], ['reason' => 'unauthorized']);
 }
 
-$userId  = $_SESSION['authentik_username'];
+$userId  = (string) $_SESSION['authentik_username'];
 $isAdmin = dnct_is_admin();
 
 $count = count_unread_for_user(dnct_db(), $userId, $isAdmin);
 
-echo json_encode(['unread' => $count]);
+json_ok(['unread' => $count]);
