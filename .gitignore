@@ -14,3 +14,6 @@ backend/mail/vendor/
 *.orig
 *.swp
 .DS_Store
+
+# Raporty narzędzia /impeccable - lokalny artefakt recenzji, nie kod strony
+.impeccable/

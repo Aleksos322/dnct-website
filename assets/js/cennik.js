@@ -84,6 +84,13 @@
        ------------------------------------------------------------------ */
     function initPlanPicks() {
         document.querySelectorAll('.plan-pick').forEach(function (card) {
+            // Karty-wizytówki na stronie głównej (components: ta sama .pcard,
+            // ale bez data-plan-id) linkują wprost do /cennik przez własny
+            // <a class="pcard-cta"> - nie mają czego "zaznaczać". Bez tego
+            // guarda klik w taką kartę wołałby showPick() z samymi "null"
+            // w tekście, zanim przeglądarka zdążyła przejść pod /cennik.
+            if (!card.hasAttribute('data-plan-id')) return;
+
             function pick(e) {
                 if (card.getAttribute('data-plan-soldout') === '1') {
                     if (e) e.preventDefault();
@@ -428,11 +435,74 @@
         });
     }
 
+    /* ------------------------------------------------------------------
+       Chroma na kartach planów: przechył 3D + poświata śledząca kursor
+
+       Obie rzeczy WYŁĄCZNIE pod kursorem - CSS pokazuje poświatę i przechyla
+       kartę tylko na ":hover"/":focus-within" (patrz cennik.css), tu liczymy
+       jedynie kąty i pozycję. Bez najechania karta zostaje płaska - żadnego
+       ambientowego ruchu, którego nikt nie prosił (Reguła Spokojnej
+       Powierzchni).
+
+       Kąt liczony od ŚRODKA karty, nie od punktu najechania: kursor w rogu
+       daje maksymalny przechył (MAX_TILT), kursor na środku - kartę płaską.
+       Oś Y jest odwrócona (górna połowa karty przechyla się "do tyłu", jak
+       prawdziwa kartka trzymana i pochylana ku sobie) - bez tego przechył
+       wyglądałby na odwrotny do ruchu kursora.
+
+       Gama poświaty to gotowy gradient CTA (ametyst -> indygo -> błękit),
+       nie tęcza - "Reguła Jednego Głosu" w DESIGN.md zabrania dokładać nowe
+       kolory akcji.
+       ------------------------------------------------------------------ */
+    /**
+     * Podpina przechył 3D + poświatę pod kursor do JEDNEGO elementu. Współdzielona
+     * przez karty planów (.pcard) i makietę konsoli/zwiastuna w pasmie "Zobacz,
+     * zanim zapłacisz" (.pnl-console/.pnl-trailer) - ten sam wzór CSS (--mx/--my/
+     * --rx/--ry), inny tylko maksymalny kąt: duży panel przechylony tak samo mocno
+     * jak mała karta wygląda na wypaczony, nie elegancki.
+     */
+    function attachChromaTilt(el, maxTilt) {
+        function move(e) {
+            var r = el.getBoundingClientRect();
+            var px = (e.clientX - r.left) / r.width;
+            var py = (e.clientY - r.top) / r.height;
+
+            el.style.setProperty('--mx', (px * 100) + '%');
+            el.style.setProperty('--my', (py * 100) + '%');
+            el.style.setProperty('--ry', ((px - 0.5) * 2 * maxTilt).toFixed(2) + 'deg');
+            el.style.setProperty('--rx', ((0.5 - py) * 2 * maxTilt).toFixed(2) + 'deg');
+        }
+
+        function reset() {
+            el.style.setProperty('--rx', '0deg');
+            el.style.setProperty('--ry', '0deg');
+        }
+
+        el.addEventListener('mousemove', move);
+        el.addEventListener('mouseleave', reset);
+    }
+
+    function initChromaCards() {
+        if (reducedMotion()) return;   // ruch śledzący kursor to wciąż ruch
+
+        document.querySelectorAll('.plan-pick .pcard').forEach(function (card) {
+            // Wyprzedana karta i tak nie prowadzi do zamówienia - przechył
+            // sugerowałby interaktywność, której tu nie ma.
+            if (card.classList.contains('is-soldout')) return;
+            attachChromaTilt(card, 10);
+        });
+
+        document.querySelectorAll('.pnl-console, .pnl-trailer').forEach(function (el) {
+            attachChromaTilt(el, 5);
+        });
+    }
+
     initTabs();
     initPlanPicks();
     initHoverBits();
     initLiveFloat();
     initLiveCount();
     initParallax();
+    initChromaCards();
     document.querySelectorAll('.cfg').forEach(initConfigurator);
 })();

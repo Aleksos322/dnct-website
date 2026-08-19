@@ -86,6 +86,14 @@ if ($centerContent) {
     <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
     <script src="/assets/js/tailwind.js"></script>
+    <?php /* System dzwiekow - syntezowany Web Audio API, zaladowany site-wide
+             (nie tylko dla zalogowanych/dzwonka), zeby toasty gosci (np. po
+             rejestracji) tez mialy dzwiek. Celowo BEZ defer: notifications.php
+             odpala inline skrypt (initToast na flash-toastach) zaraz w ciele
+             strony i musi zastac window.DnctSound juz gotowe - z defer
+             wykonalby sie pozniej niz ten inline skrypt i pierwszy toast po
+             wejsciu na strone zostalby bez dzwieku. */ ?>
+    <script src="<?php echo asset('/assets/js/sound.js'); ?>"></script>
 
     <style>
         body {

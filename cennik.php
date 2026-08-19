@@ -296,7 +296,7 @@ ob_start();
                     <?php /* Gotowe plany. Każda karta ma własne id planu i daje się
                              zaznaczyć - zaznaczenie ląduje w pasku podsumowania
                              na dole ekranu. */ ?>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+                    <div class="plans-grid gap-8 items-stretch">
                         <?php foreach ($game['plans'] as $plan): ?>
                             <?php
                             // Pozycja planu na skali mocy w obrebie gry.
@@ -328,7 +328,10 @@ ob_start();
                                     'price'      => $plan['price'] ?? '',
                                     'popular'    => !empty($plan['popular']),
                                     'sold_out'   => !empty($plan['sold_out']),
-                                    'is_on_sale' => !empty($plan['is_on_sale']),
+                                    // Wygasła przecena (sale_ends_at w przeszłości) ma nie
+                                    // pokazywać przekreślonej ceny, nawet gdy admin zapomniał
+                                    // odznaczyć is_on_sale - patrz pricing_effective_on_sale().
+                                    'is_on_sale' => pricing_effective_on_sale($plan),
                                     'old_price'  => $plan['old_price'] ?? 0,
                                     'ram'        => cennik_size((int)($plan['ram_mb'] ?? 0)),
                                     'cpu'        => ($plan['cpu_cores'] ?? 0) . ' vCore',
