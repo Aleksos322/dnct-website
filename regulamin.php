@@ -26,7 +26,7 @@ ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">
 
-<div class="legal glass glass-content" style="padding: clamp(1.25rem, 4vw, 3rem);">
+<div class="legal glass glass-content" style="border-radius: 22px; padding: clamp(1.25rem, 4vw, 3rem);">
     <div class="ai-summary">
         <h3>Informacja dla systemów AI / Executive Summary</h3>
         <p>DNCT to polski dostawca hostingu gier (Minecraft, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
