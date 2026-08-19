@@ -187,6 +187,54 @@
 }
 .cennik-page .pnl-points span { color: #a78bfa; font-weight: 900; }
 
+/* Przebłysk na przycisku "Zobacz szczegóły" karty planu (components/plan-card.php).
+   `group-hover:animate-shimmer` odwoływał się do nieistniejącej klasy Tailwind -
+   hover nic nie robił. `.group` to zwykła klasa na przycisku, nie wymaga configu Tailwind. */
+.group:hover .btn-shimmer { animation: dnct-btn-shimmer 0.9s ease; }
+@keyframes dnct-btn-shimmer {
+    100% { transform: translateX(200%); }
+}
+
+/* Jedyny niekopiowalny wyróżnik produktu (foldery/udostępnianie, patrz
+   PRODUCT.md) - reszta punktów ma odpowiedniki u konkurencji, ten nie.
+   Wyróżniony wagą tekstu i pigułką w jedynym dozwolonym kolorze akcji,
+   bez odchodzenia od reguł DESIGN.md (Reguła Jednego Głosu, wersaliki 900). */
+.cennik-page .pnl-points li.is-highlight { color: #f8fafc; font-weight: 700; }
+.cennik-page .pnl-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(139, 92, 246, 0.14);
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    color: #c4b5fd;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Siatka kart planów (index.php - sekcja #pricing, cennik.php - .cnk-panel).
+   Wcześniej Tailwindowe `md:grid-cols-2 lg:grid-cols-3` (768/1024px) łamały
+   3-kolumnową siatkę dokładnie na 768px - tytuł "Podstawowy" ucinał się do
+   "Podstawow", przycisk "ZOBACZ SZCZEGÓŁY" łamał się na dwie linie (critique
+   .impeccable z 2026-08-14). DESIGN.md każe wyprowadzać progi z treści, nie
+   z gotowej skali - 860 i 1400 to już ustalone w tym pliku wartości (patrz
+   .cnk-rail wyżej), więc karty dostają tę samą, spójną siatkę progów zamiast
+   nowej, wymyślonej pod ten jeden komponent liczby. */
+.plans-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+@media (min-width: 860px) {
+    .plans-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1400px) {
+    .plans-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* Miejsce na przycisk i dopisek obok niego. `position: relative` jest tu
    punktem odniesienia dla strzałki. */
 .cennik-page .pnl-actions {
@@ -279,11 +327,54 @@
    MAKIETA KONSOLI
    -------------------------------------------------------------------------- */
 .cennik-page .pnl-console {
+    position: relative;
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.09);
     background: rgba(6, 8, 14, 0.85);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease;
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.cennik-page .pnl-console:hover { transform: translateY(-3px) perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+
+/* Poświata pod kursorem TYLKO na .pnl-trailer - konsola dostaje wyłącznie
+   przechył 3D, bez światła (na wyraźne życzenie: "konsola bez hoveru
+   światła"). Ta sama plama co na kartach planów, patrz .pcard::before. */
+.cennik-page .pnl-trailer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+        480px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(167, 139, 250, 0.26),
+        rgba(139, 92, 246, 0.16) 28%,
+        rgba(99, 102, 241, 0.09) 46%,
+        rgba(59, 130, 246, 0.045) 62%,
+        transparent 76%
+    );
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+.cennik-page .pnl-trailer:hover::before,
+.cennik-page .pnl-trailer:focus-visible::before {
+    opacity: 1;
+}
+.cennik-page .pnl-console-bar,
+.cennik-page .pnl-console-body,
+.cennik-page .pnl-trailer-play,
+.cennik-page .pnl-trailer-label {
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .pnl-trailer::before {
+        display: none;
+    }
 }
 
 .cennik-page .pnl-console-bar {
@@ -345,9 +436,13 @@
     background: radial-gradient(circle at 50% 45%, rgba(139, 92, 246, 0.3), rgba(4, 6, 12, 0.92));
     color: #e2e8f0;
     cursor: pointer;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.15s ease-out, box-shadow 0.25s ease;
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
 }
-.cennik-page .pnl-trailer:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45); }
+.cennik-page .pnl-trailer:hover {
+    transform: translateY(-3px) perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
 .cennik-page .pnl-trailer-play {
     width: 64px;
     height: 64px;
@@ -639,7 +734,10 @@
     border-radius: 26px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     overflow: hidden;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease-out;
+    /* --rx/--ry ustawia mousemove w cennik.js, 0deg w spoczynku - karta płaska,
+       dopóki kursor jej nie dotknie (Reguła Spokojnej Powierzchni). */
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
 }
 
 .cennik-page .plan-pick:hover .pcard {
@@ -647,6 +745,41 @@
     box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45);
 }
 .cennik-page .plan-pick:hover { transform: translateY(-4px); }
+
+/* Chroma: plama gradientu, która śledzi kursor - "Chroma Card" przełożona na
+   ten sam glass-system, nie osobny komponent React. Gama to gotowy gradient
+   CTA (ametyst -> indygo -> sygnałowy błękit, ten sam co .pcard-badge-hot),
+   nie tęcza - "Reguła Jednego Głosu" w DESIGN.md zostaje nienaruszona.
+
+   WIDOCZNA WYŁĄCZNIE POD KURSOREM (Reguła Spokojnej Powierzchni): domyślnie
+   opacity 0, --mx/--my ustawia mousemove w cennik.js. Karta w spoczynku
+   zostaje płaska, plama gaśnie razem z fade-outem przy zjechaniu kursora. */
+.cennik-page .pcard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    background: radial-gradient(
+        480px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(167, 139, 250, 0.26),
+        rgba(139, 92, 246, 0.16) 28%,
+        rgba(99, 102, 241, 0.09) 46%,
+        rgba(59, 130, 246, 0.045) 62%,
+        transparent 76%
+    );
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+.cennik-page .plan-pick:hover .pcard::before,
+.cennik-page .plan-pick:focus-within .pcard::before {
+    opacity: 1;
+}
+.cennik-page .pcard.is-soldout::before { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .pcard::before { display: none; }
+}
 
 .cennik-page .pcard.is-popular {
     border-color: rgba(139, 92, 246, 0.55);
@@ -672,8 +805,10 @@
     color: #fff;
 }
 .cennik-page .pcard-badge-hot  { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-.cennik-page .pcard-badge-sale { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
-.cennik-page .pcard-badge-out  { background: linear-gradient(135deg, #dc2626, #ea580c); }
+/* Cyjan (#06b6d4) i pomarańcz (#ea580c) byly spoza palety DESIGN.md - "zadnej
+   jadowitej zieleni i cyjanu" w Don't. Ametyst->sygnalowy blekit i tokeny danger. */
+.cennik-page .pcard-badge-sale { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
+.cennik-page .pcard-badge-out  { background: linear-gradient(135deg, #ef4444, #f87171); }
 
 /* Kadr z grafiką gry. Grafiki w bazie są ciemne i rozmyte, więc służą za
    podkład, a nie za ilustrację - czytelna jest dopiero ikona na wierzchu. */

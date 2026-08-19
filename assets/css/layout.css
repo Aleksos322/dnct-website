@@ -1,6 +1,47 @@
 /* assets/css/layout.css
    Wspólne style layoutu (clear.php) - wyniesione z inline <style> */
 
+/* ==========================================================================
+   ANIMOWANE PRZEJŚCIA MIĘDZY STRONAMI (View Transitions API, tryb cross-document)
+
+   Strona nie ma SPA ani buildu - każde kliknięcie linku to pełne przeładowanie.
+   Ta reguła włącza naturalne dla przeglądarki animowane przejście MIĘDZY
+   DOKUMENTAMI (nie tylko w obrębie jednej strony): stary widok znika, nowy
+   wjeżdża, zamiast twardego przeskoku na czarno. Zero JS, zero builda.
+
+   Bezpieczne wszędzie: przeglądarki bez wsparcia (starsze silniki) po prostu
+   ignorują `@view-transition` i `::view-transition-*` jako nieznane reguły -
+   nawigacja wygląda tak jak dziś, bez błędów i bez wyjątków w kodzie.
+   Wymaga tego samego pochodzenia (beta.dnct.pl -> beta.dnct.pl); przejście
+   między subdomenami (np. na panel.dnct.pl) nie jest tym objęte.
+   ========================================================================== */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root) {
+    animation: dnctPageOut 0.16s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+    animation: dnctPageIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dnctPageOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes dnctPageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+        animation: none;
+    }
+}
+
 .btn-panel {
     display: inline-block;
     padding: 10px 20px;
@@ -141,33 +182,171 @@
 }
 
 /* ==========================================================================
-   PANEL POWIADOMIEŃ
+   DZWONEK, TOASTY I LISTA POWIADOMIEŃ
+
+   Cztery typy (success/error/warning/info) mają osobny kolor, ikonę i
+   etykietę tekstową - patrz komentarz w assets/clear/notifications.php.
+   "info" używa Głębokiego Indygo (#6366f1) - tokenu z DESIGN.md, który
+   nigdzie indziej na stronie się dziś nie pojawia, zamiast wprowadzać
+   piąty kolor spoza palety.
+
+   Materiał (gradient/blur/shadow) jest przepisany 1:1 z .glass w navbar.css,
+   NIE przez samą klasę .glass - "Reguła Ostrego Szkła" zabrania nadawać jej
+   promień, a te elementy (dzwonek, toast, panel) są zaokrągloną treścią, nie
+   chromem. Stąd własna kopia przepisu zamiast .glass + rounded-*.
+   ========================================================================== */
+.dnct-bell-btn {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 45%, rgba(255, 255, 255, 0.038) 100%);
+    backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+    color: #f1f5f9;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.dnct-bell-btn:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        0 10px 28px rgba(139, 92, 246, 0.35);
+    transform: translateY(-2px);
+}
+
+.dnct-bell-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 2px #050505, 0 0 12px rgba(239, 68, 68, 0.55);
+    animation: dnctBadgePulse 2.4s ease-in-out infinite;
+}
+@keyframes dnctBadgePulse {
+    0%, 100% { box-shadow: 0 0 0 2px #050505, 0 0 12px rgba(239, 68, 68, 0.55); }
+    50%      { box-shadow: 0 0 0 2px #050505, 0 0 18px rgba(239, 68, 68, 0.85); }
+}
+
+/* ---- Toasty (flash jednorazowy + push na żywo) ---- */
+.dnct-toast {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.85rem 1rem 0.85rem 0.9rem;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 45%, rgba(255, 255, 255, 0.038) 100%);
+    backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+    overflow: hidden;
+}
+.dnct-toast::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+}
+.dnct-toast-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.05rem;
+}
+.dnct-toast-icon svg { width: 15px; height: 15px; }
+.dnct-toast-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.dnct-toast-label {
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.dnct-toast-msg { font-size: 0.85rem; color: #f1f5f9; line-height: 1.4; text-align: left; }
+.dnct-toast-close {
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+.dnct-toast-close:hover { color: #fff; }
+
+.dnct-toast--success::before { background: #22c55e; }
+.dnct-toast--success .dnct-toast-icon { background: rgba(34, 197, 94, 0.16); color: #4ade80; }
+.dnct-toast--success .dnct-toast-label { color: #4ade80; }
+
+.dnct-toast--error::before { background: #ef4444; }
+.dnct-toast--error .dnct-toast-icon { background: rgba(239, 68, 68, 0.16); color: #f87171; }
+.dnct-toast--error .dnct-toast-label { color: #f87171; }
+
+.dnct-toast--warning::before { background: #fbbf24; }
+.dnct-toast--warning .dnct-toast-icon { background: rgba(251, 191, 36, 0.16); color: #fbbf24; }
+.dnct-toast--warning .dnct-toast-label { color: #fbbf24; }
+
+.dnct-toast--info::before { background: #6366f1; }
+.dnct-toast--info .dnct-toast-icon { background: rgba(99, 102, 241, 0.16); color: #818cf8; }
+.dnct-toast--info .dnct-toast-label { color: #818cf8; }
+
+/* ---- Historia (panel dropdown) ----
 
    Dzwonek siedzi przy DOLNEJ krawędzi okna, więc lista rozwija się w GÓRĘ
    (`bottom: 100%` w markupie). Wcześniej miała `margin-top` i całą zawartość
    wypychała poniżej widocznego obszaru - historia powiadomień istniała,
    ale nie dało się jej zobaczyć.
 
-   Wygląd dociągnięty do reszty serwisu: to samo szkło i ta sama paleta,
-   zamiast szarości Tailwinda odziedziczonej z pierwszej wersji.
-   ========================================================================== */
+   Ten sam przepis szkła co dzwonek i toasty (nie klasa .glass - patrz
+   komentarz wyżej o Regule Ostrego Szkła), żeby wszystkie trzy wyglądały
+   jak jeden, spójny materiał, nie trzy osobne stylizacje. */
 .dnct-notif-panel {
-    background: rgba(10, 12, 20, 0.92);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 45%, rgba(255, 255, 255, 0.038) 100%), rgba(8, 9, 15, 0.72);
+    background-blend-mode: normal;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 18px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(16px);
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
     overflow: hidden;
 
-    /* Rozwinięcie od dołu - panel „wyrasta" z dzwonka, zamiast pojawiać się
-       znikąd. Przy `prefers-reduced-motion` animacja znika (niżej). */
-    animation: dnctNotifIn 0.22s ease;
+    /* Panel „wyrasta" z dzwonka zamiast pojawiać się znikąd; zamknięcie
+       odwraca ten sam ruch zamiast ucinać się instant przez `hidden`
+       (patrz JS - `.hidden` dokłada się dopiero PO zakończeniu animacji). */
+    animation: dnctNotifIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     transform-origin: bottom right;
+}
+.dnct-notif-panel.dnct-notif-panel--closing {
+    animation: dnctNotifOut 0.16s ease forwards;
 }
 
 @keyframes dnctNotifIn {
-    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
     to   { opacity: 1; transform: none; }
+}
+@keyframes dnctNotifOut {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: translateY(6px) scale(0.97); }
 }
 
 .dnct-notif-head {
@@ -176,18 +355,127 @@
 }
 
 .dnct-notif-markall {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: 0.66rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: #a78bfa;
     transition: color 0.2s ease;
 }
 .dnct-notif-markall:hover { color: #c4b5fd; }
+.dnct-notif-markall:disabled { color: #4b5563; cursor: default; }
 
 /* Rozdzielenie wpisów kreską zamiast `divide-y` Tailwinda - panel bywa
    renderowany też tam, gdzie Tailwind nie doszedł. */
 .dnct-notif-item + .dnct-notif-item { border-top: 1px solid rgba(255, 255, 255, 0.05); }
-.dnct-notif-item { transition: background 0.15s ease; }
-.dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; }
+.dnct-notif-item {
+    position: relative;
+    border-left: 3px solid transparent;
+    transition: background 0.15s ease, border-color 0.4s ease, transform 0.15s ease;
+    /* Wejście z małym, narastającym opóźnieniem per wiersz (ustawianym z JS
+       przez `style="animation-delay"`) - lista „spływa", zamiast wyskakiwać
+       naraz jednym blokiem. */
+    animation: dnctItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; transform: translateX(2px); }
+
+@keyframes dnctItemIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Nieprzeczytane dostają pasek w kolorze typu po lewej - ten sam język co
+   toasty. Odczytanie płynnie ściemnia pasek i tytuł zamiast znikać skokiem
+   (JS przełącza tylko `data-read`, resztę robi transition). */
+.dnct-notif-item[data-read="0"][data-type="success"] { border-left-color: rgba(34, 197, 94, 0.55); }
+.dnct-notif-item[data-read="0"][data-type="error"]   { border-left-color: rgba(239, 68, 68, 0.55); }
+.dnct-notif-item[data-read="0"][data-type="warning"] { border-left-color: rgba(251, 191, 36, 0.55); }
+.dnct-notif-item[data-read="0"][data-type="info"]    { border-left-color: rgba(99, 102, 241, 0.55); }
+
+.dnct-notif-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #d1d5db;
+    transition: color 0.3s ease, font-weight 0.3s ease;
+}
+.dnct-notif-item[data-read="0"] .dnct-notif-title { color: #fff; font-weight: 700; }
+
+/* Ikona per typ - lista wcześniej nie rozróżniała wcale success/error/warning/info,
+   wszystkie wpisy wyglądały identycznie. Ta sama paleta co toasty wyżej. */
+.dnct-notif-icon {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.05rem;
+}
+.dnct-notif-icon svg { width: 14px; height: 14px; }
+.dnct-notif-icon--success { background: rgba(34, 197, 94, 0.16); color: #4ade80; }
+.dnct-notif-icon--error   { background: rgba(239, 68, 68, 0.16); color: #f87171; }
+.dnct-notif-icon--warning { background: rgba(251, 191, 36, 0.16); color: #fbbf24; }
+.dnct-notif-icon--info    { background: rgba(99, 102, 241, 0.16); color: #818cf8; }
+
+.dnct-notif-unread-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #a78bfa;
+    display: inline-block;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+.dnct-notif-item[data-read="1"] .dnct-notif-unread-dot { opacity: 0; }
+
+/* ---- Stan pusty i stan ładowania - zamiast gołego tekstu wyśrodkowanego w szarości ---- */
+.dnct-notif-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 2.75rem 1.5rem;
+    text-align: center;
+}
+.dnct-notif-empty-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+.dnct-notif-empty-icon svg { width: 18px; height: 18px; }
+.dnct-notif-empty p { font-weight: 700; color: #cbd5e1; font-size: 0.85rem; margin: 0; }
+.dnct-notif-empty span { font-size: 0.75rem; color: #64748b; }
+
+.dnct-skel-row { display: flex; gap: 0.75rem; padding: 0.85rem 1rem; }
+.dnct-skel-dot, .dnct-skel-lines span {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+}
+.dnct-skel-dot { width: 26px; height: 26px; border-radius: 999px; flex-shrink: 0; }
+.dnct-skel-lines { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; padding-top: 0.2rem; }
+.dnct-skel-lines span { display: block; height: 8px; border-radius: 4px; }
+.dnct-skel-lines span:first-child { width: 70%; }
+.dnct-skel-lines span:last-child { width: 45%; }
+.dnct-skel-dot::after, .dnct-skel-lines span::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09), transparent);
+    transform: translateX(-100%);
+    animation: dnctSkeletonSweep 1.6s ease-in-out infinite;
+}
+.dnct-skel-row + .dnct-skel-row { border-top: 1px solid rgba(255, 255, 255, 0.05); }
+@keyframes dnctSkeletonSweep { to { transform: translateX(100%); } }
 
 /* Pasek przewijania w panelu - domyślny w ciemnym motywie wygląda jak usterka. */
 .dnct-notif-panel::-webkit-scrollbar { width: 8px; }
@@ -197,6 +485,188 @@
 }
 .dnct-notif-panel::-webkit-scrollbar-track { background: transparent; }
 
+/* ---- Dzwonek: stan otwarty + "dzwonienie" przy nowym powiadomieniu ---- */
+.dnct-bell-btn--active {
+    border-color: rgba(139, 92, 246, 0.4);
+    box-shadow:
+        0 8px 32px 0 rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.11),
+        0 0 0 3px rgba(139, 92, 246, 0.16),
+        0 10px 28px rgba(139, 92, 246, 0.3);
+}
+
+@keyframes dnctBellRing {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(-12deg); }
+    35% { transform: rotate(10deg); }
+    55% { transform: rotate(-7deg); }
+    75% { transform: rotate(4deg); }
+    90% { transform: rotate(-2deg); }
+}
+.dnct-bell-btn svg { transform-origin: 50% 15%; }
+.dnct-bell-btn--ring svg { animation: dnctBellRing 0.6s ease; }
+
+/* ---- Przełącznik dźwięku (navibar.php) - ten sam przepis szkła co dzwonek ---- */
+.dnct-sound-toggle-btn svg { width: 16px; height: 16px; }
+.dnct-sound-toggle-btn .dnct-sound-icon-off { display: none; }
+.dnct-sound-toggle-btn.is-muted .dnct-sound-icon-on { display: none; }
+.dnct-sound-toggle-btn.is-muted .dnct-sound-icon-off { display: block; color: #64748b; }
+
 @media (prefers-reduced-motion: reduce) {
-    .dnct-notif-panel { animation: none; }
+    .dnct-notif-panel,
+    .dnct-notif-panel.dnct-notif-panel--closing,
+    .dnct-notif-item,
+    .dnct-bell-btn--ring svg,
+    .dnct-skel-dot::after,
+    .dnct-skel-lines span::after {
+        animation: none;
+    }
+    .dnct-bell-badge { animation: none; }
+}
+
+/* ==========================================================================
+   SEKCJA DISCORD (index.php) - ostatni akcent strony przed stopką
+
+   Zamiast osadzonego iframe'a Discorda (obcy, blurple wygląd, ten sam na
+   każdej stronie, która go wstawi) - avatary i status graczy pobrane po
+   stronie serwera, w tej samej kolorystyce statusów co panel powiadomień
+   (zielony/bursztyn/czerwień, patrz sekcja "Historia (panel dropdown)"
+   wyżej) - jeden spójny język koloru w całym serwisie, nie dwa osobne.
+   ========================================================================== */
+.discord-band-glow {
+    position: absolute;
+    inset: -20% -10% -10%;
+    background:
+        radial-gradient(ellipse 60% 50% at 30% 40%, rgba(139, 92, 246, 0.16), transparent 70%),
+        radial-gradient(ellipse 50% 45% at 75% 60%, rgba(99, 102, 241, 0.14), transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.discord-panel {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.discord-panel.is-revealed { opacity: 1; transform: none; }
+
+.discord-eyebrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 0.75rem;
+}
+
+.discord-heading {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    margin: 0;
+}
+
+/* ---- Licznik "na żywo" ---- */
+.discord-live {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.discord-live-count {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+}
+.discord-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #22c55e;
+    align-self: center;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+    animation: dnctBadgePulse 2.4s ease-in-out infinite;
+}
+.discord-live-number {
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+.discord-live-label {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    align-self: center;
+}
+
+/* ---- Klaster avatarów - zachodzą na siebie, pierścień niesie status ---- */
+.discord-avatars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.discord-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: #111318;
+    margin-left: -12px;
+    box-shadow: 0 0 0 3px var(--ring, #22c55e), 0 0 0 5px #0a0a0f;
+    transition: transform 0.2s ease, z-index 0s;
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+    animation: dnctAvatarIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 60ms + 0.2s);
+}
+.discord-panel:not(.is-revealed) .discord-avatar { animation-play-state: paused; }
+.discord-avatar:first-child { margin-left: 0; }
+.discord-avatar:hover { transform: translateY(-4px) scale(1.08); z-index: 2; }
+
+.discord-avatar-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06), 0 0 0 5px #0a0a0f;
+}
+
+@keyframes dnctAvatarIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Stan zapasowy, gdy Discord nie odpowiedział na czas ---- */
+.discord-live-fallback {
+    color: #4b5563;
+    text-align: center;
+    gap: 0.75rem;
+}
+.discord-live-fallback svg { width: 40px; height: 40px; opacity: 0.4; }
+.discord-live-fallback p { font-size: 0.8rem; color: #64748b; margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .discord-panel {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    .discord-avatar {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+    .discord-live-dot { animation: none; }
 }

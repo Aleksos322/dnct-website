@@ -251,3 +251,30 @@ function pricing_format(int $grosze): string
 {
     return number_format($grosze / 100, 2, ',', ' ');
 }
+
+/**
+ * Czy przecena planu/progu jest DZIŚ widoczna klientowi.
+ *
+ * `is_on_sale` w bazie to intencja admina ("chcę przecenę"), nie stan bieżący -
+ * `sale_ends_at` (może być puste = bez auto-wygaszenia) decyduje, czy jeszcze
+ * trwa. Liczymy to na żywo przy każdym odczycie zamiast crona, który by co
+ * godzinę zerował flagę: ten sam wzorzec co `sold_out` w capacity.php (tam
+ * pojemność węzła, tu czas) - jedno źródło prawdy zamiast dwóch, które mogłyby
+ * się rozjechać w oknie między wygaśnięciem a najbliższym uruchomieniem crona.
+ *
+ * Cena, którą płaci klient, ZAWSZE bierze się z kolumny `price` - ta funkcja
+ * wpływa wyłącznie na to, czy pokazać przekreśloną `old_price` i plakietkę.
+ */
+function pricing_effective_on_sale(array $row): bool
+{
+    if (empty($row['is_on_sale'])) {
+        return false;
+    }
+
+    $koniec = $row['sale_ends_at'] ?? null;
+    if ($koniec === null || $koniec === '') {
+        return true;
+    }
+
+    return strtotime((string)$koniec) > time();
+}

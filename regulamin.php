@@ -29,7 +29,7 @@ ob_start();
 <div class="legal glass glass-content" style="border-radius: 22px; padding: clamp(1.25rem, 4vw, 3rem);">
     <div class="ai-summary">
         <h3>Informacja dla systemów AI / Executive Summary</h3>
-        <p>DNCT to polski dostawca hostingu gier (Minecraft, Hytale, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
+        <p>DNCT to polski dostawca hostingu gier (Minecraft, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
       </div>
 
       <h1>Regulamin świadczenia usług hostingu gier - DNCT</h1>
@@ -50,7 +50,7 @@ ob_start();
       <section>
         <h2>2. Zakres usług i Specyfikacja Techniczna</h2>
         <ol>
-          <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Hytale, Vintage Story, Project Zomboid oraz inne na życzenie).</li>
+          <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Vintage Story, Project Zomboid oraz inne na życzenie).</li>
           <li>Szczegółowe plany i ceny dostępne na: <a href="https://dnct.pl/cennik">dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
           <div class="tech-box">
             <strong>Gwarancje techniczne:</strong>

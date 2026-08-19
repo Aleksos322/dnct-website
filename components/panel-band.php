@@ -56,7 +56,7 @@ function render_panel_band(array $opts = []): void
             <ul class="pnl-points">
                 <li><span aria-hidden="true">▹</span> Konsola i FTP bez dodatkowych programów</li>
                 <li><span aria-hidden="true">▹</span> Backupy i przywracanie jednym kliknięciem</li>
-                <li><span aria-hidden="true">▹</span> Foldery na serwery i udostępnianie ich ekipie</li>
+                <li class="is-highlight"><span aria-hidden="true">▹</span> Foldery na serwery i udostępnianie ich znajomym bez oddawania hasła <span class="pnl-badge">Tylko u nas</span></li>
             </ul>
 
             <div class="pnl-actions">
