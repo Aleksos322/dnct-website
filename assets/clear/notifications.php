@@ -112,6 +112,9 @@ function dnct_notif_type_meta(string $type): array
 (function () {
     const POLL_MS = 30000;
     const LAST_CHECK_KEY = 'dnct_last_notif_check';
+    // mark-read.php i mark-all-read.php mają teraz csrf_guard() jak reszta API -
+    // bez tego nagłówka każdy klik oznaczania jako przeczytane kończyłby się 403.
+    const CSRF_TOKEN = <?php echo json_encode(csrf_token()); ?>;
 
     const bellBtn   = document.getElementById('dnct-bell-btn');
     const badge     = document.getElementById('dnct-bell-badge');
@@ -251,7 +254,7 @@ function dnct_notif_type_meta(string $type): array
         try {
             await fetch('/api/notifications/mark-read.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                 body: JSON.stringify({ id }),
             });
             fetchUnreadCount();
@@ -262,7 +265,10 @@ function dnct_notif_type_meta(string $type): array
         markAllBtn.disabled = true;
         listEl.querySelectorAll('.dnct-notif-item').forEach(el => { el.dataset.read = '1'; });
         try {
-            await fetch('/api/notifications/mark-all-read.php', { method: 'POST' });
+            await fetch('/api/notifications/mark-all-read.php', {
+                method: 'POST',
+                headers: { 'X-CSRF-Token': CSRF_TOKEN },
+            });
             fetchUnreadCount();
         } catch (e) {
         } finally {

@@ -28,6 +28,10 @@ const RATE_LIMIT_CHECKOUT     = [12, 900];  // 12 sesji płatności / 15 min
 // wznawiane, a token i tak jest nie do zgadnięcia - chodzi o zapętlony skrypt
 // ciągnący te same 400 MB w kółko, nie o zgadywanie adresu.
 const RATE_LIMIT_DOWNLOAD     = [30, 600];  // 30 pobrań / 10 min
+// Dzwoneczek odpytuje co 30s (list.php + unread-count.php = 4/min w tle),
+// plus kliknięcia przy oznaczaniu jako przeczytane. Limit chwyta zapętlony
+// skrypt, nie normalne przeglądanie długiej listy powiadomień.
+const RATE_LIMIT_NOTIFICATIONS = [60, 300]; // 60 żądań / 5 min
 
 function rate_limit_dir(): string
 {

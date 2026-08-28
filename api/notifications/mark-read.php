@@ -1,34 +1,30 @@
 <?php
 declare(strict_types=1);
-header('Content-Type: application/json; charset=utf-8');
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
 
-require_once __DIR__ . '/../../backend/lib/notifications.php';
+require_method('POST');
+csrf_guard();
+rate_limit_guard(
+    'notifications',
+    RATE_LIMIT_NOTIFICATIONS,
+    'Zbyt wiele operacji z tego adresu IP. Odczekaj chwilę.'
+);
 
 if (!isset($_SESSION['authentik_username'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'unauthorized']);
-    exit;
+    json_error('Musisz być zalogowany.', 401, [], ['reason' => 'unauthorized']);
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'method_not_allowed']);
-    exit;
-}
-
-$input = json_decode(file_get_contents('php://input'), true) ?? [];
-$id    = (int) ($input['id'] ?? 0);
+$id = (int) request_string('id', '0');
 
 if ($id <= 0) {
-    http_response_code(400);
-    echo json_encode(['error' => 'invalid_id']);
-    exit;
+    json_error('Nieprawidłowe ID powiadomienia.', 400, [], ['reason' => 'invalid_id']);
 }
 
-mark_notification_read(dnct_db(), $id, $_SESSION['authentik_username']);
+$userId  = (string) $_SESSION['authentik_username'];
+$isAdmin = dnct_is_admin();
 
-echo json_encode(['ok' => true]);
+mark_notification_read(dnct_db(), $id, $userId, $isAdmin);
+
+json_ok();

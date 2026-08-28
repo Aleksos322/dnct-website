@@ -83,70 +83,106 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         return true;
     }
 
-    if (in_array($order['status'], ['provisioned', 'cancelled'], true)) {
-        return true;   // już obsłużone
+    /* ZAMEK NA ZAMÓWIENIE, nie tylko na zdarzenie.
+     *
+     * BLIK i Przelewy24 potwierdzają płatność DWOMA zdarzeniami dla jednej
+     * sesji: `checkout.session.completed` i `checkout.session.async_payment_succeeded`,
+     * potrafią przyjść od Stripe w odstępie pojedynczych sekund. Blokada
+     * w `stripe_events` (INSERT po event_id) chroni przed powtórką TEGO SAMEGO
+     * zdarzenia - ale to są dwa RÓŻNE zdarzenia, więc oba dostają własny wpis
+     * i oba mogły dotrzeć tu, do sprawdzenia statusu zamówienia, zanim
+     * pierwsze zdążyło dobiec do `provision_server()` i zapisać "provisioned".
+     * Efekt: dwa serwery za jedną płatność. Nie teoria - dokładnie to
+     * przydarzyło się zamówieniu #4 (17.08.2026).
+     *
+     * GET_LOCK serializuje po ID zamówienia: kto przyjdzie drugi, czeka do
+     * zwolnienia blokady, a potem czyta JUŻ ŚWIEŻY status i wychodzi na
+     * warunku niżej, zamiast zakładać drugi serwer. */
+    $orderId  = (int)$order['id'];
+    $lockName = 'dnct_order_' . $orderId;
+
+    $lockStmt = $dnct->prepare('SELECT GET_LOCK(?, 15)');
+    $lockStmt->execute([$lockName]);
+    if ((int)$lockStmt->fetchColumn() !== 1) {
+        error_log('Stripe webhook: nie udało się zająć blokady zamówienia #' . $orderId);
+        return false; // 500 - niech Stripe spróbuje ponownie
     }
 
-    /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje - dokładamy dni do
-       zamówienia-rodzica i, jeśli trzeba, zdejmujemy zawieszenie. Tworzenie
-       serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
-       tym, który ma. */
-    if (!empty($order['extends_order_id'])) {
-        return $order['kind'] === 'plan_change'
-            ? webhook_plan_change_paid($dnct, $order)
-            : webhook_extension_paid($dnct, $order, $session);
-    }
+    try {
+        // Świeży odczyt POD blokadą - poprzednie doręczenie mogło już wszystko
+        // załatwić, dopóki czekaliśmy na GET_LOCK.
+        $order = order_by_id($dnct, $orderId);
 
-    order_mark_paid(
-        $dnct,
-        (int)$order['id'],
-        isset($session->customer) ? (string)$session->customer : null,
-        isset($session->subscription) ? (string)$session->subscription : null,
-        (int)$order['period_days']
-    );
+        if ($order === null || in_array($order['status'], ['provisioned', 'cancelled'], true)) {
+            return true;   // już obsłużone
+        }
 
-    // Świeży odczyt: order_mark_paid ustawił daty, a provisioning opisuje nimi
-    // serwer.
-    $order  = order_by_id($dnct, (int)$order['id']);
-    $result = provision_server($order);
+        /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje - dokładamy dni do
+           zamówienia-rodzica i, jeśli trzeba, zdejmujemy zawieszenie. Tworzenie
+           serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
+           tym, który ma. */
+        if (!empty($order['extends_order_id'])) {
+            return $order['kind'] === 'plan_change'
+                ? webhook_plan_change_paid($dnct, $order)
+                : webhook_extension_paid($dnct, $order, $session);
+        }
 
-    if (!$result['ok']) {
-        order_mark_failed($dnct, (int)$order['id'], (string)$result['error']);
-
-        /* Pieniądze są u nas, usługi nie ma. To sytuacja wymagająca człowieka,
-           więc powiadamiamy OBIE strony: klienta, żeby nie czekał w
-           nieskończoność, i administrację, żeby ktoś to podjął. */
-        notify_user(
+        order_mark_paid(
             $dnct,
-            (string)$order['user_name'],
-            'error',
-            'Serwer nie został jeszcze utworzony',
-            'Płatność się powiodła, ale automatyczne zakładanie serwera nie doszło do skutku. '
-            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
-        );
-        notify_admins(
-            $dnct,
-            'error',
-            'Zamówienie #' . $order['id'] . ' opłacone, serwer NIE utworzony',
-            (string)$result['error']
+            $orderId,
+            isset($session->customer) ? (string)$session->customer : null,
+            isset($session->subscription) ? (string)$session->subscription : null,
+            (int)$order['period_days']
         );
 
-        // Zwracamy prawdę, nie wyjątek: powtórka doręczenia niczego nie naprawi,
-        // bo problem jest po stronie Pterodactyla, a nie doręczenia zdarzenia.
+        // Świeży odczyt: order_mark_paid ustawił daty, a provisioning opisuje nimi
+        // serwer.
+        $order  = order_by_id($dnct, $orderId);
+        $result = provision_server($order);
+
+        if (!$result['ok']) {
+            order_mark_failed($dnct, $orderId, (string)$result['error']);
+
+            /* Pieniądze są u nas, usługi nie ma. To sytuacja wymagająca człowieka,
+               więc powiadamiamy OBIE strony: klienta, żeby nie czekał w
+               nieskończoność, i administrację, żeby ktoś to podjął. */
+            notify_user(
+                $dnct,
+                (string)$order['user_name'],
+                'error',
+                'Serwer nie został jeszcze utworzony',
+                'Płatność się powiodła, ale automatyczne zakładanie serwera nie doszło do skutku. '
+                . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
+            );
+            notify_admins(
+                $dnct,
+                'error',
+                'Zamówienie #' . $orderId . ' opłacone, serwer NIE utworzony',
+                (string)$result['error']
+            );
+
+            // Zwracamy prawdę, nie wyjątek: powtórka doręczenia niczego nie naprawi,
+            // bo problem jest po stronie Pterodactyla, a nie doręczenia zdarzenia.
+            return true;
+        }
+
+        order_mark_provisioned(
+            $dnct,
+            $orderId,
+            (int)$result['ptero_user_id'],
+            (int)$result['server_id'],
+            (string)$result['uuid']
+        );
+
+        order_announce_paid($dnct, order_by_id($dnct, $orderId));
+
         return true;
+    } finally {
+        // Zwolnienie na WŁASNYM połączeniu - jeśli coś wyżej rzuciło wyjątek,
+        // blokada i tak musi zniknąć, inaczej kolejne doręczenie dla tego
+        // zamówienia czekałoby 15 sekund i dostało 500 bez powodu.
+        $dnct->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
     }
-
-    order_mark_provisioned(
-        $dnct,
-        (int)$order['id'],
-        (int)$result['ptero_user_id'],
-        (int)$result['server_id'],
-        (string)$result['uuid']
-    );
-
-    order_announce_paid($dnct, order_by_id($dnct, (int)$order['id']));
-
-    return true;
 }
 
 /**

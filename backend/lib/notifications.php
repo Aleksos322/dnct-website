@@ -151,14 +151,34 @@ function count_unread_for_user(PDO $pdo, string $userId, bool $isAdmin): int
     return (int) $stmt->fetch()['cnt'];
 }
 
-function mark_notification_read(PDO $pdo, int $notificationId, string $userId): void
+/**
+ * INSERT ... SELECT zamiast gołego INSERT - wstawia wiersz WYŁĄCZNIE gdy
+ * $notificationId istnieje i jest faktycznie widoczny dla $userId (własne /
+ * admins+isAdmin / all), tym samym warunkiem co get_notifications_for_user().
+ * Bez tego dowolny zalogowany mógł oznaczyć jako przeczytane cudze,
+ * nieadresowane do niego powiadomienie - zaśmiecenie stanu, nie wyciek
+ * danych, ale i tak brak własności nad ID, które dostaje z requestu.
+ */
+function mark_notification_read(PDO $pdo, int $notificationId, string $userId, bool $isAdmin): void
 {
     $sql = "INSERT INTO notification_reads (notification_id, user_id)
-            VALUES (:id, :user_id)
+            SELECT n.id, :user_id
+            FROM notifications n
+            WHERE n.id = :notification_id
+              AND (n.expires_at IS NULL OR n.expires_at > NOW())
+              AND (
+                    n.target_type = 'all'
+                    OR (n.target_type = 'admins' AND :is_admin = 1)
+                    OR (n.target_type = 'user' AND n.target_user_id = :user_id2)
+                  )
             ON DUPLICATE KEY UPDATE read_at = read_at"; // no-op jeśli już przeczytane
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id' => $notificationId, ':user_id' => $userId]);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
+    $stmt->bindValue(':user_id2', $userId, PDO::PARAM_STR);
+    $stmt->bindValue(':notification_id', $notificationId, PDO::PARAM_INT);
+    $stmt->bindValue(':is_admin', $isAdmin ? 1 : 0, PDO::PARAM_INT);
+    $stmt->execute();
 }
 
 function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): void
