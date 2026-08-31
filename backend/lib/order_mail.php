@@ -60,8 +60,16 @@ function order_deadlines(array $order): array
     ];
 }
 
-/** Potwierdzenie płatności i uruchomienia serwera. */
-function send_order_paid_mail(array $order): array
+/**
+ * Potwierdzenie płatności i uruchomienia serwera.
+ *
+ * $adminUser/$adminPassword: login i hasło administratora W GRZE (nie do
+ * panelu ani strony) - tylko gry, których egg ma takie zmienne startowe
+ * (dziś: Project Zomboid). NIE zapisujemy hasła nigdzie w bazie, więc ten
+ * mail (i towarzyszące mu powiadomienie na stronie) to JEDYNE miejsce,
+ * w którym klient może je zobaczyć.
+ */
+function send_order_paid_mail(array $order, ?string $adminUser = null, ?string $adminPassword = null): array
 {
     $d = order_deadlines($order);
 
@@ -82,6 +90,8 @@ function send_order_paid_mail(array $order): array
         'graceHours'  => $d['grace_hours'],
         'panelUrl'    => 'https://panel.dnct.pl',
         'accountUrl'  => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',
+        'adminUser'     => $adminUser,
+        'adminPassword' => $adminPassword,
     ];
 
     $html = render_mail_template('order-paid', $vars);
@@ -140,11 +150,18 @@ function order_paid_text(array $v): string
         : "To płatność jednorazowa - serwer NIE odnowi się sam.\n"
           . "Jeśli nie przedłużysz, zostanie zawieszony {$v['suspends']}.";
 
+    $credentials = ($v['adminUser'] !== null && $v['adminPassword'] !== null)
+        ? "\nLOGIN ADMINISTRATORA W GRZE: {$v['adminUser']}\n"
+          . "HASŁO: {$v['adminPassword']}\n"
+          . "(zapisz to - nie pokażemy go drugi raz)\n"
+        : '';
+
     return "Cześć {$v['userName']},\n\n"
         . "płatność {$v['amount']} zł została przyjęta, a serwer jest już uruchomiony.\n\n"
         . "Zamówienie #{$v['orderId']}\n"
         . "Gra: {$v['gameName']} ({$v['packageName']})\n"
-        . "Zasoby: {$v['ramMb']} MB RAM, {$v['cpuCores']} vCore, {$v['ssdMb']} MB NVMe\n\n"
+        . "Zasoby: {$v['ramMb']} MB RAM, {$v['cpuCores']} vCore, {$v['ssdMb']} MB NVMe\n"
+        . $credentials . "\n"
         . "OPŁACONE DO: {$v['expires']}\n"
         . "ZAWIESZENIE: {$v['suspends']}\n\n"
         . $renew . "\n\n"
