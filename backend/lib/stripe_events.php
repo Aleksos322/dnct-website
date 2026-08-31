@@ -174,7 +174,12 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
             (string)$result['uuid']
         );
 
-        order_announce_paid($dnct, order_by_id($dnct, $orderId));
+        order_announce_paid(
+            $dnct,
+            order_by_id($dnct, $orderId),
+            $result['game_admin_user'] ?? null,
+            $result['game_admin_password'] ?? null
+        );
 
         return true;
     } finally {
@@ -196,13 +201,22 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
  * a Stripe ponawiałby doręczenie w nieskończoność, próbując naprawić coś,
  * co jest problemem poczty, a nie płatności.
  */
-function order_announce_paid(PDO $dnct, ?array $order): void
+function order_announce_paid(PDO $dnct, ?array $order, ?string $gameAdminUser = null, ?string $gameAdminPassword = null): void
 {
     if ($order === null) {
         return;
     }
 
     $d = order_deadlines($order);
+
+    // Dane logowania administratora w grze (gdy ta gra je ma - patrz
+    // provision_server()) - JEDYNY moment, w którym to hasło gdziekolwiek
+    // się pojawia. Nie zapisujemy go nigdzie w bazie, więc jeśli klient
+    // zgubi ten mail i to powiadomienie, trzeba je będzie ustawić ręcznie
+    // z konsoli serwera (`/setaccesslevel`/`/changeoption` w Zomboidzie).
+    $credentialsLine = ($gameAdminUser !== null && $gameAdminPassword !== null)
+        ? " Login administratora w grze: {$gameAdminUser} / hasło: {$gameAdminPassword} (zapisz to - nie pokażemy go drugi raz)."
+        : '';
 
     notify_user(
         $dnct,
@@ -213,10 +227,11 @@ function order_announce_paid(PDO $dnct, ?array $order): void
         . ($order['billing_mode'] === 'subscription'
             ? 'Abonament odnawia się sam - przy nieudanej płatności serwer zostanie zawieszony ' . $d['suspends'] . '.'
             : 'To płatność jednorazowa - bez przedłużenia serwer zostanie zawieszony ' . $d['suspends'] . '.')
+        . $credentialsLine
     );
 
     try {
-        $sent = send_order_paid_mail($order);
+        $sent = send_order_paid_mail($order, $gameAdminUser, $gameAdminPassword);
         if (!$sent['ok']) {
             error_log('Zamówienie #' . $order['id'] . ': mail potwierdzający nie wyszedł - ' . $sent['error']);
         }
@@ -239,6 +254,25 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
     if ($parent === null) {
         error_log('Stripe webhook: przedłużenie #' . $order['id'] . ' bez zamówienia nadrzędnego');
         order_mark_failed($dnct, (int)$order['id'], 'Brak zamówienia nadrzędnego.');
+
+        // Wcześniej TYLKO error_log - klient zapłacił za przedłużenie i nie
+        // dostawał o niepowodzeniu żadnego sygnału poza milczącym brakiem
+        // dodatkowych dni na koncie.
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'error',
+            'Przedłużenie nie zostało zapisane',
+            'Płatność się powiodła, ale nie udało się dopisać czasu do serwera. '
+            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Zamówienie #' . (int)$order['id'] . ': opłacone przedłużenie BEZ zamówienia nadrzędnego',
+            'user: ' . (string)$order['user_email'] . ', extends_order_id: ' . (string)$order['extends_order_id']
+        );
+
         return true;
     }
 
@@ -295,6 +329,25 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
     if ($parent === null || empty($parent['ptero_server_id'])) {
         error_log('Stripe webhook: zmiana pakietu #' . $order['id'] . ' bez działającego serwera');
         order_mark_failed($dnct, (int)$order['id'], 'Brak serwera do przestawienia.');
+
+        // Ten sam brakujący sygnał co przy przedłużeniu wyżej - dopłata
+        // przeszła, a serwer zostawał na starych zasobach bez żadnej
+        // wiadomości do kogokolwiek.
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'error',
+            'Pakiet nie został zmieniony',
+            'Płatność się powiodła, ale nie znaleźliśmy działającego serwera do przestawienia. '
+            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Zamówienie #' . (int)$order['id'] . ': opłacona zmiana pakietu BEZ działającego serwera',
+            'user: ' . (string)$order['user_email'] . ', extends_order_id: ' . (string)$order['extends_order_id']
+        );
+
         return true;
     }
 
@@ -426,6 +479,19 @@ function webhook_invoice_failed(PDO $dnct, $invoice): bool
         'Nie udało się pobrać opłaty',
         'Bank odrzucił płatność za serwer. Serwer zostanie zawieszony ' . $when
         . ' - do tego czasu działa normalnie. Popraw dane karty albo przedłuż jednorazowo.'
+    );
+
+    // Admin dotąd nie dostawał o tym żadnego sygnału - dowiadywał się dopiero
+    // przy zawieszeniu (lifecycle.php) albo wcale, jeśli klient zdążył
+    // poprawić kartę w międzyczasie. To jedyny moment, w którym "coś jest nie
+    // tak z płatnością cykliczną" jest widoczne od razu, nie po fakcie.
+    notify_admins(
+        $dnct,
+        'warning',
+        'Nieudana płatność cykliczna',
+        'Zamówienie #' . (int)$order['id'] . ' (' . (string)$order['user_email'] . '), '
+        . (string)$order['game_type'] . ' - bank odrzucił odnowienie. Serwer działa do '
+        . $when . ', potem zawieszenie (lifecycle.php).'
     );
 
     try {
