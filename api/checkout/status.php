@@ -15,6 +15,8 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/stripe.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
 
 require_method('GET');
 
@@ -51,6 +53,52 @@ if (in_array($order['kind'], ['extension', 'plan_change'], true) && !empty($orde
     }
 }
 
+/**
+ * Diagnostyka WYŁĄCZNIE dla admina - klient jej nie widzi i nie potrzebuje.
+ *
+ * Strona sukcesu odpytuje TYLKO naszą bazę, więc "pending" samo z siebie nie
+ * mówi, czy to Stripe jeszcze nie potwierdził zapłaty, czy webhook w ogóle
+ * nie dotarł (np. Basic Auth na proxy blokujący Stripe'a - dokładnie ten
+ * scenariusz kosztował już kilka godzin diagnozowania ręcznie przez SSH).
+ * Realny `payment_status` z API Stripe'a rozstrzyga to jednoznacznie: jeśli
+ * Stripe mówi "paid", a u nas nadal "pending", to nie jest kwestia czasu -
+ * webhook nie dotarł i trzeba go ręcznie ponowić (reconcile-stripe.php albo
+ * przycisk "spróbuj ponownie" w /zamowienia).
+ */
+$debug = null;
+if (dnct_is_admin()) {
+    $debug = [
+        'order_status'    => $order['status'],
+        'created_at'      => $order['created_at'],
+        'updated_at'      => $order['updated_at'],
+        'failure_reason'  => $order['failure_reason'] ?: null,
+        'stripe_status'   => null,
+        'stripe_payment'  => null,
+        'diagnoza'        => null,
+    ];
+
+    try {
+        stripe_init();
+        $liveSession = \Stripe\Checkout\Session::retrieve($sessionId);
+        $debug['stripe_status']  = (string)$liveSession->status;
+        $debug['stripe_payment'] = (string)$liveSession->payment_status;
+    } catch (Throwable $e) {
+        $debug['stripe_error'] = $e->getMessage();
+    }
+
+    $paidAtStripe = in_array($debug['stripe_payment'] ?? '', ['paid', 'no_payment_required'], true);
+
+    if ($order['status'] === 'pending' && $paidAtStripe) {
+        $debug['diagnoza'] = 'Stripe potwierdza opłacenie, a u nas zamówienie nadal "pending" - webhook nie dotarł albo padł, zanim cokolwiek zapisał. Sprawdź dostarczanie webhooka (Basic Auth na proxy?) i/lub użyj "spróbuj ponownie" w /zamowienia.';
+    } elseif ($order['status'] === 'pending') {
+        $debug['diagnoza'] = 'Stripe jeszcze nie potwierdza zapłaty (status sesji: ' . ($debug['stripe_status'] ?? '?') . ') - to może być zwykłe oczekiwanie na metodę z opóźnionym potwierdzeniem (BLIK/Przelewy24).';
+    } elseif ($order['status'] === 'failed') {
+        $debug['diagnoza'] = 'Płatność przeszła, ale zakładanie serwera się nie powiodło - patrz failure_reason.';
+    } elseif ($order['status'] === 'provisioned') {
+        $debug['diagnoza'] = 'Zakończone poprawnie.';
+    }
+}
+
 json_ok([
     'status'       => $order['status'],
     'kind'         => $order['kind'],
@@ -63,4 +111,5 @@ json_ok([
     // Powód niepowodzenia pokazujemy klientowi celowo: "coś poszło nie tak"
     // zmusza go do pisania i pytania, a treść i tak trafia do administracji.
     'failed'       => $order['status'] === 'failed',
+    'debug'        => $debug,
 ]);

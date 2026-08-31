@@ -87,6 +87,13 @@ ob_start();
         </div>
 
         <div class="suc-meta" data-role="meta" hidden></div>
+
+        <?php /* Wypełnia JS z pola "debug" w odpowiedzi /api/checkout/status.php -
+                 tam obecne WYŁĄCZNIE gdy dnct_is_admin(), więc zwykły klient
+                 nigdy nie dostaje tych danych, nawet w źródle strony. Aktualizuje
+                 się co sekundę razem z resztą pollingu - widać na żywo, na jakim
+                 etapie utknęło, bez zaglądania do bazy przez SSH. */ ?>
+        <pre class="suc-debug" data-role="debug" hidden></pre>
     </div>
 
     <script src="<?php echo asset('/assets/js/success.js'); ?>" defer></script>
