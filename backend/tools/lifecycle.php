@@ -81,6 +81,14 @@ printf("[%s] %s%s\n", date('Y-m-d H:i:s'), $apply ? 'WYKONUJĘ' : 'PODGLĄD (dod
 
 $stage = static fn(string $name): bool => $only === null || $only === $name;
 
+/* `reconcile` idzie PRZED wszystkim innym - jeśli ktoś skasował serwer
+   RĘCZNIE w Pterodactylu (z pominięciem tego skryptu), `orders.ptero_server_id`
+   zostaje martwym wskaźnikiem, a status - dalej "provisioned". Bez tego etapu
+   `warn` wysłałby ostrzeżenie o wygasającym serwerze, którego już nie ma,
+   a `suspend`/`delete` próbowałyby zawiesić/skasować coś nieistniejącego
+   w kółko, co godzinę, bez końca. */
+if ($stage('reconcile')) { lifecycle_reconcile_deleted($dnct, $apply); }
+
 /* KOLEJNOŚĆ MA ZNACZENIE. `archive` idzie PRZED `suspend`, bo zawieszony
    serwer nie pozwala zrobić backupu - panel odpowiada wtedy 409
    ServerStateConflictException. Paczka musi więc powstać, dopóki maszyna
@@ -92,6 +100,80 @@ if ($stage('delete'))  { lifecycle_delete($dnct, $apply); }
 if ($stage('purge'))   { lifecycle_purge($dnct, $apply); }
 
 echo "Gotowe.\n";
+
+// ===========================================================================
+// Etap 0: pojednanie - serwery skasowane RĘCZNIE, z pominięciem tego skryptu
+// ===========================================================================
+
+/**
+ * Wyłapuje zamówienia "provisioned", których serwer nie istnieje już
+ * w Pterodactylu (skasowany ręcznie w panelu, nie przez ten skrypt).
+ *
+ * CELOWO BEZ notify_user() - klient (albo admin, który to skasował) już wie,
+ * że serwera nie ma; kolejny mail typu "Twój serwer został usunięty" byłby
+ * myloną, spóźnioną wiadomością o czymś, co już się stało. `notify_admins()`
+ * zostaje, bo to sygnał dla nas: ręczne skasowanie ominęło cykl życia
+ * (subskrypcja mogła NIE zostać anulowana w Stripie - to różni się od
+ * `lifecycle_delete()`, które zawsze anuluje najpierw).
+ *
+ * Ten sam efekt co `lifecycle_delete()` na końcu (status="cancelled",
+ * deleted_at=NOW()) - żeby WSZYSTKIE dalsze etapy (warn/suspend/delete),
+ * których warunki filtrują `deleted_at IS NULL`, przestały to zamówienie
+ * w ogóle widzieć.
+ */
+function lifecycle_reconcile_deleted(PDO $dnct, bool $apply): void
+{
+    echo "\n-- pojednanie (serwery skasowane ręcznie) --\n";
+
+    $rows = $dnct->query(
+        'SELECT * FROM orders
+          WHERE status = "provisioned"
+            AND ptero_server_id IS NOT NULL
+            AND deleted_at IS NULL
+          ORDER BY id'
+    )->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$rows) {
+        echo "  nic do sprawdzenia\n";
+        return;
+    }
+
+    $panel = panel_db();
+    $found = 0;
+
+    foreach ($rows as $o) {
+        if (pterodactyl_server_exists($panel, (int)$o['ptero_server_id'])) {
+            continue;
+        }
+
+        $found++;
+        printf("  #%-4d serwer %-5d %-24s -> serwer nie istnieje, zamykam zamówienie po cichu\n",
+            $o['id'], $o['ptero_server_id'], $o['user_name']);
+
+        if (!$apply) {
+            continue;
+        }
+
+        // Subskrypcja mogła zostać żywa - kto kasował serwer ręcznie w panelu
+        // Pterodactyla, nie miał jak dotknąć Stripe'a. Bez tego klient płaciłby
+        // dalej za coś, czego już nie ma.
+        if (!lifecycle_cancel_subscription($o)) {
+            echo "      UWAGA: nie udało się potwierdzić anulowania subskrypcji Stripe - sprawdź ręcznie\n";
+        }
+
+        $dnct->prepare('UPDATE orders SET deleted_at = NOW(), status = "cancelled" WHERE id = ?')
+             ->execute([(int)$o['id']]);
+
+        notify_admins($dnct, 'warning', 'Serwer zniknął z panelu poza cyklem życia',
+            'Zamówienie #' . (int)$o['id'] . ' (' . (string)$o['user_email'] . '), serwer '
+            . (int)$o['ptero_server_id'] . ' - ktoś skasował go ręcznie w Pterodactylu. '
+            . 'Zamówienie oznaczone jako zakończone, klient NIE dostał o tym maila.');
+    }
+
+    if ($found === 0) {
+        echo "  wszystkie istnieją\n";
+    }
+}
 
 // ===========================================================================
 // Etap 1: ostrzeżenia (tylko płatność jednorazowa)

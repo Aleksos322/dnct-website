@@ -18,6 +18,7 @@
     var elText    = card.querySelector('[data-role="text"]');
     var elActions = card.querySelector('[data-role="actions"]');
     var elMeta    = card.querySelector('[data-role="meta"]');
+    var elDebug   = card.querySelector('[data-role="debug"]');
 
     // Po tylu próbach przestajemy pytać. Minuta bez odpowiedzi znaczy, że coś
     // wymaga człowieka - kręcący się w nieskończoność pierścień tylko
@@ -82,6 +83,12 @@
                 var b = res.body;
                 var c = copyFor(b.kind);
 
+                // Na KAŻDYM tiku, nie tylko na końcu - admin ma widzieć, jak się
+                // to zmienia w czasie (np. moment, w którym Stripe potwierdza
+                // płatność, a u nas dalej "pending"), a nie dopiero finałowy stan
+                // po 60 sekundach oczekiwania.
+                renderDebug(b.debug);
+
                 if (b.server_ready) {
                     settle('ok', c.ok[0], c.ok[1], true);
                     showMeta(b);
@@ -107,6 +114,28 @@
             return;
         }
         settle('warn', 'To trwa dłużej niż zwykle', message, true);
+    }
+
+    /* `debug` jest w odpowiedzi TYLKO gdy backend uznał odpytującego za admina
+       (dnct_is_admin() w api/checkout/status.php) - zwykły klient dostaje
+       `debug: null` i ta funkcja nic nie robi, bez osobnego sprawdzania
+       uprawnień po stronie JS (i tak nie ma czego sprawdzać, bo danych po
+       prostu nie ma w odpowiedzi). */
+    function renderDebug(d) {
+        if (!elDebug || !d) return;
+
+        var linie = [
+            'status zamówienia: ' + d.order_status,
+            'status sesji Stripe: ' + (d.stripe_status || '?') + ' / płatność: ' + (d.stripe_payment || '?'),
+            'zaktualizowano: ' + d.updated_at
+        ];
+        if (d.failure_reason) linie.push('powód błędu: ' + d.failure_reason);
+        if (d.stripe_error) linie.push('błąd Stripe API: ' + d.stripe_error);
+        if (d.diagnoza) linie.push('');
+        if (d.diagnoza) linie.push('DIAGNOZA: ' + d.diagnoza);
+
+        elDebug.textContent = linie.join('\n');
+        elDebug.hidden = false;
     }
 
     function showMeta(b) {

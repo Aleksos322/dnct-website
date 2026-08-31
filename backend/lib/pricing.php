@@ -37,7 +37,7 @@ const PRICING_DEFAULT_BACKUPS    = 1;
  * @throws RuntimeException gdy wybór jest niespójny - wołający ma to zamienić
  *                          na 400, a nie na zamówienie z domyślnymi wartościami
  */
-function pricing_quote(PDO $panel, array $input): array
+function pricing_quote(PDO $panel, array $input, bool $isAdmin = false): array
 {
     $gameType    = (string)($input['game_type'] ?? '');
     $periodDays  = (int)($input['period_days'] ?? 0);
@@ -56,9 +56,9 @@ function pricing_quote(PDO $panel, array $input): array
     $slots  = isset($input['slots'])   ? (int)$input['slots']   : 0;
 
     if ($planId > 0) {
-        $spec = pricing_from_plan($panel, $planId, $gameType);
+        $spec = pricing_from_plan($panel, $planId, $gameType, $isAdmin);
     } elseif ($slots > 0) {
-        $spec = pricing_from_tier($panel, $slots, $gameType);
+        $spec = pricing_from_tier($panel, $slots, $gameType, $isAdmin);
     } else {
         throw new RuntimeException('Nie wybrano ani planu, ani liczby slotów.');
     }
@@ -171,11 +171,16 @@ function pricing_game(PDO $panel, string $type): array
  * kupić plan Minecrafta pod pozorem Vintage Story i dostać serwer z zupełnie
  * innym jajkiem, niż wskazuje cena.
  */
-function pricing_from_plan(PDO $panel, int $planId, string $gameType): array
+function pricing_from_plan(PDO $panel, int $planId, string $gameType, bool $isAdmin = false): array
 {
+    // Admin widzi i może kupić plan wyłączony `is_active = 0` (np. "wstrzymaj
+    // sprzedaż" w panelu) - potrzebne, żeby dało się przetestować prawdziwy
+    // zakup gry, którą chwilowo ukryliśmy przed klientami. `sold_out`
+    // (ręczne "wyprzedany") i realna pojemność węzła niżej NIE mają wyjątku -
+    // to inne, świadome ograniczenia, które admina też mają obowiązywać.
     $stmt = $panel->prepare(
         'SELECT id, name, type, ram_mb, cpu_cores, ssd_mb, backups_limit, price, sold_out
-         FROM hosting_plans WHERE id = ? AND is_active = 1'
+         FROM hosting_plans WHERE id = ?' . ($isAdmin ? '' : ' AND is_active = 1')
     );
     $stmt->execute([$planId]);
     $plan = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -215,17 +220,28 @@ function pricing_from_plan(PDO $panel, int $planId, string $gameType): array
  * skacze po progach, więc wartość spoza listy oznacza albo ręczne majstrowanie
  * przy żądaniu, albo rozjazd z bazą - w obu przypadkach nie ma czego sprzedać.
  */
-function pricing_from_tier(PDO $panel, int $slots, string $gameType): array
+function pricing_from_tier(PDO $panel, int $slots, string $gameType, bool $isAdmin = false): array
 {
+    // Ten sam wyjątek dla admina co pricing_from_plan() - patrz komentarz tam.
     $stmt = $panel->prepare(
-        'SELECT id, type, slots, ram_gb, cpu_cores, price
-         FROM hosting_slot_tiers WHERE type = ? AND slots = ? AND is_active = 1'
+        'SELECT id, type, slots, ram_gb, cpu_cores, price, sold_out
+         FROM hosting_slot_tiers WHERE type = ? AND slots = ?' . ($isAdmin ? '' : ' AND is_active = 1')
     );
     $stmt->execute([$gameType, $slots]);
     $tier = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$tier) {
         throw new RuntimeException('Nieznana liczba slotów dla tej gry.');
+    }
+
+    /* Dostępność sprawdzamy TU, tak samo jak pricing_from_plan() dla gotowych
+       planów - do dziś ten próg jej w ogóle nie miał, więc dało się kupić
+       serwer nawet gdy na węźle nie było już miejsca. Klient mógł otworzyć
+       stronę godzinę temu i przesunąć suwak teraz, gdy miejsca już nie ma. */
+    $capacity = node_capacity($panel);
+    [$checked] = annotate_tier_availability([$tier], $capacity);
+    if (!empty($checked['sold_out'])) {
+        throw new RuntimeException('Ta liczba slotów jest już niedostępna.');
     }
 
     $ramMb = (int)round((float)$tier['ram_gb'] * 1024);

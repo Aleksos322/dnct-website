@@ -65,7 +65,10 @@ if ($isLoggedIn) {
     }
 
     foreach ($orders as $order) {
-        $cards[] = srv_build_card($order, $panel, $salesOn);
+        $card = srv_build_card($order, $panel, $salesOn);
+        if ($card !== null) {
+            $cards[] = $card;
+        }
     }
 }
 
@@ -75,9 +78,10 @@ if ($isLoggedIn) {
  * Zbieramy to w jednym miejscu, żeby widok niżej był samym HTML-em. Mieszanie
  * zapytań z markupem jest dokładnie tym, przez co stary plik urósł do 84 KB.
  *
- * @return array<string,mixed>
+ * @return array<string,mixed>|null null, gdy serwer zniknął z Pterodactyla
+ *                                   poza naszym cyklem życia - karta się nie pokazuje
  */
-function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
+function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
 {
     $card = ['order' => $order];
 
@@ -122,6 +126,19 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): array
 
     if ($panel === null) {
         return $card;
+    }
+
+    /* Serwer zniknął z panelu poza naszym cyklem życia (np. ręczne skasowanie
+       przez admina w Pterodactylu, z pominięciem backend/tools/lifecycle.php).
+       `orders.ptero_server_id` nie znika automatycznie w takiej sytuacji -
+       bez tej kontroli klient widziałby tu usługę, której realnie już nie ma.
+       Dotyczy tylko "provisioned" - zamówienie "failed"/"cancelled" i tak nie
+       ma za czym tęsknić, a "paid" jeszcze nie zdążyło dostać serwera. */
+    if ($order['status'] === 'provisioned'
+        && !empty($order['ptero_server_id'])
+        && !pterodactyl_server_exists($panel, (int)$order['ptero_server_id'])
+    ) {
+        return null;
     }
 
     if (!empty($order['ptero_server_id'])) {

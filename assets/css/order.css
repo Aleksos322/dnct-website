@@ -206,6 +206,24 @@
     color: #64748b;
 }
 
+/* Widoczny wyłącznie adminowi (patrz komentarz w sukces.php) - żółtawa
+   obwódka i monospace celowo odróżniają to od reszty karty: to narzędzie
+   diagnostyczne, nie informacja dla klienta. */
+.cennik-page .suc-debug {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    background: rgba(251, 191, 36, 0.08);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: #fde68a;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 0.72rem;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 @media (max-width: 900px) {
     .cennik-page .ord-grid { grid-template-columns: 1fr; }
     .cennik-page .ord-summary { position: static; }

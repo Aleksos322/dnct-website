@@ -16,6 +16,8 @@
  * @var int    $graceHours
  * @var string $panelUrl
  * @var string $accountUrl
+ * @var ?string $adminUser     login administratora W GRZE (null, gdy ta gra go nie ma)
+ * @var ?string $adminPassword hasło administratora W GRZE - pokazywane TYLKO tutaj
  *
  * Layout na tabelach i style inline - Outlook i Gmail nie obsługują ani
  * zewnętrznych arkuszy, ani nowoczesnego CSS-a.
@@ -84,6 +86,34 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                     </table>
                 </td>
             </tr>
+
+            <?php if ($adminUser !== null && $adminPassword !== null): ?>
+            <!-- Dane logowania administratora W GRZE - pokazujemy je TYLKO tutaj,
+                 nigdy nie zapisujemy w bazie, więc to jedyna szansa klienta. -->
+            <tr>
+                <td style="padding:16px 32px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef2ff; border:1px solid #a5b4fc; border-radius:10px;">
+                        <tr>
+                            <td style="padding:18px 20px;">
+                                <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#3730a3; margin-bottom:12px;">
+                                    Dane logowania administratora w grze
+                                </div>
+                                <div style="font-size:14px; color:#312e81; margin-bottom:6px;">
+                                    Login: <strong style="font-size:16px;"><?= $e($adminUser) ?></strong>
+                                </div>
+                                <div style="font-size:14px; color:#312e81;">
+                                    Hasło: <strong style="font-size:16px; font-family:monospace;"><?= $e($adminPassword) ?></strong>
+                                </div>
+                                <div style="font-size:13px; line-height:1.6; color:#4338ca; margin-top:12px; padding-top:12px; border-top:1px solid #a5b4fc;">
+                                    Zapisz to hasło - <strong>nie pokażemy go drugi raz</strong>. To login do konta
+                                    administratora w samej grze, nie do panelu ani strony.
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <?php endif; ?>
 
             <!-- TERMINY. Najważniejsza część wiadomości. -->
             <tr>

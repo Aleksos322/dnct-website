@@ -241,3 +241,24 @@ function pterodactyl_ensure_user(
     error_log('Pterodactyl JIT: Stworzono nowego użytkownika: ' . $email . ' → username: ' . $newUser['username'] . ' (ID: ' . $newUser['id'] . ')');
     return $newUser;
 }
+
+/**
+ * Czy serwer o tym ID nadal istnieje w Pterodactylu.
+ *
+ * Zapytanie do bazy (`panel_db()`), nie do API - jedno proste zapytanie
+ * zamiast żądania HTTP, a ten sam efekt (404 z API i brak wiersza w bazie
+ * znaczą dokładnie to samo: serwera nie ma).
+ *
+ * DLACZEGO TO W OGÓLE POTRZEBNE: `orders.ptero_server_id` nie znika sam,
+ * gdy ktoś skasuje serwer RĘCZNIE w panelu Pterodactyla (z pominięciem
+ * backend/tools/lifecycle.php). Zamówienie zostaje ze statusem "provisioned"
+ * i martwym ID - bez tej kontroli klient nadal widziałby taki serwer na
+ * /twoje-serwery, a cykl życia dalej wysyłałby o nim ostrzeżenia i próbował
+ * go zawieszać/kasować.
+ */
+function pterodactyl_server_exists(PDO $panel, int $serverId): bool
+{
+    $stmt = $panel->prepare('SELECT 1 FROM servers WHERE id = ? LIMIT 1');
+    $stmt->execute([$serverId]);
+    return $stmt->fetchColumn() !== false;
+}
