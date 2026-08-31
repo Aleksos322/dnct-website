@@ -138,3 +138,56 @@ function annotate_plan_availability(array $plans, ?array $capacity): array
 
     return $plans;
 }
+
+/**
+ * To samo co plan_fits(), ale dla progu slotowego (Zomboid, Vintage Story).
+ *
+ * hosting_slot_tiers NIE MA własnej kolumny dysku - konfigurator slotów nie
+ * daje klientowi wyboru dysku, więc backend/lib/pricing.php (pricing_from_tier)
+ * używa jednej stałej, PRICING_DEFAULT_DISK_MB, dla KAŻDEGO progu każdej gry
+ * rozliczanej za sloty. Liczymy więc dostępność po RAM-ie progu (`ram_gb`,
+ * przeliczone na MiB) i po tej samej stałej dyskowej - inaczej duży węzeł
+ * z małym dyskiem pokazywałby nieograniczoną liczbę wolnych miejsc, mimo że
+ * miejsca na dysku dawno zabrakło.
+ */
+function tier_fits(array $tier, array $capacity): int
+{
+    $ram  = (int)round((float)($tier['ram_gb'] ?? 0) * 1024);
+    $disk = PRICING_DEFAULT_DISK_MB;
+
+    $byRam  = $ram  > 0 ? intdiv($capacity['free_memory'], $ram)  : PHP_INT_MAX;
+    $byDisk = $disk > 0 ? intdiv($capacity['free_disk'],   $disk) : PHP_INT_MAX;
+
+    return min($byRam, $byDisk);
+}
+
+/**
+ * Odpowiednik annotate_plan_availability() dla progów slotowych - te same
+ * trzy pola (`fits`, `sold_out`, `sold_out_manual`), żeby components/
+ * slot-configurator.php i pricing_from_tier() mogły czytać próg dokładnie
+ * tak samo jak plan-card-cennik.php czyta plan.
+ *
+ * @param array<int,array<string,mixed>> $tiers
+ * @return array<int,array<string,mixed>>
+ */
+function annotate_tier_availability(array $tiers, ?array $capacity): array
+{
+    foreach ($tiers as $i => $tier) {
+        $manual = !empty($tier['sold_out']);
+
+        if ($capacity === null) {
+            $tiers[$i]['fits']            = null;
+            $tiers[$i]['sold_out_manual'] = $manual;
+            $tiers[$i]['sold_out']        = $manual;
+            continue;
+        }
+
+        $fits = tier_fits($tier, $capacity);
+
+        $tiers[$i]['fits']            = $fits;
+        $tiers[$i]['sold_out_manual'] = $manual;
+        $tiers[$i]['sold_out']        = $manual || $fits < CAPACITY_MIN_FREE_SLOTS;
+    }
+
+    return $tiers;
+}

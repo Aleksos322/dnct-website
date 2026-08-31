@@ -158,18 +158,23 @@
         }
         if (!tiers.length || !periods.length) return;
 
-        var range   = root.querySelector('[data-role="range"]');
-        var elSlots = root.querySelector('[data-role="slots"]');
-        var elRam   = root.querySelector('[data-role="ram"]');
-        var elCpu   = root.querySelector('[data-role="cpu"]');
+        var range    = root.querySelector('[data-role="range"]');
+        var elSlots  = root.querySelector('[data-role="slots"]');
+        var elPakiet = root.querySelector('[data-role="pakiet"]');
+        var elRam    = root.querySelector('[data-role="ram"]');
+        var elCpu    = root.querySelector('[data-role="cpu"]');
         var elPrice = root.querySelector('[data-role="price"]');
         var elOld   = root.querySelector('[data-role="oldPrice"]');
         var elPer   = root.querySelector('[data-role="pricePer"]');
         var elSave  = root.querySelector('[data-role="save"]');
         var elHint  = root.querySelector('[data-role="hint"]');
+        var elScarce = root.querySelector('[data-role="scarce"]');
+        var elMethodsHint = root.querySelector('[data-role="methodsHint"]');
+        var elError = root.querySelector('[data-role="error"]');
         var btnSel  = root.querySelector('[data-role="select"]');
 
         var current = periods.find(function (p) { return p.days === 30; }) || periods[0];
+        var mode    = 'payment';
 
         // Ten sam wzór co backend/lib/pricing.php: zaokrąglamy w dół TYLKO gdy
         // okres ma własną końcówkę (adjust). Progi slotowe mają ceny całkowite,
@@ -185,11 +190,12 @@
             var tier = tiers[parseInt(range.value, 10)] || tiers[0];
             var total = priceFor(tier, current);
 
-            elSlots.textContent = tier.slots;
-            elRam.textContent   = tier.ram + ' GB';
-            elCpu.textContent   = tier.cpu + ' vCore';
-            elPrice.textContent = money(total);
-            elHint.textContent  = slotHint(tier.slots);
+            elSlots.textContent  = tier.slots;
+            elPakiet.textContent = tier.slots + ' slotów';
+            elRam.textContent    = tier.ram + ' GB';
+            elCpu.textContent    = tier.cpu + ' vCore';
+            elPrice.textContent  = money(total);
+            elHint.textContent   = slotHint(tier.slots);
 
             // Ile PEŁNYCH miesięcy obejmuje okres. Dzielenie przez 30 dawało dla
             // roku 12.17 miesiąca, przez co cena odniesienia rosła do 790.83 zł,
@@ -218,35 +224,117 @@
                 elSave.style.display = 'none';
             }
 
-            if (root.classList.contains('is-selected')) select();
-        }
-
-        function configUrl(tier) {
-            return '/zamowienie?game=' + encodeURIComponent(root.getAttribute('data-type') || '')
-                 + '&slots=' + encodeURIComponent(tier.slots);
-        }
-
-        function select() {
-            var tier = tiers[parseInt(range.value, 10)] || tiers[0];
-            root.classList.add('is-selected');
-            document.querySelectorAll('.plan-pick').forEach(function (c) { c.classList.remove('is-selected'); });
-            showPick(
-                tier.slots + ' slotów · ' + tier.ram + ' GB RAM',
-                money(priceFor(tier, current)),
-                '/ ' + current.label.toLowerCase(),
-                configUrl(tier)
-            );
-        }
-
-        /* Kliknięcie przycisku ma PRZEJŚĆ do zamówienia. select() zostaje osobno,
-           bo woła go też render() przy każdym ruchu suwaka - gdyby to on
-           przenosił na inną stronę, konfigurator uciekałby przy pierwszym
-           przesunięciu. */
-        function chooseConfig() {
-            select();
-            if (document.querySelector('[data-role="pickGo"]')) {
-                window.location.href = configUrl(tiers[parseInt(range.value, 10)] || tiers[0]);
+            // Ten sam komunikat o BLIK-u co dawniej na /zamowienie - klient ma
+            // się o ograniczeniu dowiedzieć PRZED kliknięciem "Przejdź do
+            // płatności", nie dopiero w Checkoucie.
+            if (elMethodsHint) {
+                elMethodsHint.textContent = mode === 'subscription'
+                    ? 'Abonament wymaga karty - BLIK i przelewy nie obsługują płatności cyklicznych.'
+                    : 'Zapłacisz kartą lub BLIK-iem. Pełną listę metod zobaczysz w Checkoucie.';
             }
+
+            renderAvailability(tier);
+        }
+
+        /* Płatność startuje wprost stąd - fetch do tego samego endpointu, co
+           dawny /zamowienie (assets/js/order.js). Nie ma już pośredniej
+           strony z tymi samymi pytaniami zadanymi drugi raz. */
+        function resetButton() {
+            if (!btnSel || btnSel.hasAttribute('data-locked')) return;
+            btnSel.textContent = root.getAttribute('data-logged-in') === '1'
+                ? 'Przejdź do płatności'
+                : 'Zaloguj się, żeby zamówić';
+        }
+
+        /* Dostępność progu - to samo `fits`/`soldOut`, które PHP dolewa przez
+           annotate_tier_availability() (backend/lib/capacity.php), więc front
+           i backend patrzą na TĘ SAMĄ liczbę wolnego miejsca na węźle. Bez
+           tego dało się przesunąć suwak na próg, którego serwer i tak by
+           odrzucił dopiero przy kliknięciu "Przejdź do płatności" - tutaj
+           widać to od razu, zanim klient w ogóle spróbuje zapłacić. */
+        function renderAvailability(tier) {
+            var soldOut = !!tier.soldOut;
+
+            if (btnSel && !btnSel.hasAttribute('data-locked')) {
+                btnSel.disabled = soldOut;
+                if (soldOut) {
+                    btnSel.textContent = 'Brak miejsca na tym progu';
+                } else {
+                    resetButton();
+                }
+            }
+
+            if (elScarce) {
+                if (soldOut) {
+                    elScarce.textContent = 'Ta liczba slotów jest chwilowo niedostępna - wybierz inną.';
+                    elScarce.style.display = '';
+                } else if (tier.fits !== null && tier.fits !== undefined && tier.fits <= 4) {
+                    elScarce.textContent = 'Zostały ' + tier.fits + ' wolne miejsca na węźle dla tej liczby slotów.';
+                    elScarce.style.display = '';
+                } else {
+                    elScarce.style.display = 'none';
+                }
+            }
+        }
+
+        function fail(message) {
+            if (elError) {
+                elError.textContent = message;
+                elError.hidden = false;
+            }
+            if (btnSel) {
+                btnSel.removeAttribute('data-locked');
+                btnSel.disabled = false;
+            }
+            resetButton();
+        }
+
+        function startCheckout() {
+            if (root.getAttribute('data-logged-in') !== '1') {
+                window.location.href = root.getAttribute('data-login-url');
+                return;
+            }
+            if (btnSel.disabled) return;
+
+            var tier = tiers[parseInt(range.value, 10)] || tiers[0];
+
+            // Drugi strażnik, nie pierwszy - przycisk jest już disabled przez
+            // renderAvailability() dla wyprzedanego progu, ale gdyby ktoś
+            // odblokował go z devtools, serwer i tak odrzuci to w
+            // pricing_from_tier(). Tu tylko oszczędzamy mu zbędnego żądania.
+            if (tier.soldOut) {
+                fail('Ta liczba slotów jest już niedostępna - wybierz inną.');
+                return;
+            }
+
+            btnSel.disabled = true;
+            btnSel.setAttribute('data-locked', '1');
+            btnSel.textContent = 'Przekierowuję do płatności…';
+            if (elError) elError.hidden = true;
+
+            fetch('/api/checkout/create.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    csrf_token:   root.getAttribute('data-csrf'),
+                    game_type:    root.getAttribute('data-type') || '',
+                    plan_id:      0,
+                    slots:        tier.slots,
+                    period_days:  current.days,
+                    billing_mode: mode
+                })
+            })
+                .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+                .then(function (res) {
+                    if (res.ok && res.body.url) {
+                        window.location.href = res.body.url;
+                        return;
+                    }
+                    fail(res.body.message || 'Nie udało się rozpocząć płatności.');
+                })
+                .catch(function () {
+                    fail('Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.');
+                });
         }
 
         range.addEventListener('input', render);
@@ -262,7 +350,17 @@
             });
         });
 
-        if (btnSel) btnSel.addEventListener('click', chooseConfig);
+        root.querySelectorAll('.cfg-mode').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                mode = btn.getAttribute('data-mode');
+                root.querySelectorAll('.cfg-mode').forEach(function (b) {
+                    b.classList.toggle('is-active', b === btn);
+                });
+                render();
+            });
+        });
+
+        if (btnSel) btnSel.addEventListener('click', startCheckout);
 
         render();
     }
@@ -494,6 +592,13 @@
 
         document.querySelectorAll('.pnl-console, .pnl-trailer').forEach(function (el) {
             attachChromaTilt(el, 5);
+        });
+
+        // Panel podsumowania w konfiguratorze slotów - ten sam przechył co karty
+        // planu, tylko łagodniejszy: to panel z przyciskiem płatności, nie ma co
+        // go szarpać tak mocno jak kartę do samego oglądania.
+        document.querySelectorAll('.cfg-summary').forEach(function (el) {
+            attachChromaTilt(el, 6);
         });
     }
 

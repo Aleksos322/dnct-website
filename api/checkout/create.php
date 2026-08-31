@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/stripe.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
 
 require_method('POST');
 csrf_guard();
@@ -54,7 +55,7 @@ try {
         'slots'        => (int)request_string('slots', '0'),
         'period_days'  => (int)request_string('period_days', '0'),
         'billing_mode' => request_string('billing_mode', 'payment'),
-    ]);
+    ], dnct_is_admin());
 } catch (RuntimeException $e) {
     // Komunikaty z wyceny są pisane pod klienta ("Ten plan jest już
     // niedostępny"), więc idą wprost - nie ma tu nic wrażliwego.

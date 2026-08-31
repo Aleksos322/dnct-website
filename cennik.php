@@ -24,11 +24,24 @@ require_once __DIR__ . '/components/slot-configurator.php';
 require_once __DIR__ . '/components/game-decor.php';
 require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
+require_once __DIR__ . '/backend/lib/notifications.php';
+
+/* Admin widzi też plany/progi wyłączone dla klientów (`is_active = 0`, np.
+   przez "wstrzymaj sprzedaż" w panelu) - inaczej nie dałoby się przetestować
+   prawdziwego zakupu gry, którą chwilowo ukryliśmy. Zwykły odwiedzający nadal
+   widzi wyłącznie to, co jest realnie na sprzedaż. */
+$isAdmin = dnct_is_admin();
 
 /* Czy karty mają prowadzić do zamówienia, czy tylko dawać się zaznaczać.
    Jedna zmienna dla całej strony - inaczej łatwo o wersję, w której przycisk
    na karcie prowadzi do kasy, a konfigurator obok nie. */
 $salesOn = stripe_sales_enabled();
+
+/* Konfigurator slotów startuje płatność bezpośrednio z tej strony (patrz
+   render_slot_configurator() niżej), więc musi wiedzieć, czy jest komu
+   założyć zamówienie - serwer zakładamy na koncie w panelu, dopasowanym
+   po e-mailu z sesji. Ten sam warunek co w zamowienie.php. */
+$isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
 
 /**
  * Zwiastun w paśmie "Panel".
@@ -76,7 +89,7 @@ try {
     // grach różnica jest bez znaczenia, ale wzorzec "zapytanie w pętli" ma
     // paskudny zwyczaj przeżywać do czasu, gdy gier jest czterdzieści.
     $planRows = $pdo->query(
-        'SELECT * FROM hosting_plans WHERE is_active = 1 ORDER BY price ASC'
+        'SELECT * FROM hosting_plans' . ($isAdmin ? '' : ' WHERE is_active = 1') . ' ORDER BY price ASC'
     )->fetchAll();
 
     /* Dostępność liczona z realnej pojemności węzła klienckiego. Plan znika
@@ -93,9 +106,14 @@ try {
 
     // Progi slotow dla gier rozliczanych za liczbe graczy (Zomboid, Vintage
     // Story). Jedno zapytanie na wszystkie typy, grupowane w PHP.
+    //
+    // Ta sama adnotacja pojemnością co plany wyzej - do 30.08.2026 progi jej
+    // w ogole nie mialy, wiec konfigurator slotow nigdy nie pokazywal "brak
+    // miejsca", nawet gdy wezel byl juz pelny.
     $tierRows = $pdo->query(
-        'SELECT * FROM hosting_slot_tiers WHERE is_active = 1 ORDER BY slots ASC'
+        'SELECT * FROM hosting_slot_tiers' . ($isAdmin ? '' : ' WHERE is_active = 1') . ' ORDER BY slots ASC'
     )->fetchAll();
+    $tierRows = annotate_tier_availability($tierRows, $capacity);
     $tiersByType = [];
     foreach ($tierRows as $tier) {
         $tiersByType[$tier['type']][] = $tier;
@@ -244,6 +262,20 @@ ob_start();
     </div>
 </section>
 
+<?php /* Widoczne wyłącznie dla admina, i tylko gdy faktycznie coś jest
+         wyłączone dla klientów - inaczej pasek wisiałby tu zawsze, na pusto.
+         Pod hero, nie nad nim - wyżej łapało się pod stały navbar (pt-32 na
+         .page-main najwyraźniej nie starcza dla samodzielnego elementu na
+         samej górze .cnk-wrap, mimo że hero pod tym samym pt-32 wychodzi
+         poprawnie - różnicy nie warto było zgadywać bez podglądu w przeglądarce,
+         prościej przenieść niżej, gdzie już wiadomo, że jest miejsce). */ ?>
+<?php if ($isAdmin && (array_filter($planRows, static fn($p) => !$p['is_active']) || array_filter($tierRows, static fn($t) => !$t['is_active']))): ?>
+    <div class="cnk-admin-notice glass-content">
+        Widzisz tu też pozycje wyłączone dla klientów ("wstrzymaj sprzedaż" w panelu) - jesteś zalogowany jako admin.
+        Zwykli odwiedzający ich nie widzą i nie mogą ich kupić.
+    </div>
+<?php endif; ?>
+
     <?php if ($dbError): ?>
         <div class="cennik-info glass">
             <h2>Cennik chwilowo niedostępny</h2>
@@ -359,7 +391,7 @@ ob_start();
                         <h2>Zbuduj serwer pod swoją ekipę</h2>
                         <p>Przesuń suwak i ustaw liczbę graczy - resztę dobierzemy automatycznie.</p>
                     </div>
-                    <?php render_slot_configurator($game['type'], $game['tiers'], $periods); ?>
+                    <?php render_slot_configurator($game['type'], $game['tiers'], $periods, (string)$game['name'], $isLoggedIn, $salesOn); ?>
                     </div>
                 <?php endif; ?>
             </div>

@@ -26,6 +26,15 @@
        jak przypadkowe przerwy, bo takie właśnie były. Teraz wszystkie pasma
        biorą odstęp stąd i zmiana jednej liczby przestawia całą stronę. */
     --cnk-band-gap: clamp(1.75rem, 3.5vw, 2.75rem);
+
+    /* Podciągnięcie POD navbar, TYLKO na tej stronie. `.page-main` w
+       clear.php ma `pt-32` (128px) - odstęp pod navbarem (fixed, ~70-90px
+       wysokości), wspólny dla całego serwisu. Zmiana tamtej klasy ruszyłaby
+       każdą podstronę; ujemny margines tutaj zostaje wyłącznie w cenniku.
+       Navbar ma z-50, treść cennika z-10 (przez .page-main), więc gdyby ktoś
+       kiedyś przesadził z liczbą, navbar po prostu przykryje górę hero,
+       zamiast złamać układ. */
+    margin-top: -90px;
 }
 
 /* Wspólny odstęp dla wszystkich pasm najwyższego poziomu. */
@@ -1229,16 +1238,22 @@
    Układ asymetryczny: sterowanie po lewej, wynik po prawej. Celowo inny rytm
    niż siatka kart - druga gra ma się różnić w odbiorze, nie tylko treścią.
    ========================================================================== */
-.cennik-page .cnk-panel-cfg { max-width: 940px; margin: 0 auto; }
+/* Bez własnego max-width - ma zajmować całą szerokość .cnk-wrap, tak jak
+   zakładki nad nim i pasmo "Panel" pod spodem. Węższy blok pośrodku wyglądał
+   jak inny komponent niż reszta strony, nie jak jej integralna część. */
+.cennik-page .cnk-panel-cfg { width: 100%; }
 
 .cennik-page .cfg-intro { text-align: center; margin-bottom: 2rem; }
 .cennik-page .cfg-intro h2 { font-size: 1.35rem; font-weight: 800; color: #f1f5f9; margin: 0 0 0.4rem; }
 .cennik-page .cfg-intro p { color: #64748b; font-size: 0.87rem; margin: 0; }
 
-.cennik-page .cfg { border-radius: 22px; padding: 1.75rem; transition: box-shadow 0.25s ease; }
-.cennik-page .cfg.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); }
+/* .cfg to już tylko nośnik danych (data-tiers/data-periods/...) i siatka -
+   szkło i obwódkę mają teraz DWA osobne pudełka niżej (.cfg-controls,
+   .cfg-summary), nie jedno wspólne. Podsumowanie ma dzięki temu własną
+   krawędź i stoi po prawej jako osobna karta, a nie wnętrze większego boxa. */
+.cennik-page .cfg-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem; align-items: start; }
 
-.cennik-page .cfg-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 2.25rem; align-items: center; }
+.cennik-page .cfg-controls { border-radius: 22px; padding: 1.75rem; border: 1px solid rgba(255, 255, 255, 0.07); }
 .cennik-page .cfg-block { margin-bottom: 1.75rem; }
 .cennik-page .cfg-block:last-child { margin-bottom: 0; }
 
@@ -1276,6 +1291,11 @@
 /* Podpowiedź kontekstowa - klient nietechniczny nie musi zgadywać liczby slotów. */
 .cennik-page .cfg-hint { margin-top: 0.85rem; font-size: 0.8rem; color: #a78bfa; min-height: 1.2em; }
 
+/* Niedobór/brak miejsca na węźle dla wybranego progu - ten sam kolor co
+   .pcard-scarce na kartach planów, żeby oba komunikaty czytały się jako
+   jedna, spójna rzecz, nie dwa różne systemy ostrzeżeń. */
+.cennik-page .cfg-scarce { margin-top: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #fbbf24; }
+
 .cennik-page .cfg-periods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
 .cennik-page .cfg-period {
     position: relative; padding: 0.8rem 0.4rem; border-radius: 13px;
@@ -1293,37 +1313,101 @@
     text-transform: uppercase; letter-spacing: 0.08em; color: #4ade80;
 }
 
-.cennik-page .cfg-summary {
-    text-align: center; padding: 1.5rem; border-radius: 18px;
-    background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06);
+/* Model rozliczenia - ten sam rytm co .ord-option na dawnym /zamowienie,
+   tylko dwa obok siebie zamiast trzech. */
+.cennik-page .cfg-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+.cennik-page .cfg-mode {
+    text-align: left; padding: 0.8rem 0.9rem; border-radius: 13px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #94a3b8; cursor: pointer; transition: all 0.2s ease;
 }
-.cennik-page .cfg-specs { display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1.15rem; }
-.cennik-page .cfg-spec-key {
-    display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.15em;
-    color: #64748b; font-weight: 800; margin-bottom: 0.25rem;
+.cennik-page .cfg-mode:hover { background: rgba(255, 255, 255, 0.06); color: #e2e8f0; }
+.cennik-page .cfg-mode.is-active {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+    border-color: rgba(139, 92, 246, 0.5); color: #fff;
 }
-.cennik-page .cfg-spec-val { font-size: 0.92rem; font-weight: 700; color: #e2e8f0; font-family: ui-monospace, monospace; }
+.cennik-page .cfg-mode-label { display: block; font-weight: 800; font-size: 0.82rem; }
+.cennik-page .cfg-mode-note  { display: block; margin-top: 0.25rem; font-size: 0.7rem; color: #94a3b8; line-height: 1.45; }
 
-.cennik-page .cfg-price-old { font-size: 0.82rem; color: #64748b; text-decoration: line-through; margin-bottom: 0.15rem; }
+/* Karta podsumowania - osobne pudełko, nie wnętrze .cfg-controls. Ten sam
+   przechył 3D + poświata śledząca kursor co na kartach Minecrafta (.pcard,
+   patrz attachChromaTilt() w cennik.js) - to jedyny element tej strony, który
+   klient faktycznie klika, żeby zapłacić, więc dostaje ten sam sygnał
+   "to jest interaktywne", co karty planu. */
+.cennik-page .cfg-summary {
+    position: relative;
+    text-align: left; padding: 1.4rem 1.5rem; border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease-out;
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+.cennik-page .cfg-summary:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45);
+}
+.cennik-page .cfg-summary::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 0; opacity: 0;
+    background: radial-gradient(
+        420px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(167, 139, 250, 0.26),
+        rgba(139, 92, 246, 0.16) 28%,
+        rgba(99, 102, 241, 0.09) 46%,
+        rgba(59, 130, 246, 0.045) 62%,
+        transparent 76%
+    );
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+.cennik-page .cfg-summary:hover::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cfg-summary { transform: none; }
+    .cennik-page .cfg-summary::before { display: none; }
+}
+
+.cennik-page .cfg-summary-head { margin-bottom: 1rem; }
+.cennik-page .cfg-summary-label {
+    display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.2em;
+    font-weight: 800; color: #64748b; margin-bottom: 0.3rem;
+}
+.cennik-page .cfg-summary-sub { display: block; font-size: 0.92rem; font-weight: 700; color: #e2e8f0; }
+.cennik-page .cfg-summary-sub strong { color: #a78bfa; }
+
+/* Specyfikacja - te same kafelki 2x2 co .pcard-specs na kartach Minecrafta
+   (ikony, wartość, etykieta), zamiast czterech pełnych wierszy tekstu. Krótsza
+   karta to mniej scrollowania, żeby dojechać do przycisku płatności. */
+.cennik-page .cfg-summary .pcard-specs { margin-bottom: 1.1rem; }
+
+.cennik-page .cfg-price-wrap { text-align: center; margin-top: 0; position: relative; z-index: 1; }
+.cennik-page .cfg-price-old { font-size: 0.8rem; color: #64748b; text-decoration: line-through; margin-bottom: 0.1rem; }
 .cennik-page .cfg-price { display: flex; align-items: baseline; justify-content: center; gap: 0.3rem; }
-.cennik-page .cfg-price span:first-child { font-size: 2.7rem; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
-.cennik-page .cfg-price-cur { font-size: 0.95rem; color: #64748b; font-weight: 700; }
-.cennik-page .cfg-price-per { font-size: 0.73rem; color: #64748b; margin-top: 0.35rem; }
+.cennik-page .cfg-price span:first-child { font-size: 2.4rem; font-weight: 900; color: #fff; line-height: 1; font-variant-numeric: tabular-nums; }
+.cennik-page .cfg-price-cur { font-size: 0.92rem; color: #64748b; font-weight: 700; }
+.cennik-page .cfg-price-per { font-size: 0.71rem; color: #64748b; margin-top: 0.3rem; }
 
 .cennik-page .cfg-save {
-    display: inline-block; margin-top: 0.6rem; padding: 0.25rem 0.7rem; border-radius: 999px;
+    display: inline-block; margin-top: 0.5rem; padding: 0.22rem 0.65rem; border-radius: 999px;
     background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #4ade80; font-size: 0.68rem; font-weight: 800;
+    color: #4ade80; font-size: 0.66rem; font-weight: 800;
 }
 
 .cennik-page .cfg-select {
-    width: 100%; margin-top: 1.4rem; padding: 0.85rem; border-radius: 15px;
+    position: relative; z-index: 1;
+    width: 100%; margin-top: 1.1rem; padding: 0.8rem; border-radius: 15px; text-align: center;
     background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); color: #fff;
-    font-weight: 800; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.12em;
+    font-weight: 800; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.12em;
     cursor: pointer; border: none; transition: all 0.2s ease;
     box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
 }
 .cennik-page .cfg-select:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(139, 92, 246, 0.45); }
+.cennik-page .cfg-select:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.cennik-page .cfg-methods-hint { position: relative; z-index: 1; margin: 0.7rem 0 0; font-size: 0.68rem; color: #64748b; line-height: 1.5; text-align: center; }
+.cennik-page .cfg-error       { position: relative; z-index: 1; margin: 0.6rem 0 0; font-size: 0.76rem; color: #f87171; line-height: 1.45; text-align: center; }
+.cennik-page .cfg-legal       { position: relative; z-index: 1; margin: 0.8rem 0 0; font-size: 0.64rem; color: #52606d; line-height: 1.5; text-align: center; }
+.cennik-page .cfg-legal a     { color: #94a3b8; }
+.cennik-page .cfg-testmode    { display: block; margin-top: 0.3rem; color: #fbbf24; font-weight: 700; }
 
 /* ==========================================================================
    PASEK WYBORU - bez przycisku zakupu; sprzedaż jest wyłączona, a przycisk
@@ -1638,6 +1722,21 @@
 
 @media (prefers-reduced-motion: reduce) {
     .cennik-page .cennik-ask-btn:hover { transform: none; }
+}
+
+/* Baner widoczny wyłącznie adminowi, gdy cennik pokazuje mu pozycje
+   wyłączone dla klientów - patrz komentarz w cennik.php. Żółty, nie
+   czerwony/fioletowy: to informacja, nie błąd i nie element sprzedażowy. */
+.cnk-admin-notice {
+    margin: 0 0 1.5rem;
+    padding: 0.9rem 1.2rem;
+    border-radius: 14px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.5;
 }
 
 /* Pływająca plakietka z licznikiem - patrz komentarz w cennik.php.
