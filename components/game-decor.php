@@ -4,13 +4,15 @@
  *
  * DWA ŹRÓDŁA GRAFIKI, JEDEN KOD
  *
- * MINECRAFT ma prawdziwe rendery (assets/media/minecraft): statek z End City,
- * geodę ametystową, komnatę portalu, Creaking i spawner blaze'ów. Biją każdą
- * wektorową imitację i były pod ręką, więc nie ma powodu ich udawać.
+ * MINECRAFT i PROJECT ZOMBOID mają prawdziwe grafiki: Minecraft rendery
+ * (assets/media/minecraft) - statek z End City, geodę ametystową, komnatę
+ * portalu, Creaking i spawner blaze'ów; Zomboid moodle ze stanu postaci
+ * (assets/media/zomboid) - te same ikonki, które gracz zna z paska HUD-u.
+ * Biją każdą wektorową imitację i były pod ręką, więc nie ma powodu ich udawać.
  *
- * POZOSTAŁE GRY nie mają takich materiałów, więc zostają zestawy RYSOWANE -
- * lepsze to niż puste marginesy albo cudze grafiki wzięte z sieci, do których
- * nie mamy praw. Rysunki powstają dwiema technikami:
+ * VINTAGE STORY nie ma jeszcze takich materiałów, więc zostaje zestaw
+ * RYSOWANY - lepiej to niż puste marginesy albo cudze grafiki wzięte z sieci,
+ * do których nie mamy praw. Rysunki powstają dwiema technikami:
  *
  * 1. IZOMETRYCZNE BLOKI (decor_cube) - trzy równoległoboki: góra, lewy i prawy
  *    bok. Czytają się jako "klocek" bez ani jednego pliku graficznego.
@@ -19,11 +21,16 @@
  *    go, zmieniając litery.
  *
  * Wybór jest DANYMI, nie rozgałęzieniem kodu: element zestawu z kluczem `img`
- * renderuje się jako obrazek, napis - jako rysunek.
+ * renderuje się jako obrazek (z folderu gry, patrz render_game_decor()),
+ * napis - jako rysunek.
  *
- * ROZMIARY. Źródła miały po 2000 px i do megabajta; przeskalowane do realnych
- * rozmiarów wyświetlania cały zestaw waży 110 KB zamiast 3,4 MB. Dekoracja,
- * która kosztuje więcej niż reszta strony, przestaje być dekoracją.
+ * ROZMIARY. Źródła Minecrafta miały po 2000 px i do megabajta; przeskalowane
+ * do realnych rozmiarów wyświetlania cały zestaw waży 110 KB zamiast 3,4 MB.
+ * Dekoracja, która kosztuje więcej niż reszta strony, przestaje być dekoracją.
+ * Moodle Zomboida są małe z natury (126x126 w źródle) i nie potrzebują tego
+ * zabiegu - dlatego nie dostają też powiększonych wymiarów jak Minecraft
+ * w cennik.css (`[data-decor-for="game-minecraft"]`): to skalowanie było
+ * pomyślane pod rozległe rendery, nie pod ikonki HUD-u.
  *
  * DOSTĘPNOŚĆ: cała warstwa jest aria-hidden i pointer-events:none. To czysta
  * ozdoba - nie może przechwytywać kliknięć ani trafiać do czytników ekranu.
@@ -128,43 +135,6 @@ function decor_sets(): array
         '..bbbb..',
     ], ['b' => '#0d5f52', 'c' => '#149c84', 'd' => '#3fe0c0']);
 
-    /* --- Project Zomboid: zapuszczone przedmieścia ---------------------- */
-    $plank   = decor_cube('#9c7a52', '#6d5335', '#57422a');
-    $asphalt = decor_cube('#4a4f4a', '#31352f', '#242721');
-
-    $medkit = decor_pixels([
-        '.rrrrrr.',
-        'rrrrrrrr',
-        'rrrwwrrr',
-        'rrwwwwrr',
-        'rrwwwwrr',
-        'rrrwwrrr',
-        'rrrrrrrr',
-        '.rrrrrr.',
-    ], ['r' => '#9b2f2f', 'w' => '#f2f2f2']);
-
-    $hazard = decor_pixels([
-        '...yy...',
-        '...yy...',
-        '..yyyy..',
-        '..ykky..',
-        '.yykkyy.',
-        '.yyykyy.',
-        'yyyyyyyy',
-        '........',
-    ], ['y' => '#c9a227', 'k' => '#1c1a12']);
-
-    $barrel = decor_pixels([
-        '.oooooo.',
-        'obbbbbbo',
-        'obbbbbbo',
-        'ooooooooo',
-        'obbbbbbo',
-        'obbbbbbo',
-        'ooooooooo',
-        '.oooooo.',
-    ], ['o' => '#7a5b2e', 'b' => '#a8813f']);
-
     /* --- Vintage Story: epoka miedzi ------------------------------------ */
     $copper = decor_cube('#d18a4a', '#9c6130', '#7d4c25');
     $clay   = decor_cube('#b8795c', '#8a563e', '#6f4531');
@@ -202,12 +172,12 @@ function decor_sets(): array
         '...ac...',
     ], ['a' => '#e8c169', 'b' => '#d9a441', 'c' => '#a8761f']);
 
-    /* MINECRAFT MA PRAWDZIWE GRAFIKI, pozostałe gry rysowane klocki.
-       Dla Minecrafta dostaliśmy zestaw rendersów (End City, geoda ametystowa,
-       portal, spawner, Creaking, pufferfish) i one biją każdą wektorową
-       imitację. Dla Zomboida i Vintage Story takich materiałów nie ma, więc
-       zostają zestawy rysowane - lepsze to niż puste marginesy albo cudze
-       grafiki wzięte z sieci.
+    /* MINECRAFT I ZOMBOID MAJĄ PRAWDZIWE GRAFIKI, Vintage Story - rysowane
+       klocki. Zomboid dostał komplet moodli (assets/media/zomboid) - te same
+       ikonki stanu postaci, które gracz zna z paska HUD-u w grze; sześć z ośmiu,
+       bo tyle mieści się w marginesie bez zamieniania go w tapetę (patrz
+       docblock pliku). Wybrane są te najbardziej "grywalne" - zombified i dead
+       czytelnie sygnalizują, o jaką grę chodzi, zanim ktoś przeczyta nazwę.
 
        Rozdzielenie jest DANYMI, nie osobnym kodem: element z kluczem `img`
        renderuje się jako obrazek, z kluczem `svg` jako rysunek. */
@@ -220,7 +190,14 @@ function decor_sets(): array
             ['img' => 'Nether_Fortress_Blaze_Spawner','alt' => 'Spawner blaze’ów'],
             ['puffer' => true,                        'alt' => 'Rozdymka'],
         ],
-        'zomboid'      => [$plank, $medkit, $asphalt, $hazard, $plank, $barrel],
+        'zomboid' => [
+            ['img' => 'Mood_Zombified', 'alt' => 'Moodle: zombified'],
+            ['img' => 'Mood_Dead',      'alt' => 'Moodle: dead'],
+            ['img' => 'Mood_Ill',       'alt' => 'Moodle: ill'],
+            ['img' => 'Mood_Nauseous',  'alt' => 'Moodle: nauseous'],
+            ['img' => 'Mood_Stressed',  'alt' => 'Moodle: stressed'],
+            ['img' => 'Mood_Drunk',     'alt' => 'Moodle: drunk'],
+        ],
         'vintagestory' => [$copper, $ingot, $clay, $pot, $copper, $resin],
     ];
 }
@@ -254,7 +231,10 @@ function render_game_decor(string $type): void
                         <img src="/assets/media/minecraft/Pufferfish_Large.webp"  alt="" class="p3" loading="lazy" decoding="async">
                     </span>
                 <?php elseif (is_array($item)): ?>
-                    <img src="/assets/media/minecraft/<?php echo htmlspecialchars($item['img']); ?>.webp"
+                    <?php /* Folder gry = $type, nie sztywno "minecraft" - dzięki temu
+                             ten sam blok obsługuje też prawdziwe grafiki Zomboida
+                             (assets/media/zomboid), bez rozgałęzienia w kodzie. */ ?>
+                    <img src="/assets/media/<?php echo htmlspecialchars($type); ?>/<?php echo htmlspecialchars($item['img']); ?>.webp"
                          alt="" loading="lazy" decoding="async">
                 <?php else: ?>
                     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><?php echo $item; ?></svg>

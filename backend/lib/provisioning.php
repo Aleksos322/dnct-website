@@ -73,7 +73,19 @@ function provision_game_map(): array
                 'MAX_PLAYERS'   => (string)($order['slots'] ?? 10),
                 'SRCDS_APPID'   => '380870',
                 'AUTO_UPDATE'   => '1',
-                'SRCDS_BETAID'  => 'unstable',
+                // PUSTE, celowo - Steam (depot 380870) NIE MA gałęzi o nazwie
+                // "unstable". Sprawdzone wprost w API Steama (api.steamcmd.net,
+                // bez logowania): realne gałęzie to `public`, `42.19` i
+                // `legacy41`. Skrypt instalacyjny egga robi
+                // `-beta ${SRCDS_BETAID}` tylko gdy zmienna nie jest pusta
+                // ([[ -z ${SRCDS_BETAID} ]] w script_install) - z "unstable"
+                // steamcmd odrzucał całą instalację (ERROR! Failed to set
+                // beta 'unstable'), więc plik gry nigdy nie powstawał, mimo
+                // że serwer w panelu wyglądał na założony poprawnie. Puste =
+                // brak flagi -beta = SteamCMD bierze `public`, czyli aktualny
+                // Build 42 (Indie Stone przeniosło B42 do gałęzi domyślnej,
+                // a stary B41 zostawiło pod `legacy41`).
+                'SRCDS_BETAID'  => '',
                 // Port, a nie identyfikator alokacji. Stara wersja wstawiała
                 // tu `$freeAllocationId`, czyli numer wiersza w bazie - serwer
                 // dostawał zupełnie inny port, niż faktycznie nasłuchiwał.
@@ -85,10 +97,20 @@ function provision_game_map(): array
             'nest'           => 9,
             'egg'            => 27,  // Vintage Story
             'fallback_image' => 'ghcr.io/pterodactyl/yolks:dotnet_8',
+            // Klucze MUSZĄ być dokładnymi nazwami zmiennych egga (sprawdzone w
+            // bazie panelu: RELEASE_VERSION/FILES_BRANCH/MAX_CLIENTS/SQLITE_TMPDIR,
+            // trzy pierwsze `required`). Poprzednia wersja wysyłała VS_VERSION,
+            // MAX_PLAYERS i SERVER_PORT - żadna z tych nazw nie istnieje w tym
+            // jajku, więc Pterodactyl albo odrzucał całe zamówienie (brak
+            // wymaganej zmiennej), albo zakładał serwer na samych domyślnych
+            // wartościach, ignorując wybór klienta. Port serwera idzie przez
+            // `allocation.default` w payloadzie niżej - to jajko nie ma
+            // osobnej zmiennej portu, więc SERVER_PORT był i tak zbędny.
             'env' => static fn(array $order, array $alloc): array => [
-                'VS_VERSION'  => 'latest',
-                'MAX_PLAYERS' => (string)($order['slots'] ?? 10),
-                'SERVER_PORT' => (string)$alloc['port'],
+                'FILES_BRANCH'    => 'stable',
+                'RELEASE_VERSION' => 'latest',
+                'MAX_CLIENTS'     => (string)($order['slots'] ?? 16),
+                'SQLITE_TMPDIR'   => '/home/container/data/Backups',
             ],
         ],
     ];
@@ -188,6 +210,13 @@ function provision_server(array $order): array
         ? $order['slots'] . ' slotów'
         : 'plan #' . (int)$order['plan_id'];
 
+    // Osobna zmienna, nie inline w payloadzie - poniżej wyciągamy z niej
+    // ADMIN_USER/ADMIN_PASSWORD (gdy gra je ma) do zwrócenia wywołującemu,
+    // żeby dało się je pokazać klientowi w mailu/powiadomieniu. Wcześniej
+    // to hasło znikało bezpowrotnie zaraz po wysłaniu do Pterodactyla -
+    // klient nie miał ŻADNEGO sposobu, żeby się dowiedzieć, jakie dostał.
+    $environment = ($game['env'])($order, $alloc);
+
     $payload = [
         'name'        => ucfirst($gameType) . ' - ' . $order['user_name'],
         'description' => sprintf(
@@ -200,7 +229,7 @@ function provision_server(array $order): array
         'nest'         => $game['nest'],
         'egg'          => $game['egg'],
         'docker_image' => $egg['image'],
-        'environment'  => ($game['env'])($order, $alloc),
+        'environment'  => $environment,
         'limits' => [
             'memory' => (int)$order['ram_mb'],
             'swap'   => 0,
@@ -238,6 +267,10 @@ function provision_server(array $order): array
         'server_id'     => (int)$attr['id'],
         'uuid'          => (string)($attr['uuid'] ?? ''),
         'ptero_user_id' => (int)$pteroUser['id'],
+        // Puste dla gier bez konta admina w grze (np. Vintage Story - tam
+        // uprawnienia nadaje się komendą `/op` z konsoli panelu, nie env-em).
+        'game_admin_user'     => $environment['ADMIN_USER'] ?? null,
+        'game_admin_password' => $environment['ADMIN_PASSWORD'] ?? null,
     ];
 }
 
