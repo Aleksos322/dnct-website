@@ -25,6 +25,7 @@ require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/pricing.php';
 require_once __DIR__ . '/lib/orders.php';
 require_once __DIR__ . '/lib/panel_sso.php';
+require_once __DIR__ . '/lib/gsc.php';
 
 // ------------------------------------------------------------
 // Sesja - ciasteczko niedostępne dla JS i wysyłane tylko po HTTPS.
