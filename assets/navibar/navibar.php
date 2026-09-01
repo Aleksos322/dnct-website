@@ -199,5 +199,10 @@ function navbar_class_mobile(bool $active): string
 </nav>
 
 <!-- Skrypty JS zawsze ze ścieżką od głównego katalogu (/) -->
-<script src="/assets/js/lucide.min.js"></script>
-<script src="/assets/navibar/navbar.js"></script>
+<?php /* defer: 387 KB nieblokujace. navbar.js i tak czeka na
+         DOMContentLoaded zanim wywola lucide.createIcons(), a deferowane
+         skrypty wykonuja sie w kolejnosci dokumentu tuz przed tym zdarzeniem
+         - kolejnosc (lucide zdefiniowany -> navbar.js podpina listener)
+         zostaje zachowana. */ ?>
+<script src="/assets/js/lucide.min.js" defer></script>
+<script src="/assets/navibar/navbar.js" defer></script>
