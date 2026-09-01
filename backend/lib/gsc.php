@@ -210,6 +210,74 @@ function gsc_url_inspection(string $siteUrl, string $inspectUrl): array
 }
 
 /**
+ * To samo co gsc_url_inspection(), dla wielu URL-i NARAZ.
+ *
+ * Zmierzone: pojedyncza inspekcja u Google trwa ok. 6-7 SEKUND (to jeden
+ * z wolniejszych endpointów Search Console API, nie da się tego przyspieszyć
+ * z naszej strony). Pięć wywołań po kolei to 30+ sekund blokującego PHP -
+ * curl_multi odpala je RÓWNOLEGLE, więc całość trwa tyle co najwolniejsza
+ * pojedyncza inspekcja (~7s), nie suma wszystkich.
+ *
+ * @param string[] $urls
+ * @return array<string, array{result: ?array, error: ?string}> Klucz = URL.
+ */
+function gsc_url_inspections_batch(string $siteUrl, array $urls): array
+{
+    $token = gsc_access_token();
+    if ($token === null) {
+        $blad = ['result' => null, 'error' => 'Brak tokenu dostępu'];
+        return array_fill_keys($urls, $blad);
+    }
+
+    $multi = curl_multi_init();
+    $handles = [];
+
+    foreach ($urls as $url) {
+        $ch = curl_init(GSC_INSPECTION_URL);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => json_encode(['inspectionUrl' => $url, 'siteUrl' => $siteUrl]),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        curl_multi_add_handle($multi, $ch);
+        $handles[$url] = $ch;
+    }
+
+    $running = null;
+    do {
+        curl_multi_exec($multi, $running);
+        curl_multi_select($multi);
+    } while ($running > 0);
+
+    $wyniki = [];
+    foreach ($handles as $url => $ch) {
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $response = curl_multi_getcontent($ch);
+        $body = $response !== null ? json_decode($response, true) : null;
+
+        if ($httpCode !== 200) {
+            error_log('GSC: url inspection (batch) HTTP ' . $httpCode . ' dla ' . $url);
+            $wyniki[$url] = ['result' => null, 'error' => 'Błąd zapytania do Search Console (HTTP ' . $httpCode . ')'];
+        } else {
+            $wyniki[$url] = ['result' => $body['inspectionResult'] ?? null, 'error' => null];
+        }
+
+        curl_multi_remove_handle($multi, $ch);
+        curl_close($ch);
+    }
+
+    curl_multi_close($multi);
+
+    return $wyniki;
+}
+
+/**
  * Cache na dysku dla widoków panelu admina - GSC i tak aktualizuje dane
  * search-analytics z ok. 2-dniowym opóźnieniem, więc odpytywanie API przy
  * każdym wejściu w stronę tylko marnuje limit i spowalnia ładowanie.
