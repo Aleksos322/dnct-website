@@ -167,6 +167,100 @@ $gamesSoon      = array_values(array_filter($games, static fn(array $g): bool =>
 $periods        = $periods ?? [];
 $liveServers    = $liveServers ?? 0;
 
+/* JSON-LD dla cennika: Product/Offer per gotowy plan + FAQPage z tresci sekcji
+   "Bez gwiazdek i doplat" / "Ryzykujesz mniej, niz myslisz" nizej na tej samej
+   stronie. Budowane z tych samych $gamesWithPlans, ktore renderuja karty -
+   schemat nie moze klamac wzgledem tego, co widac, bo Google i AI boty
+   porownuja jedno z drugim. Progi slotowe (konfigurator) celowo pominiete -
+   to suwak, nie stale SKU jak gotowe plany.
+
+   KAZDY plan ma TRZY ceny (tydzien/miesiac/rok), nie jedna - dokladnie ten sam
+   wzor co karta i kasa (pricing_apply_period() z backend/lib/pricing.php,
+   ladowane przez bootstrap.php). Pierwsza wersja tego bloku uzywala samej
+   $plan['price'] (bazowej, miesiecznej) i zaniazala minimalna cene na stronie
+   jako 6,99 zl - podczas gdy realny "od" na calej stronie to 3,99 zl/tydzien
+   (Podstawowy: floor(6,99*0,5)+0,99 = 3,99). Schema z jedna cena klamala wiec
+   wzgledem wlasnego opisu strony. */
+$schemaProducts = [];
+foreach ($gamesWithPlans as $game) {
+    foreach ($game['plans'] as $plan) {
+        $offers = [];
+        foreach ($periods as $period) {
+            $offers[] = [
+                '@type'         => 'Offer',
+                'name'          => 'Rozliczenie: ' . $period['label'] . ' (' . (int)$period['days'] . ' dni)',
+                'price'         => number_format(pricing_apply_period((float)$plan['price'], $period), 2, '.', ''),
+                'priceCurrency' => 'PLN',
+                'availability'  => empty($plan['sold_out'])
+                    ? 'https://schema.org/InStock'
+                    : 'https://schema.org/OutOfStock',
+                'url'           => 'https://dnct.pl/zamowienie?plan=' . (int)$plan['id'],
+            ];
+        }
+
+        $schemaProducts[] = [
+            '@type' => 'Product',
+            'name'  => $game['name'] . ' - ' . $plan['name'],
+            'description' => sprintf(
+                'Serwer %s: %s RAM, %s NVMe, %s vCore.',
+                $game['name'],
+                cennik_size((int)($plan['ram_mb'] ?? 0)),
+                cennik_size((int)($plan['ssd_mb'] ?? 0)),
+                (string)($plan['cpu_cores'] ?? '')
+            ),
+            'brand'  => ['@type' => 'Brand', 'name' => 'DNCT Hosting'],
+            'offers' => $offers,
+        ];
+    }
+}
+
+$schemaFaq = [
+    [
+        'q' => 'Co jest wliczone w każdy plan hostingu DNCT?',
+        'a' => 'Pełny dostęp do panelu i konsoli, dyski NVMe bez współdzielenia RAM-u i CPU, '
+             . 'codzienne backupy z retencją 7 dni, ochrona DDoS (Cloudflare Magic Transit), '
+             . 'własna subdomena, zmiana wersji gry i wsparcie przez Discord bez systemu biletów.',
+    ],
+    [
+        'q' => 'Czy mogę zrezygnować z hostingu i dostać zwrot pieniędzy?',
+        'a' => 'Tak - masz 24 godziny na rezygnację. Wystarczy napisać na Discordzie, żeby odzyskać pieniądze.',
+    ],
+    [
+        'q' => 'Gdzie fizycznie stoją serwery DNCT Hosting?',
+        'a' => 'Serwery stoją w Polsce, nie za granicą - krótsza droga oznacza niższy ping i mniej lagów w grze.',
+    ],
+    [
+        'q' => 'Czy RAM i CPU są dzielone z innymi klientami (overselling)?',
+        'a' => 'Nie. Zasoby są gwarantowane i nie są dzielone z nikim innym - zero oversellingu.',
+    ],
+    [
+        'q' => 'Czy płatność roczna jest tańsza niż miesięczna?',
+        'a' => 'Tak - płatność roczna liczy się jak jedenaście miesięcy zamiast dwunastu, czyli rok taniej o miesiąc.',
+    ],
+];
+
+$extraHead = '';
+if ($schemaProducts) {
+    $extraHead .= '<script type="application/ld+json">' . json_encode([
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        'itemListElement' => array_map(
+            static fn(array $p, int $i): array => ['@type' => 'ListItem', 'position' => $i + 1, 'item' => $p],
+            $schemaProducts,
+            array_keys($schemaProducts)
+        ),
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+}
+$extraHead .= '<script type="application/ld+json">' . json_encode([
+    '@context'   => 'https://schema.org',
+    '@type'      => 'FAQPage',
+    'mainEntity' => array_map(static fn(array $f): array => [
+        '@type'          => 'Question',
+        'name'           => $f['q'],
+        'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']],
+    ], $schemaFaq),
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
+
 ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">

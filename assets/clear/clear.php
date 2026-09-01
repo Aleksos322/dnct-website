@@ -11,6 +11,11 @@
  *   $canonicalUrl      (opcjonalnie, pełny URL bieżącej strony)
  *   $centerContent     (opcjonalnie, bool - true wycentrowuje $content pionowo,
  *                        false dla stron wielosekcyjnych jak landing page)
+ *   $extraHead         (opcjonalnie, surowy HTML/JSON-LD doklejany w <head> PO
+ *                        sitewide Organization/WebSite - np. Product/FAQPage
+ *                        na cenniku. Budować z tych samych danych co widoczna
+ *                        treść, nigdy z osobno wymyślonych - Google i AI boty
+ *                        porównują schema z tym, co faktycznie widać.)
  *
  * Przykład:
  *   <?php
@@ -85,6 +90,33 @@ if ($centerContent) {
     <meta name="twitter:description" content="<?php echo htmlspecialchars($metaDescription); ?>">
     <meta name="twitter:image" content="<?php echo htmlspecialchars($ogImage); ?>">
 
+    <?php /* JSON-LD sitewide. Adresy zawsze wskazuja na dnct.pl (prod),
+             tak samo jak domyslny $canonicalUrl wyzej - spojna tozsamosc
+             marki niezaleznie od tego, czy strona jest ogladana na becie. */ ?>
+    <script type="application/ld+json"><?php echo json_encode([
+        '@context' => 'https://schema.org',
+        '@type'    => 'Organization',
+        'name'     => 'DNCT Hosting',
+        'url'      => 'https://dnct.pl',
+        'logo'     => 'https://dnct.pl/assets/media/icons/LINKS.png',
+        'sameAs'   => [
+            'https://facebook.com/dncthosting',
+            'https://instagram.com/dncthosting',
+            'https://x.com/dncthosting',
+            'https://youtube.com/@dncthosting',
+            'https://discord.gg/4kcXP5WmQ8',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
+    <script type="application/ld+json"><?php echo json_encode([
+        '@context' => 'https://schema.org',
+        '@type'    => 'WebSite',
+        'name'     => 'DNCT Hosting',
+        'url'      => 'https://dnct.pl',
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
+    <?php if (!empty($extraHead)): ?>
+    <?php echo $extraHead; ?>
+    <?php endif; ?>
+
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <link rel="apple-touch-icon" href="/assets/media/icons/favicon.png">
 
@@ -92,6 +124,14 @@ if ($centerContent) {
              trzymają stary arkusz po wgraniu poprawki. Patrz backend/lib/assets.php. */ ?>
     <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
+    <?php /* CELOWO bez defer, mimo 407 KB. Proba defer (2026-09-01) zepsula
+             tlo FinisherHeader: jego inline-init na dole <body> jest
+             synchroniczny i wykonuje sie W TRAKCIE parsowania, czyli PRZED
+             deferowanym skryptem - div .finisher-header zostawal bez klas
+             Tailwinda (fixed/inset-0/z-0) w momencie gdy FinisherHeader
+             mierzyl kontener, plus widoczny FOUC (logo/przycisk Discord
+             migające bez stylow). Blokujace ladowanie jest tu bezpieczniejsze
+             niz szybsze. */ ?>
     <script src="/assets/js/tailwind.js"></script>
     <?php /* System dzwiekow - syntezowany Web Audio API, zaladowany site-wide
              (nie tylko dla zalogowanych/dzwonka), zeby toasty gosci (np. po

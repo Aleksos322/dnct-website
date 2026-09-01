@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /backend/
+Disallow: /login
+Disallow: /register
+Disallow: /panel
+Disallow: /demo
+Disallow: /callback
+Disallow: /wyloguj
+Disallow: /logout
+Disallow: /zamowienie
+Disallow: /oplaty
+Disallow: /sukces
+Disallow: /pobierz
+Disallow: /test
+
+# Boty AI - jawnie dozwolone (to samo co User-agent: * powyzej,
+# wpis jawny sygnalizuje swiadoma zgode zamiast domyslnego zachowania)
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://dnct.pl/sitemap.xml
