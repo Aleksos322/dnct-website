@@ -560,10 +560,25 @@
      * jak mała karta wygląda na wypaczony, nie elegancki.
      */
     function attachChromaTilt(el, maxTilt) {
-        function move(e) {
+        // Mysz potrafi wysylac mousemove czesciej niz przegladarka rysuje
+        // klatki - bez dlawienia KAZDY event od razu przeliczal transform I
+        // duzy gradient (.pcard::before, kolo 480px), co dawalo wiecej
+        // przeliczen/repaintow na klatke niz przegladarka zdazyla wyswietlic.
+        // rAF zbija cala serie eventow miedzy klatkami do JEDNEJ aktualizacji.
+        var pendingX = null;
+        var pendingY = null;
+        var frameScheduled = false;
+        var lastX = null; // ostatnia ZNANA pozycja kursora (do przeliczenia po scrollu)
+        var lastY = null;
+
+        function apply() {
+            frameScheduled = false;
+            if (pendingX === null) return;
             var r = el.getBoundingClientRect();
-            var px = (e.clientX - r.left) / r.width;
-            var py = (e.clientY - r.top) / r.height;
+            var px = (pendingX - r.left) / r.width;
+            var py = (pendingY - r.top) / r.height;
+            pendingX = null;
+            pendingY = null;
 
             el.style.setProperty('--mx', (px * 100) + '%');
             el.style.setProperty('--my', (py * 100) + '%');
@@ -571,13 +586,47 @@
             el.style.setProperty('--rx', ((0.5 - py) * 2 * maxTilt).toFixed(2) + 'deg');
         }
 
+        function schedule(x, y) {
+            lastX = x;
+            lastY = y;
+            pendingX = x;
+            pendingY = y;
+            if (!frameScheduled) {
+                frameScheduled = true;
+                requestAnimationFrame(apply);
+            }
+        }
+
+        function move(e) {
+            schedule(e.clientX, e.clientY);
+        }
+
         function reset() {
+            pendingX = null;
+            pendingY = null;
+            lastX = null;
+            lastY = null;
             el.style.setProperty('--rx', '0deg');
             el.style.setProperty('--ry', '0deg');
         }
 
+        /* Lenis (smooth-scroll.js) potrafi jeszcze przez chwile dojezdzac
+           karte bezwladnoscia POD NIERUCHOMYM kursorem - system generuje
+           "mousemove" tylko gdy mysz sie fizycznie rusza, wiec --rx/--ry
+           zamrazaly sie na starej wartosci, karta wjezdzala pod tilt, a
+           dopiero kolejny prawdziwy ruch myszy "odswiezal" go do poprawnej
+           wartosci. Wygladalo to jak karta, ktora sie odpycha i sama wraca
+           na miejsce. Doliczamy wiec tez scroll, ale tylko gdy kursor juz
+           kiedys byl nad karta (lastX/lastY) - inaczej kazdy scroll strony
+           liczylby tilt dla kart, ktorych nikt nie dotyka. */
+        function onScroll() {
+            if (lastX === null) return;
+            schedule(lastX, lastY);
+        }
+
         el.addEventListener('mousemove', move);
         el.addEventListener('mouseleave', reset);
+        window.addEventListener('scroll', onScroll, { passive: true });
     }
 
     function initChromaCards() {
@@ -602,6 +651,121 @@
         });
     }
 
+    /* ------------------------------------------------------------------
+       Naglowek hero: "wpisywany" znak po znaku z migajacym kursorem, a po
+       skonczeniu druga linia sama sie podmienia - "nie zwalnia" ->
+       "nie ogranicza" -> "nie zawodzi" -> "daje przewagę" (ostatnia podmiana
+       kasuje tez "nie", nie tylko slowo koncowe).
+
+       Tekst w HTML (patrz [data-type-text] w cennik.php) zostaje tresci
+       SEO/czytnikow ekranu i zrodlem znakow do animacji jednoczesnie - bez
+       JS-a widac go od razu, normalnie (Reguła "JS to dodatek" z naglowka
+       tego pliku). JS go tylko na chwile czysci i przepisuje z powrotem.
+       ------------------------------------------------------------------ */
+    function initHeroTypewriter() {
+        if (reducedMotion()) return;
+
+        var lines = Array.prototype.slice.call(document.querySelectorAll('.cnk-h1 [data-type-text]'));
+        if (!lines.length) return;
+
+        var queue = lines.map(function (el) {
+            var text = el.textContent;
+            el.textContent = '';
+            return { el: el, text: text };
+        });
+
+        // Pasek rysowany w CSS (cennik.css), nie znak "|" - ten dziedziczyl
+        // font-weight: 900 naglowka i wychodzil gruby jak reszta liter.
+        var cursor = document.createElement('span');
+        cursor.className = 'cnk-type-cursor';
+        cursor.setAttribute('aria-hidden', 'true');
+
+        var CHAR_DELAY = 38;   // ms miedzy wpisywanymi znakami
+        var DELETE_DELAY = 32; // ms miedzy kasowanymi znakami
+        var CYCLE_PAUSE = 5000; // ms przerwy PO wpisaniu, zanim zacznie sie kasowanie
+
+        // Kazdy krok: ile znakow skasowac OD KONCA linii, i co wpisac w to
+        // miejsce. Trzeci krok kasuje CALE "nie zawodzi" (nie tylko
+        // "zawodzi"), bo "daje przewagę" juz nie ma przeczenia.
+        var CYCLE_STEPS = [
+            { deleteCount: 'zwalnia'.length, text: 'ogranicza' },
+            { deleteCount: 'ogranicza'.length, text: 'zawodzi' },
+            { deleteCount: 'nie zawodzi'.length, text: 'daje przewagę' }
+        ];
+
+        // Kazdy wpisany znak to WLASNY text node (insertAdjacentText nigdy
+        // nie skleja go z sasiednim) - dzieki temu kasowanie to zawsze
+        // "usun ostatni text node przed kursorem", bez liczenia offsetow
+        // w stringu.
+        function typeInto(text, onDone) {
+            var i = 0;
+            function step() {
+                if (i < text.length) {
+                    cursor.insertAdjacentText('beforebegin', text.charAt(i));
+                    i++;
+                    setTimeout(step, CHAR_DELAY);
+                } else if (onDone) {
+                    onDone();
+                }
+            }
+            step();
+        }
+
+        function deleteChars(count, onDone) {
+            function step(remaining) {
+                if (remaining > 0) {
+                    var node = cursor.previousSibling;
+                    if (node) node.remove();
+                    setTimeout(function () { step(remaining - 1); }, DELETE_DELAY);
+                } else if (onDone) {
+                    onDone();
+                }
+            }
+            step(count);
+        }
+
+        function runCycle(stepIndex) {
+            if (stepIndex >= CYCLE_STEPS.length) return; // koniec - kursor zostaje migac
+            var def = CYCLE_STEPS[stepIndex];
+            setTimeout(function () {
+                deleteChars(def.deleteCount, function () {
+                    typeInto(def.text, function () {
+                        runCycle(stepIndex + 1);
+                    });
+                });
+            }, CYCLE_PAUSE);
+        }
+
+        function typeLine(index) {
+            if (index >= queue.length) {
+                // Cala reszta naglowka wpisana - druga (ostatnia) linia
+                // zaczyna cykl podmian slowa koncowego.
+                runCycle(0);
+                return;
+            }
+
+            var item = queue[index];
+
+            function start() {
+                item.el.appendChild(cursor);
+                typeInto(item.text, function () { typeLine(index + 1); });
+            }
+
+            // data-type-pause: przerwa PRZED tym segmentem (np. przejscie na
+            // druga linie naglowka). Bez atrybutu segment leci od razu dalej -
+            // uzywane miedzy "Serwer" i ", ktory" na tej samej linii, zeby nie
+            // bylo dziwnej przerwy w srodku zdania.
+            var pause = parseInt(item.el.getAttribute('data-type-pause') || '0', 10);
+            if (pause > 0) {
+                setTimeout(start, pause);
+            } else {
+                start();
+            }
+        }
+
+        typeLine(0);
+    }
+
     initTabs();
     initPlanPicks();
     initHoverBits();
@@ -609,5 +773,6 @@
     initLiveCount();
     initParallax();
     initChromaCards();
+    initHeroTypewriter();
     document.querySelectorAll('.cfg').forEach(initConfigurator);
 })();

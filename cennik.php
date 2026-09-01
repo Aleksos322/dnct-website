@@ -213,9 +213,14 @@ ob_start();
     <div class="cnk-hero-inner">
         <div class="cnk-hero-text">
             <span class="cnk-eyebrow">Cennik</span>
-            <h1 class="cnk-h1">
-                Serwer, który<br>
-                <span class="cnk-h1-accent">nie zwalnia</span>
+            <?php /* data-type-text: cennik.js (initHeroTypewriter) czysci te
+                     spany i przepisuje je znak po znaku z migajacym "|" -
+                     tekst tutaj to jednoczesnie tresc SEO/dla czytnikow
+                     ekranu (bez JS zostaje widoczny od razu, normalnie) I
+                     zrodlo dla animacji, wiec nie ma dwoch kopii tego samego
+                     napisu do rozjechania przy edycji. */ ?>
+            <h1 class="cnk-h1"><span class="cnk-h1-accent" data-type-text>Serwer</span><span data-type-text>, który</span><br>
+                <span data-type-text data-type-pause="220">nie zwalnia</span>
             </h1>
         </div>
 

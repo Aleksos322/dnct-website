@@ -108,6 +108,17 @@
     height: 100%;
     display: block;
     animation: decorFloat 9s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* Warianty z prawdziwą grafiką (is-photo) mają <img> zamiast <svg>, więc
+   powyższy selektor je omija - unoszenie trzeba powtórzyć osobno. Selektor
+   dziecka bezpośredniego (>) celowo pomija obrazki rozdymki zagnieżdżone
+   w .cnk-puffer - ta ma własną animację sterowaną hoverem (patrz niżej) i
+   drugi `transform` na tym samym elemencie by z nią kolidował. */
+.cnk-decor-item.is-photo > img {
+    animation: decorFloat 10s ease-in-out infinite;
+    will-change: transform;
 }
 
 @keyframes decorIn {
@@ -138,6 +149,13 @@
 .cnk-decor-item.d5 svg { animation-delay: 3.3s; }
 .cnk-decor-item.d6 svg { animation-delay: 1.9s; }
 
+.cnk-decor-item.d1.is-photo > img { animation-delay: 0s; }
+.cnk-decor-item.d2.is-photo > img { animation-delay: 1.4s; }
+.cnk-decor-item.d3.is-photo > img { animation-delay: 2.6s; }
+.cnk-decor-item.d4.is-photo > img { animation-delay: 0.7s; }
+.cnk-decor-item.d5.is-photo > img { animation-delay: 3.3s; }
+.cnk-decor-item.d6.is-photo > img { animation-delay: 1.9s; }
+
 @media (min-width: 900px) {
     .cnk-decor-layer { display: block; }
 }
@@ -156,6 +174,7 @@
 @media (prefers-reduced-motion: reduce) {
     .cnk-decor-item { animation: none; opacity: var(--o, 0.5); translate: none; }
     .cnk-decor-item svg { animation: none; }
+    .cnk-decor-item.is-photo > img { animation: none; }
 }
 
 /* ==========================================================================
@@ -511,6 +530,11 @@
     letter-spacing: -0.035em;
     color: #f8fafc;
     margin: 0 0 1.25rem;
+    /* Rezerwuje miejsce na obie linie od razu (2x line-height + zapas na
+       "y"/"ę"), zeby reszta strony nie skakala, gdy initHeroTypewriter
+       (cennik.js) czysci tekst i wpisuje go z powrotem znak po znak -
+       inaczej pusta druga linia chwilowo zapadala sie do zera. */
+    min-height: 2.2em;
 }
 
 .cennik-page .cnk-h1-accent {
@@ -518,6 +542,31 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+/* Kursor maszyny do pisania (cennik.js, initHeroTypewriter). Cienki pasek
+   rysowany w CSS, nie znak "|" - ten dziedziczyl font-weight: 900 naglowka
+   i wychodzil gruby jak reszta liter. step-end (zamiast steps(1, jump-none))
+   daje twardy blink bez przenikania - opacity trzyma wartosc AZ do kolejnego
+   przystanku klatek, zero platynnego fade w srodku. */
+.cennik-page .cnk-type-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 0.72em;
+    margin-left: 0.07em;
+    vertical-align: -0.04em;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #a78bfa, #3b82f6);
+    animation: cnkCursorBlink 1s step-end infinite;
+}
+
+@keyframes cnkCursorBlink {
+    from, to { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-type-cursor { display: none; }
 }
 
 .cennik-page .cnk-h2 {
@@ -543,9 +592,19 @@
    -------------------------------------------------------------------------- */
 /* Hero nie ma własnych marginesów bocznych - bierze je z .cnk-wrap, dzięki
    czemu nagłówek stoi w tej samej pionowej linii co panel z planami poniżej. */
+/* Dystans naglowek->karty przepolowiony, a zdjeta polowa doklejona nad
+   naglowkiem (miedzy navbarem a "CENNIK"). Trzy skladniki dawnego dolnego
+   odstepu - wlasny padding-bottom hero, margin-top .cnk-panel (override
+   nizej) i margin-bottom .cnk-panel-head (tez nizej) - sa kazdy przepolowiony
+   osobno, wiec usunieta wartosc to dokladnie te trzy polowki z powrotem,
+   doliczone do padding-top przez calc(). Responsywne clampy zostaja
+   responsywne na kazdej szerokosci, nie tylko przy jednym zmierzonym
+   viewporcie. Wysokosc samego naglowka "Gotowe plany" (tresc, nie odstep)
+   zostaje nietknieta. */
 .cennik-page .cnk-hero {
     position: relative;
-    padding: clamp(1.75rem, 4vw, 2.75rem) 0 clamp(1.25rem, 2.5vw, 1.75rem);
+    padding-top: calc(clamp(1.75rem, 4vw, 2.75rem) + clamp(0.625rem, 1.25vw, 0.875rem) + clamp(0.875rem, 1.75vw, 1.375rem) + 1rem);
+    padding-bottom: clamp(0.625rem, 1.25vw, 0.875rem);
 }
 
 /* Miękka poświata pod hero. Tło strony rysuje FinisherHeader (wspólne z całym
@@ -691,9 +750,19 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.012) 100%);
     border: 1px solid rgba(255, 255, 255, 0.07);
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+    /* Nadpisuje margin-top: var(--cnk-band-gap) z bloku wyzej (ta sama
+       specyficznosc, ale ta regula jest pozniej w pliku, wiec wygrywa) -
+       CELOWO tylko dla .cnk-panel, nie dla calej zmiennej --cnk-band-gap,
+       ktora odmierza tez odstepy miedzy INNYMI pasmami strony (cennik-ask,
+       pnl-band...) i nie powinna sie skurczyc razem z tym. Polowa
+       oryginalnej wartosci - druga polowa dolozona do padding-top .cnk-hero
+       wyzej w tym pliku. */
+    margin-top: clamp(0.875rem, 1.75vw, 1.375rem);
 }
 
-.cennik-page .cnk-panel-head { margin-bottom: 2rem; }
+/* Polowa z 2rem - trzeci skladnik przepolowionego dystansu naglowek->karty,
+   patrz komentarz przy .cnk-hero. */
+.cennik-page .cnk-panel-head { margin-bottom: 1rem; }
 .cennik-page .cnk-panel-head h2 {
     font-size: 1.15rem;
     font-weight: 800;
@@ -1949,3 +2018,4 @@
     .cennik-page .cnk-ping .pg  { animation: none; opacity: 0; }
     .cennik-page .cnk-ping .pg5 { opacity: 1; }
 }
+
