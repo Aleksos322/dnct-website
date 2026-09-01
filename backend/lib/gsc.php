@@ -208,3 +208,25 @@ function gsc_url_inspection(string $siteUrl, string $inspectUrl): array
 
     return ['result' => $res['body']['inspectionResult'] ?? null, 'error' => null];
 }
+
+/**
+ * Cache na dysku dla widoków panelu admina - GSC i tak aktualizuje dane
+ * search-analytics z ok. 2-dniowym opóźnieniem, więc odpytywanie API przy
+ * każdym wejściu w stronę tylko marnuje limit i spowalnia ładowanie.
+ */
+function gsc_cached(string $key, int $ttlSeconds, callable $fn): mixed
+{
+    $file = sys_get_temp_dir() . '/dnct_gsc_cache_' . md5($key) . '.json';
+
+    if (is_readable($file)) {
+        $cached = json_decode((string)file_get_contents($file), true);
+        if (is_array($cached) && ($cached['expires_at'] ?? 0) > time()) {
+            return $cached['value'];
+        }
+    }
+
+    $value = $fn();
+    file_put_contents($file, (string)json_encode(['value' => $value, 'expires_at' => time() + $ttlSeconds]));
+
+    return $value;
+}
