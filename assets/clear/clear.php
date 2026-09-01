@@ -61,6 +61,13 @@ if ($centerContent) {
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <?php /* Eliminuje bialy blysk PRZED wczytaniem jakiegokolwiek CSS - przy
+             zwyklym ladowaniu trwa to niezauwazalne kilka ms, ale animowane
+             przejscie miedzy stronami (@view-transition nizej w layout.css)
+             potrafi zamrozic ten moment w widoczna klatke. To ustawienie
+             dziala na poziomie przegladarki (domyslne tlo canvasu), zanim
+             jeszcze cokolwiek z CSS/Tailwind CDN zdazy sie wykonac. */ ?>
+    <meta name="color-scheme" content="dark">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($metaDescription); ?>">
@@ -166,6 +173,13 @@ if ($centerContent) {
          powstanie ciasteczko i od każdego odwiedzającego - nie tylko od osób,
          które przechodzą przez rejestrację. -->
     <?php require_once __DIR__ . '/cookie-banner.php'; ?>
+
+    <!-- SPOKOJNY SCROLL -->
+    <?php /* Lenis wgrana lokalnie (assets/js/lenis.min.js), tak jak reszta
+             skryptów strony - nie z CDN. Szczegoly i uzasadnienie w
+             assets/js/smooth-scroll.js. */ ?>
+    <script src="<?php echo asset('/assets/js/lenis.min.js'); ?>"></script>
+    <script src="<?php echo asset('/assets/js/smooth-scroll.js'); ?>"></script>
 
     <!-- TŁO ANIMOWANE -->
     <div class="header finisher-header fixed inset-0 pointer-events-none z-0"></div>

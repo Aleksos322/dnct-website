@@ -19,19 +19,40 @@
     navigation: auto;
 }
 
+/* Navbar NIE dostaje zadnej osobnej nazwy przejscia i NIGDY jej nie dostanie -
+   zostaje zwyklym elementem "root", dokladnie tak jak kazda inna strona
+   serwisu. Piec kolejnych prob z osobno animowanym/"trzymanym" navbarem
+   (view-transition-name na #main-header) konczylo sie tym samym objawem:
+   navbar znikal na setki ms w trakcie przejscia, bo przegladarka niezawodnie
+   nie potrafi sparowac nazwanego elementu miedzy DWOMA OSOBNYMI dokumentami
+   w tym silniku - to nie byla kwestia doboru animacji (probowane: brak
+   animacji, "trzymanie" bez ruchu, ruch w dol-gore), tylko fundamentalnej
+   zawodnosci mechanizmu. Dowod: nagranie klatka po klatce (ffmpeg co 50ms)
+   pokazywalo pusty pasek na gorze dlugo po tym, jak reszta strony juz sie
+   ustabilizowala.
+
+   Zamiast tego wyjscie jest INNE: to nie NAVBAR trzeba wyciagac z "root",
+   tylko TRESC (patrz "Przejscie kierunkowe" nizej) - #main-header zostaje
+   w root i dostaje wylacznie ten sam, juz sprawdzony delikatny fade
+   (dnctPageOut/dnctPageIn), ktorego uzywa kazda inna para stron w serwisie.
+   Zero osobnej nazwy = zero mozliwosci zniknac tym bledem. */
+/* 0.16s/0.24s i 8px byly dobrane, gdy navbar NIE byl czescia tego zrzutu -
+   od kiedy nim jest (patrz wyzej), ten sam fade porusza teraz navbarem przy
+   KAZDYM przejsciu na stronie, nie tylko glowna<->cennik. Przy takiej
+   predkosci 8px wygladalo jak szybki skok, nie fade. Wolniej i 1px. */
 ::view-transition-old(root) {
-    animation: dnctPageOut 0.16s cubic-bezier(0.4, 0, 1, 1) both;
+    animation: dnctPageOut 0.45s cubic-bezier(0.4, 0, 1, 1) both;
 }
 ::view-transition-new(root) {
-    animation: dnctPageIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: dnctPageIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes dnctPageOut {
     from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 0; transform: translateY(-1px); }
 }
 @keyframes dnctPageIn {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(1px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -41,6 +62,19 @@
         animation: none;
     }
 }
+
+/* ---- Kierunkowe przejscie glowna<->cennik: WYCOFANE (2026-09-01) ----
+   Probowano nazwac osobno navbar (5 prob), potem tresc (#dnct-page-content) -
+   za kazdym razem ten sam objaw: nazwany element MIEDZY DWOMA DOKUMENTAMI
+   losowo traci pary "old/new" w tym silniku przegladarki (raz dziala
+   idealnie w jedna strone, chwile potem ten sam kierunek nagle pokazuje
+   tresc bez animacji wejscia, bez zadnej zmiany w kodzie). To nie byl blad
+   w CSS/JS - to ograniczenie samego mechanizmu cross-document view
+   transitions, ktorego nie da sie obejsc z poziomu CSS/pageswap/pagereveal
+   (w przeciwienstwie do przejsc w obrebie jednej strony, gdzie
+   document.startViewTransition(callback) pozwala poczekac na gotowosc).
+   Zostaje wylacznie fade na "root" ponizej - dziala niezawodnie, bo NIC
+   nie dostaje osobnej nazwy, wiec nie ma czego zgubic w parowaniu. */
 
 .btn-panel {
     display: inline-block;
@@ -670,3 +704,39 @@
     }
     .discord-live-dot { animation: none; }
 }
+
+/* ==========================================================================
+   MINIMALISTYCZNY SUWAK - port 1:1 z panelu gier
+   (pterodactyl/resources/scripts/components/server/new-layout/ServerLayout.tsx)
+   Zamiast domyslnego, grubego paska przegladarki - cienki, przezroczysty
+   tor i fioletowy akcent pod kursorem, jak w sidebarze panelu.
+   ========================================================================== */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #8b5cf6;
+}
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* CSS scroll-snap WYCOFANY (2026-08-31): natywny snap i Lenis (JS smooth
+   scroll, assets/js/smooth-scroll.js) sterują tym samym scrollem naraz.
+   Zmierzone na zywo: skok np. z 527px na 696px w jednej klatce, potem
+   zamrożenie na kilkanascie klatek - przegladarka i Lenis wyrywaly sobie
+   kontrole, najgorzej tam gdzie sekcje siedza blisko siebie (hero -> "zobacz
+   zanim zaplacisz" -> hosting). Jesli kiedys wraca centrowanie na sekcjach,
+   robic to przez lenis.scrollTo() z IntersectionObserver, NIE przez
+   scroll-snap-type/scroll-snap-align - to jedyny sposob, zeby oba mechanizmy
+   nie walczyly o tę samą pozycję. */
