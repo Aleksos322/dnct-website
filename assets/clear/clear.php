@@ -243,5 +243,46 @@ if ($centerContent) {
       "shapes": ["c"]
     });
     </script>
+
+    <!-- OBECNOŚĆ (heartbeat) -->
+    <?php /* Co ~20s zgłasza "jestem tu" do api/aktywnosc/ping.php - backend/lib/aktywnosc.php.
+             Osobny CSRF_TOKEN (nie ten z notifications.php - zamknięty w tamtejszym IIFE). */ ?>
+    <script type="text/javascript">
+    (function () {
+        const PING_MS = 20000;
+        const CSRF_TOKEN = <?php echo json_encode(csrf_token()); ?>;
+
+        function ping() {
+            fetch('/api/aktywnosc/ping.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({
+                    strona: location.pathname,
+                    widoczna: document.visibilityState === 'visible',
+                }),
+                keepalive: true,
+            }).catch(function () {});
+        }
+
+        ping();
+        setInterval(ping, PING_MS);
+        document.addEventListener('visibilitychange', ping);
+
+        // sendBeacon zamiast fetch: strona zamyka się TERAZ, fetch (nawet
+        // keepalive) nie ma gwarancji dokończenia. sendBeacon nie ustawia
+        // nagłówków, więc csrf_token jedzie w body - csrf_check_request()
+        // czyta go stamtąd jako fallback. Content-Type: application/json
+        // wymaga Bloba (string dałby text/plain, a request_payload() sparsuje
+        // JSON tylko przy application/json).
+        window.addEventListener('pagehide', function () {
+            var blob = new Blob([JSON.stringify({
+                strona: location.pathname,
+                widoczna: false,
+                csrf_token: CSRF_TOKEN,
+            })], { type: 'application/json' });
+            navigator.sendBeacon('/api/aktywnosc/ping.php', blob);
+        });
+    })();
+    </script>
 </body>
 </html>

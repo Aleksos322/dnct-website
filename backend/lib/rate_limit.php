@@ -32,6 +32,10 @@ const RATE_LIMIT_DOWNLOAD     = [30, 600];  // 30 pobrań / 10 min
 // plus kliknięcia przy oznaczaniu jako przeczytane. Limit chwyta zapętlony
 // skrypt, nie normalne przeglądanie długiej listy powiadomień.
 const RATE_LIMIT_NOTIFICATIONS = [60, 300]; // 60 żądań / 5 min
+// Heartbeat obecności co 20s z każdej otwartej karty (~3/min), plus ping
+// dodatkowy przy visibilitychange. Limit chwyta zapętlony skrypt, nie
+// normalne przeglądanie - jedna karta zmieściłaby się nawet w 10/min.
+const RATE_LIMIT_AKTYWNOSC     = [10, 60];  // 10 żądań / minutę
 
 function rate_limit_dir(): string
 {
