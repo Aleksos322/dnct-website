@@ -38,9 +38,33 @@ const CAPACITY_MIN_FREE_SLOTS = 2;
 const CAPACITY_DEFAULT_NODE = 'User node';
 
 /**
+ * CPU węzła klienckiego - 48 vCPU przydzielonych maszynie wirtualnej w
+ * Proxmoksie (host fizyczny: 2 gniazda, 20 rdzeni/40 wątków, ~7% obciążenia
+ * w chwili pisania - dużo zapasu). "Xeon E5-2680 v3" widoczny w panelu
+ * (TechnicalInfo.tsx) to opisowy tekst modelu procesora, nie licznik
+ * przydzielonych rdzeni - stąd wcześniejsza pomyłka 12 zamiast 48.
+ *
+ * Stała, NIE kolumna w `nodes` - w przeciwieństwie do RAM-u i dysku, ten
+ * Pterodactyl w ogóle nie trzyma limitu CPU węzła w bazie (`SHOW COLUMNS
+ * FROM nodes` nie ma nic z "cpu"). Dopisanie kolumny do tabeli, która
+ * faktycznie należy do Pterodactyla (nie do naszych hosting_plans/
+ * hosting_slot_tiers, dopisanych obok z wygody) byłoby ingerencją w jego
+ * schemat - stąd limit żyje tu, tym samym wzorem co CAPACITY_DEFAULT_NODE.
+ *
+ * Jednostki jak w Pterodactylu: 100 = jeden rdzeń. 48 vCPU = 4800.
+ *
+ * BEZ nadsubskrypcji (0%), świadomie inaczej niż RAM (200%) i dysk (100%).
+ * Project Zomboid jest w dużej mierze jednowątkowy, a przy 48 vCPU i dziś
+ * zajętych 13 nie ma potrzeby dokładać nadsubskrypcji, żeby cokolwiek się
+ * zmieściło - zapas jest i bez niej.
+ */
+const CAPACITY_NODE_CPU_CORES        = 4800;
+const CAPACITY_NODE_CPU_OVERALLOCATE = 0;
+
+/**
  * Wolne zasoby węzła, z uwzględnieniem nadsubskrypcji.
  *
- * @return array{name:string,free_memory:int,free_disk:int,servers:int}|null
+ * @return array{name:string,free_memory:int,free_disk:int,free_cpu:int,servers:int}|null
  *         null, gdy węzła nie ma w bazie - wtedy wywołujący nie powinien
  *         niczego wyłączać, bo brak danych to nie to samo co brak miejsca.
  */
@@ -60,7 +84,7 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
     }
 
     $used = $pdo->prepare(
-        'SELECT COUNT(*) AS ile, COALESCE(SUM(memory), 0) AS ram, COALESCE(SUM(disk), 0) AS hdd
+        'SELECT COUNT(*) AS ile, COALESCE(SUM(memory), 0) AS ram, COALESCE(SUM(disk), 0) AS hdd, COALESCE(SUM(cpu), 0) AS cpu
          FROM servers WHERE node_id = ?'
     );
     $used->execute([$node['id']]);
@@ -76,6 +100,7 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
 
     $memLimit  = $effective((int)$node['memory'], (int)$node['memory_overallocate']);
     $diskLimit = $effective((int)$node['disk'], (int)$node['disk_overallocate']);
+    $cpuLimit  = $effective(CAPACITY_NODE_CPU_CORES, CAPACITY_NODE_CPU_OVERALLOCATE);
 
     return [
         'name'        => (string)$node['name'],
@@ -83,6 +108,7 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
         // max(0, ...) bo węzeł potrafi być już przekroczony ręcznym wpisem admina
         'free_memory' => $memLimit === INF ? PHP_INT_MAX : (int)max(0, $memLimit - (int)$u['ram']),
         'free_disk'   => $diskLimit === INF ? PHP_INT_MAX : (int)max(0, $diskLimit - (int)$u['hdd']),
+        'free_cpu'    => $cpuLimit === INF ? PHP_INT_MAX : (int)max(0, $cpuLimit - (int)$u['cpu']),
     ];
 }
 
@@ -96,11 +122,13 @@ function plan_fits(array $plan, array $capacity): int
 {
     $ram  = (int)($plan['ram_mb'] ?? 0);
     $disk = (int)($plan['ssd_mb'] ?? 0);
+    $cpu  = (int)round((float)($plan['cpu_cores'] ?? 0) * 100);
 
     $byRam  = $ram  > 0 ? intdiv($capacity['free_memory'], $ram)  : PHP_INT_MAX;
     $byDisk = $disk > 0 ? intdiv($capacity['free_disk'],   $disk) : PHP_INT_MAX;
+    $byCpu  = $cpu  > 0 ? intdiv($capacity['free_cpu'],    $cpu)  : PHP_INT_MAX;
 
-    return min($byRam, $byDisk);
+    return min($byRam, $byDisk, $byCpu);
 }
 
 /**
@@ -153,12 +181,14 @@ function annotate_plan_availability(array $plans, ?array $capacity): array
 function tier_fits(array $tier, array $capacity): int
 {
     $ram  = (int)round((float)($tier['ram_gb'] ?? 0) * 1024);
-    $disk = PRICING_DEFAULT_DISK_MB;
+    $disk = (int)($tier['ssd_mb'] ?? PRICING_DEFAULT_DISK_MB);
+    $cpu  = (int)round((float)($tier['cpu_cores'] ?? 0) * 100);
 
     $byRam  = $ram  > 0 ? intdiv($capacity['free_memory'], $ram)  : PHP_INT_MAX;
     $byDisk = $disk > 0 ? intdiv($capacity['free_disk'],   $disk) : PHP_INT_MAX;
+    $byCpu  = $cpu  > 0 ? intdiv($capacity['free_cpu'],    $cpu)  : PHP_INT_MAX;
 
-    return min($byRam, $byDisk);
+    return min($byRam, $byDisk, $byCpu);
 }
 
 /**

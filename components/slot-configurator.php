@@ -79,6 +79,8 @@ function render_slot_configurator(
              'slots'    => (int)$t['slots'],
              'ram'      => (float)$t['ram_gb'],
              'cpu'      => (float)$t['cpu_cores'],
+             'disk'     => (int)$t['ssd_mb'],
+             'backups'  => (int)$t['backups_limit'],
              'price'    => (float)$t['price'],
              // Dokladane przez annotate_tier_availability() w cennik.php - nie
              // liczymy tego tutaj, zeby nie miec DRUGIEJ kopii logiki pojemnosci
@@ -175,8 +177,9 @@ function render_slot_configurator(
                     <?php /* Te same ikony i ten sam kafelek 2x2 co .pcard-specs na
                              kartach Minecrafta (components/plan-card-cennik.php) -
                              krócej niż cztery pełne wiersze tekstu, więc karta mieści
-                             się bez scrollowania. Dysk i backupy są stałe dla gier
-                             slotowych (PRICING_DEFAULT_* w backend/lib/pricing.php). */ ?>
+                             się bez scrollowania. Dysk i backupy skalują się z progiem
+                             (migracja 007) - stąd data-role zamiast echo stałej, tak
+                             samo jak RAM/CPU niżej. */ ?>
                     <ul class="pcard-specs">
                         <li>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -187,7 +190,7 @@ function render_slot_configurator(
                         <li>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
-                            <span class="pcard-spec-val"><?php echo (int)round(PRICING_DEFAULT_DISK_MB / 1024); ?> GB</span>
+                            <span class="pcard-spec-val" data-role="dysk"></span>
                             <span class="pcard-spec-lbl">Dysk NVMe</span>
                         </li>
                         <li>
@@ -199,7 +202,7 @@ function render_slot_configurator(
                         <li>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-                            <span class="pcard-spec-val"><?php echo (int)PRICING_DEFAULT_BACKUPS; ?></span>
+                            <span class="pcard-spec-val" data-role="backupy"></span>
                             <span class="pcard-spec-lbl">Backupy</span>
                         </li>
                     </ul>
