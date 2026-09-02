@@ -163,6 +163,8 @@
         var elPakiet = root.querySelector('[data-role="pakiet"]');
         var elRam    = root.querySelector('[data-role="ram"]');
         var elCpu    = root.querySelector('[data-role="cpu"]');
+        var elDysk   = root.querySelector('[data-role="dysk"]');
+        var elBackup = root.querySelector('[data-role="backupy"]');
         var elPrice = root.querySelector('[data-role="price"]');
         var elOld   = root.querySelector('[data-role="oldPrice"]');
         var elPer   = root.querySelector('[data-role="pricePer"]');
@@ -194,6 +196,8 @@
             elPakiet.textContent = tier.slots + ' slotów';
             elRam.textContent    = tier.ram + ' GB';
             elCpu.textContent    = tier.cpu + ' vCore';
+            elDysk.textContent   = (tier.disk / 1024) + ' GB';
+            elBackup.textContent = tier.backups;
             elPrice.textContent  = money(total);
             elHint.textContent   = slotHint(tier.slots);
 

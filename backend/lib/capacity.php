@@ -153,7 +153,7 @@ function annotate_plan_availability(array $plans, ?array $capacity): array
 function tier_fits(array $tier, array $capacity): int
 {
     $ram  = (int)round((float)($tier['ram_gb'] ?? 0) * 1024);
-    $disk = PRICING_DEFAULT_DISK_MB;
+    $disk = (int)($tier['ssd_mb'] ?? PRICING_DEFAULT_DISK_MB);
 
     $byRam  = $ram  > 0 ? intdiv($capacity['free_memory'], $ram)  : PHP_INT_MAX;
     $byDisk = $disk > 0 ? intdiv($capacity['free_disk'],   $disk) : PHP_INT_MAX;

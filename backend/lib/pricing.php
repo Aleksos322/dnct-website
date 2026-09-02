@@ -224,7 +224,7 @@ function pricing_from_tier(PDO $panel, int $slots, string $gameType, bool $isAdm
 {
     // Ten sam wyjątek dla admina co pricing_from_plan() - patrz komentarz tam.
     $stmt = $panel->prepare(
-        'SELECT id, type, slots, ram_gb, cpu_cores, price, sold_out
+        'SELECT id, type, slots, ram_gb, cpu_cores, ssd_mb, backups_limit, price, sold_out
          FROM hosting_slot_tiers WHERE type = ? AND slots = ?' . ($isAdmin ? '' : ' AND is_active = 1')
     );
     $stmt->execute([$gameType, $slots]);
@@ -246,18 +246,19 @@ function pricing_from_tier(PDO $panel, int $slots, string $gameType, bool $isAdm
 
     $ramMb = (int)round((float)$tier['ram_gb'] * 1024);
 
-    /* Konfigurator nie ma miejsca na dysk ani backupy - tabela progów ich nie
-       trzyma, bo klient ich nie wybiera. Wartości są stałe i świadomie
-       zadeklarowane u góry tego pliku, a nie rozsypane po kodzie tworzącym
-       serwer, jak to było w starej wersji. */
+    /* Dysk i backupy są własną kolumną progu (migracja 007) - skalują się
+       z liczbą slotów tak samo jak RAM/CPU. PRICING_DEFAULT_DISK_MB/
+       PRICING_DEFAULT_BACKUPS zostają w tym pliku jako DEFAULT kolumny
+       w bazie (nowy próg bez podanych wartości dostaje rozsądny start), ale
+       tu już ich nie czytamy - liczy się to, co faktycznie stoi w wierszu. */
     return [
         'plan_id'       => null,
         'slots'         => (int)$tier['slots'],
         'label'         => $tier['slots'] . ' slotów',
         'ram_mb'        => $ramMb,
         'cpu_cores'     => (float)$tier['cpu_cores'],
-        'ssd_mb'        => PRICING_DEFAULT_DISK_MB,
-        'backups_limit' => PRICING_DEFAULT_BACKUPS,
+        'ssd_mb'        => (int)$tier['ssd_mb'],
+        'backups_limit' => (int)$tier['backups_limit'],
         'price'         => (float)$tier['price'],
     ];
 }

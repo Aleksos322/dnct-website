@@ -78,8 +78,8 @@ try {
             'fits'            => $tier['fits'],
             'ram_mb'          => (int)round((float)$tier['ram_gb'] * 1024),
             'cpu_cores'       => $tier['cpu_cores'],
-            'ssd_mb'          => PRICING_DEFAULT_DISK_MB,
-            'backups_limit'   => PRICING_DEFAULT_BACKUPS,
+            'ssd_mb'          => (int)$tier['ssd_mb'],
+            'backups_limit'   => (int)$tier['backups_limit'],
             'background_img'  => $gameArt[$tierType]['background_img'] ?? '',
             'icon_img'        => $gameArt[$tierType]['icon_img'] ?? '',
         ];
