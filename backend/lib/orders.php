@@ -227,20 +227,11 @@ function order_cancel_renewals(PDO $dnct, int $orderId): void
  */
 function server_forget_by_ptero_id(PDO $dnct, int $pteroServerId): array
 {
-    // suspended_at IS NULL - bez tego endpoint reaguje też na skasowanie
-    // AUTOMATYCZNE (lifecycle_delete(): najpierw provision_delete(), dopiero
-    // potem UPDATE status="cancelled" - w tym oknie zamówienie wygląda
-    // identycznie jak przy prawdziwym ręcznym skasowaniu). suspended_at
-    // ustawia WYŁĄCZNIE lifecycle_suspend(), więc jego obecność znaczy
-    // "ten serwer już był w naszym cyklu życia" - zostawiamy to lifecycle.php.
-    // Prawdziwe ręczne skasowanie żywego (nigdy niezawieszonego) serwera
-    // nadal przechodzi przez ten warunek bez zmian.
     $stmt = $dnct->prepare(
         'SELECT * FROM orders
           WHERE status = "provisioned"
             AND ptero_server_id = ?
             AND deleted_at IS NULL
-            AND suspended_at IS NULL
           LIMIT 1'
     );
     $stmt->execute([$pteroServerId]);

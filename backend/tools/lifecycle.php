@@ -438,14 +438,31 @@ function lifecycle_delete(PDO $dnct, bool $apply): void
             continue;
         }
 
+        /* status="cancelled" TU, PRZED wywołaniem API - nie po. provision_delete()
+           kasuje serwer w Pterodactylu, co synchronicznie odpala webhook do
+           api/internal/ptero-server-deleted.php (ServerDeletionService::delete()).
+           Ten webhook i server_forget_by_ptero_id() nie mają jak odróżnić "my
+           właśnie to kasujemy" od "ktoś skasował ręcznie" - jedyny sygnał, jaki
+           mają, to status zamówienia. Gdyby został "provisioned" aż do linii
+           niżej, webhook złapałby zamówienie W TYM OKNIE i wysłał fałszywy alarm
+           "ktoś skasował ręcznie, klient nie dostał maila" - mimo że to zwykły
+           przebieg automatu i klient dostaje poprawny mail kilka linii niżej.
+           Rewert przy błędzie (poniżej) pilnuje, żeby nieudane skasowanie nie
+           zniknęło z kolejki - inaczej lifecycle_reconcile_deleted() i kolejne
+           przebiegi lifecycle_delete() przestałyby to zamówienie widzieć. */
+        $dnct->prepare('UPDATE orders SET status = "cancelled" WHERE id = ?')
+             ->execute([(int)$o['id']]);
+
         if (!provision_delete((int)$o['ptero_server_id'])) {
+            $dnct->prepare('UPDATE orders SET status = "provisioned" WHERE id = ?')
+                 ->execute([(int)$o['id']]);
             echo "      BŁĄD: panel nie skasował serwera\n";
             notify_admins($dnct, 'error', 'Nie udało się skasować serwera',
                 'Zamówienie #' . (int)$o['id'] . ', serwer ' . (int)$o['ptero_server_id'] . '.');
             continue;
         }
 
-        $dnct->prepare('UPDATE orders SET deleted_at = NOW(), status = "cancelled" WHERE id = ?')
+        $dnct->prepare('UPDATE orders SET deleted_at = NOW() WHERE id = ?')
              ->execute([(int)$o['id']]);
 
         notify_user(
