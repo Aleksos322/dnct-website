@@ -42,7 +42,48 @@ try {
        na cenniku. Wcześniej karty miały tu wymuszone `sold_out => true`, przez
        co strona główna pokazywała wszystko jako wyprzedane, a cennik jako
        dostępne. Dwie strony tego samego serwisu przeczyły sobie nawzajem. */
-    $showcasePlans = annotate_plan_availability($showcasePlans, node_capacity($pdo));
+    $capacity      = node_capacity($pdo);
+    $showcasePlans = annotate_plan_availability($showcasePlans, $capacity);
+
+    /* Progi slotowe (Project Zomboid, Vintage Story) nie mają gotowych planów
+       w hosting_plans - klient dobiera liczbę graczy suwakiem na /cennik.
+       Tu, na stronie głównej, pokazujemy po jednym reprezentancie: najtańszy
+       aktywny próg każdej gry, przerobiony na ten sam kształt co wiersz
+       hosting_plans, żeby pętla renderująca karty niżej nie musiała wiedzieć,
+       skąd dana karta pochodzi. Grafiki (icon_img/background_img) biorą się
+       z hosting_games - progi ich nie mają, bo to atrybut gry, nie ceny. */
+    $gameArt = [];
+    foreach ($pdo->query("SELECT type, name, icon_img, background_img FROM hosting_games WHERE type IN ('zomboid','vintagestory')") as $g) {
+        $gameArt[$g['type']] = $g;
+    }
+
+    $tierStmt = $pdo->prepare(
+        'SELECT * FROM hosting_slot_tiers WHERE type = ? AND is_active = 1 ORDER BY slots ASC LIMIT 1'
+    );
+    foreach (['zomboid', 'vintagestory'] as $tierType) {
+        $tierStmt->execute([$tierType]);
+        $tier = $tierStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$tier) {
+            continue;
+        }
+        [$tier] = annotate_tier_availability([$tier], $capacity);
+
+        $showcasePlans[] = [
+            'name'            => ($gameArt[$tierType]['name'] ?? ucfirst($tierType)) . ' · ' . $tier['slots'] . ' graczy',
+            'price'           => $tier['price'],
+            'old_price'       => 0,
+            'is_on_sale'      => false,
+            'popular'         => false,
+            'sold_out'        => $tier['sold_out'],
+            'fits'            => $tier['fits'],
+            'ram_mb'          => (int)round((float)$tier['ram_gb'] * 1024),
+            'cpu_cores'       => $tier['cpu_cores'],
+            'ssd_mb'          => PRICING_DEFAULT_DISK_MB,
+            'backups_limit'   => PRICING_DEFAULT_BACKUPS,
+            'background_img'  => $gameArt[$tierType]['background_img'] ?? '',
+            'icon_img'        => $gameArt[$tierType]['icon_img'] ?? '',
+        ];
+    }
 } catch (Throwable $e) {
     error_log('index: nie udalo sie pobrac planow: ' . $e->getMessage());
 }
