@@ -139,3 +139,34 @@ function stripe_base_url(): string
     }
     return rtrim($url, '/');
 }
+
+/**
+ * Anuluje subskrypcję zamówienia w Stripie, jeśli jeszcze żyje.
+ *
+ * Współdzielona przez cykl życia (backend/tools/lifecycle.php) i przez
+ * server_forget_by_ptero_id() - oba miejsca zamykają zamówienie po tym,
+ * jak serwer w Pterodactylu przestał istnieć, więc muszą też jednakowo
+ * zamknąć płatność, inaczej Stripe obciążałby kartę za coś, czego nie ma.
+ */
+function lifecycle_cancel_subscription(array $order): bool
+{
+    $subId = trim((string)($order['stripe_subscription_id'] ?? ''));
+    if ($subId === '') {
+        return true;
+    }
+
+    try {
+        stripe_init();
+        $sub = \Stripe\Subscription::retrieve($subId);
+
+        if (in_array($sub->status, ['canceled', 'incomplete_expired'], true)) {
+            return true;
+        }
+
+        $sub->cancel();
+        return true;
+    } catch (Throwable $e) {
+        error_log('Cykl życia: nie udalo sie anulowac subskrypcji ' . $subId . ': ' . $e->getMessage());
+        return false;
+    }
+}

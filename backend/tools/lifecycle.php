@@ -154,20 +154,15 @@ function lifecycle_reconcile_deleted(PDO $dnct, bool $apply): void
             continue;
         }
 
-        // Subskrypcja mogła zostać żywa - kto kasował serwer ręcznie w panelu
-        // Pterodactyla, nie miał jak dotknąć Stripe'a. Bez tego klient płaciłby
-        // dalej za coś, czego już nie ma.
-        if (!lifecycle_cancel_subscription($o)) {
+        // Ta sama sciezka co api/internal/ptero-server-deleted.php - patrz
+        // server_forget_by_ptero_id() w backend/lib/orders.php. Ten etap
+        // zostaje jako siatka bezpieczenstwa: gdyby webhook z Pterodactyla
+        // nie doszedl (siec padla, sekret sie rozjechal), martwe zamowienie
+        // i tak zostanie zamkniete w ciagu godziny, zamiast wisiec bez konca.
+        $result = server_forget_by_ptero_id($dnct, (int)$o['ptero_server_id']);
+        if ($result['found'] && $result['subscription_cancelled'] === false) {
             echo "      UWAGA: nie udało się potwierdzić anulowania subskrypcji Stripe - sprawdź ręcznie\n";
         }
-
-        $dnct->prepare('UPDATE orders SET deleted_at = NOW(), status = "cancelled" WHERE id = ?')
-             ->execute([(int)$o['id']]);
-
-        notify_admins($dnct, 'warning', 'Serwer zniknął z panelu poza cyklem życia',
-            'Zamówienie #' . (int)$o['id'] . ' (' . (string)$o['user_email'] . '), serwer '
-            . (int)$o['ptero_server_id'] . ' - ktoś skasował go ręcznie w Pterodactylu. '
-            . 'Zamówienie oznaczone jako zakończone, klient NIE dostał o tym maila.');
     }
 
     if ($found === 0) {
@@ -514,28 +509,8 @@ function lifecycle_delete_deadline(array $order, string $suspendedAt): string
  * Anuluje subskrypcję w Stripie. Zwraca true także wtedy, gdy nie ma czego
  * anulować - brak subskrypcji to stan docelowy, nie błąd.
  */
-function lifecycle_cancel_subscription(array $order): bool
-{
-    $subId = trim((string)($order['stripe_subscription_id'] ?? ''));
-    if ($subId === '') {
-        return true;
-    }
-
-    try {
-        stripe_init();
-        $sub = \Stripe\Subscription::retrieve($subId);
-
-        if (in_array($sub->status, ['canceled', 'incomplete_expired'], true)) {
-            return true;
-        }
-
-        $sub->cancel();
-        return true;
-    } catch (Throwable $e) {
-        error_log('Cykl życia: nie udalo sie anulowac subskrypcji ' . $subId . ': ' . $e->getMessage());
-        return false;
-    }
-}
+// lifecycle_cancel_subscription() przeniesiona do backend/lib/stripe.php -
+// współdzielona z server_forget_by_ptero_id() (backend/lib/orders.php).
 
 /** Wysyłka, która nie może wywrócić całego przebiegu. */
 function lifecycle_send(callable $send, int $orderId, string $co): void

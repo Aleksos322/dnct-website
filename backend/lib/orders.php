@@ -25,6 +25,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/stripe.php';
+require_once __DIR__ . '/notifications.php';
 
 /**
  * Zakłada zamówienie w stanie `pending`.
@@ -205,4 +207,59 @@ function order_cancel_renewals(PDO $dnct, int $orderId): void
 {
     $stmt = $dnct->prepare('UPDATE orders SET status = "cancelled" WHERE id = ?');
     $stmt->execute([$orderId]);
+}
+
+/**
+ * Zamyka zamówienie(a) po tym, jak serwer w Pterodactylu przestał istnieć -
+ * bez względu na to, SKĄD przyszła wiadomość o skasowaniu (cykl życia co
+ * godzinę wywołuje to w pętli dla wszystkich martwych ID, a webhook
+ * api/internal/ptero-server-deleted.php - od razu, dla jednego).
+ *
+ * Jedna funkcja, dwa wywołania - inaczej reguła "kasowanie w Pterodactylu =
+ * zamknij zamówienie i anuluj Stripe'a" rozjechałaby się w dwóch miejscach
+ * przy pierwszej zmianie.
+ *
+ * CELOWO BEZ notify_user(): klient (albo admin, który skasował serwer) już
+ * wie, że go nie ma. `notify_admins()` zostaje - to sygnał, że ktoś ominął
+ * normalny cykl życia, więc subskrypcja mogła NIE zostać anulowana wcześniej.
+ *
+ * @return array{found:bool,order_id:?int,subscription_cancelled:?bool}
+ */
+function server_forget_by_ptero_id(PDO $dnct, int $pteroServerId): array
+{
+    // suspended_at IS NULL - bez tego endpoint reaguje też na skasowanie
+    // AUTOMATYCZNE (lifecycle_delete(): najpierw provision_delete(), dopiero
+    // potem UPDATE status="cancelled" - w tym oknie zamówienie wygląda
+    // identycznie jak przy prawdziwym ręcznym skasowaniu). suspended_at
+    // ustawia WYŁĄCZNIE lifecycle_suspend(), więc jego obecność znaczy
+    // "ten serwer już był w naszym cyklu życia" - zostawiamy to lifecycle.php.
+    // Prawdziwe ręczne skasowanie żywego (nigdy niezawieszonego) serwera
+    // nadal przechodzi przez ten warunek bez zmian.
+    $stmt = $dnct->prepare(
+        'SELECT * FROM orders
+          WHERE status = "provisioned"
+            AND ptero_server_id = ?
+            AND deleted_at IS NULL
+            AND suspended_at IS NULL
+          LIMIT 1'
+    );
+    $stmt->execute([$pteroServerId]);
+    $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($order === false) {
+        return ['found' => false, 'order_id' => null, 'subscription_cancelled' => null];
+    }
+
+    $cancelled = lifecycle_cancel_subscription($order);
+
+    $dnct->prepare('UPDATE orders SET deleted_at = NOW(), status = "cancelled" WHERE id = ?')
+         ->execute([(int)$order['id']]);
+
+    notify_admins($dnct, 'warning', 'Serwer zniknął z panelu poza cyklem życia',
+        'Zamówienie #' . (int)$order['id'] . ' (' . (string)$order['user_email'] . '), serwer '
+        . $pteroServerId . ' - ktoś skasował go ręcznie w Pterodactylu. '
+        . 'Zamówienie oznaczone jako zakończone, klient NIE dostał o tym maila.'
+        . ($cancelled ? '' : ' UWAGA: nie udało się potwierdzić anulowania subskrypcji Stripe - sprawdź ręcznie.'));
+
+    return ['found' => true, 'order_id' => (int)$order['id'], 'subscription_cancelled' => $cancelled];
 }
