@@ -83,6 +83,12 @@ if ($quote['direction'] === 'down') {
 
     plan_change_store($dnct, (int)$order['id'], $quote['plan'], (int)$quote['bonus_days']);
 
+    if (!plan_change_update_subscription($order, (float)$quote['plan']['price'])) {
+        notify_admins($dnct, 'error', 'Nie przestawiono ceny subskrypcji',
+            'Zamówienie #' . $order['id'] . ' zeszło na pakiet ' . $quote['plan']['name']
+            . ', ale subskrypcja w Stripe nadal ma starą cenę - popraw ręcznie.');
+    }
+
     $msg = 'Pakiet zmieniony na ' . $quote['plan']['name'] . '.';
     if ($quote['bonus_days'] > 0) {
         $msg .= ' Niewykorzystana różnica wróciła jako ' . $quote['bonus_days'] . ' dni.';

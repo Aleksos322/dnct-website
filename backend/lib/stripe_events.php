@@ -409,6 +409,21 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
 
     plan_change_store($dnct, (int)$parent['id'], $plan, 0);
 
+    /* Cena widoczna w orders.plan_id to CEL zmiany, nie kwota dopłaty
+       (amount_gross tego zamówienia to tylko różnica za resztę okresu) -
+       stąd osobne dociągnięcie z cennika, żeby przestawić na nią przyszłe
+       odnowienia subskrypcji. */
+    $panel     = panel_db();
+    $priceStmt = $panel->prepare('SELECT price FROM hosting_plans WHERE id = ?');
+    $priceStmt->execute([(int)$order['plan_id']]);
+    $monthlyPrice = (float)$priceStmt->fetchColumn();
+
+    if ($monthlyPrice > 0 && !plan_change_update_subscription($parent, $monthlyPrice)) {
+        notify_admins($dnct, 'error', 'Nie przestawiono ceny subskrypcji',
+            'Zamówienie #' . (int)$parent['id'] . ': pakiet zmieniony na nowe zasoby, '
+            . 'ale subskrypcja w Stripe nadal ma starą cenę - popraw ręcznie.');
+    }
+
     $dnct->prepare('UPDATE orders SET status = "provisioned", expires_at = NOW() WHERE id = ?')
          ->execute([(int)$order['id']]);
 
