@@ -296,20 +296,42 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
         ]);
     }
 
+    $unsuspended = true;
     if (!empty($parent['ptero_server_id'])) {
-        provision_unsuspend((int)$parent['ptero_server_id']);
+        $unsuspended = provision_unsuspend((int)$parent['ptero_server_id']);
     }
 
     $dnct->prepare('UPDATE orders SET status = "provisioned", expires_at = NOW() WHERE id = ?')
          ->execute([(int)$order['id']]);
 
-    notify_user(
-        $dnct,
-        (string)$order['user_name'],
-        'success',
-        'Serwer przedłużony',
-        'Dopisaliśmy kolejny okres - serwer działa dalej bez przerwy.'
-    );
+    if ($unsuspended) {
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'success',
+            'Serwer przedłużony',
+            'Dopisaliśmy kolejny okres - serwer działa dalej bez przerwy.'
+        );
+    } else {
+        // Pieniądze są u nas, dni doliczone - ale panel nie potwierdził
+        // zdjęcia zawieszenia. Bez tego rozróżnienia klient słyszał "działa
+        // dalej bez przerwy" nawet wtedy, gdy serwer fizycznie stał dalej
+        // zawieszony w Pterodactylu.
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'warning',
+            'Serwer przedłużony, ale mógł zostać zawieszony',
+            'Zapłata i dni się zgadzają, ale panel nie potwierdził zdjęcia zawieszenia. '
+            . 'Sprawdzimy to ręcznie - napisz na Discordzie, jeśli serwer nadal nie działa.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Nie udało się odwiesić serwera po przedłużeniu',
+            'Zamówienie #' . (int)$parent['id'] . ', serwer ' . (int)$parent['ptero_server_id'] . '.'
+        );
+    }
 
     return true;
 }
@@ -430,17 +452,38 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
     /* Serwer mógł zostać zawieszony po nieudanej płatności. Skoro zaległość
        jest opłacona, przywracamy go od razu - czekanie na ręczne odwieszenie
        oznaczałoby, że klient zapłacił i nadal nie gra. */
+    $unsuspended = true;
     if (!empty($order['ptero_server_id'])) {
-        provision_unsuspend((int)$order['ptero_server_id']);
+        $unsuspended = provision_unsuspend((int)$order['ptero_server_id']);
     }
 
-    notify_user(
-        $dnct,
-        (string)$order['user_name'],
-        'success',
-        'Abonament przedłużony',
-        'Płatność się powiodła - serwer działa dalej przez kolejny okres.'
-    );
+    if ($unsuspended) {
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'success',
+            'Abonament przedłużony',
+            'Płatność się powiodła - serwer działa dalej przez kolejny okres.'
+        );
+    } else {
+        // Ten sam powód co w webhook_extension_paid() - bez sprawdzenia
+        // wyniku klient słyszał "działa dalej" nawet gdy panel nie zdjął
+        // zawieszenia.
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'warning',
+            'Abonament przedłużony, ale serwer mógł zostać zawieszony',
+            'Płatność się powiodła, ale panel nie potwierdził zdjęcia zawieszenia. '
+            . 'Sprawdzimy to ręcznie - napisz na Discordzie, jeśli serwer nadal nie działa.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Nie udało się odwiesić serwera po opłaconej fakturze',
+            'Zamówienie #' . (int)$order['id'] . ', serwer ' . (int)$order['ptero_server_id'] . '.'
+        );
+    }
 
     return true;
 }
