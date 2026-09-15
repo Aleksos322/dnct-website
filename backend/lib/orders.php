@@ -165,9 +165,17 @@ function order_mark_failed(PDO $dnct, int $orderId, string $reason): void
  */
 function order_extend(PDO $dnct, int $orderId, int $days): void
 {
+    /* `suspended_at = NULL` JEST TU CELOWO. Bez tego opłacone przedłużenie
+       zostawiało stary znacznik zawieszenia w bazie: serwer wracał do życia
+       w Pterodactylu (provision_unsuspend() u wywołującego), ale
+       lifecycle_delete() patrzy WYŁĄCZNIE na suspended_at + upływ czasu, nie
+       na expires_at - więc automat kasował, po cichu, działający, opłacony
+       serwer przy najbliższym przebiegu crona, bo jego zegar kasowania nigdy
+       nie został zatrzymany. Ten sam powód co zerowanie grace_until obok. */
     $stmt = $dnct->prepare(
         'UPDATE orders
             SET expires_at = DATE_ADD(GREATEST(COALESCE(expires_at, NOW()), NOW()), INTERVAL ? DAY),
+                suspended_at = NULL,
                 grace_until = NULL,
                 failure_reason = NULL,
                 status = IF(status = "failed", status, "provisioned")
