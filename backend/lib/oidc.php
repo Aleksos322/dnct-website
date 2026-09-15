@@ -186,6 +186,14 @@ function oidc_safe_return_to(?string $candidate): string
     if ($candidate[0] !== '/' || str_starts_with($candidate, '//')) {
         return $default;
     }
+    /* "\" TEŻ ODRZUCAMY, NIE TYLKO "//". Przeglądarki (spec WHATWG URL)
+       traktują "\" identycznie jak "/" w adresach ze schematem http(s), więc
+       "/\evil.com" przechodzi test powyżej (zaczyna się od jednego "/", nie
+       od "//"), a mimo to przeglądarka rozwiąże je jako przekierowanie na
+       evil.com - dokładnie ten sam open redirect, inny bajt. */
+    if (str_contains($candidate, '\\')) {
+        return $default;
+    }
     if (str_contains($candidate, "\r") || str_contains($candidate, "\n")) {
         return $default;
     }
