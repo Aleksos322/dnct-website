@@ -462,7 +462,23 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
         return true;
     }
 
-    order_extend($dnct, (int)$order['id'], (int)$order['period_days']);
+    /* period_end WPROST Z FAKTURY, nie "+period_days" liczone przez nas.
+       Stripe fakturuje wg WŁASNEGO kalendarza (miesiąc kalendarzowy ma
+       28-31 dni, rok przestępny 366) - sztywne +30/+365 dni po naszej
+       stronie po kilku cyklach przestaje się zgadzać z tym, kiedy Stripe
+       faktycznie obciąży kartę następnym razem, i data ważności u nas
+       zaczyna dryfować względem rzeczywistego okresu, za który klient
+       zapłacił. */
+    $periodEnd = isset($invoice->period_end) ? (int)$invoice->period_end : 0;
+
+    if ($periodEnd > 0) {
+        order_extend_to($dnct, (int)$order['id'], gmdate('Y-m-d H:i:s', $periodEnd));
+    } else {
+        // Zapasowo, gdyby ta faktura wyjątkowo nie miała period_end - lepsze
+        // przybliżone +dni niż brak jakiegokolwiek przedłużenia.
+        error_log('Stripe webhook: faktura ' . ($invoice->id ?? '?') . ' bez period_end - liczę +dni jak dawniej');
+        order_extend($dnct, (int)$order['id'], (int)$order['period_days']);
+    }
 
     /* Serwer mógł zostać zawieszony po nieudanej płatności. Skoro zaległość
        jest opłacona, przywracamy go od razu - czekanie na ręczne odwieszenie

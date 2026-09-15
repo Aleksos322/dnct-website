@@ -74,12 +74,23 @@ function env_all(): array
        DNCT_ENV_FILE, to znaczy, że chce DOKŁADNIE tego środowiska. */
     $explicit = $_SERVER['DNCT_ENV_FILE'] ?? getenv('DNCT_ENV_FILE') ?: null;
     if ($explicit !== null && !is_readable((string)$explicit)) {
-        error_log(
-            'env: KRYTYCZNE - wskazany plik ' . $explicit . ' jest nieczytelny dla '
+        $msg = 'env: KRYTYCZNE - wskazany plik ' . $explicit . ' jest nieczytelny dla '
             . (function_exists('posix_geteuid') ? 'uid ' . posix_geteuid() : 'tego procesu')
-            . '. Sięgam po plik domyślny, co oznacza CUDZE ustawienia (klucze płatności, adresy baz). '
-            . 'Napraw uprawnienia: chown deployer:www-data ' . $explicit
-        );
+            . '. Napraw uprawnienia: chown deployer:www-data ' . $explicit;
+        error_log($msg);
+
+        /* FAIL-CLOSED, NIE FAIL-OPEN. Kontynuowanie do pliku domyślnego
+           poniżej oznaczałoby CUDZE ustawienia (produkcyjne klucze Stripe,
+           produkcyjną bazę) na środowisku, które jawnie poprosiło o WŁASNY
+           plik przez DNCT_ENV_FILE - to się już zdarzyło dwa razy (patrz
+           CLAUDE.md), za każdym razem po zwykłej edycji pliku, która zgubiła
+           grupę www-data. Strona, która przestaje działać, jest widoczna od
+           razu; strona, która działa dalej na cudzej konfiguracji, jest
+           widoczna dopiero po fakcie - zwykle gdy ktoś zauważy testowe
+           zamówienie w produkcyjnej historii albo płatność na prawdziwej
+           karcie. Ten sam powód co env_required() niżej: brak wymaganej
+           konfiguracji ma być błędem, nie cichą awarią. */
+        throw new RuntimeException($msg);
     }
 
     $path = null;

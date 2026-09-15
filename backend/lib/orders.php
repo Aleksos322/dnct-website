@@ -185,6 +185,35 @@ function order_extend(PDO $dnct, int $orderId, int $days): void
 }
 
 /**
+ * Przedłużenie na KONKRETNĄ datę ze Stripe'a, nie o stałą liczbę dni.
+ *
+ * order_extend() liczy "+N dni" po naszej stronie - dobre przy pierwszym,
+ * ręcznym przedłużeniu (nie ma tam jeszcze z czym porównać), złe przy
+ * kolejnych fakturach abonamentu: Stripe fakturuje wg WŁASNEGO kalendarza
+ * (miesiąc kalendarzowy to 28-31 dni, nie sztywne 30), więc nasze "+30 dni"
+ * po kilku cyklach przestaje się zgadzać z tym, kiedy Stripe faktycznie
+ * obciąży kartę następny raz - klientowi wygasłby dostęp dzień lub dwa
+ * PRZED kolejną fakturą, albo odwrotnie. Ta wersja bierze `period_end`
+ * wprost z opłaconej faktury, więc oba zegary idą co do sekundy razem.
+ *
+ * Te same czyszczenia co w order_extend() - to jest jego odpowiednik, nie
+ * osobna logika.
+ */
+function order_extend_to(PDO $dnct, int $orderId, string $expiresAt): void
+{
+    $stmt = $dnct->prepare(
+        'UPDATE orders
+            SET expires_at = GREATEST(COALESCE(expires_at, ?), ?),
+                suspended_at = NULL,
+                grace_until = NULL,
+                failure_reason = NULL,
+                status = IF(status = "failed", status, "provisioned")
+          WHERE id = ?'
+    );
+    $stmt->execute([$expiresAt, $expiresAt, $orderId]);
+}
+
+/**
  * Nieudana płatność cykliczna - karencja zamiast natychmiastowego wyłączenia.
  *
  * Stripe sam ponawia obciążenie przez kilka dni. Zabranie serwera po pierwszej
