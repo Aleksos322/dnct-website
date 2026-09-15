@@ -294,3 +294,72 @@ function plan_change_store(PDO $dnct, int $orderId, array $plan, int $bonusDays)
 
     $dnct->prepare($sql)->execute($params);
 }
+
+/**
+ * Przestawia CENĘ subskrypcji Stripe na przyszłość, po zmianie pakietu.
+ *
+ * BEZ TEGO WYWOŁANIA subskrypcja zostawała na cenie sprzed zmiany NA ZAWSZE -
+ * dopłata w plan/change.php rozlicza tylko RESZTĘ bieżącego okresu, a sam
+ * obiekt Subscription w Stripe (i jego harmonogram odnowień) nigdy nie był
+ * dotykany. Serwer działał na nowych zasobach, ale każda kolejna faktura
+ * biła starą kwotą - w górę to strata dla nas, w dół to nadpłata klienta.
+ *
+ * `price_data` inline, nie gotowy `price` ID - tak samo jak w
+ * api/checkout/create.php, bo w tym projekcie nie istnieją stałe obiekty
+ * Price, każda cena jest tworzona na miejscu.
+ *
+ * `proration_behavior: 'none'` JEST TU CELOWE. Różnica za bieżący okres już
+ * została rozliczona osobno (dopłata w plan/change.php albo dni bonusowe
+ * przy zejściu niżej) - pozwolenie Stripe'owi na własną proracje policzyłoby
+ * tę samą różnicę drugi raz.
+ *
+ * Zamówienia płatności jednorazowej (`billing_mode = payment`) nic tu nie
+ * robią i zwracają sukces - nie mają subskrypcji do przestawienia, a cena
+ * kolejnego przedłużenia i tak liczy się na nowo z danych zamówienia, które
+ * plan_change_store() już zapisała.
+ *
+ * @return bool sukces; false = subskrypcja w Stripe zostaje na starej cenie,
+ *              wymaga ręcznej poprawki
+ */
+function plan_change_update_subscription(array $order, float $newMonthlyPrice): bool
+{
+    if ((string)($order['billing_mode'] ?? '') !== 'subscription'
+        || empty($order['stripe_subscription_id'])
+    ) {
+        return true;
+    }
+
+    $subId = (string)$order['stripe_subscription_id'];
+
+    try {
+        stripe_init();
+        $sub = \Stripe\Subscription::retrieve($subId);
+
+        $item = $sub->items->data[0] ?? null;
+        if ($item === null) {
+            error_log('Zmiana pakietu: subskrypcja ' . $subId . ' nie ma pozycji do przestawienia.');
+            return false;
+        }
+
+        \Stripe\Subscription::update($subId, [
+            'items' => [[
+                'id'         => $item->id,
+                'price_data' => [
+                    'currency'     => (string)$sub->currency,
+                    'unit_amount'  => (int)round($newMonthlyPrice * 100),
+                    'product'      => (string)$item->price->product,
+                    'recurring'    => [
+                        'interval'       => (string)$item->price->recurring->interval,
+                        'interval_count' => (int)$item->price->recurring->interval_count,
+                    ],
+                ],
+            ]],
+            'proration_behavior' => 'none',
+        ]);
+
+        return true;
+    } catch (Throwable $e) {
+        error_log('Zmiana pakietu: nie udało się przestawić ceny subskrypcji ' . $subId . ' - ' . $e->getMessage());
+        return false;
+    }
+}
