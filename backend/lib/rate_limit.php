@@ -2,7 +2,8 @@
 /**
  * Limitowanie liczby żądań per IP (przesuwane okno czasowe, magazyn plikowy).
  *
- * Topologia beta.dnct.pl: klient -> Cloudflare -> reverse proxy 192.168.50.10
+ * Topologia beta.dnct.pl: klient -> Cloudflare -> reverse proxy NPM (192.168.50.10, od
+ * przeprowadzki do strefy PUBLICZNE 10.0.50.10)
  * -> Apache (vhost :8910). Proxy nadpisuje X-Forwarded-For / X-Real-IP adresem
  * swojego bezpośredniego klienta (czyli IP krawędzi Cloudflare), natomiast
  * nagłówek CF-Connecting-IP z prawdziwym adresem klienta przekazuje bez zmian -
@@ -12,7 +13,7 @@
 declare(strict_types=1);
 
 /** Adresy zaufanych proxy. Dopiero żądaniu z nich ufamy w kwestii nagłówków. */
-const TRUSTED_PROXIES = ['192.168.50.10', '127.0.0.1', '::1'];
+const TRUSTED_PROXIES = ['192.168.50.10', '10.0.50.10', '127.0.0.1', '::1'];
 
 // Limity w formacie [liczba żądań, okno w sekundach].
 const RATE_LIMIT_REGISTER     = [10, 900];  // 10 finalnych rejestracji / 15 min
