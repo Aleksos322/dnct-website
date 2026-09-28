@@ -150,6 +150,15 @@ if ($pterodactylUser === null) {
 }
 
 // ------------------------------------------------------------
+// 4.55. Konto hostingu WWW - to samo konto DNCT, pakiet bez zasobów do czasu
+//       zakupu. Jak przy Pterodactylu: błąd tylko w logu, logowanie i tak
+//       dołoży brakujące konto (auth/callback.php).
+// ------------------------------------------------------------
+if (hosting_ensure_user($identity['email'], $displayName) === null && hosting_enabled()) {
+    error_log('Rejestracja: konto hostingu nie powstało dla ' . $identity['email']);
+}
+
+// ------------------------------------------------------------
 // 4.6. JUST-IN-TIME PROVISIONING - stwórz konto w Jellyfinie
 // ------------------------------------------------------------
 // W przeciwieństwie do Pterodactyla NIE MA find-or-create po e-mailu (Jellyfin

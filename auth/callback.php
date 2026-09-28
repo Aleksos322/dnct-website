@@ -138,6 +138,16 @@ if ($email !== '') {
     }
 }
 
+// Jedno konto DNCT: to samo konto dostaje też hosting WWW (pakiet bez
+// zasobów, dopóki nic nie kupi). Tak jak wyżej - błąd nie blokuje logowania.
+if ($email !== '') {
+    try {
+        hosting_ensure_user($email, (string)($user['name'] ?? $username));
+    } catch (Throwable $e) {
+        error_log('OIDC callback: JIT hostingu nieudany dla ' . $email . ': ' . $e->getMessage());
+    }
+}
+
 $_SESSION['flash'][] = ['type' => 'success', 'message' => 'Zalogowano jako ' . $username];
 
 header('Location: ' . $returnTo);
