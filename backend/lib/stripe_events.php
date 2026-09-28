@@ -21,6 +21,7 @@ require_once __DIR__ . '/provisioning.php';
 require_once __DIR__ . '/notifications.php';
 require_once __DIR__ . '/order_mail.php';
 require_once __DIR__ . '/plan_change.php';
+require_once __DIR__ . '/hosting_orders.php';
 
 /**
  * Rozdzielenie zdarzeń.
@@ -36,20 +37,39 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
            przypadkach warunkiem jest payment_status = paid. */
         case 'checkout.session.completed':
         case 'checkout.session.async_payment_succeeded':
+            // Hosting WWW ma własną tabelę zamówień (backend/lib/hosting_orders.php).
+            if (hosting_is_hosting_session($event->data->object)) {
+                return hosting_webhook_checkout_completed($dnct, $event->data->object);
+            }
             return webhook_checkout_completed($dnct, $event->data->object);
 
         case 'invoice.paid':
+            if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
+                return hosting_webhook_invoice_paid($dnct, $h, $event->data->object);
+            }
             return webhook_invoice_paid($dnct, $event->data->object);
 
         case 'invoice.payment_failed':
+            if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
+                return hosting_webhook_invoice_failed($dnct, $h, $event->data->object);
+            }
             return webhook_invoice_failed($dnct, $event->data->object);
 
         case 'customer.subscription.deleted':
+            if ($h = webhook_hosting_by_subscription($dnct, (string)$event->data->object->id)) {
+                return hosting_webhook_subscription_deleted($dnct, $h);
+            }
             return webhook_subscription_deleted($dnct, $event->data->object);
 
         default:
             return false;
     }
+}
+
+/** Zamówienie hostingu WWW po identyfikatorze subskrypcji (tylko główne, nie przedłużenie). */
+function webhook_hosting_by_subscription(PDO $dnct, string $subscriptionId): ?array
+{
+    return $subscriptionId !== '' ? hosting_order_by($dnct, 'stripe_subscription_id', $subscriptionId) : null;
 }
 
 /** Opłacona sesja - oznaczamy zamówienie i zakładamy serwer. */
