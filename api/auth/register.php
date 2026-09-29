@@ -13,9 +13,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
-require_once dirname(__DIR__, 2) . '/backend/lib/jellyfin.php';
-require_once dirname(__DIR__, 2) . '/backend/lib/jellyfin_mail.php';
-require_once dirname(__DIR__, 2) . '/backend/lib/user_profiles.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/accounts.php';
 
 require_method('POST');
 csrf_guard();
@@ -132,50 +130,33 @@ if (!$result['ok']) {
 }
 
 // ------------------------------------------------------------
-// 4.5. JUST-IN-TIME PROVISIONING - stwórz konto w Pterodactylu
+// 4.5. Konta w usługach (panel gier, hosting WWW, Jellyfin) - przez kolejkę
+//      w backend/lib/accounts.php. Najpierw profil z `sub` (niezmienny
+//      identyfikator konta), potem zadania: wykonane od razu, a te, które
+//      teraz się nie udały, ponowi cykl życia. Błąd żadnej usługi nie
+//      blokuje rejestracji - konto DNCT już istnieje.
 // ------------------------------------------------------------
-// Po pomyślnym stworzeniu konta w Authentiku, automatycznie tworzymy
-// użytkownika w Pterodactylu. To umożliwia SSO bez dodatkowego kroku.
-$pterodactylUser = pterodactyl_ensure_user(
-    email: $identity['email'],
-    username: $identity['username'],
-    firstName: $identity['first_name'],
-    lastName: $identity['last_name']
-);
-
-if ($pterodactylUser === null) {
-    // JIT provisioning zawiódł - logujemy błąd, ale nie blokujemy rejestracji
-    // Użytkownik może się zalogować, a administrator rozwiąże problem
-    error_log('Rejestracja: JIT provisioning zawiódł dla ' . $identity['email']);
-}
-
-// ------------------------------------------------------------
-// 4.6. JUST-IN-TIME PROVISIONING - stwórz konto w Jellyfinie
-// ------------------------------------------------------------
-// W przeciwieństwie do Pterodactyla NIE MA find-or-create po e-mailu (Jellyfin
-// nie zwraca e-maila w /Users) - dlatego to woła się WYŁĄCZNIE tutaj, raz,
-// przy zakładaniu konta, nigdy przy logowaniu (patrz backend/lib/jellyfin.php).
-$jellyfinAccount = jellyfin_create_user(
-    jellyfin_username_from_authentik($identity['username'])
-);
-
-if ($jellyfinAccount === null) {
-    error_log('Rejestracja: tworzenie konta Jellyfin zawiodło dla ' . $identity['email']);
-} else {
-    $mailResult = send_jellyfin_credentials_mail($identity['email'], $identity['first_name'], $jellyfinAccount);
-    if (!$mailResult['ok']) {
-        error_log('Rejestracja: mail z danymi Jellyfina nie dotarł do ' . $identity['email'] . ': ' . $mailResult['error']);
-    }
-}
-
-user_profile_create(dnct_db(), [
-    'authentik_username'   => $identity['username'],
-    'authentik_email'      => $identity['email'],
-    'pterodactyl_user_id'  => $pterodactylUser['id'] ?? null,
-    'jellyfin_user_id'     => $jellyfinAccount['id'] ?? null,
-    'jellyfin_linked_at'   => $jellyfinAccount !== null ? gmdate('Y-m-d H:i:s') : null,
-    'jellyfin_link_source' => $jellyfinAccount !== null ? 'created' : null,
+$dnct = dnct_db();
+user_profile_create($dnct, [
+    'authentik_username' => $identity['username'],
+    'authentik_email'    => $identity['email'],
+    'authentik_sub'      => $result['uid'] ?? '',
 ]);
+
+if (($result['uid'] ?? '') !== '') {
+    $konta = account_provision_all($dnct, [
+        'sub'        => $result['uid'],
+        'username'   => $identity['username'],
+        'email'      => $identity['email'],
+        'first_name' => $identity['first_name'],
+        'last_name'  => $identity['last_name'],
+    ]);
+    if (in_array(false, $konta, true)) {
+        error_log('Rejestracja: część kont w usługach czeka na ponowienie dla ' . $identity['email'] . ' ' . json_encode($konta));
+    }
+} else {
+    error_log('Rejestracja: Authentik nie zwrócił uid dla ' . $identity['username'] . ' - konta w usługach powstaną przy logowaniu');
+}
 
 // ------------------------------------------------------------
 // 5. Sukces - czyścimy stan rejestracji i przekazujemy komunikat na logowanie.
