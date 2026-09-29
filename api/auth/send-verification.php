@@ -159,10 +159,19 @@ otp_store($code);
 
 $result = send_verification_code_mail($identity['email'], $code, $identity['first_name'], (int)(OTP_TTL / 60));
 if (!$result['ok']) {
+    // Adres nie istnieje (serwer odbiorcy odrzucił go od razu) - to literówka
+    // po stronie klienta, a nie awaria, więc mówimy to wprost.
+    $nieIstnieje = preg_match('/Recipient address rejected|User unknown|does not exist|no such user|mailbox unavailable/i', (string)($result['error'] ?? '')) === 1;
+    error_log('Rejestracja: kod nie wyszedł na ' . $identity['email'] . ': ' . ($result['error'] ?? '?'));
+    /* 422/503, NIGDY 502: Cloudflare podmienia treść odpowiedzi 502 na własne
+       "error code: 502", front nie dostaje JSON-a i pokazywał ogólne "spróbuj
+       ponownie" zamiast powodu (ta sama pułapka co w api/checkout/create.php). */
     json_error(
-        'Nie udało się wysłać kodu na podany adres. Sprawdź adres e-mail lub spróbuj ponownie za chwilę.',
-        502,
-        ['email' => 'Nie udało się dostarczyć wiadomości na ten adres.']
+        $nieIstnieje
+            ? 'Taki adres e-mail nie istnieje. Sprawdź, czy nie ma w nim literówki.'
+            : 'Nie udało się wysłać kodu na podany adres. Spróbuj ponownie za chwilę.',
+        $nieIstnieje ? 422 : 503,
+        ['email' => $nieIstnieje ? 'Ten adres nie przyjmuje poczty.' : 'Nie udało się dostarczyć wiadomości na ten adres.']
     );
 }
 
