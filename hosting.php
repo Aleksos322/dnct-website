@@ -53,6 +53,10 @@ ob_start();
     <h1 class="cnk-h1">Strony, poczta i bazy<br>na jednym koncie DNCT</h1>
     <p class="cnk-lead">Logujesz się tym samym kontem co do panelu gier. WordPress, sklep albo własny kod,
         darmowy adres w dnct.pl albo własna domena, certyfikat SSL i poczta w pakiecie.</p>
+    <?php /* Dla obecnych klientów - także tych logujących się hasłem panelu (np. strony
+             przeniesione ze starego hostingu), których hosting.dnct.pl bez sesji DNCT
+             odsyła właśnie tutaj. */ ?>
+    <p class="hst-mam"><a href="https://hosting.dnct.pl/login">Masz już hosting? Zaloguj się do panelu &rarr;</a></p>
 </section>
 
 <?php if ($waiting): ?>

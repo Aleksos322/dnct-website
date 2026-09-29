@@ -72,3 +72,7 @@
 @media (max-width: 520px) {
     .cennik-page .hst-modes { grid-template-columns: 1fr; }
 }
+
+.cennik-page .hst-mam { margin-top: 1.1rem; }
+.cennik-page .hst-mam a { color: #a78bfa; font-weight: 700; font-size: 0.92rem; text-decoration: underline; text-decoration-color: rgba(139, 92, 246, 0.5); text-underline-offset: 4px; }
+.cennik-page .hst-mam a:hover { color: #c4b5fd; }
