@@ -147,7 +147,9 @@ ob_start();
 <?php if ($current === null): ?><p class="ord-error hst-error" data-hosting-error hidden></p><?php endif; ?>
 
 <p class="ord-legal hst-legal">
-    Ceny brutto. Klikając, akceptujesz <a href="/regulamin">Regulamin</a>. Płatność obsługuje Stripe.
+    Ceny brutto. Klikając „Wybieram”, akceptujesz <a href="/regulamin">Regulamin</a> (pkt 15-17) i zawierasz
+    <a href="/umowa-powierzenia">umowę powierzenia</a> danych umieszczanych w hostingu, a także żądasz rozpoczęcia usługi
+    przed upływem 14 dni na odstąpienie od umowy (przy odstąpieniu zwracamy kwotę za niewykorzystany okres). Płatność obsługuje Stripe.
     Po terminie hosting jest zawieszany, a nie kasowany - po opłaceniu wraca od razu.
     <?php if (stripe_is_test_mode()): ?><span class="ord-testmode">Tryb testowy - żadne pieniądze nie są pobierane.</span><?php endif; ?>
 </p>
