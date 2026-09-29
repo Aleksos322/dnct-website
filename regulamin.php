@@ -2,8 +2,10 @@
 /**
  * Regulamin świadczenia usług
  *
- * Treść przeniesiona 1:1 ze starej strony (beta/regulamin.html) - dokument prawny,
- * więc jego brzmienie zostaje nietknięte. Zmienia się wyłącznie oprawa: strona
+ * Treść przeniesiona ze starej strony (beta/regulamin.html). 2026-09-29: dopisany
+ * hosting WWW (pkt 15), konto DNCT (pkt 16) i umowa powierzenia (pkt 17, osobna
+ * strona /umowa-powierzenia), usunięte publiczne hasło do konta demo (pkt 5),
+ * zaktualizowany abonament i prawo odstąpienia (pkt 6), usuwanie konta (pkt 9). Zmienia się wyłącznie oprawa: strona
  * korzysta teraz ze wspólnego layoutu (navbar, stopka, tło, SEO), a wygląd
  * bloków i tabel opisuje assets/css/legal.css.
  *
@@ -18,7 +20,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle       = 'Regulamin - DNCT Hosting';
-$metaDescription = 'Regulamin świadczenia usług hostingu serwerów gier DNCT: zakres usług, płatności, SLA, backupy, RODO i reklamacje.';
+$metaDescription = 'Regulamin usług DNCT: hosting serwerów gier i stron WWW, konto DNCT, płatności, SLA, backupy, RODO, umowa powierzenia i reklamacje.';
 $canonicalUrl    = 'https://dnct.pl/regulamin';
 $centerContent   = false;
 
@@ -32,8 +34,9 @@ ob_start();
         <p>DNCT to polski dostawca hostingu gier (Minecraft, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
       </div>
 
-      <h1>Regulamin świadczenia usług hostingu gier - DNCT</h1>
-      <p><strong>Data wejścia w życie:</strong> 7 lutego 2026</p>
+      <h1>Regulamin świadczenia usług - DNCT</h1>
+      <p><strong>Data wejścia w życie:</strong> 7 lutego 2026<br>
+      <strong>Aktualizacja:</strong> 29 września 2026 - hosting stron WWW, jedno konto DNCT, umowa powierzenia. Dla dotychczasowych klientów zmiany obowiązują od <strong>13 października 2026</strong> (14 dni, pkt 14); dla nowych zamówień - od chwili zawarcia umowy.</p>
       <p>Ten dokument określa zasady świadczenia usług przez DNCT (dalej: „DNCT”, „Dostawca”). Korzystając z usług, Klient akceptuje poniższe postanowienia.</p>
 
       <section>
@@ -50,7 +53,7 @@ ob_start();
       <section>
         <h2>2. Zakres usług i Specyfikacja Techniczna</h2>
         <ol>
-          <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Vintage Story, Project Zomboid oraz inne na życzenie).</li>
+          <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Vintage Story, Project Zomboid oraz inne na życzenie) oraz hostingu stron WWW z pocztą e-mail i bazami danych (szczegóły w pkt 15).</li>
           <li>Szczegółowe plany i ceny dostępne na: <a href="https://dnct.pl/cennik">dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
           <div class="tech-box">
             <strong>Gwarancje techniczne:</strong>
@@ -133,8 +136,7 @@ ob_start();
         <ol>
           <li>Umowa zostaje zawarta z chwilą opłacenia zamówienia.</li>
           <li>Do rejestracji wymagane są: e-mail, nick, imię i nazwisko. Dane muszą być prawdziwe.</li>
-          <li><strong>Konto DEMO:</strong> W celu weryfikacji panelu (<code>panel.dnct.pl</code>) dostępne jest konto:<br>
-              Login: <code>DEMO</code> | Hasło: <code>DEM0-TE$TER</code>. Służy wyłącznie do testów funkcjonalności.</li>
+          <li><strong>Konto DEMO:</strong> Panel gier można wypróbować bez rejestracji pod adresem <a href="https://dnct.pl/demo">dnct.pl/demo</a>. Konto demo służy wyłącznie do testów funkcjonalności.</li>
           <li>Klient musi być pełnoletni lub posiadać zgodę opiekuna prawnego.</li>
         </ol>
       </section>
@@ -144,7 +146,8 @@ ob_start();
         <ol>
           <li>Płatności: Stripe (BLIK, karty, Przelewy24).</li>
           <li>Brak faktur VAT (działalność nierejestrowana).</li>
-          <li>Subskrypcje nie odnawiają się automatycznie - wymagane ręczne przedłużenie (możliwe do 3 lat).</li>
+          <li>Usługę można opłacić <strong>jednorazowo</strong> (przedłużenie ręczne) albo w <strong>abonamencie</strong>, który odnawia się automatycznie na kolejny okres. Abonament można zatrzymać w każdej chwili w panelu klienta - usługa działa wtedy do końca opłaconego okresu.</li>
+          <li><strong>Prawo odstąpienia (konsument):</strong> Klient będący konsumentem może odstąpić od umowy w terminie 14 dni od jej zawarcia. Zamawiając usługę, Klient żąda rozpoczęcia jej świadczenia przed upływem tego terminu; w razie odstąpienia zwracamy kwotę proporcjonalną do niewykorzystanej części usługi.</li>
           <li><strong>Polityka zwrotów:</strong> Możliwość zwrotu środków w ciągu <strong>24 godzin</strong> od zakupu po kontakcie przez ticket na Discordzie: <a href="https://discord.gg/juwUYaQV">Otwórz ticket</a>. Po tym terminie lub przy częściowym wykorzystaniu miesiąca zwroty nie przysługują.</li>
         </ol>
       </section>
@@ -191,7 +194,8 @@ ob_start();
         <ol>
           <li><strong>Backupy:</strong> Codziennie o 03:00 CET. Retencja: 7 dni.</li>
           <li>Klient jest zobowiązany do posiadania własnej kopii krytycznych danych poza DNCT.</li>
-          <li><strong>Usuwanie:</strong> Następuje natychmiast po zgłoszeniu ticketu o zamknięcie konta na Discordzie. Dane nieopłacone usuwane są po 3 dniach od wezwania.</li>
+          <li><strong>Usuwanie konta:</strong> Klient może sam usunąć konto DNCT wraz z kontami w usługach w ustawieniach konta (<a href="https://account.dnct.pl/ustawienia#rodo">account.dnct.pl</a>) albo zgłaszając to na Discordzie lub e-mailem. Usunięcie jest możliwe, gdy Klient nie ma aktywnych usług ani abonamentu. Historię zamówień przechowujemy przez okres wymagany przepisami (pkt 12).</li>
+          <li><strong>Serwery gier po terminie:</strong> nieopłacony serwer jest archiwizowany, zawieszany, a następnie usuwany; paczka z plikami jest udostępniana Klientowi do pobrania.</li>
         </ol>
       </section>
 
@@ -215,8 +219,9 @@ ob_start();
       <section>
         <h2>12. RODO (Ochrona Danych Osobowych)</h2>
         <ol>
-          <li>Administratorem danych jest Aleks Osiński. Dane (e-mail, imię, nazwisko) przetwarzane są wyłącznie w celu realizacji Usługi.</li>
-          <li>Klient ma prawo do wglądu, modyfikacji i żądania usunięcia swoich danych osobowych.</li>
+          <li>Administratorem danych Klienta jest Aleks Osiński (DNCT). Szczegóły: <a href="/polityka-prywatnosci">Polityka Prywatności</a>.</li>
+          <li>Klient ma prawo do wglądu, modyfikacji, przeniesienia i usunięcia swoich danych osobowych - samodzielnie w ustawieniach konta albo na żądanie.</li>
+          <li>Dane, które Klient umieszcza w usługach (strony WWW, skrzynki pocztowe, bazy danych, pliki serwerów), DNCT przetwarza w imieniu Klienta jako <strong>podmiot przetwarzający</strong> na zasadach <a href="/umowa-powierzenia">Umowy powierzenia przetwarzania danych</a> (pkt 17).</li>
         </ol>
       </section>
 
@@ -234,6 +239,37 @@ ob_start();
         <ol>
           <li>W sprawach nieuregulowanych stosuje się przepisy prawa polskiego.</li>
           <li>Zmiany regulaminu ogłaszane są z 14-dniowym wyprzedzeniem.</li>
+        </ol>
+      </section>
+      <section>
+        <h2>15. Hosting stron WWW</h2>
+        <ol>
+          <li><strong>Pakiety:</strong> Start, Pro i Biznes różnią się liczbą stron, pojemnością dysku, liczbą skrzynek pocztowych i baz danych. Aktualne parametry i ceny: <a href="https://dnct.pl/hosting">dnct.pl/hosting</a>. Okres rozliczeniowy wynosi 30 dni.</li>
+          <li><strong>W pakiecie:</strong> panel klienta (<code>hosting.dnct.pl</code>), certyfikaty SSL, poczta e-mail z webmailem (<code>poczta.dnct.pl</code>), bazy MariaDB, instalator aplikacji (m.in. WordPress), menedżer plików, dostęp SFTP oraz codzienne kopie zapasowe z retencją 7 dni.</li>
+          <li><strong>Adresy:</strong> Klient może użyć własnej domeny albo darmowego adresu w domenie <code>dnct.pl</code>. Darmowy adres pozostaje własnością DNCT - wygasa razem z usługą i może zostać odebrany za naruszenie regulaminu. Nazwy mylące (np. podszywające się pod DNCT, banki czy znane marki) są niedozwolone.</li>
+          <li><strong>Uczciwe korzystanie z zasobów:</strong> hosting jest współdzielony. Pojedynczy skrypt ma limit pamięci i czasu wykonania, a konto limit procesora i pamięci. Strona, która mimo to obciąża serwer w sposób utrudniający pracę innym klientom, może zostać czasowo ograniczona - o czym informujemy Klienta.</li>
+          <li><strong>Poczta:</strong> zakazana jest wysyłka spamu, masowych mailingów bez zgody odbiorców oraz wiadomości podszywających się pod inne podmioty. Skrzynki mają limity pojemności i liczby wysyłanych wiadomości zależne od pakietu. Naruszenie skutkuje natychmiastową blokadą wysyłki.</li>
+          <li><strong>Zakazane treści i zastosowania:</strong> poza pkt 11 - kopalnie kryptowalut, serwery proxy/VPN, skanery sieci, przechowywanie plików niezwiązanych ze stroną (np. archiwa wideo) oraz treści naruszające prawa autorskie.</li>
+          <li><strong>Po terminie płatności:</strong> nieopłacony hosting jest zawieszany (strony i poczta przestają działać, dane zostają nienaruszone). Po opłaceniu wszystko wraca od razu. Konto zawieszone dłużej niż 14 dni DNCT może usunąć po wcześniejszym powiadomieniu Klienta e-mailem i umożliwieniu pobrania kopii.</li>
+          <li><strong>Kopie zapasowe</strong> mają charakter pomocniczy - Klient odpowiada za posiadanie własnej kopii ważnych danych (pkt 9).</li>
+          <li><strong>Zmiana pakietu</strong> w trakcie okresu rozliczeniowego odbywa się na zgłoszenie; różnica w cenie jest rozliczana proporcjonalnie.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>16. Konto DNCT i profil</h2>
+        <ol>
+          <li>Jedno konto DNCT służy do logowania we wszystkich usługach (strona, panel gier, panel hostingu). Przy rejestracji lub pierwszym logowaniu tworzone są konta w tych usługach.</li>
+          <li>Klient odpowiada za bezpieczeństwo swojego hasła; zaleca się włączenie weryfikacji dwuetapowej. Zmiana adresu e-mail wymaga potwierdzenia kodem wysłanym na nowy adres.</li>
+          <li><strong>Profil publiczny</strong> (<code>account.dnct.pl/u/…</code>) jest domyślnie wyłączony. Klient, który go włącza, odpowiada za umieszczone w nim treści (opis, zdjęcia, odnośniki). DNCT może ukryć profil lub usunąć treści naruszające prawo, dobre obyczaje lub niniejszy regulamin.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>17. Umowa powierzenia przetwarzania danych</h2>
+        <ol>
+          <li>Zamawiając hosting stron WWW lub serwer gry, Klient zawiera z DNCT <a href="/umowa-powierzenia">Umowę powierzenia przetwarzania danych osobowych</a> (art. 28 RODO), która stanowi integralną część niniejszego regulaminu.</li>
+          <li>Umowa obejmuje dane, które Klient umieszcza w usługach - w tym dane osób odwiedzających jego strony i korespondujących z jego skrzynkami. Administratorem tych danych pozostaje Klient.</li>
         </ol>
       </section>
 </div>

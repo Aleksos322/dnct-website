@@ -922,3 +922,17 @@ input:focus-visible {
         animation: none;
     }
 }
+
+/* Obowiązek informacyjny RODO pod zgodami - mały, ale czytelny, bez checkboxa. */
+.consent-info {
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: #64748b;
+}
+.consent-info a {
+    color: #94a3b8;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.consent-info a:hover { color: #c4b5fd; }

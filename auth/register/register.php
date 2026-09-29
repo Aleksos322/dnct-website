@@ -357,6 +357,17 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                                 </span>
                             </label>
                             <p class="field-error" data-error-for="terms"></p>
+                            <?php /* Adresy bezwzględne: ten sam kreator działa też na account.dnct.pl,
+                                     gdzie ścieżki /regulamin itd. nie istnieją (są tylko przekierowania). */ ?>
+                            <p class="consent-info">
+                                Administratorem Twoich danych jest DNCT (Aleks Osiński). Dane konta służą do logowania
+                                i świadczenia usług; możesz je pobrać albo usunąć konto w ustawieniach konta.
+                                Przy zakupie hostingu lub serwera zawierasz też
+                                <a href="https://dnct.pl/umowa-powierzenia" target="_blank" rel="noopener noreferrer">umowę powierzenia</a>
+                                danych, które w nich umieścisz.
+                                Do logowania używamy wyłącznie niezbędnych plików cookie; analityczne tylko za Twoją zgodą
+                                (<a href="https://dnct.pl/polityka-prywatnosci#cookies" target="_blank" rel="noopener noreferrer">więcej</a>).
+                            </p>
 
                             <label class="consent" for="accept-marketing">
                                 <input type="checkbox" class="consent-box" id="accept-marketing" name="marketing" value="1">

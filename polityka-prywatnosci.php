@@ -32,7 +32,7 @@ ob_start();
         </div>
 
         <h1>Polityka Prywatności</h1>
-        <p><strong>Data wejścia w życie:</strong> 8 lutego 2026</p>
+        <p><strong>Data wejścia w życie:</strong> 8 lutego 2026 · <strong>aktualizacja:</strong> 29 września 2026 (konto DNCT, profil, hosting WWW)</p>
         <p><strong>Ostatnia aktualizacja:</strong> 8 lutego 2026</p>
 
         <div class="info-box">
@@ -90,6 +90,16 @@ ob_start();
                 <td>Świadczenie usług hostingu</td>
               </tr>
               <tr>
+                <td><strong>Profil konta</strong></td>
+                <td>Nazwa wyświetlana, opis, lokalizacja, strona WWW, avatar, baner, nicki w grach (Minecraft, Discord, Steam), opcjonalnie data urodzenia i telefon</td>
+                <td>Prezentacja profilu (publicznie <strong>tylko</strong> pola wybrane przez Ciebie i tylko po włączeniu profilu publicznego); data urodzenia i telefon - wyłącznie do kontaktu z supportem, nigdy publicznie</td>
+              </tr>
+              <tr>
+                <td><strong>Dane hostingu</strong></td>
+                <td>Pliki stron, bazy danych, skrzynki pocztowe</td>
+                <td>Świadczenie usługi - te dane przetwarzamy <strong>w imieniu klienta</strong> jako podmiot przetwarzający (<a href="/umowa-powierzenia">umowa powierzenia</a>); ich administratorem jest klient</td>
+              </tr>
+              <tr>
                 <td><strong>Korespondencja</strong></td>
                 <td>Treść wiadomości Discord, emaili support</td>
                 <td>Obsługa zgłoszeń, wsparcie techniczne</td>
@@ -111,6 +121,11 @@ ob_start();
                 <td><strong>Logi systemowe</strong></td>
                 <td>Adres IP, User-Agent, czas żądania, URI</td>
                 <td>Bezpieczeństwo, debugging (art. 6.1.f RODO)</td>
+              </tr>
+              <tr>
+                <td><strong>Sesje logowania</strong></td>
+                <td>Adres IP, przeglądarka i system, przybliżona lokalizacja (miasto), czas ostatniego użycia</td>
+                <td>Bezpieczeństwo konta - lista „Gdzie jesteś zalogowany” w ustawieniach konta (art. 6.1.f RODO)</td>
               </tr>
               <tr>
                 <td><strong>Cookies analityczne</strong></td>
@@ -157,6 +172,18 @@ ob_start();
                 <td>90 dni</td>
               </tr>
               <tr>
+                <td>Profil konta, avatar i baner</td>
+                <td>Do usunięcia konta albo danego pola; zdjęcia kasujemy od razu przy zmianie lub usunięciu</td>
+              </tr>
+              <tr>
+                <td>Dane hostingu (strony, poczta, bazy)</td>
+                <td>Czas trwania usługi; po jej zakończeniu zgodnie z regulaminem (pkt 15) i umową powierzenia</td>
+              </tr>
+              <tr>
+                <td>Sesje logowania</td>
+                <td>Do wylogowania albo wygaśnięcia sesji; zdarzenia logowania - 12 miesięcy</td>
+              </tr>
+              <tr>
                 <td>Backupy serwerów</td>
                 <td>7 dni (rotacja)</td>
               </tr>
@@ -181,7 +208,9 @@ ob_start();
             <li><strong>Stripe, Inc.</strong> – procesor płatności (USA/Irlandia, Standard Contractual Clauses)</li>
             <li><strong>Google Analytics</strong> – analiza ruchu na stronie (wyłącznie po zgodzie użytkownika)</li>
             <li><strong>Cloudflare, Inc.</strong> – CDN, ochrona DDoS (USA, Standard Contractual Clauses)</li>
-            <li><strong>Mailcow (self-hosted)</strong> – wysyłka emaili transakcyjnych (serwer w UE)</li>
+            <li><strong>Mailcow (self-hosted)</strong> – wysyłka emaili transakcyjnych i poczta klientów hostingu (własny serwer w Polsce)</li>
+            <li><strong>Authentik (self-hosted)</strong> – logowanie jednym kontem DNCT (własny serwer w Polsce)</li>
+            <li><strong>Hosting WWW i serwery gier (self-hosted)</strong> – własna infrastruktura w Polsce, bez udziału zewnętrznych dostawców</li>
           </ul>
 
           <h3>5.2. Organy państwowe</h3>
@@ -217,7 +246,7 @@ ob_start();
               <tr>
                 <td><strong>Dostęp (art. 15)</strong></td>
                 <td>Uzyskanie kopii swoich danych osobowych</td>
-                <td>Email: register@dnct.pl</td>
+                <td>Samodzielnie: <a href="https://account.dnct.pl/ustawienia#rodo">Ustawienia konta → Pobierz moje dane</a>, albo e-mail: support@dnct.pl</td>
               </tr>
               <tr>
                 <td><strong>Sprostowanie (art. 16)</strong></td>
@@ -227,7 +256,7 @@ ob_start();
               <tr>
                 <td><strong>Usunięcie (art. 17)</strong></td>
                 <td>"Prawo do bycia zapomnianym" - usunięcie konta</td>
-                <td>Discord ticket lub email</td>
+                <td>Samodzielnie: <a href="https://account.dnct.pl/ustawienia#rodo">Ustawienia konta → Usuń konto</a>, albo Discord / e-mail</td>
               </tr>
               <tr>
                 <td><strong>Ograniczenie (art. 18)</strong></td>
@@ -237,7 +266,7 @@ ob_start();
               <tr>
                 <td><strong>Przenoszenie (art. 20)</strong></td>
                 <td>Eksport danych w formacie JSON/CSV</td>
-                <td>Email z żądaniem eksportu</td>
+                <td>Samodzielnie: plik JSON w ustawieniach konta, albo e-mail z żądaniem</td>
               </tr>
               <tr>
                 <td><strong>Sprzeciw (art. 21)</strong></td>
@@ -263,7 +292,7 @@ ob_start();
         </section>
 
         <section>
-          <h2>8. Cookies i Technologie Śledzące</h2>
+          <h2 id="cookies">8. Cookies i Technologie Śledzące</h2>
       
           <h3>8.1. Rodzaje cookies</h3>
           <table>
@@ -380,7 +409,7 @@ ob_start();
             <tbody>
               <tr>
                 <td><strong>Wersja dokumentu:</strong></td>
-                <td>1.0</td>
+                <td>1.1</td>
               </tr>
               <tr>
                 <td><strong>Data wejścia w życie:</strong></td>
@@ -388,7 +417,7 @@ ob_start();
               </tr>
               <tr>
                 <td><strong>Ostatnia aktualizacja:</strong></td>
-                <td>8 lutego 2026</td>
+                <td>29 września 2026</td>
               </tr>
             </tbody>
           </table>
