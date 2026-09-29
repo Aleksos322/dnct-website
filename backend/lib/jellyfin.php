@@ -53,7 +53,8 @@ function jellyfin_api_request(string $method, string $path, ?array $body = null)
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => $method,
         CURLOPT_HTTPHEADER     => [
-            'X-Emby-Token: ' . $apiKey,
+            // Jellyfin 12 domyslnie odrzuca stare naglowki (X-Emby-Token itd.)
+            'Authorization: MediaBrowser Token="' . $apiKey . '"',
             'Content-Type: application/json',
             'Accept: application/json',
         ],
