@@ -159,7 +159,7 @@ ob_start();
         </h1>
 
         <p class="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 px-4">
-            Serwery Minecraft, Project Zomboid i Vintage Story.
+            Serwery Minecraft, Project Zomboid i Vintage Story oraz hosting stron WWW z pocztą.
             Ochrona DDoS, szybkie NVMe i wsparcie 24/7.
         </p>
 
@@ -221,12 +221,13 @@ ob_start();
                 Hosting gier Minecraft, Project Zomboid i Vintage Story
             </h2>
             <p class="text-gray-400 mb-4">
-                DNCT Hosting to serwery gier dla Minecraft, Project Zomboid i Vintage Story.
-                Hosting gier od 3.99 PLN - stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
+                DNCT Hosting to serwery dla Minecraft, Project Zomboid i Vintage Story,
+                od 3.99 PLN - stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
             </p>
             <p class="text-gray-400">
-                Polska infrastruktura, ochrona DDoS, codzienne backupy i wsparcie 24/7 przez Discord.
-                Hosting Minecraft z modami, hosting Project Zomboid, hosting Vintage Story - wszystko w jednym miejscu.
+                Serwery stoją na naszym własnym sprzęcie (Proxmox), nie na odsprzedanych
+                zasobach - stąd realna dostępność, nie tylko deklaracja. Do tego polska
+                infrastruktura, ochrona DDoS, codzienne backupy i wsparcie 24/7 przez Discord.
             </p>
         </div>
 
@@ -300,15 +301,55 @@ ob_start();
     </div>
 
     <div class="mt-12 text-center">
-        <p class="text-gray-500 text-sm mb-4">
-            Sprzedaż nowych serwerów startuje wkrótce. Zapytaj o dostępność na Discordzie.
-        </p>
-        <a href="/cennik" class="text-gray-400 hover:text-white underline decoration-purple-500 decoration-2 underline-offset-4 transition-all">
+        <a href="/cennik" class="text-gray-400 hover:text-white underline decoration-[#8b5cf6] decoration-2 underline-offset-4 transition-all">
             Zobacz pełną ofertę (więcej gier) &rarr;
         </a>
     </div>
 </section>
 <?php endif; ?>
+
+<!-- ============ HOSTING WWW ============ -->
+<?php
+/* Pasmo hostingu stron - ceny z HOSTING_PLANS (backend/lib/hosting_orders.php),
+   tego samego źródła co /hosting i koszyk, więc strona główna nie może pokazać
+   innej kwoty niż Stripe. Dopóki sprzedaż jest wyłączona (HOSTING_SALES),
+   przyciski prowadzą do /hosting z opisem, a znacznik mówi "wkrótce". */
+require_once __DIR__ . '/backend/lib/hosting_orders.php';
+$hostingSprzedaz = hosting_sales_enabled() && stripe_sales_enabled();
+$zl = static fn(int $gr): string => number_format($gr / 100, 2, ',', ' ');
+?>
+<link rel="stylesheet" href="<?php echo asset('/assets/css/order.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/hosting.css'); ?>">
+<section id="hosting-www" class="cennik-page py-20 px-6 max-w-7xl mx-auto w-full">
+    <div class="text-center mb-12">
+        <span class="cnk-eyebrow">Hosting WWW<?php echo $hostingSprzedaz ? '' : ' · wkrótce w sprzedaży'; ?></span>
+        <h2 class="text-3xl md:text-4xl font-bold mt-3 mb-4">Strona, poczta i bazy na tym samym koncie</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">
+            WordPress, sklep albo własny kod. Darmowy adres w dnct.pl albo własna domena, SSL, poczta z webmailem
+            i codzienne kopie. Logujesz się tym samym kontem co do panelu gier.
+        </p>
+    </div>
+    <div class="hst-plans">
+        <?php foreach (HOSTING_PLANS as $klucz => $plan): ?>
+            <article class="hst-plan glass<?php echo $klucz === 'dnct-pro' ? ' is-featured' : ''; ?>">
+                <?php if ($klucz === 'dnct-pro'): ?><span class="ord-option-badge">Najczęściej wybierany</span><?php endif; ?>
+                <h3 class="hst-plan-name"><?php echo htmlspecialchars($plan['name']); ?></h3>
+                <div class="ord-total">
+                    <span><?php echo $zl((int)$plan['price']); ?></span>
+                    <span class="ord-total-cur">zł</span>
+                    <span class="ord-total-per">/ 30 dni</span>
+                </div>
+                <ul class="hst-list">
+                    <li><strong><?php echo (int)$plan['sites']; ?></strong> <?php echo $plan['sites'] === 1 ? 'strona' : 'stron'; ?> WWW</li>
+                    <li><strong><?php echo (int)$plan['disk_gb']; ?> GB</strong> dysku SSD</li>
+                    <li><strong><?php echo (int)$plan['mailboxes']; ?></strong> skrzynek pocztowych</li>
+                    <li><strong><?php echo (int)$plan['databases']; ?></strong> baz danych</li>
+                </ul>
+                <a class="ord-cta" href="/hosting"><?php echo $hostingSprzedaz ? 'Wybieram ' . htmlspecialchars($plan['name']) : 'Zobacz szczegóły'; ?></a>
+            </article>
+        <?php endforeach; ?>
+    </div>
+</section>
 
 <!-- ============ DISCORD ============ -->
 <?php
@@ -375,7 +416,7 @@ $discordOnline  = (int)($discordWidget['presence_count'] ?? count($discordMember
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                     </svg>
-                    <p>Setki graczy rozmawiają codziennie</p>
+                    <p>Porozmawiaj z nami na Discordzie</p>
                 </div>
                 <?php endif; ?>
             </div>
