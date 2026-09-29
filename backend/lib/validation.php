@@ -39,6 +39,20 @@ function validate_email_value(string $email): ?string
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > EMAIL_MAX_LENGTH) {
         return 'Podaj poprawny adres e-mail (np. twoj@email.pl).';
     }
+    $domena = strtolower(substr(strrchr($email, '@'), 1));
+    // Najczęstsze literówki - podpowiadamy, zanim kod pójdzie w próżnię
+    // (proxmox.aosi@gmail.pl: domena nie istnieje, kod wracał jako niedoręczalny,
+    // a klient czekał na maila, który nigdy nie przyjdzie).
+    $literowki = ['gmail.pl' => 'gmail.com', 'gmial.com' => 'gmail.com', 'gmai.com' => 'gmail.com', 'gmail.co' => 'gmail.com',
+                  'gamil.com' => 'gmail.com', 'gmail.con' => 'gmail.com', 'wp.com' => 'wp.pl', 'onet.com' => 'onet.pl',
+                  'interia.com' => 'interia.pl', 'outlok.com' => 'outlook.com', 'hotmial.com' => 'hotmail.com'];
+    if (isset($literowki[$domena])) {
+        return 'Czy chodziło o @' . $literowki[$domena] . '? Domena @' . $domena . ' nie przyjmuje poczty.';
+    }
+    // Domena bez MX i bez adresu IP nie odbierze żadnego maila.
+    if (!checkdnsrr($domena, 'MX') && !checkdnsrr($domena, 'A')) {
+        return 'Domena @' . $domena . ' nie przyjmuje poczty. Sprawdź, czy nie ma literówki.';
+    }
     return null;
 }
 
