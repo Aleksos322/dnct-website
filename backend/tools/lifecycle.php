@@ -56,6 +56,7 @@ require_once __DIR__ . '/../lib/server_archive.php';
 require_once __DIR__ . '/../lib/lifecycle_mail.php';
 require_once __DIR__ . '/../lib/stripe.php';
 require_once __DIR__ . '/../lib/hosting_orders.php';
+require_once __DIR__ . '/../lib/accounts.php';
 
 /** Ile serwerów najwyżej skasujemy w jednym przebiegu. */
 const LIFECYCLE_DELETE_LIMIT = 5;
@@ -103,6 +104,10 @@ if ($stage('purge'))   { lifecycle_purge($dnct, $apply); }
 /* Hosting WWW: własna tabela (hosting_orders), własne etapy - ostrzeżenie,
    zawieszenie konta, sygnał dla admina. Bez kasowania - patrz hosting_orders.php. */
 if ($stage('hosting')) { hosting_lifecycle_run($dnct, $apply); }
+
+/* Konta w usługach, których nie udało się założyć przy rejestracji
+   (usługa nie działała) - ponawiane z rosnącym odstępem, patrz accounts.php. */
+if ($stage('konta')) { account_provision_retry($dnct, $apply); }
 
 echo "Gotowe.\n";
 

@@ -37,13 +37,14 @@ function user_profile_create(PDO $pdo, array $fields): array
 {
     $stmt = $pdo->prepare(
         'INSERT INTO user_profiles
-            (authentik_username, authentik_email, pterodactyl_user_id,
+            (authentik_username, authentik_email, authentik_sub, pterodactyl_user_id,
              jellyfin_user_id, jellyfin_linked_at, jellyfin_link_source)
-         VALUES (?, ?, ?, ?, ?, ?)'
+         VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $fields['authentik_username'],
         $fields['authentik_email'] ?? null,
+        ($fields['authentik_sub'] ?? '') !== '' ? $fields['authentik_sub'] : null,
         $fields['pterodactyl_user_id'] ?? null,
         $fields['jellyfin_user_id'] ?? null,
         $fields['jellyfin_linked_at'] ?? null,

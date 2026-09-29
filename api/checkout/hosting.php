@@ -27,7 +27,7 @@ rate_limit_guard(
 if (!stripe_sales_enabled()) {
     json_error('Sprzedaż jest chwilowo wyłączona - trwa przerwa techniczna.', 503, [], ['reason' => 'sales_disabled']);
 }
-if (!hosting_enabled()) {
+if (!hosting_sales_enabled()) {
     json_error('Sprzedaż hostingu WWW jeszcze nie ruszyła.', 503, [], ['reason' => 'hosting_disabled']);
 }
 

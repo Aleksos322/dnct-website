@@ -17,7 +17,7 @@ $metaDescription = 'Hosting stron WWW z pocztą i bazami danych. Jedno konto DNC
 $centerContent   = false;
 
 $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
-$enabled    = hosting_enabled() && stripe_sales_enabled();
+$enabled    = hosting_sales_enabled() && stripe_sales_enabled();
 $email      = (string)($_SESSION['authentik_email'] ?? '');
 
 $current = null;

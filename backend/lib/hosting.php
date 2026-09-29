@@ -25,6 +25,15 @@ function hosting_enabled(): bool
     return env('HOSTING_PANEL_URL', '') !== '' && env('HOSTING_INTERNAL_TOKEN', '') !== '';
 }
 
+/**
+ * Sprzedaż hostingu - osobny przełącznik od samego panelu. Produkcja może mieć
+ * podpięty panel (jedno konto DNCT, JIT kont) zanim ruszy sprzedaż pakietów.
+ */
+function hosting_sales_enabled(): bool
+{
+    return hosting_enabled() && env('HOSTING_SALES', '0') === '1';
+}
+
 /** Adres panelu hostingu dla klienta (przycisk "Otwórz panel hostingu"). */
 function hosting_public_url(): string
 {
@@ -73,9 +82,11 @@ function hosting_call(string $action, array $fields = []): ?array
  *
  * @return array{user:string,created:bool}|null
  */
-function hosting_ensure_user(string $email, string $displayName = ''): ?array
+function hosting_ensure_user(string $email, string $displayName = '', string $sub = ''): ?array
 {
-    $res = hosting_call('ensure', ['email' => $email, 'name' => $displayName]);
+    // sub: panel łączy konta po nim (odporne na zmianę e-maila), e-mail służy
+    // tylko do pierwszego powiązania kont sprzed tej zmiany.
+    $res = hosting_call('ensure', ['email' => $email, 'name' => $displayName, 'sub' => $sub]);
     if ($res === null || empty($res['user'])) {
         return null;
     }

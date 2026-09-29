@@ -142,7 +142,7 @@ if ($email !== '') {
 // zasobów, dopóki nic nie kupi). Tak jak wyżej - błąd nie blokuje logowania.
 if ($email !== '') {
     try {
-        hosting_ensure_user($email, (string)($user['name'] ?? $username));
+        hosting_ensure_user($email, (string)($user['name'] ?? $username), (string)($user['sub'] ?? ''));
     } catch (Throwable $e) {
         error_log('OIDC callback: JIT hostingu nieudany dla ' . $email . ': ' . $e->getMessage());
     }

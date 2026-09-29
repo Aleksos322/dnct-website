@@ -160,7 +160,9 @@ function authentik_create_user(array $data): array
         return ['ok' => false, 'code' => 'password_failed', 'user_id' => $userId];
     }
 
-    return ['ok' => true, 'code' => 'created', 'user_id' => $userId];
+    // uid = `sub` w OIDC (providery mają sub_mode=hashed_user_id) - niezmienny
+    // identyfikator, którym łączymy konta w usługach (migracja 009).
+    return ['ok' => true, 'code' => 'created', 'user_id' => $userId, 'uid' => (string)($create['body']['uid'] ?? '')];
 }
 
 // ============================================================
