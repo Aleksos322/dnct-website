@@ -60,6 +60,12 @@ function authentik_api_request(string $method, string $path, ?array $body = null
     } elseif ($method === 'PATCH') {
         $opts[CURLOPT_CUSTOMREQUEST] = 'PATCH';
         $opts[CURLOPT_POSTFIELDS] = json_encode($body);
+    } elseif ($method !== 'GET') {
+        // Każda inna metoda (DELETE, PUT) jawnie - wcześniej po cichu szła jako GET.
+        $opts[CURLOPT_CUSTOMREQUEST] = $method;
+        if ($body !== null) {
+            $opts[CURLOPT_POSTFIELDS] = json_encode($body);
+        }
     }
 
     curl_setopt_array($ch, $opts);

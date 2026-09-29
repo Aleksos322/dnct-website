@@ -18,7 +18,9 @@ require_once __DIR__ . '/jellyfin.php';
 require_once __DIR__ . '/jellyfin_mail.php';
 require_once __DIR__ . '/notifications.php';
 
-const ACCOUNT_SERVICES = ['pterodactyl', 'hosting', 'jellyfin'];
+// Jellyfin celowo wyłączony z rejestracji (2026-09-29, decyzja: zajmiemy się nim osobno).
+// Gałąź account_job_jellyfin() zostaje - wystarczy dopisać 'jellyfin' z powrotem.
+const ACCOUNT_SERVICES = ['pterodactyl', 'hosting'];
 const ACCOUNT_JOB_MAX_PROB = 10;
 
 /**
