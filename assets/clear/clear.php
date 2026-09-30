@@ -284,5 +284,43 @@ if ($centerContent) {
         });
     })();
     </script>
+
+    <?php /* Synchronizacja sesji między kartami: odświeżenie tylko po zmianie stanu. */ ?>
+    <script type="text/javascript">
+    (function () {
+        var initialAuthenticated = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
+        var requestInProgress = false;
+
+        function syncSessionState() {
+            if (requestInProgress || document.visibilityState === 'hidden') {
+                return;
+            }
+
+            requestInProgress = true;
+            fetch('/check_session?t=' + Date.now(), {
+                cache: 'no-store',
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+            })
+                .then(function (response) {
+                    return response.ok ? response.json() : null;
+                })
+                .then(function (session) {
+                    if (session && Boolean(session.authenticated) !== initialAuthenticated) {
+                        window.location.reload();
+                    }
+                })
+                .catch(function () {})
+                .then(function () {
+                    requestInProgress = false;
+                });
+        }
+
+        syncSessionState();
+        setInterval(syncSessionState, 5000);
+        document.addEventListener('visibilitychange', syncSessionState);
+        window.addEventListener('focus', syncSessionState);
+    })();
+    </script>
 </body>
 </html>

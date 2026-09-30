@@ -377,7 +377,7 @@ function oidc_site_home_url(): string
 {
     $host = (string)($_SERVER['HTTP_HOST'] ?? 'dnct.pl');
 
-    $allowed = ['dnct.pl', 'beta.dnct.pl'];
+    $allowed = ['dnct.pl', 'beta.dnct.pl', 'web.dnct.pl'];
     if (!in_array($host, $allowed, true)) {
         $host = 'dnct.pl';
     }
