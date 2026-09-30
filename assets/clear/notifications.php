@@ -173,13 +173,20 @@ function dnct_notif_type_meta(string $type): array
        przejście koloru/paska robi CSS (patrz layout.css). Dzięki temu klik
        daje natychmiastowy, płynny feedback zamiast czekać na sieć. */
     function renderList(notifications) {
+        const signature = notifications.map(n => `${n.id}:${n.is_read ? 1 : 0}:${n.created_at}`).join('|');
+        if (listEl.dataset.signature === signature) return;
+
         if (!notifications.length) {
             listEl.innerHTML = emptyHtml();
+            listEl.dataset.signature = signature;
+            listEl.dataset.ids = '';
             return;
         }
-        listEl.innerHTML = notifications.map((n, i) => {
+        const knownIds = new Set((listEl.dataset.ids || '').split(',').filter(Boolean));
+        const listWasRendered = listEl.dataset.signature !== undefined;
+        listEl.innerHTML = notifications.map(n => {
             const type = typeMeta[n.type] ? n.type : 'info';
-            const delay = Math.min(i, 8) * 40;
+            const isNew = listWasRendered && !knownIds.has(String(n.id));
             const inner = `
                 <span class="dnct-notif-icon dnct-notif-icon--${type}" aria-hidden="true">${iconSvg(type)}</span>
                 <div class="flex-1 min-w-0">
@@ -189,9 +196,11 @@ function dnct_notif_type_meta(string $type): array
                 </div>`;
             const linkOpen = n.link ? `<a href="${escapeHtml(n.link)}" class="flex items-start gap-3">` : '<div class="flex items-start gap-3">';
             const linkClose = n.link ? `</a>` : '</div>';
-            return `<div class="dnct-notif-item px-4 py-3 cursor-pointer" data-id="${n.id}" data-type="${type}" data-read="${n.is_read ? 1 : 0}" style="animation-delay:${delay}ms">${linkOpen}${inner}${linkClose}</div>`;
+            return `<div class="dnct-notif-item${isNew ? ' dnct-notif-item--new' : ''} px-4 py-3 cursor-pointer" data-id="${n.id}" data-type="${type}" data-read="${n.is_read ? 1 : 0}">${linkOpen}${inner}${linkClose}</div>`;
         }).join('');
 
+        listEl.dataset.signature = signature;
+        listEl.dataset.ids = notifications.map(n => String(n.id)).join(',');
         listEl.querySelectorAll('.dnct-notif-item').forEach(el => {
             el.addEventListener('click', () => markRead(parseInt(el.dataset.id, 10), el));
         });
@@ -250,27 +259,37 @@ function dnct_notif_type_meta(string $type): array
        trakcie przejścia ucięłoby animację w połowie. Serwer i tak się
        zsynchronizuje przy najbliższym odświeżeniu (poll albo kolejne otwarcie). */
     async function markRead(id, el) {
-        if (el) el.dataset.read = '1';
+        if (!el || el.dataset.read === '1' || el.dataset.pending === '1') return;
+        el.dataset.pending = '1';
         try {
-            await fetch('/api/notifications/mark-read.php', {
+            const res = await fetch('/api/notifications/mark-read.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                 body: JSON.stringify({ id }),
             });
+            if (!res.ok) throw new Error('mark-read failed');
+            el.classList.add('dnct-notif-item--reading');
+            el.dataset.read = '1';
             fetchUnreadCount();
-        } catch (e) {}
+        } catch (e) {
+            el.removeAttribute('data-pending');
+        }
     }
 
     markAllBtn.addEventListener('click', async () => {
         markAllBtn.disabled = true;
-        listEl.querySelectorAll('.dnct-notif-item').forEach(el => { el.dataset.read = '1'; });
         try {
-            await fetch('/api/notifications/mark-all-read.php', {
+            const res = await fetch('/api/notifications/mark-all-read.php', {
                 method: 'POST',
-                headers: { 'X-CSRF-Token': CSRF_TOKEN },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: '{}',
+            });
+            if (!res.ok) throw new Error('mark-all failed');
+            listEl.querySelectorAll('.dnct-notif-item[data-read="0"]').forEach(el => {
+                el.classList.add('dnct-notif-item--reading');
+                el.dataset.read = '1';
             });
             fetchUnreadCount();
-        } catch (e) {
         } finally {
             markAllBtn.disabled = false;
         }

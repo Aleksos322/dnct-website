@@ -181,7 +181,7 @@ function mark_notification_read(PDO $pdo, int $notificationId, string $userId, b
     $stmt->execute();
 }
 
-function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): void
+function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): int
 {
     $sql = "INSERT INTO notification_reads (notification_id, user_id)
             SELECT n.id, :user_id
@@ -203,4 +203,6 @@ function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): void
     $stmt->bindValue(':user_id3', $userId, PDO::PARAM_STR);
     $stmt->bindValue(':is_admin', $isAdmin ? 1 : 0, PDO::PARAM_INT);
     $stmt->execute();
+
+    return $stmt->rowCount();
 }

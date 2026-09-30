@@ -19,6 +19,7 @@ if (!isset($_SESSION['authentik_username'])) {
 $userId  = (string) $_SESSION['authentik_username'];
 $isAdmin = dnct_is_admin();
 
-mark_all_read(dnct_db(), $userId, $isAdmin);
+// Klient dostaje potwierdzony wynik, zamiast tylko optymistycznej zmiany wyglądu.
+$marked = mark_all_read(dnct_db(), $userId, $isAdmin);
 
-json_ok();
+json_ok(['marked' => $marked]);

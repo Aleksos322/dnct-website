@@ -405,16 +405,14 @@
 .dnct-notif-item {
     position: relative;
     border-left: 3px solid transparent;
-    transition: background 0.15s ease, border-color 0.4s ease, transform 0.15s ease;
-    /* Wejście z małym, narastającym opóźnieniem per wiersz (ustawianym z JS
-       przez `style="animation-delay"`) - lista „spływa", zamiast wyskakiwać
-       naraz jednym blokiem. */
-    animation: dnctItemIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: background 0.15s ease, border-color 0.6s ease, color 0.6s ease, opacity 0.7s ease, transform 0.15s ease;
 }
 .dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; transform: translateX(2px); }
 
+/* Tylko rzeczywiście nowy wpis wpada od górnej części panelu. */
+.dnct-notif-item--new { animation: dnctItemIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }
 @keyframes dnctItemIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(-12px); }
     to   { opacity: 1; transform: none; }
 }
 
@@ -433,6 +431,12 @@
     transition: color 0.3s ease, font-weight 0.3s ease;
 }
 .dnct-notif-item[data-read="0"] .dnct-notif-title { color: #fff; font-weight: 700; }
+.dnct-notif-item[data-read="1"] { opacity: 0.58; }
+.dnct-notif-item--reading { animation: dnctNotifRead 0.7s ease both; }
+@keyframes dnctNotifRead {
+    from { opacity: 1; }
+    to { opacity: 0.58; }
+}
 
 /* Ikona per typ - lista wcześniej nie rozróżniała wcale success/error/warning/info,
    wszystkie wpisy wyglądały identycznie. Ta sama paleta co toasty wyżej. */
@@ -453,17 +457,24 @@
 .dnct-notif-icon--info    { background: rgba(99, 102, 241, 0.16); color: #818cf8; }
 
 .dnct-notif-unread-dot {
+    position: absolute;
+    top: 14px;
+    right: 16px;
     width: 6px;
     height: 6px;
     border-radius: 999px;
-    background: #a78bfa;
+    background: #ef4444;
     display: inline-block;
-    margin-left: 0.4rem;
-    vertical-align: middle;
     opacity: 1;
-    transition: opacity 0.3s ease;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+    animation: dnctUnreadDotPulse 2.4s ease-in-out infinite;
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
-.dnct-notif-item[data-read="1"] .dnct-notif-unread-dot { opacity: 0; }
+.dnct-notif-item[data-read="1"] .dnct-notif-unread-dot { opacity: 0; transform: scale(0.35); animation: none; }
+@keyframes dnctUnreadDotPulse {
+    0%, 100% { opacity: 0.7; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1); }
+}
 
 /* ---- Stan pusty i stan ładowania - zamiast gołego tekstu wyśrodkowanego w szarości ---- */
 .dnct-notif-empty {
@@ -550,6 +561,7 @@
     .dnct-notif-panel,
     .dnct-notif-panel.dnct-notif-panel--closing,
     .dnct-notif-item,
+    .dnct-notif-unread-dot,
     .dnct-bell-btn--ring svg,
     .dnct-skel-dot::after,
     .dnct-skel-lines span::after {
