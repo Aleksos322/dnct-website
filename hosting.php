@@ -15,6 +15,8 @@ require_once __DIR__ . '/backend/lib/hosting_orders.php';
 $pageTitle       = 'Hosting WWW - DNCT Hosting';
 $metaDescription = 'Hosting stron WWW z pocztą i bazami danych. Jedno konto DNCT do stron, poczty i serwerów gier.';
 $centerContent   = false;
+// Ta sama strona jest główną web.dnct.pl (.htaccess, reguła 3b) - to adres, który ma być w wynikach wyszukiwania.
+$canonicalUrl    = 'https://web.dnct.pl/';
 
 $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
 $enabled    = hosting_sales_enabled() && stripe_sales_enabled();
@@ -141,7 +143,7 @@ ob_start();
             <?php if ($current !== null): ?>
                 <p class="ord-hint"><?php echo $current['package'] === $key ? 'Twój obecny pakiet.' : 'Zmiana pakietu - napisz do nas, rozliczymy różnicę.'; ?></p>
             <?php elseif (!$isLoggedIn): ?>
-                <a class="ord-cta" href="/login?return_to=%2Fhosting">Zaloguj się, żeby zamówić</a>
+                <a class="ord-cta" href="https://dnct.pl/login?return_to=%2Fhosting">Zaloguj się, żeby zamówić</a>
             <?php else: ?>
                 <button type="button" class="ord-cta" data-hosting-buy data-package="<?php echo htmlspecialchars($key); ?>" <?php echo $enabled ? '' : 'disabled'; ?>>Wybieram <?php echo htmlspecialchars($p['name']); ?></button>
             <?php endif; ?>
