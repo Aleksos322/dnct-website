@@ -69,6 +69,7 @@ function oidc_redirect_uri(): string
         'beta.dnct.pl'      => 'https',
         'admin.lan.dnct.pl' => 'http',
         'account.dnct.pl'   => 'https',
+        'web.dnct.pl'       => 'https',
     ];
 
     $host = (string)($_SERVER['HTTP_HOST'] ?? 'dnct.pl');

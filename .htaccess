@@ -56,26 +56,6 @@ AddDefaultCharset UTF-8
     RewriteRule ^\.git(/|$) - [F,L]
 
     # ------------------------------------------------------------------------
-    # 3b. web.dnct.pl - oferta hostingu WWW pod własnym adresem.
-    #
-    #    NPM kieruje ten host na ten sam Apache co dnct.pl (vhost domyślny).
-    #    Strona główna tego hosta to hosting.php; pliki statyczne (CSS, JS,
-    #    grafiki) idą normalnie, a KAŻDY inny adres - logowanie, API, navbar -
-    #    301 na dnct.pl. Sesja jest per host, więc zakup i logowanie muszą
-    #    odbywać się na dnct.pl, inaczej klient byłby zalogowany „w połowie".
-    #    REDIRECT_STATUS pusty = tylko pierwotne żądanie, nie wewnętrzne
-    #    przepisanie na hosting.php z reguły powyżej.
-    # ------------------------------------------------------------------------
-    RewriteCond %{HTTP_HOST} ^web\.dnct\.pl$ [NC]
-    RewriteRule ^$ hosting.php [L]
-
-    RewriteCond %{HTTP_HOST} ^web\.dnct\.pl$ [NC]
-    RewriteCond %{ENV:REDIRECT_STATUS} ^$
-    RewriteCond %{REQUEST_FILENAME} !-f [OR]
-    RewriteCond %{REQUEST_URI} \.php$
-    RewriteRule ^(.*)$ https://dnct.pl/$1 [R=301,L]
-
-    # ------------------------------------------------------------------------
     # 4. Czyste adresy — w linku nie ma ani nazw katalogów, ani rozszerzeń
     #
     #    Działa w dwie strony:
@@ -166,6 +146,12 @@ AddDefaultCharset UTF-8
     # stronie, więc nie ma czego przenosić.
     RewriteCond %{ENV:REDIRECT_STATUS} ^$
     RewriteRule ^uslugi/?$ %{ENV:SITE_SCHEME}://%{HTTP_HOST}/twoje-serwery [R=301,L,QSD]
+
+    # Hosting stron WWW wyprowadził się na osobną stronę (WEB/web.dnct.pl).
+    # /hosting jest w mailach, zakładkach i starych powrotach ze Stripe'a
+    # (?oplacono=1 przechodzi dalej - tamta strona go rozumie).
+    RewriteCond %{ENV:REDIRECT_STATUS} ^$
+    RewriteRule ^hosting/?$ https://web.dnct.pl/ [R=301,L]
 
     # --- (a) nazwane trasy --------------------------------------------------
     RewriteRule ^login/?$        auth/login/login.php       [L]

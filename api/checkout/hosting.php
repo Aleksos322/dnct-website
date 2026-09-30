@@ -2,6 +2,9 @@
 /**
  * POST /api/checkout/hosting
  *
+ * Wywoływany z web.dnct.pl (cienka nakładka w WEB/web.dnct.pl/api/checkout/),
+ * więc sesja i CSRF są tamtego hosta. Stripe wraca na hosting_site_url().
+ *
  * Zakup albo przedłużenie hostingu WWW - odpowiednik api/checkout/create.php
  * i extend.php dla serwerów gier, z własną tabelą zamówień (hosting_orders).
  *
@@ -91,7 +94,7 @@ $meta = ['order_id' => (string)$orderId, 'product' => 'hosting'];
 
 try {
     stripe_init();
-    $base   = stripe_base_url();
+    $base   = hosting_site_url();
     $params = [
         'mode'                  => $isSub ? 'subscription' : 'payment',
         'line_items'            => [['price_data' => $priceData, 'quantity' => 1]],
@@ -99,8 +102,8 @@ try {
         'customer_email'        => $email,
         'client_reference_id'   => 'hosting-' . $orderId,
         'metadata'              => $meta,
-        'success_url'           => $base . '/hosting?oplacono=1',
-        'cancel_url'            => $base . '/hosting',
+        'success_url'           => $base . '/?oplacono=1',
+        'cancel_url'            => $base . '/#pakiety',
     ];
     if ($isSub) {
         $params['subscription_data'] = ['metadata' => $meta];
