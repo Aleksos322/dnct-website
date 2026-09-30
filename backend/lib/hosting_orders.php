@@ -298,7 +298,7 @@ function hosting_webhook_subscription_deleted(PDO $dnct, array $order): bool
 
 function hosting_account_url(): string
 {
-    return rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/hosting';
+    return hosting_site_url() . '/';
 }
 
 function hosting_announce_paid(PDO $dnct, ?array $order): void

@@ -42,6 +42,16 @@ function hosting_public_url(): string
 }
 
 /**
+ * Adres strony hostingu WWW (oferta, zakup, "Twój hosting") - osobna strona
+ * WEB/web.dnct.pl, nie podstrona dnct.pl. Tu wracają płatności Stripe'a
+ * i prowadzą linki z maili.
+ */
+function hosting_site_url(): string
+{
+    return rtrim((string)env('HOSTING_SITE_URL', 'https://web.dnct.pl'), '/');
+}
+
+/**
  * @return array<string,mixed>|null  odpowiedź panelu albo null przy błędzie
  */
 function hosting_call(string $action, array $fields = []): ?array

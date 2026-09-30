@@ -244,7 +244,7 @@ ob_start();
       <section>
         <h2>15. Hosting stron WWW</h2>
         <ol>
-          <li><strong>Pakiety:</strong> Start, Pro i Biznes różnią się liczbą stron, pojemnością dysku, liczbą skrzynek pocztowych i baz danych. Aktualne parametry i ceny: <a href="https://dnct.pl/hosting">dnct.pl/hosting</a>. Okres rozliczeniowy wynosi 30 dni.</li>
+          <li><strong>Pakiety:</strong> Start, Pro i Biznes różnią się liczbą stron, pojemnością dysku, liczbą skrzynek pocztowych i baz danych. Aktualne parametry i ceny: <a href="https://web.dnct.pl">web.dnct.pl</a>. Okres rozliczeniowy wynosi 30 dni.</li>
           <li><strong>W pakiecie:</strong> panel klienta (<code>web.panel-dnct.pl</code>), certyfikaty SSL, poczta e-mail z webmailem (<code>poczta.dnct.pl</code>), bazy MariaDB, instalator aplikacji (m.in. WordPress), menedżer plików, dostęp SFTP oraz codzienne kopie zapasowe z retencją 7 dni.</li>
           <li><strong>Adresy:</strong> Klient może użyć własnej domeny albo darmowego adresu w domenie <code>dnct.pl</code>. Darmowy adres pozostaje własnością DNCT - wygasa razem z usługą i może zostać odebrany za naruszenie regulaminu. Nazwy mylące (np. podszywające się pod DNCT, banki czy znane marki) są niedozwolone.</li>
           <li><strong>Uczciwe korzystanie z zasobów:</strong> hosting jest współdzielony. Pojedynczy skrypt ma limit pamięci i czasu wykonania, a konto limit procesora i pamięci. Strona, która mimo to obciąża serwer w sposób utrudniający pracę innym klientom, może zostać czasowo ograniczona - o czym informujemy Klienta.</li>

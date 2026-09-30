@@ -159,7 +159,7 @@ ob_start();
         </h1>
 
         <p class="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 px-4">
-            Serwery Minecraft, Project Zomboid i Vintage Story oraz hosting stron WWW z pocztą.
+            Serwery Minecraft, Project Zomboid i Vintage Story.
             Ochrona DDoS, szybkie NVMe i wsparcie 24/7.
         </p>
 
@@ -307,49 +307,6 @@ ob_start();
     </div>
 </section>
 <?php endif; ?>
-
-<!-- ============ HOSTING WWW ============ -->
-<?php
-/* Pasmo hostingu stron - ceny z HOSTING_PLANS (backend/lib/hosting_orders.php),
-   tego samego źródła co /hosting i koszyk, więc strona główna nie może pokazać
-   innej kwoty niż Stripe. Dopóki sprzedaż jest wyłączona (HOSTING_SALES),
-   przyciski prowadzą do /hosting z opisem, a znacznik mówi "wkrótce". */
-require_once __DIR__ . '/backend/lib/hosting_orders.php';
-$hostingSprzedaz = hosting_sales_enabled() && stripe_sales_enabled();
-$zl = static fn(int $gr): string => number_format($gr / 100, 2, ',', ' ');
-?>
-<link rel="stylesheet" href="<?php echo asset('/assets/css/order.css'); ?>">
-<link rel="stylesheet" href="<?php echo asset('/assets/css/hosting.css'); ?>">
-<section id="hosting-www" class="cennik-page py-20 px-6 max-w-7xl mx-auto w-full">
-    <div class="text-center mb-12">
-        <span class="cnk-eyebrow">Hosting WWW<?php echo $hostingSprzedaz ? '' : ' · wkrótce w sprzedaży'; ?></span>
-        <h2 class="text-3xl md:text-4xl font-bold mt-3 mb-4">Strona, poczta i bazy na tym samym koncie</h2>
-        <p class="text-gray-400 max-w-2xl mx-auto">
-            WordPress, sklep albo własny kod. Darmowy adres w dnct.pl albo własna domena, SSL, poczta z webmailem
-            i codzienne kopie. Logujesz się tym samym kontem co do panelu gier.
-        </p>
-    </div>
-    <div class="hst-plans">
-        <?php foreach (HOSTING_PLANS as $klucz => $plan): ?>
-            <article class="hst-plan glass<?php echo $klucz === 'dnct-pro' ? ' is-featured' : ''; ?>">
-                <?php if ($klucz === 'dnct-pro'): ?><span class="ord-option-badge">Najczęściej wybierany</span><?php endif; ?>
-                <h3 class="hst-plan-name"><?php echo htmlspecialchars($plan['name']); ?></h3>
-                <div class="ord-total">
-                    <span><?php echo $zl((int)$plan['price']); ?></span>
-                    <span class="ord-total-cur">zł</span>
-                    <span class="ord-total-per">/ 30 dni</span>
-                </div>
-                <ul class="hst-list">
-                    <li><strong><?php echo (int)$plan['sites']; ?></strong> <?php echo $plan['sites'] === 1 ? 'strona' : 'stron'; ?> WWW</li>
-                    <li><strong><?php echo (int)$plan['disk_gb']; ?> GB</strong> dysku SSD</li>
-                    <li><strong><?php echo (int)$plan['mailboxes']; ?></strong> skrzynek pocztowych</li>
-                    <li><strong><?php echo (int)$plan['databases']; ?></strong> baz danych</li>
-                </ul>
-                <a class="ord-cta" href="/hosting"><?php echo $hostingSprzedaz ? 'Wybieram ' . htmlspecialchars($plan['name']) : 'Zobacz szczegóły'; ?></a>
-            </article>
-        <?php endforeach; ?>
-    </div>
-</section>
 
 <!-- ============ DISCORD ============ -->
 <?php
