@@ -171,7 +171,7 @@ function mark_notification_read(PDO $pdo, int $notificationId, string $userId, b
                     OR (n.target_type = 'admins' AND :is_admin = 1)
                     OR (n.target_type = 'user' AND n.target_user_id = :user_id2)
                   )
-            ON DUPLICATE KEY UPDATE read_at = read_at"; // no-op jeśli już przeczytane
+            ON DUPLICATE KEY UPDATE read_at = notification_reads.read_at"; // no-op jeśli już przeczytane
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
@@ -195,7 +195,7 @@ function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): int
                     OR (n.target_type = 'admins' AND :is_admin = 1)
                     OR (n.target_type = 'user' AND n.target_user_id = :user_id3)
                   )
-            ON DUPLICATE KEY UPDATE read_at = read_at";
+            ON DUPLICATE KEY UPDATE read_at = notification_reads.read_at";
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
