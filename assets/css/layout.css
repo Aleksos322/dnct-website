@@ -362,6 +362,8 @@
         inset 0 -1px 0 rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
     -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 
     /* Panel „wyrasta" z dzwonka zamiast pojawiać się znikąd; zamknięcie
@@ -386,6 +388,16 @@
 .dnct-notif-head {
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     background: rgba(255, 255, 255, 0.03);
+}
+
+/* Przewija się wyłącznie lista pod nieruchomym nagłówkiem. `overscroll-behavior`
+   zatrzymuje przewijanie na tej liście zamiast przekazywać je stronie. */
+#dnct-bell-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .dnct-notif-markall {
@@ -523,12 +535,12 @@
 @keyframes dnctSkeletonSweep { to { transform: translateX(100%); } }
 
 /* Pasek przewijania w panelu - domyślny w ciemnym motywie wygląda jak usterka. */
-.dnct-notif-panel::-webkit-scrollbar { width: 8px; }
-.dnct-notif-panel::-webkit-scrollbar-thumb {
+#dnct-bell-list::-webkit-scrollbar { width: 8px; }
+#dnct-bell-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.14);
     border-radius: 8px;
 }
-.dnct-notif-panel::-webkit-scrollbar-track { background: transparent; }
+#dnct-bell-list::-webkit-scrollbar-track { background: transparent; }
 
 /* ---- Dzwonek: stan otwarty + "dzwonienie" przy nowym powiadomieniu ---- */
 .dnct-bell-btn--active {
