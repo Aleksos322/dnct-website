@@ -35,6 +35,15 @@ function user_profile_by_username(PDO $pdo, string $username): ?array
  */
 function user_profile_create(PDO $pdo, array $fields): array
 {
+    // Authentik przed chwilą przyjął tę nazwę jako nową, więc stary wiersz o tej
+    // samej nazwie to sierota po usuniętym koncie - inaczej INSERT pada na
+    // uniq_username, a konto DNCT zostaje bez profilu i bez usług.
+    $sierota = $pdo->prepare('DELETE FROM user_profiles WHERE authentik_username = ?');
+    $sierota->execute([$fields['authentik_username']]);
+    if ($sierota->rowCount() > 0) {
+        error_log('Profil: usunieto osierocony wiersz dla nazwy ' . $fields['authentik_username']);
+    }
+
     $stmt = $pdo->prepare(
         'INSERT INTO user_profiles
             (authentik_username, authentik_email, authentik_sub, pterodactyl_user_id,
