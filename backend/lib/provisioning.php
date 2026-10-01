@@ -52,7 +52,7 @@ function provision_game_map(): array
         'minecraft' => [
             'nest'           => 1,
             'egg'            => 4,   // Paper
-            'fallback_image' => 'ghcr.io/pterodactyl/yolks:java_21',
+            'fallback_image' => 'ghcr.io/pterodactyl/yolks:java_25',
             'env' => static fn(array $order, array $alloc): array => [
                 'SERVER_JARFILE' => 'server.jar',
                 'MINECRAFT_VERSION' => 'latest',
