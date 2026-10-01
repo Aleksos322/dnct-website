@@ -91,7 +91,7 @@ function dnct_notif_type_meta(string $type): array
              Dzwonek jest przyklejony do DOLNEJ krawędzi ekranu, więc `mt-2`
              rozwijało panel poniżej widocznego obszaru - historia powiadomień
              istniała, ale nie dało się jej zobaczyć ani przewinąć do niej. */ ?>
-    <div id="dnct-bell-dropdown" class="hidden absolute right-0 bottom-full mb-3 w-80 max-h-[60vh] overflow-y-auto dnct-notif-panel">
+    <div id="dnct-bell-dropdown" class="hidden absolute right-0 bottom-full mb-3 w-80 max-h-[60vh] dnct-notif-panel">
         <div class="dnct-notif-head flex items-center justify-between px-4 py-3">
             <span class="font-bold text-sm tracking-wide">Powiadomienia</span>
             <button id="dnct-mark-all-read" type="button" class="dnct-notif-markall">Oznacz wszystkie</button>
