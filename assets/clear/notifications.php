@@ -51,7 +51,7 @@ function dnct_notif_type_meta(string $type): array
 ?>
 
 <?php if (!empty($flashMessages)): ?>
-<div id="dnct-notifications" class="fixed right-4 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm" style="bottom: calc(5rem + env(safe-area-inset-bottom));">
+<div id="dnct-notifications" class="fixed right-4 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm" style="bottom: calc(8.5rem + env(safe-area-inset-bottom));">
     <?php foreach ($flashMessages as $i => $flash):
         $type = $flash['type'] ?? 'info';
         $type = in_array($type, ['success', 'error', 'warning', 'info'], true) ? $type : 'info';
@@ -78,7 +78,7 @@ function dnct_notif_type_meta(string $type): array
 
 <?php if ($isLoggedInForBell): ?>
 <!-- DZWONECZEK POWIADOMIEŃ -->
-<div id="dnct-bell-wrap" class="fixed right-4 z-[9998]" style="bottom: calc(1rem + env(safe-area-inset-bottom));">
+<div id="dnct-bell-wrap" class="fixed right-4 z-[9998]" style="bottom: calc(4.75rem + env(safe-area-inset-bottom));">
     <button id="dnct-bell-btn" type="button" class="dnct-bell-btn relative w-11 h-11 flex items-center justify-center rounded-full transition" aria-label="Powiadomienia">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
@@ -366,7 +366,7 @@ function dnct_notif_type_meta(string $type): array
         const div = document.createElement('div');
         div.id = 'dnct-notifications';
         div.className = 'fixed right-4 z-[9999] flex flex-col gap-2 w-[90%] max-w-sm';
-        div.style.bottom = 'calc(5rem + env(safe-area-inset-bottom))';
+        div.style.bottom = 'calc(8.5rem + env(safe-area-inset-bottom))';
         document.body.appendChild(div);
         return div;
     }

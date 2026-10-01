@@ -165,6 +165,9 @@ if ($centerContent) {
     <!-- POWIADOMIENIA -->
     <?php require_once __DIR__ . '/notifications.php'; ?>
 
+    <!-- CZAT SUPPORTU -->
+    <?php require_once __DIR__ . '/support-chat.php'; ?>
+
     <!-- TREŚĆ STRONY (wstrzykiwana przez podstrony) -->
     <main class="<?php echo $mainClasses; ?>">
         <?php echo $content; ?>
