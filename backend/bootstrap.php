@@ -18,6 +18,7 @@ require_once __DIR__ . '/lib/rate_limit.php';
 require_once __DIR__ . '/lib/validation.php';
 require_once __DIR__ . '/lib/authentik.php';
 require_once __DIR__ . '/lib/oidc.php';
+require_once __DIR__ . '/lib/sso_logout.php';
 require_once __DIR__ . '/lib/registration.php';
 require_once __DIR__ . '/lib/pterodactyl.php';
 require_once __DIR__ . '/lib/hosting.php';
@@ -45,3 +46,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
     session_start();
 }
+
+// Sesja DNCT zakończona w Authentiku (wylogowanie w innej aplikacji) - patrz lib/sso_logout.php.
+sso_logout_enforce();
