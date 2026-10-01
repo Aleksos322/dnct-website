@@ -142,7 +142,7 @@
         if (!elMeta) return;
         var bits = ['Kwota: ' + b.amount + ' zł'];
         if (b.billing_mode === 'subscription') bits.push('abonament odnawialny');
-        if (b.expires_at) bits.push('opłacone do ' + b.expires_at.replace(' ', ', '));
+        if (b.expires_at) bits.push('opłacone do ' + b.expires_at);
         elMeta.textContent = bits.join(' · ');
         elMeta.hidden = false;
     }

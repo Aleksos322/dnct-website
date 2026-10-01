@@ -12,6 +12,7 @@ define('DNCT_BACKEND_PATH', __DIR__);             // .../private/backend
 
 require_once __DIR__ . '/lib/assets.php';
 require_once __DIR__ . '/lib/env.php';
+require_once __DIR__ . '/lib/czas.php';
 require_once __DIR__ . '/lib/http.php';
 require_once __DIR__ . '/lib/csrf.php';
 require_once __DIR__ . '/lib/rate_limit.php';

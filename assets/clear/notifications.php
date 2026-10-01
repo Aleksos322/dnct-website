@@ -137,7 +137,7 @@ function dnct_notif_type_meta(string $type): array
     }
 
     function timeAgo(dateStr) {
-        const diffMs = Date.now() - new Date(dateStr.replace(' ', 'T')).getTime();
+        const diffMs = Date.now() - new Date(dateStr.replace(' ', 'T') + 'Z').getTime();
         const mins = Math.floor(diffMs / 60000);
         if (mins < 1) return 'przed chwilą';
         if (mins < 60) return mins + ' min temu';
@@ -337,7 +337,7 @@ function dnct_notif_type_meta(string $type): array
         const lastCheck = parseInt(localStorage.getItem(LAST_CHECK_KEY) || '0', 10);
         const now = Date.now();
         const fresh = notifications.filter(n => {
-            const created = new Date(n.created_at.replace(' ', 'T')).getTime();
+            const created = new Date(n.created_at.replace(' ', 'T') + 'Z').getTime();
             return !n.is_read && created > lastCheck;
         });
         fresh.forEach(n => showToast(n));

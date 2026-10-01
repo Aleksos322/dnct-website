@@ -197,7 +197,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
             'days'     => $days,
             'label'    => (string)$p['label'],
             'badge'    => $p['badge'] !== null ? (string)$p['badge'] : null,
-            'until'    => date('d.m.Y', $base + $days * 86400),
+            'until'    => czas_fmt_ts($base + $days * 86400, 'd.m.Y'),
             'prices'   => [],
         ];
 
@@ -304,7 +304,7 @@ ob_start();
                             </h2>
                             <p class="srv-sub">
                                 Zamówienie #<?php echo (int)$o['id']; ?>
-                                · kupione <?php echo htmlspecialchars(date('d.m.Y', strtotime((string)$o['created_at']))); ?>
+                                · kupione <?php echo htmlspecialchars(czas_fmt((string)$o['created_at'], 'd.m.Y')); ?>
                                 <?php if ($c['suspended']): ?>
                                     · <strong class="srv-flag">serwer zawieszony</strong>
                                 <?php endif; ?>
@@ -336,7 +336,7 @@ ob_start();
                     <div>
                         <span>Opłacone do</span>
                         <strong><?php echo $o['expires_at'] !== null
-                            ? htmlspecialchars(date('d.m.Y, H:i', strtotime((string)$o['expires_at'])))
+                            ? htmlspecialchars(czas_fmt((string)$o['expires_at'], 'd.m.Y, H:i'))
                             : '-'; ?></strong>
                     </div>
                     <div>
@@ -373,7 +373,7 @@ ob_start();
                 <?php elseif ($c['in_grace']): ?>
                     <p class="srv-alert">
                         Nie udało się pobrać opłaty. Serwer działa do
-                        <?php echo htmlspecialchars(date('d.m.Y, H:i', strtotime((string)$o['grace_until']))); ?> -
+                        <?php echo htmlspecialchars(czas_fmt((string)$o['grace_until'], 'd.m.Y, H:i')); ?> -
                         popraw dane karty albo przedłuż jednorazowo.
                     </p>
                 <?php elseif ($c['renews']): ?>

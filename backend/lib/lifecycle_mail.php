@@ -26,7 +26,7 @@ function lifecycle_when(?string $raw): string
         return 'nieustalone';
     }
 
-    return (new DateTimeImmutable($raw))->format('d.m.Y \o H:i');
+    return czas_fmt($raw, 'd.m.Y \o H:i');
 }
 
 function lifecycle_account_url(): string
