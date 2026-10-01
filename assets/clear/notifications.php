@@ -96,7 +96,7 @@ function dnct_notif_type_meta(string $type): array
             <span class="font-bold text-sm tracking-wide">Powiadomienia</span>
             <button id="dnct-mark-all-read" type="button" class="dnct-notif-markall">Oznacz wszystkie</button>
         </div>
-        <div id="dnct-bell-list">
+        <div id="dnct-bell-list" data-lenis-prevent-wheel>
             <?php // Skeleton zamiast golego "Ladowanie..." - to samo, co JS wstawia przy kazdym otwarciu. ?>
             <?php for ($i = 0; $i < 3; $i++): ?>
             <div class="dnct-skel-row">
