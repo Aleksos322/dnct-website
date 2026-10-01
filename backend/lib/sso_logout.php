@@ -51,14 +51,19 @@ function sso_logout_enforce(): void
     $sid = (string)$_SESSION['oidc_sid'];
     $sub = (string)$_SESSION['oidc_sid_sub'];
 
-    $revoked = $sid !== '' && is_file(sso_logout_marker('sid', $sid));
+    // Tylko sesje zalogowane PRZED znacznikiem. Authentik wysyła logout_token
+    // także przy zdarzeniach, po których jego sesja (ten sam sid) żyje dalej -
+    // bez tego warunku każde ponowne logowanie w niej byłoby od razu ubijane.
+    $loggedAt = (int)($_SESSION['logged_in_at'] ?? 0);
+    $sidFile  = $sid !== '' ? sso_logout_marker('sid', $sid) : '';
+    $revoked  = $sidFile !== '' && is_file($sidFile) && $loggedAt < (int)@filemtime($sidFile);
 
     // Token bez sid oznacza "wszystkie sesje tego użytkownika do chwili iat".
     if (!$revoked && $sub !== '') {
         $subFile = sso_logout_marker('sub', $sub);
         if (is_file($subFile)) {
             $iat = (int)@file_get_contents($subFile);
-            $revoked = (int)($_SESSION['logged_in_at'] ?? 0) <= $iat;
+            $revoked = $loggedAt <= $iat;
         }
     }
 
