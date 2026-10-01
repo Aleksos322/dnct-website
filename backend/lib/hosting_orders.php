@@ -139,10 +139,8 @@ function hosting_suspends_at(array $order): ?DateTimeImmutable
 
 function hosting_fmt_date(?string $raw): string
 {
-    // Baza trzyma czas w UTC; klient czyta go po polsku.
-    return $raw
-        ? (new DateTimeImmutable($raw, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone('Europe/Warsaw'))->format('d.m.Y \o H:i')
-        : 'nieustalone';
+    // Baza trzyma czas w UTC; klient czyta go po polsku (backend/lib/czas.php).
+    return czas_fmt($raw, 'd.m.Y \o H:i', 'nieustalone');
 }
 
 // ---------------------------------------------------------------------------

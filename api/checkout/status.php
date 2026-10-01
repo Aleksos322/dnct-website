@@ -69,8 +69,8 @@ $debug = null;
 if (dnct_is_admin()) {
     $debug = [
         'order_status'    => $order['status'],
-        'created_at'      => $order['created_at'],
-        'updated_at'      => $order['updated_at'],
+        'created_at'      => czas_fmt((string)$order['created_at']),
+        'updated_at'      => czas_fmt((string)$order['updated_at']),
         'failure_reason'  => $order['failure_reason'] ?: null,
         'stripe_status'   => null,
         'stripe_payment'  => null,
@@ -106,7 +106,8 @@ json_ok([
     'period_days'  => (int)$order['period_days'],
     'billing_mode' => $order['billing_mode'],
     'amount'       => pricing_format((int)$order['amount_gross']),
-    'expires_at'   => $expiresAt,
+    // Baza trzyma UTC - front dostaje gotowy czas polski (backend/lib/czas.php).
+    'expires_at'   => $expiresAt !== null ? czas_fmt((string)$expiresAt) : null,
     'server_ready' => $order['status'] === 'provisioned',
     // Powód niepowodzenia pokazujemy klientowi celowo: "coś poszło nie tak"
     // zmusza go do pisania i pytania, a treść i tak trafia do administracji.

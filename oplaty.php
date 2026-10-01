@@ -148,8 +148,8 @@ ob_start();
             ?>
             <div class="op-row">
                 <span class="op-date" data-label="Data">
-                    <?php echo (new DateTimeImmutable((string)$r['created_at']))->format('d.m.Y'); ?>
-                    <small><?php echo (new DateTimeImmutable((string)$r['created_at']))->format('H:i'); ?></small>
+                    <?php echo czas_fmt((string)$r['created_at'], 'd.m.Y'); ?>
+                    <small><?php echo czas_fmt((string)$r['created_at'], 'H:i'); ?></small>
                 </span>
 
                 <span class="op-what" data-label="Czego dotyczy">

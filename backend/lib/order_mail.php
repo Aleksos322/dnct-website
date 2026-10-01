@@ -52,8 +52,8 @@ function order_deadlines(array $order): array
         : $expires;
 
     return [
-        'expires'      => $expires->format('d.m.Y \o H:i'),
-        'suspends'     => $suspends->format('d.m.Y \o H:i'),
+        'expires'      => $expires->setTimezone(new DateTimeZone(DNCT_TZ_USER))->format('d.m.Y \o H:i'),
+        'suspends'     => $suspends->setTimezone(new DateTimeZone(DNCT_TZ_USER))->format('d.m.Y \o H:i'),
         'expires_raw'  => $expires->format('Y-m-d H:i:s'),
         'suspends_raw' => $suspends->format('Y-m-d H:i:s'),
         'grace_hours'  => PROVISION_GRACE_HOURS,
@@ -117,7 +117,7 @@ function send_payment_failed_mail(array $order): array
         'gameName'   => ucfirst((string)$order['game_type']),
         'amount'     => pricing_format((int)$order['amount_gross']),
         'suspends'   => $order['grace_until'] !== null
-            ? (new DateTimeImmutable((string)$order['grace_until']))->format('d.m.Y \o H:i')
+            ? czas_fmt((string)$order['grace_until'], 'd.m.Y \o H:i')
             : $d['suspends'],
         'graceHours' => $d['grace_hours'],
         'accountUrl' => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',

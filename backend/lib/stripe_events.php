@@ -563,7 +563,7 @@ function webhook_invoice_failed(PDO $dnct, $invoice): bool
        z niego liczy się data zawieszenia podawana klientowi. */
     $order = order_by_id($dnct, (int)$order['id']);
     $when  = $order['grace_until'] !== null
-        ? (new DateTimeImmutable((string)$order['grace_until']))->format('d.m.Y \o H:i')
+        ? czas_fmt((string)$order['grace_until'], 'd.m.Y \o H:i')
         : order_deadlines($order)['suspends'];
 
     notify_user(
