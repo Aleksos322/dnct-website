@@ -18,7 +18,7 @@ const TRUSTED_PROXIES = ['192.168.50.10', '10.0.50.10', '127.0.0.1', '::1'];
 // Limity w formacie [liczba żądań, okno w sekundach].
 const RATE_LIMIT_REGISTER     = [10, 900];  // 10 finalnych rejestracji / 15 min
 const RATE_LIMIT_AVAILABILITY = [40, 300];  // 40 zapytań o dostępność / 5 min
-const RATE_LIMIT_LOGIN        = [10, 900];  // 10 prób logowania / 15 min
+const RATE_LIMIT_LOGIN        = [30, 300];  // 30 wejść na /login / 5 min (samo przekierowanie; hasło pilnuje Authentik)
 const RATE_LIMIT_OTP_SEND     = [8, 900];   // 8 wysyłek kodu / 15 min (anty-spam mailowy)
 const RATE_LIMIT_OTP_VERIFY   = [20, 900];  // 20 prób weryfikacji kodu / 15 min
 // Każde kliknięcie "kupuję" zakłada sesję po stronie Stripe'a i wiersz w bazie.
