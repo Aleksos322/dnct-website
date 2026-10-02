@@ -21,7 +21,7 @@ require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle       = 'Regulamin - DNCT Hosting';
 $metaDescription = 'Regulamin usług DNCT: hosting serwerów gier i stron WWW, konto DNCT, płatności, SLA, backupy, RODO, umowa powierzenia i reklamacje.';
-$canonicalUrl    = 'https://dnct.pl/regulamin';
+$canonicalUrl    = 'https://game.dnct.pl/regulamin';
 $centerContent   = false;
 
 ob_start();
@@ -54,7 +54,7 @@ ob_start();
         <h2>2. Zakres usług i Specyfikacja Techniczna</h2>
         <ol>
           <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Vintage Story, Project Zomboid oraz inne na życzenie) oraz hostingu stron WWW z pocztą e-mail i bazami danych (szczegóły w pkt 15).</li>
-          <li>Szczegółowe plany i ceny dostępne na: <a href="https://dnct.pl/cennik">dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
+          <li>Szczegółowe plany i ceny dostępne na: <a href="https://game.dnct.pl/cennik">game.dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
           <div class="tech-box">
             <strong>Gwarancje techniczne:</strong>
             <ul>
@@ -136,7 +136,7 @@ ob_start();
         <ol>
           <li>Umowa zostaje zawarta z chwilą opłacenia zamówienia.</li>
           <li>Do rejestracji wymagane są: e-mail, nick, imię i nazwisko. Dane muszą być prawdziwe.</li>
-          <li><strong>Konto DEMO:</strong> Panel gier można wypróbować bez rejestracji pod adresem <a href="https://dnct.pl/demo">dnct.pl/demo</a>. Konto demo służy wyłącznie do testów funkcjonalności.</li>
+          <li><strong>Konto DEMO:</strong> Panel gier można wypróbować bez rejestracji pod adresem <a href="https://game.dnct.pl/demo">game.dnct.pl/demo</a>. Konto demo służy wyłącznie do testów funkcjonalności.</li>
           <li>Klient musi być pełnoletni lub posiadać zgodę opiekuna prawnego.</li>
         </ol>
       </section>

@@ -89,7 +89,7 @@ function stripe_init(): void
     stripe_guard_environment($key);
 
     \Stripe\Stripe::setApiKey($key);
-    \Stripe\Stripe::setAppInfo('DNCT Hosting', '1.0', 'https://dnct.pl');
+    \Stripe\Stripe::setAppInfo('DNCT Hosting', '1.0', 'https://game.dnct.pl');
     $done = true;
 }
 

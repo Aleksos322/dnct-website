@@ -26,4 +26,4 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-Sitemap: https://dnct.pl/sitemap.xml
+Sitemap: https://game.dnct.pl/sitemap.xml

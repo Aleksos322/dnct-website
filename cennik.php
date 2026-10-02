@@ -62,7 +62,7 @@ const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
 $metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.';
-$canonicalUrl    = 'https://dnct.pl/cennik';
+$canonicalUrl    = 'https://game.dnct.pl/cennik';
 $centerContent   = false;
 
 /**
@@ -194,7 +194,7 @@ foreach ($gamesWithPlans as $game) {
                 'availability'  => empty($plan['sold_out'])
                     ? 'https://schema.org/InStock'
                     : 'https://schema.org/OutOfStock',
-                'url'           => 'https://dnct.pl/zamowienie?plan=' . (int)$plan['id'],
+                'url'           => 'https://game.dnct.pl/zamowienie?plan=' . (int)$plan['id'],
             ];
         }
 

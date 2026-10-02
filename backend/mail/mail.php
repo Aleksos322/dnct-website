@@ -220,7 +220,7 @@ function send_verification_code_mail(string $to, string $code, string $firstName
         . "    {$code}\n\n"
         . "Kod jest ważny przez {$ttlMinutes} minut.\n\n"
         . "Jeśli to nie Ty zakładasz konto, po prostu zignoruj tę wiadomość.\n\n"
-        . "-- \nDNCT Hosting\nhttps://dnct.pl";
+        . "-- \nDNCT Hosting\nhttps://game.dnct.pl";
 
     return send_mail($to, 'Kod weryfikacyjny: ' . $code . ' - DNCT Hosting', $html, $text);
 }

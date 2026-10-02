@@ -19,7 +19,7 @@ require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle       = 'Polityka prywatności - DNCT Hosting';
 $metaDescription = 'Jak DNCT Hosting przetwarza dane osobowe: podstawy prawne, zakres danych, okres przechowywania, prawa użytkownika i cookies.';
-$canonicalUrl    = 'https://dnct.pl/polityka-prywatnosci';
+$canonicalUrl    = 'https://game.dnct.pl/polityka-prywatnosci';
 $centerContent   = false;
 
 ob_start();
@@ -44,7 +44,7 @@ ob_start();
           <div class="contact-info">
             <p><strong>Nazwa:</strong> DNCT Hosting</p>
             <p><strong>Email kontaktowy:</strong> register@dnct.pl</p>
-            <p><strong>Strona internetowa:</strong> https://dnct.pl</p>
+            <p><strong>Strona internetowa:</strong> https://game.dnct.pl</p>
             <p><strong>Serwer Discord (Support):</strong> https://discord.gg/r2SsJp9e</p>
           </div>
           <p>Administratorem Twoich danych osobowych jest DNCT Hosting, zwany dalej "Administratorem".</p>
