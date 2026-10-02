@@ -36,7 +36,7 @@ function stripe_is_test_mode(): bool
 }
 
 /** Adresy, na których wolno użyć klucza produkcyjnego. */
-const STRIPE_LIVE_HOSTS = ['dnct.pl', 'www.dnct.pl', 'shop.dnct.pl'];
+const STRIPE_LIVE_HOSTS = ['dnct.pl', 'www.dnct.pl', 'shop.dnct.pl', 'game.dnct.pl'];
 
 /**
  * Bezpiecznik: klucz `sk_live_` działa WYŁĄCZNIE na produkcyjnej domenie.
