@@ -49,8 +49,8 @@ $email      = $_SESSION['authentik_email'] ?? null;
 // Domyślne wartości SEO - nadpisywane przez stronę wywołującą, jeśli ustawione wcześniej
 $pageTitle       = $pageTitle       ?? 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story';
 $metaDescription = $metaDescription ?? 'DNCT Hosting to serwery Minecraft, Project Zomboid, Vintage Story i innych gier z ochroną DDoS. Start od 3.99 PLN, szybkie NVMe i wsparcie 24/7.';
-$ogImage         = $ogImage         ?? 'https://dnct.pl/assets/media/icons/LINKS.png';
-$canonicalUrl    = $canonicalUrl    ?? ('https://dnct.pl' . strtok($_SERVER['REQUEST_URI'] ?? '/', '?'));
+$ogImage         = $ogImage         ?? 'https://game.dnct.pl/assets/media/icons/LINKS.png';
+$canonicalUrl    = $canonicalUrl    ?? ('https://game.dnct.pl' . strtok($_SERVER['REQUEST_URI'] ?? '/', '?'));
 $centerContent   = $centerContent   ?? true;
 $content         = $content         ?? '';
 
@@ -90,15 +90,15 @@ if ($centerContent) {
     <meta name="twitter:description" content="<?php echo htmlspecialchars($metaDescription); ?>">
     <meta name="twitter:image" content="<?php echo htmlspecialchars($ogImage); ?>">
 
-    <?php /* JSON-LD sitewide. Adresy zawsze wskazuja na dnct.pl (prod),
+    <?php /* JSON-LD sitewide. Adresy zawsze wskazuja na game.dnct.pl (prod),
              tak samo jak domyslny $canonicalUrl wyzej - spojna tozsamosc
              marki niezaleznie od tego, czy strona jest ogladana na becie. */ ?>
     <script type="application/ld+json"><?php echo json_encode([
         '@context' => 'https://schema.org',
         '@type'    => 'Organization',
         'name'     => 'DNCT Hosting',
-        'url'      => 'https://dnct.pl',
-        'logo'     => 'https://dnct.pl/assets/media/icons/LINKS.png',
+        'url'      => 'https://game.dnct.pl',
+        'logo'     => 'https://game.dnct.pl/assets/media/icons/LINKS.png',
         'sameAs'   => [
             'https://facebook.com/dncthosting',
             'https://instagram.com/dncthosting',
@@ -111,7 +111,7 @@ if ($centerContent) {
         '@context' => 'https://schema.org',
         '@type'    => 'WebSite',
         'name'     => 'DNCT Hosting',
-        'url'      => 'https://dnct.pl',
+        'url'      => 'https://game.dnct.pl',
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
     <?php if (!empty($extraHead)): ?>
     <?php echo $extraHead; ?>

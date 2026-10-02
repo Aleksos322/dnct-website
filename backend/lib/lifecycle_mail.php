@@ -31,7 +31,7 @@ function lifecycle_when(?string $raw): string
 
 function lifecycle_account_url(): string
 {
-    return rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery';
+    return rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/') . '/twoje-serwery';
 }
 
 /**

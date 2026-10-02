@@ -8,11 +8,11 @@ opłaceniu, z panelem administracyjnym (Pterodactyl) do zarządzania plikami,
 konsolą, bazą danych i backupami.
 
 ## Oferta
-- [Cennik](https://dnct.pl/cennik): pełny cennik planów dla Minecraft,
+- [Cennik](https://game.dnct.pl/cennik): pełny cennik planów dla Minecraft,
   Project Zomboid, Vintage Story.
-- [Twoje serwery](https://dnct.pl/twoje-serwery): dostępne gry i plany.
-- [Panel demo](https://dnct.pl/demo): wypróbowanie panelu bez zakładania konta.
+- [Twoje serwery](https://game.dnct.pl/twoje-serwery): dostępne gry i plany.
+- [Panel demo](https://game.dnct.pl/demo): wypróbowanie panelu bez zakładania konta.
 
 ## Zasady
-- [Regulamin](https://dnct.pl/regulamin)
-- [Polityka prywatności](https://dnct.pl/polityka-prywatnosci)
+- [Regulamin](https://game.dnct.pl/regulamin)
+- [Polityka prywatności](https://game.dnct.pl/polityka-prywatnosci)

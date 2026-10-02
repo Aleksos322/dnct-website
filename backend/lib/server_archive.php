@@ -62,7 +62,7 @@ function archive_path(array $archive): ?string
 /** Adres, pod którym klient pobierze paczkę. */
 function archive_download_url(array $archive): string
 {
-    return rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/')
+    return rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/')
         . '/pobierz?token=' . rawurlencode((string)$archive['token']);
 }
 

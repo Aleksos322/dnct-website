@@ -29,7 +29,7 @@ function send_jellyfin_credentials_mail(string $to, string $firstName, array $je
         . "Hasło: {$jellyfinAccount['password']}\n\n"
         . "To hasło pokazujemy tylko raz, w tej wiadomości - zapisz je i zmień po pierwszym logowaniu.\n"
         . "Masz już inne konto Jellyfin? Podłącz je zamiast tego na account.dnct.pl.\n\n"
-        . "-- \nDNCT Hosting\nhttps://dnct.pl";
+        . "-- \nDNCT Hosting\nhttps://game.dnct.pl";
 
     return send_mail($to, 'Twoje konto Jellyfin - DNCT Hosting', $html, $text);
 }

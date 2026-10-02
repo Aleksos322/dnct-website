@@ -56,12 +56,12 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
     <title>Rejestracja w DNCT Hosting | Stwórz Konto Hostingu Gier</title>
     <meta name="description" content="Zarejestruj się w DNCT Hosting i załóż konto dla serwerów Minecraft i gier. Szybka rejestracja, 24/7 support.">
     <meta name="keywords" content="rejestracja hosting, minecraft account, konto hosting">
-    <link rel="canonical" href="https://dnct.pl/register">
+    <link rel="canonical" href="https://game.dnct.pl/register">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://dnct.pl/register">
+    <meta property="og:url" content="https://game.dnct.pl/register">
     <meta property="og:title" content="Rejestracja | DNCT Hosting">
     <meta property="og:description" content="Stwórz konto i zacznij korzystać z serwerów Minecraft.">
-    <meta property="og:image" content="https://dnct.pl/media/icons/LINKS.png">
+    <meta property="og:image" content="https://game.dnct.pl/media/icons/LINKS.png">
     <script src="/assets/js/tailwind.js"></script>
     <script src="/assets/js/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -363,10 +363,10 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                                 Administratorem Twoich danych jest DNCT (Aleks Osiński). Dane konta służą do logowania
                                 i świadczenia usług; możesz je pobrać albo usunąć konto w ustawieniach konta.
                                 Przy zakupie hostingu lub serwera zawierasz też
-                                <a href="https://dnct.pl/umowa-powierzenia" target="_blank" rel="noopener noreferrer">umowę powierzenia</a>
+                                <a href="https://game.dnct.pl/umowa-powierzenia" target="_blank" rel="noopener noreferrer">umowę powierzenia</a>
                                 danych, które w nich umieścisz.
                                 Do logowania używamy wyłącznie niezbędnych plików cookie; analityczne tylko za Twoją zgodą
-                                (<a href="https://dnct.pl/polityka-prywatnosci#cookies" target="_blank" rel="noopener noreferrer">więcej</a>).
+                                (<a href="https://game.dnct.pl/polityka-prywatnosci#cookies" target="_blank" rel="noopener noreferrer">więcej</a>).
                             </p>
 
                             <label class="consent" for="accept-marketing">

@@ -39,6 +39,15 @@ AddDefaultCharset UTF-8
     RewriteEngine On
     RewriteBase /
 
+    # Sklep serwerów gier działa pod game.dnct.pl. Stary host zachowuje tylko
+    # endpointy serwer-serwer, których nie wolno przenosić przez 301: Stripe
+    # wysyła POST, Authentik wysyła POST z logout_tokenem, a obecny panel gier
+    # nadal odpytuje check_session pod dnct.pl do czasu swojej migracji.
+    RewriteCond %{HTTP_HOST} ^(?:www\.)?dnct\.pl(?::\d+)?$ [NC]
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$
+    RewriteCond %{REQUEST_URI} !^/(?:api/stripe/webhook(?:\.php)?|auth/backchannel-logout|check_session(?:\.php)?)/?$ [NC]
+    RewriteRule ^(.*)$ https://game.dnct.pl/$1 [R=301,L,NE]
+
     # ------------------------------------------------------------------------
     # 3. Druga warstwa blokad (pierwsza to .htaccess w tamtych katalogach).
     #

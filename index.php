@@ -137,7 +137,7 @@ require_once __DIR__ . '/components/panel-band.php';
 
 $pageTitle       = 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story - Od 3.99 PLN';
 $metaDescription = 'DNCT Hosting to serwery Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Start od 3.99 PLN, szybkie NVMe i wsparcie 24/7.';
-$canonicalUrl    = 'https://dnct.pl/';
+$canonicalUrl    = 'https://game.dnct.pl/';
 $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
 ob_start();

@@ -19,7 +19,7 @@ require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle       = 'Umowa powierzenia przetwarzania danych - DNCT Hosting';
 $metaDescription = 'Umowa powierzenia przetwarzania danych osobowych (art. 28 RODO) dla klientów hostingu stron WWW i serwerów gier DNCT.';
-$canonicalUrl    = 'https://dnct.pl/umowa-powierzenia';
+$canonicalUrl    = 'https://game.dnct.pl/umowa-powierzenia';
 $centerContent   = false;
 
 ob_start();

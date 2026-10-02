@@ -89,7 +89,7 @@ function send_order_paid_mail(array $order, ?string $adminUser = null, ?string $
         'suspends'    => $d['suspends'],
         'graceHours'  => $d['grace_hours'],
         'panelUrl'    => 'https://panel.dnct.pl',
-        'accountUrl'  => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',
+        'accountUrl'  => rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/') . '/twoje-serwery',
         'adminUser'     => $adminUser,
         'adminPassword' => $adminPassword,
     ];
@@ -120,7 +120,7 @@ function send_payment_failed_mail(array $order): array
             ? czas_fmt((string)$order['grace_until'], 'd.m.Y \o H:i')
             : $d['suspends'],
         'graceHours' => $d['grace_hours'],
-        'accountUrl' => rtrim((string)env('BASE_URL', 'https://dnct.pl'), '/') . '/twoje-serwery',
+        'accountUrl' => rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/') . '/twoje-serwery',
     ];
 
     $html = render_mail_template('payment-failed', $vars);

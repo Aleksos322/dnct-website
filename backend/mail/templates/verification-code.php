@@ -100,7 +100,7 @@ $greeting = $safeName !== '' ? 'Cześć ' . $safeName . '!' : 'Cześć!';
                             </p>
                             <p style="margin:0; font-size:12px; color:#999999;">
                                 &copy; <?= date('Y') ?> DNCT Hosting &middot;
-                                <a href="https://dnct.pl" style="color:#8b5cf6; text-decoration:none;">dnct.pl</a>
+                                <a href="https://game.dnct.pl" style="color:#8b5cf6; text-decoration:none;">game.dnct.pl</a>
                             </p>
                         </td>
                     </tr>

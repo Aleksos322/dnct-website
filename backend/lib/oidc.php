@@ -63,6 +63,7 @@ function oidc_redirect_uri(): string
     // Twarda lista dozwolonych hostów - nagłówek Host pochodzi od klienta.
     $allowed = [
         'dnct.pl'           => 'https',
+        'game.dnct.pl'      => 'https',
         'beta.dnct.pl'      => 'https',
         'admin.lan.dnct.pl' => 'http',
         'account.dnct.pl'   => 'https',
@@ -374,7 +375,7 @@ function oidc_site_home_url(): string
 {
     $host = (string)($_SERVER['HTTP_HOST'] ?? 'dnct.pl');
 
-    $allowed = ['dnct.pl', 'beta.dnct.pl', 'web.dnct.pl'];
+    $allowed = ['dnct.pl', 'game.dnct.pl', 'beta.dnct.pl', 'web.dnct.pl'];
     if (!in_array($host, $allowed, true)) {
         $host = 'dnct.pl';
     }
