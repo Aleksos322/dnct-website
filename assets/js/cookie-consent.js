@@ -34,7 +34,24 @@
      * Usunięcie cookie
      */
     function deleteCookie(name) {
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+        const expires = 'expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        const hostname = window.location.hostname;
+        const domains = new Set(['', hostname, `.${hostname}`]);
+        const labels = hostname.split('.');
+
+        // GA przy `cookie_domain: auto` może wybrać domenę nadrzędną (np.
+        // dnct.pl zamiast beta.dnct.pl). Ciasteczko da się usunąć tylko z
+        // takim samym atrybutem Domain, z którym je utworzono.
+        for (let i = 1; i < labels.length - 1; i += 1) {
+            const domain = labels.slice(i).join('.');
+            domains.add(domain);
+            domains.add(`.${domain}`);
+        }
+
+        domains.forEach(domain => {
+            const domainAttribute = domain ? `;domain=${domain}` : '';
+            document.cookie = `${name}=;${expires};path=/${domainAttribute};SameSite=Lax;Secure`;
+        });
     }
 
     /**
@@ -57,8 +74,16 @@
      * Dynamiczne ładowanie Google Analytics
      */
     function loadGoogleAnalytics() {
+        window[`ga-disable-${GA_ID}`] = false;
+
         if (window.gtag) {
-            console.log('[Cookie Consent] Google Analytics już załadowane');
+            // GA może nadal być w pamięci po cofnięciu zgody na tej samej
+            // stronie. Ponowne wyrażenie zgody nie wymaga wtedy przeładowania.
+            window.gtag('consent', 'update', { analytics_storage: 'granted' });
+            window.gtag('config', GA_ID, {
+                'anonymize_ip': true,
+                'cookie_flags': 'SameSite=Lax;Secure'
+            });
             return;
         }
 
@@ -72,7 +97,8 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         window.gtag = gtag;
-        
+
+        gtag('consent', 'default', { analytics_storage: 'granted' });
         gtag('js', new Date());
         gtag('config', GA_ID, {
             'anonymize_ip': true,
@@ -101,6 +127,17 @@
     }
 
     /**
+     * Zatrzymanie analityki w już otwartej karcie. Skasowanie cookies samo
+     * nie wystarcza: załadowane gtag może wysyłać kolejne zdarzenia bez nich.
+     */
+    function disableGoogleAnalytics() {
+        window[`ga-disable-${GA_ID}`] = true;
+        if (typeof window.gtag === 'function') {
+            window.gtag('consent', 'update', { analytics_storage: 'denied' });
+        }
+    }
+
+    /**
      * Akceptacja cookies
      */
     function acceptCookies() {
@@ -114,6 +151,7 @@
      */
     function rejectCookies() {
         setCookie(CONSENT_COOKIE_NAME, 'rejected', CONSENT_COOKIE_EXPIRY);
+        disableGoogleAnalytics();
         removeGoogleAnalyticsCookies();
         hideBanner();
     }
@@ -151,6 +189,7 @@
      */
     function revokeConsent() {
         deleteCookie(CONSENT_COOKIE_NAME);
+        disableGoogleAnalytics();
         removeGoogleAnalyticsCookies();
         showBanner();
     }
