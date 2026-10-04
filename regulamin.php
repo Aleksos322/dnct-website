@@ -208,11 +208,16 @@ ob_start();
         </ol>
       </section>
 
-      <section>
-        <h2>11. Polityka Treści i Prawa Dostępu</h2>
+      <section id="zgloszenia-nielegalnych-tresci-dsa">
+        <h2>11. Zgłoszenia nielegalnych treści i bezpieczeństwo usług</h2>
         <ol>
-          <li>Zakaz hostowania malware, phishingu i treści nielegalnych. Procedura wyjaśniająca (DMCA-like) trwa 24h od zgłoszenia.</li>
-          <li><strong>Dostęp techniczny:</strong> Klient wyraża zgodę na dostęp administracji do plików w celu diagnostyki, backupu i zapewnienia bezpieczeństwa.</li>
+          <li>Zakazane jest korzystanie z usług do publikowania lub rozpowszechniania treści nielegalnych, w szczególności złośliwego oprogramowania, phishingu, oszustw, treści naruszających prawa autorskie, prywatność albo prawa osób trzecich.</li>
+          <li><strong>Zgłoszenie:</strong> każda osoba może bezpłatnie i bez konta zgłosić potencjalnie nielegalną treść przez <a href="/zglos-naruszenie">formularz zgłoszenia</a> lub, gdy formularz jest niedostępny, e-mailem na <a href="mailto:support@dnct.pl?subject=Abuse%20report">support@dnct.pl</a>. Zgłoszenie powinno zawierać dokładną lokalizację treści, uzasadnienie oraz dane kontaktowe umożliwiające odpowiedź; dane kontaktowe nie są wymagane przy zgłoszeniu dotyczącym bezpieczeństwa dzieci.</li>
+          <li><strong>Ocena i decyzja:</strong> DNCT ocenia zgłoszenia rzetelnie, obiektywnie i bez zbędnej zwłoki. W zależności od sprawy może poprosić o uzupełnienie informacji, ograniczyć dostęp do treści lub usługi, zachować materiał na potrzeby postępowania albo nie podejmować działania. Nie gwarantujemy sztywnego czasu rozpatrzenia, ponieważ zależy on od kompletności zgłoszenia i rodzaju ryzyka.</li>
+          <li><strong>Uzasadnienie i zastrzeżenia:</strong> gdy podanie uzasadnienia jest właściwe, przekazujemy je zgłaszającemu i klientowi, którego sprawa dotyczy. Zastrzeżenie do decyzji można przesłać w odpowiedzi na wiadomość zawierającą numer sprawy; oceni je człowiek.</li>
+          <li><strong>Brak ogólnego monitorowania:</strong> DNCT nie ma obowiązku ani nie prowadzi ogólnego monitorowania wszystkich danych klientów. Nie ogranicza to działań koniecznych dla bezpieczeństwa usług, realizacji obowiązków prawnych lub reakcji na wiarygodne zgłoszenie.</li>
+          <li><strong>Prawa autorskie:</strong> zgłoszenia naruszeń praw autorskich i znaków towarowych rozpatrujemy według powyższej procedury. Nie jest to amerykańska procedura DMCA ani obietnica automatycznego usunięcia treści po każdym zgłoszeniu.</li>
+          <li><strong>Dostęp techniczny:</strong> Klient wyraża zgodę na dostęp administracji do plików wyłącznie w zakresie potrzebnym do diagnostyki, kopii zapasowej, bezpieczeństwa, realizacji obowiązku prawnego lub obsługi zgłoszenia.</li>
         </ol>
       </section>
 

@@ -34,6 +34,8 @@
             &nbsp;·&nbsp;
             <a href="/polityka-prywatnosci" class="hover:text-gray-400 transition-colors">Polityka Prywatności</a>
             &nbsp;·&nbsp;
+            <a href="/zglos-naruszenie" class="hover:text-gray-400 transition-colors">Zgłoś naruszenie</a>
+            &nbsp;·&nbsp;
             <?php /* RODO wymaga, żeby wycofanie zgody było równie łatwe jak jej udzielenie -
                      stąd stały odnośnik w stopce, a nie tylko jednorazowy baner.
                      revoke() kasuje ciasteczko zgody, usuwa cookies _ga* i pokazuje baner
