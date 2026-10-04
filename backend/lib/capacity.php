@@ -38,9 +38,9 @@ const CAPACITY_MIN_FREE_SLOTS = 2;
 const CAPACITY_DEFAULT_NODE = 'User node';
 
 /**
- * CPU węzła klienckiego - 48 vCPU przydzielonych maszynie wirtualnej w
- * Proxmoksie (host fizyczny: 2 gniazda, 20 rdzeni/40 wątków, ~7% obciążenia
- * w chwili pisania - dużo zapasu). "Xeon E5-2680 v3" widoczny w panelu
+ * CPU węzła klienckiego - 40 vCPU przydzielonych maszynie wirtualnej w
+ * Proxmoksie. Weryfikacja wewnątrz VM (`nproc`) zwraca 40; host fizyczny ma
+ * odrębny budżet, którego nie wolno doliczać do oferty klientom. "Xeon E5-2680 v3" widoczny w panelu
  * (TechnicalInfo.tsx) to opisowy tekst modelu procesora, nie licznik
  * przydzielonych rdzeni - stąd wcześniejsza pomyłka 12 zamiast 48.
  *
@@ -51,14 +51,12 @@ const CAPACITY_DEFAULT_NODE = 'User node';
  * hosting_slot_tiers, dopisanych obok z wygody) byłoby ingerencją w jego
  * schemat - stąd limit żyje tu, tym samym wzorem co CAPACITY_DEFAULT_NODE.
  *
- * Jednostki jak w Pterodactylu: 100 = jeden rdzeń. 48 vCPU = 4800.
+ * Jednostki jak w Pterodactylu: 100 = jeden rdzeń. 40 vCPU = 4000.
  *
- * BEZ nadsubskrypcji (0%), świadomie inaczej niż RAM (200%) i dysk (100%).
- * Project Zomboid jest w dużej mierze jednowątkowy, a przy 48 vCPU i dziś
- * zajętych 13 nie ma potrzeby dokładać nadsubskrypcji, żeby cokolwiek się
- * zmieściło - zapas jest i bez niej.
+ * BEZ nadsubskrypcji (0%). Project Zomboid jest w dużej mierze jednowątkowy;
+ * zajętość jest odczytywana z panelu przy każdym sprawdzeniu dostępności.
  */
-const CAPACITY_NODE_CPU_CORES        = 4800;
+const CAPACITY_NODE_CPU_CORES        = 4000;
 const CAPACITY_NODE_CPU_OVERALLOCATE = 0;
 
 /**
