@@ -9,10 +9,12 @@
  *
  * Dwie rzeczy, które łatwo tu przeoczyć, a bez nich wynik jest bez sensu:
  *
- * 1. BEZ NADSUBSKRYPCJI. Pterodactyl może dopuszczać większe przydziały przez
- *    `memory_overallocate` i `disk_overallocate`, ale sklep nie może traktować
- *    tego jako pojemności do sprzedaży. Liczymy wyłącznie bazę węzła; gdy
- *    istniejące przydziały ją przekraczają, nowe zakupy są zatrzymane.
+ * 1. NADSUBSKRYPCJA. Pterodactyl pozwala przydzielić więcej, niż węzeł ma
+ *    fizycznie - kolumny `memory_overallocate` i `disk_overallocate` (w procentach).
+ *    User node ma 40 000 MiB RAM i 200% nadsubskrypcji, czyli realny limit to
+ *    120 000 MiB. Bez uwzględnienia tego węzeł wyglądałby na przepełniony przy
+ *    43 968 MiB przydzielonego RAM-u i CAŁY cennik pokazałby się jako wyprzedany.
+ *    Wartość -1 oznacza w Pterodactylu brak limitu.
  *
  * 2. LICZY SIĘ PRZYDZIAŁ, NIE ZUŻYCIE. Serwer wyłączony albo zawieszony nadal
  *    zajmuje miejsce na węźle, bo jego pliki leżą na dysku, a RAM jest dla niego
@@ -54,10 +56,11 @@ const CAPACITY_DEFAULT_NODE = 'User node';
  * BEZ nadsubskrypcji (0%). Project Zomboid jest w dużej mierze jednowątkowy;
  * zajętość jest odczytywana z panelu przy każdym sprawdzeniu dostępności.
  */
-const CAPACITY_NODE_CPU_CORES = 4000;
+const CAPACITY_NODE_CPU_CORES        = 4000;
+const CAPACITY_NODE_CPU_OVERALLOCATE = 0;
 
 /**
- * Wolne zasoby węzła bez nadsubskrypcji.
+ * Wolne zasoby węzła, z uwzględnieniem nadsubskrypcji.
  *
  * @return array{name:string,free_memory:int,free_disk:int,free_cpu:int,servers:int}|null
  *         null, gdy węzła nie ma w bazie - wtedy wywołujący nie powinien
@@ -68,7 +71,7 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
     $nodeName = $nodeName ?? CAPACITY_DEFAULT_NODE;
 
     $stmt = $pdo->prepare(
-        'SELECT id, name, memory, disk
+        'SELECT id, name, memory, memory_overallocate, disk, disk_overallocate
          FROM nodes WHERE name = ? LIMIT 1'
     );
     $stmt->execute([$nodeName]);
@@ -85,17 +88,25 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
     $used->execute([$node['id']]);
     $u = $used->fetch(PDO::FETCH_ASSOC);
 
-    $memLimit  = (int)$node['memory'];
-    $diskLimit = (int)$node['disk'];
-    $cpuLimit  = CAPACITY_NODE_CPU_CORES;
+    /** Limit po doliczeniu nadsubskrypcji. -1 = bez limitu. */
+    $effective = static function (int $base, int $overallocate): float {
+        if ($overallocate < 0) {
+            return INF;
+        }
+        return $base * (1 + $overallocate / 100);
+    };
+
+    $memLimit  = $effective((int)$node['memory'], (int)$node['memory_overallocate']);
+    $diskLimit = $effective((int)$node['disk'], (int)$node['disk_overallocate']);
+    $cpuLimit  = $effective(CAPACITY_NODE_CPU_CORES, CAPACITY_NODE_CPU_OVERALLOCATE);
 
     return [
         'name'        => (string)$node['name'],
         'servers'     => (int)$u['ile'],
         // max(0, ...) bo węzeł potrafi być już przekroczony ręcznym wpisem admina
-        'free_memory' => max(0, $memLimit - (int)$u['ram']),
-        'free_disk'   => max(0, $diskLimit - (int)$u['hdd']),
-        'free_cpu'    => max(0, $cpuLimit - (int)$u['cpu']),
+        'free_memory' => $memLimit === INF ? PHP_INT_MAX : (int)max(0, $memLimit - (int)$u['ram']),
+        'free_disk'   => $diskLimit === INF ? PHP_INT_MAX : (int)max(0, $diskLimit - (int)$u['hdd']),
+        'free_cpu'    => $cpuLimit === INF ? PHP_INT_MAX : (int)max(0, $cpuLimit - (int)$u['cpu']),
     ];
 }
 
