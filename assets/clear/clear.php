@@ -113,10 +113,6 @@ if ($centerContent) {
         'url'      => 'https://game.dnct.pl',
         'logo'     => 'https://game.dnct.pl/assets/media/icons/LINKS.png',
         'sameAs'   => [
-            'https://facebook.com/dncthosting',
-            'https://instagram.com/dncthosting',
-            'https://x.com/dncthosting',
-            'https://youtube.com/@dncthosting',
             'https://discord.gg/4kcXP5WmQ8',
         ],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
