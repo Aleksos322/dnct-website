@@ -694,7 +694,7 @@
         var CYCLE_STEPS = [
             { deleteCount: 'zwalnia'.length, text: 'ogranicza' },
             { deleteCount: 'ogranicza'.length, text: 'zawodzi' },
-            { deleteCount: 'nie zawodzi'.length, text: 'daje przewagę' }
+            { deleteCount: 'nie zawodzi'.length, text: 'daje przewagę!' }
         ];
 
         // Kazdy wpisany znak to WLASNY text node (insertAdjacentText nigdy
