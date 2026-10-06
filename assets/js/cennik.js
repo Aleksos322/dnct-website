@@ -246,7 +246,7 @@
         function resetButton() {
             if (!btnSel || btnSel.hasAttribute('data-locked')) return;
             btnSel.textContent = root.getAttribute('data-logged-in') === '1'
-                ? 'Przejdź do płatności'
+                ? 'Dalej - podsumowanie'
                 : 'Zaloguj się, żeby zamówić';
         }
 
@@ -311,34 +311,15 @@
                 return;
             }
 
-            btnSel.disabled = true;
-            btnSel.setAttribute('data-locked', '1');
-            btnSel.textContent = 'Przekierowuję do płatności…';
-            if (elError) elError.hidden = true;
-
-            fetch('/api/checkout/create.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    csrf_token:   root.getAttribute('data-csrf'),
-                    game_type:    root.getAttribute('data-type') || '',
-                    plan_id:      0,
-                    slots:        tier.slots,
-                    period_days:  current.days,
-                    billing_mode: mode
-                })
-            })
-                .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
-                .then(function (res) {
-                    if (res.ok && res.body.url) {
-                        window.location.href = res.body.url;
-                        return;
-                    }
-                    fail(res.body.message || 'Nie udało się rozpocząć płatności.');
-                })
-                .catch(function () {
-                    fail('Brak połączenia z serwerem. Sprawdź internet i spróbuj ponownie.');
-                });
+            /* Zgody (Regulamin, natychmiastowy start) i kod rabatowy są na
+               /zamowienie - tak samo jak przy planach. Wcześniej konfigurator
+               wysyłał płatność sam, bez zgody, i serwer ją odrzucał. */
+            window.location.href = '/zamowienie?' + new URLSearchParams({
+                game:  root.getAttribute('data-type') || '',
+                slots: String(tier.slots),
+                days:  String(current.days),
+                mode:  mode
+            }).toString();
         }
 
         range.addEventListener('input', render);

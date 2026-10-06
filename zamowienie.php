@@ -54,7 +54,7 @@ try {
     // Przy wejściu z karty planu gra wynika z samego planu - nie każemy jej
     // podawać w adresie, bo to tylko okazja do niespójnego żądania.
     if ($planId > 0 && $game === '') {
-        $stmt = $panel->prepare('SELECT type FROM hosting_plans WHERE id = ? AND is_active = 1');
+        $stmt = $panel->prepare('SELECT type FROM hosting_plans WHERE id = ?' . (dnct_is_admin() ? '' : ' AND is_active = 1'));
         $stmt->execute([$planId]);
         $game = (string)($stmt->fetchColumn() ?: '');
     }
@@ -76,7 +76,7 @@ try {
                     'slots'        => $slots,
                     'period_days'  => (int)$p['days'],
                     'billing_mode' => $mode,
-                ]);
+                ], dnct_is_admin());   // admin widzi też progi wstrzymane, jak w cenniku i create.php
             } catch (RuntimeException $e) {
                 // Abonament tygodniowy albo inny wariant bez odpowiednika
                 // w Stripe po prostu nie pojawi się na liście.

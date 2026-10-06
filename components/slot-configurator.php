@@ -230,7 +230,7 @@ function render_slot_configurator(
 
                     <button type="button" class="cfg-select" data-role="select"
                             <?php echo $salesOn ? '' : 'disabled'; ?>>
-                        <?php echo $isLoggedIn ? 'Przejdź do płatności' : 'Zaloguj się, żeby zamówić'; ?>
+                        <?php echo $isLoggedIn ? 'Dalej - podsumowanie' : 'Zaloguj się, żeby zamówić'; ?>
                     </button>
 
                     <?php if (!$salesOn): ?>
@@ -239,8 +239,8 @@ function render_slot_configurator(
                     <p class="cfg-error" data-role="error" hidden></p>
 
                     <p class="cfg-legal">
-                        Klikając, akceptujesz <a href="/regulamin">Regulamin</a>. Płatność obsługuje Stripe -
-                        nie przechowujemy danych Twojej karty.
+                        W następnym kroku zaakceptujesz <a href="/regulamin">Regulamin</a> i możesz wpisać kod rabatowy.
+                        Płatność obsługuje Stripe - nie przechowujemy danych Twojej karty.
                         <?php if (stripe_is_test_mode()): ?>
                             <span class="cfg-testmode">Tryb testowy - żadne pieniądze nie są pobierane.</span>
                         <?php endif; ?>
