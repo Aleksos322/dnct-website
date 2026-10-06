@@ -45,45 +45,11 @@ try {
     $capacity      = node_capacity($pdo);
     $showcasePlans = annotate_plan_availability($showcasePlans, $capacity);
 
-    /* Progi slotowe (Project Zomboid, Vintage Story) nie mają gotowych planów
-       w hosting_plans - klient dobiera liczbę graczy suwakiem na /cennik.
-       Tu, na stronie głównej, pokazujemy po jednym reprezentancie: najtańszy
-       aktywny próg każdej gry, przerobiony na ten sam kształt co wiersz
-       hosting_plans, żeby pętla renderująca karty niżej nie musiała wiedzieć,
-       skąd dana karta pochodzi. Grafiki (icon_img/background_img) biorą się
-       z hosting_games - progi ich nie mają, bo to atrybut gry, nie ceny. */
-    $gameArt = [];
-    foreach ($pdo->query("SELECT type, name, icon_img, background_img FROM hosting_games WHERE type IN ('zomboid','vintagestory')") as $g) {
-        $gameArt[$g['type']] = $g;
-    }
-
-    $tierStmt = $pdo->prepare(
-        'SELECT * FROM hosting_slot_tiers WHERE type = ? AND is_active = 1 ORDER BY slots ASC LIMIT 1'
-    );
-    foreach (['zomboid', 'vintagestory'] as $tierType) {
-        $tierStmt->execute([$tierType]);
-        $tier = $tierStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$tier) {
-            continue;
-        }
-        [$tier] = annotate_tier_availability([$tier], $capacity);
-
-        $showcasePlans[] = [
-            'name'            => ($gameArt[$tierType]['name'] ?? ucfirst($tierType)) . ' · ' . $tier['slots'] . ' graczy',
-            'price'           => $tier['price'],
-            'old_price'       => 0,
-            'is_on_sale'      => false,
-            'popular'         => false,
-            'sold_out'        => $tier['sold_out'],
-            'fits'            => $tier['fits'],
-            'ram_mb'          => (int)round((float)$tier['ram_gb'] * 1024),
-            'cpu_cores'       => $tier['cpu_cores'],
-            'ssd_mb'          => (int)$tier['ssd_mb'],
-            'backups_limit'   => (int)$tier['backups_limit'],
-            'background_img'  => $gameArt[$tierType]['background_img'] ?? '',
-            'icon_img'        => $gameArt[$tierType]['icon_img'] ?? '',
-        ];
-    }
+    /* Gry slotowe (Zomboid, Vintage Story) celowo NIE trafiają na stronę
+       główną - tu stoją trzy plany Minecrafta, a pozostałe gry są na /cennik
+       (link "Zobacz pełną ofertę" pod kartami). Dawniej doklejaliśmy tu
+       najtańszy próg każdej gry i po włączeniu sprzedaży Zomboida (07.10.2026)
+       w siatce wisiała jedna samotna karta. */
 } catch (Throwable $e) {
     error_log('index: nie udalo sie pobrac planow: ' . $e->getMessage());
 }
