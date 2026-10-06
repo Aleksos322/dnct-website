@@ -182,7 +182,8 @@ function render_cennik_plan_card(array $p): void
         <?php if ($isSoldOut): ?>
             <button type="button" class="pcard-cta is-off" aria-disabled="true" tabindex="-1">Wyprzedane</button>
         <?php elseif (!empty($p['href'])): ?>
-            <a class="pcard-cta" href="<?php echo htmlspecialchars((string)$p['href']); ?>">
+            <a class="pcard-cta" href="<?php echo htmlspecialchars((string)$p['href']); ?>"
+               aria-label="Zamawiam: <?php echo htmlspecialchars((string)($p['name'] ?? 'plan')); ?>, <?php echo htmlspecialchars(cennik_price_label($p['price'] ?? '')); ?> zł miesięcznie">
                 <?php echo htmlspecialchars((string)($p['cta'] ?? 'Zamawiam')); ?>
             </a>
         <?php else: ?>

@@ -234,7 +234,7 @@ if ($centerContent) {
     <script src="<?php echo asset('/assets/js/smooth-scroll.js'); ?>"></script>
 
     <!-- TŁO ANIMOWANE -->
-    <div class="header finisher-header fixed inset-0 pointer-events-none z-0"></div>
+    <div class="header finisher-header fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
 
     <script src="/assets/js/finisher-header.es5.min.js" type="text/javascript"></script>
     <?php /* Rozsynchronizowanie przebłysku na taflach .glass - bez tego
