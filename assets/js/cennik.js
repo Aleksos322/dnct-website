@@ -83,7 +83,7 @@
        Zaznaczanie gotowych planów
        ------------------------------------------------------------------ */
     function initPlanPicks() {
-        document.querySelectorAll('.plan-pick').forEach(function (card) {
+        document.querySelectorAll('.plan-pick.is-selectable').forEach(function (card) {
             // Karty-wizytówki na stronie głównej (components: ta sama .pcard,
             // ale bez data-plan-id) linkują wprost do /cennik przez własny
             // <a class="pcard-cta"> - nie mają czego "zaznaczać". Bez tego
@@ -97,19 +97,10 @@
                     return;
                 }
 
-                // Kliknięcie W PRZYCISK karty ma przejść do zamówienia, więc
-                // nie blokujemy zdarzenia. Wcześniej preventDefault leciało
-                // bezwarunkowo i zjadało nawigację razem z całą ścieżką zakupu:
-                // przycisk zaznaczał plan i nic więcej.
-                var cta = e && e.target && e.target.closest
-                    ? e.target.closest('a.pcard-cta')
-                    : null;
-
-                if (!cta) {
-                    // Karta jest klikalna jako całość (role="button"), więc bez
-                    // tego spacja przewinęłaby stronę zamiast zaznaczyć plan.
-                    if (e) e.preventDefault();
-                }
+                // Tylko karta wyboru (bez aktywnego linku do zakupu) obsługuje
+                // kliknięcie całego kontenera. Dzięki temu nie ma zagnieżdżonych
+                // elementów interaktywnych ani podwójnego przystanku Tab.
+                if (e) e.preventDefault();
 
                 document.querySelectorAll('.plan-pick').forEach(function (c) {
                     c.classList.toggle('is-selected', c === card);

@@ -420,9 +420,9 @@ ob_start();
                         <h2>Gotowe plany</h2>
                         <p>Wybierz rozmiar - resztę mamy taką samą w każdym.</p>
                     </div>
-                    <?php /* Gotowe plany. Każda karta ma własne id planu i daje się
-                             zaznaczyć - zaznaczenie ląduje w pasku podsumowania
-                             na dole ekranu. */ ?>
+                    <?php /* Gotowe plany. Gdy sprzedaż jest wyłączona, karta daje
+                             się zaznaczyć i trafia do paska podsumowania. Gdy jest
+                             włączona, jedynym celem klawiatury jest link „Zamawiam”. */ ?>
                     <div class="plans-grid gap-8 items-stretch">
                         <?php foreach ($game['plans'] as $plan): ?>
                             <?php
@@ -434,22 +434,22 @@ ob_start();
                             // odróżniać to, co miał odróżniać.
                             $ramSpan = max(1, $game['ram_max'] - $game['ram_min']);
                             $ramPos  = sqrt(((int)$plan['ram_mb'] - $game['ram_min']) / $ramSpan);
+                            $isSelectable = !$salesOn && empty($plan['sold_out']);
                             ?>
-                            <div class="plan-pick"
+                            <div class="plan-pick<?php echo $isSelectable ? ' is-selectable' : ''; ?>"
                                  data-plan-id="<?php echo (int)$plan['id']; ?>"
                                  data-plan-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
                                  data-plan-game="<?php echo htmlspecialchars((string)$game['name']); ?>"
                                  data-plan-price="<?php echo htmlspecialchars(cennik_price_label($plan['price'])); ?>"
                                  data-plan-soldout="<?php echo !empty($plan['sold_out']) ? '1' : '0'; ?>"
                                  data-plan-fits="<?php echo $plan['fits'] ?? ''; ?>"
-                                 tabindex="0" role="button"
-                                 aria-label="Wybierz plan <?php echo htmlspecialchars((string)$plan['name']); ?>">
+                                 <?php if ($isSelectable): ?>tabindex="0" role="button"<?php endif; ?>>
 
                                 <?php
                                 /* Wariant cennikowy: wysoka karta z ceną przy
-                                   dole. Karta nie jest linkiem - sprzedaż jest
-                                   wyłączona, a kliknięcie obsługuje skrypt
-                                   zaznaczania na kontenerze .plan-pick. */
+                                   dole. Przy wyłączonej sprzedaży kliknięcie
+                                   kontenera zaznacza plan; przy włączonej sam
+                                   link CTA prowadzi do zamówienia. */
                                 render_cennik_plan_card([
                                     'name'       => $plan['name'] ?? '',
                                     'price'      => $plan['price'] ?? '',
