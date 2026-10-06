@@ -45,7 +45,7 @@ ob_start();
             <p><strong>Nazwa:</strong> DNCT Hosting</p>
             <p><strong>Email kontaktowy:</strong> register@dnct.pl</p>
             <p><strong>Strona internetowa:</strong> https://game.dnct.pl</p>
-            <p><strong>Serwer Discord (Support):</strong> https://discord.gg/r2SsJp9e</p>
+            <p><strong>Serwer Discord (Support):</strong> https://discord.gg/4kcXP5WmQ8</p>
           </div>
           <p>Administratorem Twoich danych osobowych jest DNCT Hosting, zwany dalej "Administratorem".</p>
         </section>
@@ -390,7 +390,7 @@ ob_start();
           <div class="contact-info">
             <p><strong>Email:</strong> register@dnct.pl</p>
             <p><strong>Temat wiadomości:</strong> "RODO - [twoje żądanie]"</p>
-            <p><strong>Discord Support:</strong> <a href="https://discord.gg/r2SsJp9e" target="_blank">https://discord.gg/r2SsJp9e</a></p>
+            <p><strong>Discord Support:</strong> <a href="https://discord.gg/4kcXP5WmQ8" target="_blank">https://discord.gg/4kcXP5WmQ8</a></p>
             <p><strong>Czas odpowiedzi:</strong> do 30 dni kalendarzowych</p>
           </div>
           <p>Jeśli uważasz, że Twoje prawa zostały naruszone, możesz wnieść skargę do <strong>Urzędu Ochrony Danych Osobowych (UODO)</strong>:</p>
