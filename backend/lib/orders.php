@@ -28,14 +28,58 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/stripe.php';
 require_once __DIR__ . '/notifications.php';
 
+/** Wersja warunków, którą zapisujemy przy nowych zamówieniach. */
+const DNCT_TERMS_VERSION = '2026-10-04';
+
 /**
  * Zakłada zamówienie w stanie `pending`.
  *
  * @param array<string,mixed> $quote Wynik pricing_quote()
  * @return int Identyfikator zamówienia
  */
-function order_create(PDO $dnct, array $quote, string $userEmail, string $userName): int
+function order_create(
+    PDO $dnct,
+    array $quote,
+    string $userEmail,
+    string $userName,
+    ?bool $immediateServiceStart = null
+): int
 {
+    /* Stare ścieżki (przedłużenie i zmiana pakietu) nie mają jeszcze własnego
+       formularza zgody. Nie dopisujemy im fikcyjnego dowodu wstecz. Nowy zakup
+       zawsze podaje true albo false i wtedy zapisujemy pełny wybór. */
+    if ($immediateServiceStart !== null) {
+        $stmt = $dnct->prepare(
+            'INSERT INTO orders
+                (user_email, user_name, game_type, plan_id, slots, ram_mb, cpu_cores, ssd_mb,
+                 backups_limit, period_days, billing_mode, amount_gross, currency, terms_version,
+                 terms_accepted_at, immediate_service_requested_at, service_start_at, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(),
+                     IF(?, NOW(), NULL),
+                     IF(?, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY)), "pending")'
+        );
+        $stmt->execute([
+            $userEmail,
+            $userName,
+            $quote['game_type'],
+            $quote['plan_id'],
+            $quote['slots'],
+            $quote['ram_mb'],
+            $quote['cpu_cores'],
+            $quote['ssd_mb'],
+            $quote['backups_limit'],
+            $quote['period_days'],
+            $quote['billing_mode'],
+            $quote['amount_gross'],
+            $quote['currency'],
+            DNCT_TERMS_VERSION,
+            (int)$immediateServiceStart,
+            (int)$immediateServiceStart,
+        ]);
+
+        return (int)$dnct->lastInsertId();
+    }
+
     $stmt = $dnct->prepare(
         'INSERT INTO orders
             (user_email, user_name, game_type, plan_id, slots, ram_mb, cpu_cores, ssd_mb,
@@ -60,6 +104,41 @@ function order_create(PDO $dnct, array $quote, string $userEmail, string $userNa
     ]);
 
     return (int)$dnct->lastInsertId();
+}
+
+/**
+ * Treść utrwalana w e-mailu po zawarciu nowej umowy.
+ *
+ * Nie zastępuje Regulaminu; daje klientowi trwały zapis wersji, jego wyboru
+ * i najważniejszej konsekwencji prawa odstąpienia bez profilowania go IP.
+ */
+function order_contract_confirmation_text(array $order): string
+{
+    if (empty($order['terms_version']) || empty($order['terms_accepted_at'])) {
+        return '';
+    }
+
+    $version = (string)$order['terms_version'];
+    $termsUrl = 'https://game.dnct.pl/regulamin#platnosci-i-odstapienie';
+
+    $text = "POTWIERDZENIE WARUNKÓW UMOWY\n"
+        . "Zaakceptowano Regulamin DNCT w wersji {$version}: {$termsUrl}\n";
+
+    if (!empty($order['immediate_service_requested_at'])) {
+        return $text
+            . "Na Twoje wyraźne żądanie rozpoczniemy usługę niezwłocznie po potwierdzeniu płatności. "
+            . "Potwierdziłeś(-aś), że po pełnym wykonaniu usługi możesz utracić prawo odstąpienia, "
+            . "jeżeli są spełnione ustawowe warunki. Jeżeli odstąpisz przed pełnym wykonaniem, "
+            . "rozliczymy wyłącznie część usługi wykonaną do chwili otrzymania oświadczenia.\n";
+    }
+
+    $start = !empty($order['service_start_at'])
+        ? czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i')
+        : 'po upływie 14 dni od zawarcia umowy';
+
+    return $text
+        . "Nie zażądałeś(-aś) rozpoczęcia usługi przed upływem terminu odstąpienia. "
+        . "Usługę uruchomimy {$start}.\n";
 }
 
 /** Dopina identyfikator sesji Stripe'a po jej utworzeniu. */
@@ -125,7 +204,7 @@ function order_mark_paid(
             SET status = "paid",
                 stripe_customer_id = COALESCE(?, stripe_customer_id),
                 stripe_subscription_id = COALESCE(?, stripe_subscription_id),
-                expires_at = DATE_ADD(NOW(), INTERVAL ? DAY),
+                expires_at = DATE_ADD(GREATEST(NOW(), COALESCE(service_start_at, NOW())), INTERVAL ? DAY),
                 grace_until = NULL,
                 failure_reason = NULL
           WHERE id = ?'

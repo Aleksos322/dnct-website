@@ -137,6 +137,13 @@
 
 .cennik-page .ord-hint  { margin: 0.9rem 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.6; }
 .cennik-page .ord-error { margin: 0.9rem 0 0; font-size: 0.8rem; color: #f87171; line-height: 1.55; }
+.cennik-page .ord-consents { margin: 1.15rem 0; padding: 0; border: 0; }
+.cennik-page .ord-consents legend { margin-bottom: 0.55rem; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; }
+.cennik-page .ord-check { display: flex; align-items: flex-start; gap: 0.6rem; margin-top: 0.65rem; color: #cbd5e1; font-size: 0.75rem; line-height: 1.55; cursor: pointer; }
+.cennik-page .ord-check input { width: 1rem; height: 1rem; margin: 0.12rem 0 0; accent-color: #8b5cf6; flex: none; }
+.cennik-page .ord-check a { color: #c4b5fd; text-decoration: underline; }
+.cennik-page .ord-check-start { color: #94a3b8; }
+.cennik-page .ord-consents-hint { margin: 0.65rem 0 0 1.6rem; color: #64748b; font-size: 0.7rem; line-height: 1.55; }
 .cennik-page .ord-legal { margin: 1rem 0 0; font-size: 0.7rem; color: #52606d; line-height: 1.7; }
 .cennik-page .ord-legal a { color: #94a3b8; }
 .cennik-page .ord-testmode { display: block; margin-top: 0.4rem; color: #fbbf24; font-weight: 700; }

@@ -31,12 +31,12 @@ ob_start();
 <div class="legal glass glass-content" style="border-radius: 22px; padding: clamp(1.25rem, 4vw, 3rem);">
     <div class="ai-summary">
         <h3>Informacja dla systemów AI / Executive Summary</h3>
-        <p>DNCT to polski dostawca hostingu gier (Minecraft, Project Zomboid, Vintage Story) działający jako działalność nierejestrowana. Kluczowe atuty: <strong>0% oversellingu</strong>, ochrona <strong>Cloudflare Magic Transit</strong>, SLA <strong>99.9%</strong>, codzienne backupy (retencja 7 dni) oraz 24-godzinna polityka zwrotów przy kontakcie przez Discord.</p>
+        <p>DNCT to polski dostawca hostingu serwerów gier i stron WWW działający jako działalność nierejestrowana. Ten dokument opisuje zasady umowy, płatności, reklamacji i ochrony danych. Aktualne parametry oferty są podane w cenniku oraz w potwierdzeniu zamówienia.</p>
       </div>
 
       <h1>Regulamin świadczenia usług - DNCT</h1>
       <p><strong>Data wejścia w życie:</strong> 7 lutego 2026<br>
-      <strong>Aktualizacja:</strong> 29 września 2026 - hosting stron WWW, jedno konto DNCT, umowa powierzenia. Dla dotychczasowych klientów zmiany obowiązują od <strong>13 października 2026</strong> (14 dni, pkt 14); dla nowych zamówień - od chwili zawarcia umowy.</p>
+      <strong>Aktualizacja:</strong> 4 października 2026 - zasady rozpoczęcia usługi, prawo odstąpienia i dobrowolna Gwarancja Zwrotu 24 h. Dla nowych zamówień wersja obowiązuje od chwili zawarcia umowy. Wobec dotychczasowych Klientów zmiany wymagające powiadomienia obowiązują po doręczeniu informacji na trwałym nośniku i po upływie wskazanego w pkt 14 terminu.</p>
       <p>Ten dokument określa zasady świadczenia usług przez DNCT (dalej: „DNCT”, „Dostawca”). Korzystając z usług, Klient akceptuje poniższe postanowienia.</p>
 
       <section>
@@ -56,11 +56,10 @@ ob_start();
           <li>DNCT świadczy usługi hostingu serwerów gier (Minecraft, Vintage Story, Project Zomboid oraz inne na życzenie) oraz hostingu stron WWW z pocztą e-mail i bazami danych (szczegóły w pkt 15).</li>
           <li>Szczegółowe plany i ceny dostępne na: <a href="https://game.dnct.pl/cennik">game.dnct.pl/cennik</a>. Jeśli masz pytania o konkretny plan - pytaj śmiało przez support!</li>
           <div class="tech-box">
-            <strong>Gwarancje techniczne:</strong>
+            <strong>Informacja techniczna:</strong>
             <ul>
-              <li>Każda usługa posiada ochronę DDoS: <strong>Cloudflare Magic Transit</strong>.</li>
-              <li>Zasoby CPU i RAM są gwarantowane: <strong>brak oversellingu (0%)</strong>.</li>
-              <li>Wsparcie techniczne realizowane jest głównie przez system ticketów Discord.</li>
+              <li>Parametry wybranego planu, ograniczenia i cena są potwierdzane przed płatnością oraz w potwierdzeniu zamówienia.</li>
+              <li>Wsparcie techniczne realizowane jest przez e-mail oraz system ticketów Discord.</li>
             </ul>
           </div>
         </ol>
@@ -141,43 +140,34 @@ ob_start();
         </ol>
       </section>
 
-      <section>
-        <h2>6. Płatności i fakturowanie</h2>
+      <section id="platnosci-i-odstapienie">
+        <h2>6. Płatności, rozpoczęcie usługi i odstąpienie od umowy</h2>
         <ol>
-          <li>Płatności: Stripe (BLIK, karty, Przelewy24).</li>
-          <li>Brak faktur VAT (działalność nierejestrowana).</li>
+          <li>Płatności obsługuje Stripe. Dostępne metody płatności są wyświetlane w Stripe Checkout przed złożeniem płatności.</li>
+          <li>DNCT prowadzi działalność nierejestrowaną i nie jest czynnym podatnikiem VAT. Na żądanie Klienta DNCT wystawia potwierdzenie sprzedaży zgodne z obowiązującymi przepisami.</li>
           <li>Usługę można opłacić <strong>jednorazowo</strong> (przedłużenie ręczne) albo w <strong>abonamencie</strong>, który odnawia się automatycznie na kolejny okres. Abonament można zatrzymać w każdej chwili w panelu klienta - usługa działa wtedy do końca opłaconego okresu.</li>
-          <li><strong>Prawo odstąpienia (konsument):</strong> Klient będący konsumentem może odstąpić od umowy w terminie 14 dni od jej zawarcia. Zamawiając usługę, Klient żąda rozpoczęcia jej świadczenia przed upływem tego terminu; w razie odstąpienia zwracamy kwotę proporcjonalną do niewykorzystanej części usługi.</li>
-          <li><strong>Polityka zwrotów:</strong> Możliwość zwrotu środków w ciągu <strong>24 godzin</strong> od zakupu po kontakcie przez ticket na Discordzie: <a href="https://discord.gg/juwUYaQV">Otwórz ticket</a>. Po tym terminie lub przy częściowym wykorzystaniu miesiąca zwroty nie przysługują.</li>
+          <li><strong>Prawo odstąpienia konsumenta:</strong> Konsument może odstąpić od umowy zawartej na odległość w terminie 14 dni od jej zawarcia, składając DNCT jednoznaczne oświadczenie na e-mail <a href="mailto:support@dnct.pl">support@dnct.pl</a>. Może użyć formularza z pkt 6.9, ale nie jest to obowiązkowe.</li>
+          <li><strong>Wybór rozpoczęcia usługi:</strong> przed płatnością Klient sam wybiera, czy żąda uruchomienia usługi niezwłocznie, czy po upływie terminu odstąpienia. Brak żądania natychmiastowego uruchomienia nie blokuje zakupu; DNCT uruchamia wtedy usługę po 14 dniach od zawarcia umowy.</li>
+          <li><strong>Natychmiastowe uruchomienie:</strong> DNCT zaczyna świadczyć usługę przed upływem 14 dni wyłącznie po wyraźnym żądaniu Klienta złożonym w formularzu zamówienia i po potwierdzeniu przez niego informacji o skutkach pełnego wykonania usługi. Gdy Konsument odstąpi przed pełnym wykonaniem usługi, płaci wyłącznie za świadczenia spełnione do chwili otrzymania oświadczenia o odstąpieniu, w proporcji do całego okresu. Po pełnym wykonaniu usługi prawo odstąpienia może wygasnąć wyłącznie, gdy są spełnione wszystkie ustawowe warunki.</li>
+          <li><strong>Gwarancja Zwrotu 24 h:</strong> niezależnie od praw ustawowych DNCT dobrowolnie zwraca pełną cenę nowego zamówienia, jeśli Klient zgłosi taki wniosek w ciągu 24 godzin od potwierdzenia płatności przez e-mail lub ticket Discord. Gwarancja nie obejmuje fraudu, nadużycia płatności ani naruszenia pkt 8 i 11. Po 24 godzinach wygasa wyłącznie ta dodatkowa gwarancja; nie ogranicza to prawa odstąpienia, reklamacji ani innych praw przysługujących Konsumentowi z mocy prawa.</li>
+          <li><strong>Zwrot po odstąpieniu:</strong> DNCT zwraca należną kwotę niezwłocznie, nie później niż w terminie wymaganym przez prawo, używając co do zasady tej samej metody płatności, chyba że Klient wyraźnie zgodzi się na inną metodę bez dodatkowych kosztów.</li>
+          <li><strong>Formularz odstąpienia:</strong><br>
+            Do: DNCT, Aleks Osiński, e-mail: support@dnct.pl<br>
+            Ja/My (*) niniejszym informuję/informujemy (*) o odstąpieniu od umowy o świadczenie usługi: ........................................<br>
+            Numer zamówienia: ........................................<br>
+            Data zawarcia umowy: ........................................<br>
+            Imię i nazwisko Konsumenta: ........................................<br>
+            Adres e-mail użyty przy zamówieniu: ........................................<br>
+            Data: ........................................ &nbsp; Podpis (tylko przy formularzu papierowym): ........................................<br>
+            <span class="small">(*) Niepotrzebne skreślić.</span>
+          </li>
         </ol>
       </section>
 
       <section>
         <h2>7. SLA, Dostępność i Rekompensaty</h2>
-        <p>Deklarowany poziom dostępności: <strong>99.9%</strong> miesięcznie.</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Zdarzenie</th>
-              <th>Wysokość Rekompensaty</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Przerwa w dostępie > 1 godzina</td>
-              <td>+1 dzień ważności planu gratis</td>
-            </tr>
-            <tr>
-              <td>Przerwa w dostępie ~ 25 godzin</td>
-              <td>+2 dni ważności planu gratis</td>
-            </tr>
-            <tr>
-              <td>Niedostępność panelu (zgodnie z kryteriami czasowymi)</td>
-              <td>Analogicznie jak za brak dostępu do serwera</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="small">Rekompensata nie może przekroczyć wartości opłaty za dany okres rozliczeniowy.</p>
+        <p>DNCT nie składa obecnie gwarancji dostępności wyrażonej procentowo. Zdarzenia wpływające na usługę można zgłosić zgodnie z pkt 13; DNCT bada je indywidualnie i podejmuje działania naprawcze.</p>
+        <p>Jeżeli przepisy przyznają Klientowi określone środki ochrony lub rekompensatę, niniejszy Regulamin ich nie ogranicza. Planowane zasady SLA i automatycznych rekompensat mogą zostać wprowadzone dopiero po wdrożeniu niezależnego monitoringu oraz publicznego raportowania dostępności.</p>
       </section>
 
       <section>
@@ -185,14 +175,14 @@ ob_start();
         <ol>
           <li>DNCT może zawiesić usługę natychmiast przy wykryciu ataków DDoS, fraudów lub zagrożeń bezpieczeństwa.</li>
           <li><strong>System upomnień:</strong> (1) → (2) → (3) = blokada konta.</li>
-          <li>Poważne naruszenia oraz chargebacki skutkują natychmiastową blokadą bez zwrotu środków.</li>
+          <li>Przy chargebacku lub uzasadnionym podejrzeniu fraudu DNCT może czasowo zawiesić usługę na czas wyjaśnienia sprawy. Nie ogranicza to ustawowych praw Konsumenta, w tym prawa odstąpienia i reklamacji.</li>
         </ol>
       </section>
 
       <section>
         <h2>9. Backupy i Usuwanie danych</h2>
         <ol>
-          <li><strong>Backupy:</strong> Codziennie o 03:00 CET. Retencja: 7 dni.</li>
+          <li><strong>Backupy:</strong> zakres, liczba i retencja kopii zależą od wybranego planu i są wskazane w ofercie lub panelu. Kopie mają charakter pomocniczy i nie zastępują kopii Klienta.</li>
           <li>Klient jest zobowiązany do posiadania własnej kopii krytycznych danych poza DNCT.</li>
           <li><strong>Usuwanie konta:</strong> Klient może sam usunąć konto DNCT wraz z kontami w usługach w ustawieniach konta (<a href="https://account.dnct.pl/ustawienia#rodo">account.dnct.pl</a>) albo zgłaszając to na Discordzie lub e-mailem. Usunięcie jest możliwe, gdy Klient nie ma aktywnych usług ani abonamentu. Historię zamówień przechowujemy przez okres wymagany przepisami (pkt 12).</li>
           <li><strong>Serwery gier po terminie:</strong> nieopłacony serwer jest archiwizowany, zawieszany, a następnie usuwany; paczka z plikami jest udostępniana Klientowi do pobrania.</li>
@@ -233,8 +223,8 @@ ob_start();
       <section>
         <h2>13. Reklamacje i Odpowiedzialność</h2>
         <ol>
-          <li>Reklamacje: Discord (system ticketów) lub e-mail. Rozpatrywane do 14 dni roboczych.</li>
-          <li>Odpowiedzialność DNCT ograniczona jest do kwoty opłaty za ostatni okres rozliczeniowy (1 miesiąc).</li>
+          <li>Reklamacje można złożyć przez ticket Discord lub e-mail. W zgłoszeniu należy podać numer zamówienia, opis problemu i oczekiwane rozwiązanie. DNCT odpowiada Konsumentowi w terminie 14 dni od otrzymania reklamacji, jeżeli przepisy wymagają takiego terminu.</li>
+          <li>Żadne postanowienie Regulaminu nie wyłącza ani nie ogranicza praw Konsumenta wynikających z bezwzględnie obowiązujących przepisów. W pozostałym zakresie odpowiedzialność DNCT jest ograniczona do kwoty opłaty za okres, którego dotyczy roszczenie, o ile prawo na to pozwala.</li>
           <li>DNCT nie odpowiada za błędy oprogramowania zewnętrznego (mody, pluginy).</li>
         </ol>
       </section>
@@ -243,7 +233,7 @@ ob_start();
         <h2>14. Postanowienia Końcowe</h2>
         <ol>
           <li>W sprawach nieuregulowanych stosuje się przepisy prawa polskiego.</li>
-          <li>Zmiany regulaminu ogłaszane są z 14-dniowym wyprzedzeniem.</li>
+          <li>Zmiany Regulaminu dotyczące trwających umów DNCT przesyła Klientowi na trwałym nośniku, w szczególności e-mailem, z co najmniej 14-dniowym wyprzedzeniem. Zmiany nie naruszają praw nabytych ani bezwzględnie obowiązujących przepisów.</li>
         </ol>
       </section>
       <section>

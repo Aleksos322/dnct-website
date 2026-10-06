@@ -5,7 +5,8 @@
  * Zakłada zamówienie i sesję Stripe Checkout, po czym oddaje adres, pod który
  * front ma przekierować przeglądarkę.
  *
- * Wejście:  { game_type, plan_id | slots, period_days, billing_mode, csrf_token }
+ * Wejście:  { game_type, plan_id | slots, period_days, billing_mode,
+ *             terms_accepted, immediate_service_start, csrf_token }
  * Wyjście:  { ok: true, url: "https://checkout.stripe.com/..." }
  *
  * CZEGO TU NIE MA, I TO CELOWO: kwoty. Klient przysyła wyłącznie to, CO wybrał;
@@ -41,6 +42,16 @@ if ($email === '' || $name === '') {
     json_error('Musisz być zalogowany, żeby złożyć zamówienie.', 401, [], ['reason' => 'unauthorized']);
 }
 
+/* Akceptacja Regulaminu i żądanie natychmiastowego startu są osobnymi
+   decyzjami. Brak drugiej NIE blokuje zakupu: usługa zostaje wtedy opłacona,
+   ale uruchomiona dopiero po ustawowym terminie odstąpienia. */
+if (!request_bool('terms_accepted')) {
+    json_error('Zaakceptuj Regulamin, aby przejść do płatności.', 422, [
+        'terms_accepted' => 'Akceptacja Regulaminu jest wymagana.',
+    ]);
+}
+$immediateServiceStart = request_bool('immediate_service_start');
+
 $panel = new PDO(
     'mysql:host=' . env('DB_HOST', 'localhost') . ';dbname=' . env('DB_DATABASE') . ';charset=utf8mb4',
     (string)env('DB_USERNAME'),
@@ -62,8 +73,16 @@ try {
     json_error($e->getMessage(), 422, [], ['reason' => 'invalid_selection']);
 }
 
+if (!$immediateServiceStart && $quote['billing_mode'] === 'subscription') {
+    json_error(
+        'Wybierz płatność jednorazową albo zaznacz natychmiastowe uruchomienie. Abonamentu nie uruchamiamy przed startem usługi.',
+        422,
+        ['billing_mode' => 'Przy uruchomieniu po 14 dniach wybierz płatność jednorazową.']
+    );
+}
+
 $dnct    = dnct_db();
-$orderId = order_create($dnct, $quote, $email, $name);
+$orderId = order_create($dnct, $quote, $email, $name, $immediateServiceStart);
 
 stripe_init();
 
@@ -111,7 +130,11 @@ try {
 
         'customer_email'      => $email,
         'client_reference_id' => (string)$orderId,
-        'metadata'            => ['order_id' => (string)$orderId],
+        'metadata'            => [
+            'order_id' => (string)$orderId,
+            'terms_version' => DNCT_TERMS_VERSION,
+            'immediate_service_start' => $immediateServiceStart ? 'yes' : 'no',
+        ],
 
         'success_url' => $base . '/sukces?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url'  => $base . '/cennik',

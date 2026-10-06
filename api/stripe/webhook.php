@@ -13,8 +13,8 @@
  * 2. IDEMPOTENCJA. Stripe POWTARZA doręczenia: po każdym błędzie, po każdym
  *    przekroczeniu czasu odpowiedzi, czasem bez powodu. Bez zabezpieczenia
  *    jedna płatność zakłada trzy serwery. Wiersz w `stripe_events` zakładamy
- *    PRZED obsługą, więc powtórka odbija się o klucz główny nawet wtedy, gdy
- *    pierwsze doręczenie jeszcze się liczy.
+ *    PRZED obsługą, więc równoległa powtórka odbija się o klucz główny. Gdy
+ *    poprzednia próba zakończyła się błędem, atomowo przejmujemy ją do retry.
  *
  * 3. TWORZENIE SERWERA PO STRONIE SERWERA. Stara wersja robiła to w success.php,
  *    czyli przy WYŚWIETLENIU strony powrotu - kto zamknął kartę po zapłaceniu,
@@ -69,17 +69,33 @@ $dnct = dnct_db();
    w dwóch krokach zostawia okno, w które trafiają dwa równoległe doręczenia
    tego samego zdarzenia - a Stripe potrafi je wysłać dokładnie tak. */
 try {
-    $lock = $dnct->prepare('INSERT INTO stripe_events (event_id, type) VALUES (?, ?)');
+    $lock = $dnct->prepare('INSERT INTO stripe_events (event_id, type, status) VALUES (?, ?, "processing")');
     $lock->execute([$event->id, $event->type]);
 } catch (PDOException $e) {
     if ($e->getCode() === '23000') {
-        // Już widzieliśmy to zdarzenie. 200, żeby Stripe przestał ponawiać.
-        echo '{"ok":true,"duplicate":true}';
-        exit;
+        /* Powtarzamy wyłącznie zdarzenie, które poprzednio doszło do stanu
+           `error`. Warunek w UPDATE jest atomowy: dwa równoległe retry nie
+           przejmą tego samego wiersza, a `done` i `processing` dostają 200. */
+        $retry = $dnct->prepare(
+            'UPDATE stripe_events
+             SET status = "processing", error = NULL, handled_at = NOW()
+             WHERE event_id = ? AND status = "error"'
+        );
+        $retry->execute([$event->id]);
+
+        if ($retry->rowCount() !== 1) {
+            echo '{"ok":true,"duplicate":true}';
+            exit;
+        }
+
+        error_log('Stripe webhook: ponawiam wcześniejszy błąd ' . $event->type . ' (' . $event->id . ')');
     }
-    error_log('Stripe webhook: baza niedostępna - ' . $e->getMessage());
-    http_response_code(500);
-    exit('{"error":"database"}');
+
+    if ($e->getCode() !== '23000') {
+        error_log('Stripe webhook: baza niedostępna - ' . $e->getMessage());
+        http_response_code(500);
+        exit('{"error":"database"}');
+    }
 }
 
 try {
@@ -94,8 +110,8 @@ try {
 
     /* Zdarzenie zostaje oznaczone jako błędne, ale WIERSZ ZOSTAJE - inaczej
        powtórka trafiłaby na czysto i mogła powtórzyć część, która się udała.
-       Zwracamy 500, więc Stripe spróbuje ponownie; przy powtórce zadziała
-       blokada powyżej, a ślad błędu zostaje do ręcznego rozpatrzenia. */
+       Zwracamy 500, więc Stripe spróbuje ponownie; warunkowy UPDATE powyżej
+       przejmie tylko ten stan `error`, a ślad pozostanie w logu aplikacji. */
     $fail = $dnct->prepare('UPDATE stripe_events SET status = "error", error = ?, handled_at = NOW() WHERE event_id = ?');
     $fail->execute([mb_substr($e->getMessage(), 0, 500), $event->id]);
 

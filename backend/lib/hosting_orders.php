@@ -44,17 +44,39 @@ const HOSTING_STALE_DAYS = 14;
 // Zamówienia
 // ---------------------------------------------------------------------------
 
-function hosting_order_create(PDO $dnct, string $email, string $name, string $package, string $billingMode, ?int $extendsId = null): int
+function hosting_order_create(
+    PDO $dnct,
+    string $email,
+    string $name,
+    string $package,
+    string $billingMode,
+    ?int $extendsId = null,
+    ?bool $immediateServiceStart = null
+): int
 {
     $plan = HOSTING_PLANS[$package] ?? null;
     if ($plan === null) {
         throw new RuntimeException('Nieznany pakiet hostingu.');
     }
-    $stmt = $dnct->prepare(
-        'INSERT INTO hosting_orders (user_email, user_name, package, period_days, billing_mode, amount_gross, extends_order_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
-    );
-    $stmt->execute([$email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, $plan['price'], $extendsId]);
+    if ($immediateServiceStart !== null) {
+        $stmt = $dnct->prepare(
+            'INSERT INTO hosting_orders
+                (user_email, user_name, package, period_days, billing_mode, amount_gross, extends_order_id,
+                 terms_version, terms_accepted_at, immediate_service_requested_at, service_start_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), IF(?, NOW(), NULL),
+                     IF(?, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY)))'
+        );
+        $stmt->execute([
+            $email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, $plan['price'], $extendsId,
+            DNCT_TERMS_VERSION, (int)$immediateServiceStart, (int)$immediateServiceStart,
+        ]);
+    } else {
+        $stmt = $dnct->prepare(
+            'INSERT INTO hosting_orders (user_email, user_name, package, period_days, billing_mode, amount_gross, extends_order_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([$email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, $plan['price'], $extendsId]);
+    }
     return (int)$dnct->lastInsertId();
 }
 
@@ -216,32 +238,56 @@ function hosting_webhook_checkout_completed(PDO $dnct, $session): bool
             'UPDATE hosting_orders
                 SET status = "paid", stripe_customer_id = COALESCE(?, stripe_customer_id),
                     stripe_subscription_id = COALESCE(?, stripe_subscription_id),
-                    expires_at = DATE_ADD(NOW(), INTERVAL period_days DAY), grace_until = NULL, failure_reason = NULL
+                    expires_at = DATE_ADD(GREATEST(NOW(), COALESCE(service_start_at, NOW())), INTERVAL period_days DAY), grace_until = NULL, failure_reason = NULL
               WHERE id = ?'
         )->execute([$customer, $subscription, $id]);
 
-        $res = hosting_call('create', [
-            'email'   => (string)$order['user_email'],
-            'name'    => (string)$order['user_name'],
-            'package' => (string)$order['package'],
-        ]);
+        $order = hosting_order_by($dnct, 'id', $id);
+        if ($order === null) {
+            return false;
+        }
+        hosting_send_contract_confirmation($order);
 
-        if ($res === null || empty($res['user'])) {
-            hosting_order_fail($dnct, $id, 'Panel hostingu nie przyjął zmiany pakietu.');
-            notify_user($dnct, (string)$order['user_name'], 'error', 'Hosting nie został jeszcze włączony',
-                'Płatność się powiodła, ale automatyczne włączenie pakietu nie doszło do skutku. Zajmiemy się tym ręcznie.');
-            notify_admins($dnct, 'error', 'Hosting #' . $id . ' opłacony, pakiet NIE ustawiony', (string)$order['user_email'] . ' - ' . (string)$order['package']);
-            return true; // powtórka doręczenia nic nie naprawi
+        if (empty($order['immediate_service_requested_at'])) {
+            notify_user(
+                $dnct,
+                (string)$order['user_name'],
+                'info',
+                'Płatność przyjęta - uruchomienie po terminie odstąpienia',
+                'Nie wybrano natychmiastowego startu. Hosting uruchomimy '
+                . hosting_fmt_date((string)$order['service_start_at']) . '.'
+            );
+            return true;
         }
 
-        $dnct->prepare('UPDATE hosting_orders SET status = "provisioned", hosting_user = ? WHERE id = ?')
-             ->execute([(string)$res['user'], $id]);
-
-        hosting_announce_paid($dnct, hosting_order_by($dnct, 'id', $id));
-        return true;
+        return hosting_activate_paid_order($dnct, $order);
     } finally {
         $dnct->prepare('SELECT RELEASE_LOCK(?)')->execute([$lock]);
     }
+}
+
+/** Ustawia opłacony pakiet; woła go webhook albo narzędzie startu odroczonego. */
+function hosting_activate_paid_order(PDO $dnct, array $order): bool
+{
+    $id = (int)$order['id'];
+    $res = hosting_call('create', [
+            'email'   => (string)$order['user_email'],
+            'name'    => (string)$order['user_name'],
+            'package' => (string)$order['package'],
+    ]);
+
+    if ($res === null || empty($res['user'])) {
+        hosting_order_fail($dnct, $id, 'Panel hostingu nie przyjął zmiany pakietu.');
+        notify_user($dnct, (string)$order['user_name'], 'error', 'Hosting nie został jeszcze włączony',
+            'Płatność się powiodła, ale automatyczne włączenie pakietu nie doszło do skutku. Zajmiemy się tym ręcznie.');
+        notify_admins($dnct, 'error', 'Hosting #' . $id . ' opłacony, pakiet NIE ustawiony', (string)$order['user_email'] . ' - ' . (string)$order['package']);
+        return true;
+    }
+
+    $dnct->prepare('UPDATE hosting_orders SET status = "provisioned", hosting_user = ? WHERE id = ?')
+         ->execute([(string)$res['user'], $id]);
+    hosting_announce_paid($dnct, hosting_order_by($dnct, 'id', $id));
+    return true;
 }
 
 function hosting_webhook_invoice_paid(PDO $dnct, array $order, $invoice): bool
@@ -322,6 +368,17 @@ function hosting_announce_paid(PDO $dnct, ?array $order): void
         . 'Panel hostingu: ' . hosting_public_url() . "\n"
         . "Logujesz się tym samym kontem DNCT co na stronie i w panelu gier.\n\n"
         . 'Twój hosting: ' . hosting_account_url());
+}
+
+/** Trwałe potwierdzenie wersji warunków i wyboru złożonego przy płatności. */
+function hosting_send_contract_confirmation(array $order): void
+{
+    $legal = order_contract_confirmation_text($order);
+    if ($legal === '') {
+        return;
+    }
+    hosting_mail($order, 'Potwierdzenie umowy - zamówienie #' . (int)$order['id'],
+        "Potwierdzamy zawarcie umowy i przyjęcie płatności za hosting.\n\n" . $legal);
 }
 
 /** Prosta wiadomość z info@ - błąd poczty nie wywraca webhooka. */

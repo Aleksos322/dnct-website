@@ -57,6 +57,12 @@ if (request_string('extend') === '1') {
     $package = (string)$current['package'];
     $extends = (int)$current['id'];
 } else {
+    if (!request_bool('terms_accepted')) {
+        json_error('Zaakceptuj Regulamin, aby przejść do płatności.', 422, [
+            'terms_accepted' => 'Akceptacja Regulaminu jest wymagana.',
+        ]);
+    }
+    $immediateServiceStart = request_bool('immediate_service_start');
     $package = request_string('package');
     if (!isset(HOSTING_PLANS[$package])) {
         json_error('Wybierz pakiet hostingu.', 422, [], ['reason' => 'invalid_selection']);
@@ -74,7 +80,22 @@ if (request_string('extend') === '1') {
 }
 
 $plan    = HOSTING_PLANS[$package];
-$orderId = hosting_order_create($dnct, $email, $name, $package, $billing, $extends);
+if ($extends === null && empty($immediateServiceStart) && $billing === 'subscription') {
+    json_error(
+        'Wybierz płatność jednorazową albo zaznacz natychmiastowe uruchomienie. Abonamentu nie uruchamiamy przed startem usługi.',
+        422,
+        ['billing_mode' => 'Przy uruchomieniu po 14 dniach wybierz płatność jednorazową.']
+    );
+}
+$orderId = hosting_order_create(
+    $dnct,
+    $email,
+    $name,
+    $package,
+    $billing,
+    $extends,
+    $extends === null ? ($immediateServiceStart ?? false) : null
+);
 $isSub   = $billing === 'subscription';
 
 $priceData = [
@@ -91,6 +112,10 @@ if ($isSub) {
 }
 
 $meta = ['order_id' => (string)$orderId, 'product' => 'hosting'];
+if ($extends === null) {
+    $meta['terms_version'] = DNCT_TERMS_VERSION;
+    $meta['immediate_service_start'] = !empty($immediateServiceStart) ? 'yes' : 'no';
+}
 
 try {
     stripe_init();

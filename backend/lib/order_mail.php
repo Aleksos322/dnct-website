@@ -106,6 +106,35 @@ function send_order_paid_mail(array $order, ?string $adminUser = null, ?string $
     );
 }
 
+/**
+ * Potwierdzenie zawarcia umowy wysyłamy zaraz po otrzymaniu płatności, zanim
+ * uruchomimy usługę. Dzięki temu klient dostaje trwały zapis wersji warunków
+ * i wyboru startu także wtedy, gdy wybrał uruchomienie po 14 dniach.
+ */
+function send_order_contract_confirmation_mail(array $order): array
+{
+    $legal = order_contract_confirmation_text($order);
+    if ($legal === '') {
+        return ['ok' => true, 'error' => ''];
+    }
+
+    $text = 'Cześć ' . (string)$order['user_name'] . ",\n\n"
+        . 'Potwierdzamy zawarcie umowy i przyjęcie płatności za zamówienie #'
+        . (int)$order['id'] . ".\n\n"
+        . $legal
+        . "\nDNCT Hosting";
+    $html = '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#111">'
+        . nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . '</div>';
+
+    return send_mail(
+        (string)$order['user_email'],
+        'Potwierdzenie umowy - zamówienie #' . (int)$order['id'],
+        $html,
+        $text,
+        'info'
+    );
+}
+
 /** Ostrzeżenie po nieudanej płatności cyklicznej. */
 function send_payment_failed_mail(array $order): array
 {

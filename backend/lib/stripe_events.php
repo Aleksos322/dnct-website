@@ -155,59 +155,81 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
             (int)$order['period_days']
         );
 
-        // Świeży odczyt: order_mark_paid ustawił daty, a provisioning opisuje nimi
-        // serwer.
-        $order  = order_by_id($dnct, $orderId);
-        $result = provision_server($order);
+        // Świeży odczyt: order_mark_paid ustawił daty i zachował wybór klienta.
+        $order = order_by_id($dnct, $orderId);
+        if ($order === null) {
+            return false;
+        }
+        try {
+            $sent = send_order_contract_confirmation_mail($order);
+            if (!$sent['ok']) {
+                error_log('Zamówienie #' . $orderId . ': mail z potwierdzeniem umowy nie wyszedł - ' . $sent['error']);
+            }
+        } catch (Throwable $e) {
+            error_log('Zamówienie #' . $orderId . ': błąd maila z potwierdzeniem umowy - ' . $e->getMessage());
+        }
 
-        if (!$result['ok']) {
-            order_mark_failed($dnct, $orderId, (string)$result['error']);
-
-            /* Pieniądze są u nas, usługi nie ma. To sytuacja wymagająca człowieka,
-               więc powiadamiamy OBIE strony: klienta, żeby nie czekał w
-               nieskończoność, i administrację, żeby ktoś to podjął. */
+        if (empty($order['immediate_service_requested_at'])) {
             notify_user(
                 $dnct,
                 (string)$order['user_name'],
-                'error',
-                'Serwer nie został jeszcze utworzony',
-                'Płatność się powiodła, ale automatyczne zakładanie serwera nie doszło do skutku. '
-                . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
+                'info',
+                'Płatność przyjęta - uruchomienie po terminie odstąpienia',
+                'Nie wybrano natychmiastowego startu. Serwer uruchomimy '
+                . czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i') . '.'
             );
-            notify_admins(
-                $dnct,
-                'error',
-                'Zamówienie #' . $orderId . ' opłacone, serwer NIE utworzony',
-                (string)$result['error']
-            );
-
-            // Zwracamy prawdę, nie wyjątek: powtórka doręczenia niczego nie naprawi,
-            // bo problem jest po stronie Pterodactyla, a nie doręczenia zdarzenia.
             return true;
         }
 
-        order_mark_provisioned(
-            $dnct,
-            $orderId,
-            (int)$result['ptero_user_id'],
-            (int)$result['server_id'],
-            (string)$result['uuid']
-        );
-
-        order_announce_paid(
-            $dnct,
-            order_by_id($dnct, $orderId),
-            $result['game_admin_user'] ?? null,
-            $result['game_admin_password'] ?? null
-        );
-
-        return true;
+        return webhook_provision_paid_order($dnct, $order);
     } finally {
         // Zwolnienie na WŁASNYM połączeniu - jeśli coś wyżej rzuciło wyjątek,
         // blokada i tak musi zniknąć, inaczej kolejne doręczenie dla tego
         // zamówienia czekałoby 15 sekund i dostało 500 bez powodu.
         $dnct->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
     }
+}
+
+/** Wspólna końcówka dla webhooka i bezpiecznego uruchomienia odroczonego. */
+function webhook_provision_paid_order(PDO $dnct, array $order): bool
+{
+    $orderId = (int)$order['id'];
+    $result = provision_server($order);
+
+    if (!$result['ok']) {
+        order_mark_failed($dnct, $orderId, (string)$result['error']);
+        notify_user(
+            $dnct,
+            (string)$order['user_name'],
+            'error',
+            'Serwer nie został jeszcze utworzony',
+            'Płatność się powiodła, ale automatyczne zakładanie serwera nie doszło do skutku. '
+            . 'Zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.'
+        );
+        notify_admins(
+            $dnct,
+            'error',
+            'Zamówienie #' . $orderId . ' opłacone, serwer NIE utworzony',
+            (string)$result['error']
+        );
+        return true;
+    }
+
+    order_mark_provisioned(
+        $dnct,
+        $orderId,
+        (int)$result['ptero_user_id'],
+        (int)$result['server_id'],
+        (string)$result['uuid']
+    );
+    order_announce_paid(
+        $dnct,
+        order_by_id($dnct, $orderId),
+        $result['game_admin_user'] ?? null,
+        $result['game_admin_password'] ?? null
+    );
+
+    return true;
 }
 
 /**

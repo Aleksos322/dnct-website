@@ -22,6 +22,8 @@
     var elHint   = document.querySelector('[data-role="methodsHint"]');
     var elError  = document.querySelector('[data-role="error"]');
     var btnPay   = document.querySelector('[data-role="pay"]');
+    var elTerms  = document.querySelector('[data-role="terms"]');
+    var elImmediateStart = document.querySelector('[data-role="immediateStart"]');
 
     function availableDays() {
         return Object.keys(data.quotes).map(Number).sort(function (a, b) { return a - b; });
@@ -69,7 +71,9 @@
             ? 'Abonament wymaga karty - BLIK i przelewy nie obsługują płatności cyklicznych.'
             : 'Zapłacisz kartą lub BLIK-iem. Pełną listę metod zobaczysz w Checkoucie.';
 
-        if (btnPay && !btnPay.hasAttribute('data-locked')) btnPay.disabled = false;
+        if (btnPay && !btnPay.hasAttribute('data-locked')) {
+            btnPay.disabled = !data.sales_enabled || !elTerms || !elTerms.checked;
+        }
     }
 
     document.querySelectorAll('[data-role="periods"] .ord-option').forEach(function (btn) {
@@ -82,6 +86,18 @@
         });
     });
 
+    if (elTerms) {
+        elTerms.addEventListener('change', render);
+    }
+    if (elImmediateStart) {
+        elImmediateStart.addEventListener('change', function () {
+            // Bez natychmiastowego startu nie zakładamy subskrypcji, która
+            // mogłaby odnowić się zanim usługa w ogóle ruszy.
+            if (!elImmediateStart.checked && state.mode === 'subscription') state.mode = 'payment';
+            render();
+        });
+    }
+
     document.querySelectorAll('[data-role="modes"] .ord-option').forEach(function (btn) {
         btn.addEventListener('click', function () {
             if (btn.disabled) return;
@@ -93,6 +109,11 @@
     if (btnPay) {
         btnPay.addEventListener('click', function () {
             if (btnPay.disabled) return;
+
+            if (!elTerms || !elTerms.checked) {
+                fail('Zaakceptuj Regulamin, aby przejść do płatności.');
+                return;
+            }
 
             // Blokada na czas żądania. Bez niej podwójne kliknięcie zakłada
             // dwie sesje Stripe'a i dwa wiersze w tabeli zamówień.
@@ -110,7 +131,9 @@
                     plan_id:      data.plan_id || 0,
                     slots:        data.slots || 0,
                     period_days:  state.days,
-                    billing_mode: state.mode
+                    billing_mode: state.mode,
+                    terms_accepted: true,
+                    immediate_service_start: !!(elImmediateStart && elImmediateStart.checked)
                 })
             })
                 .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
@@ -133,7 +156,7 @@
             elError.hidden = false;
         }
         btnPay.removeAttribute('data-locked');
-        btnPay.disabled = false;
+        btnPay.disabled = !data.sales_enabled || !elTerms || !elTerms.checked;
         btnPay.textContent = 'Przejdź do płatności';
     }
 

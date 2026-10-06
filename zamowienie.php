@@ -202,6 +202,18 @@ ob_start();
             <a class="ord-cta" href="/login?return_to=<?php echo htmlspecialchars(rawurlencode($returnTo)); ?>">Zaloguj się, żeby zamówić</a>
             <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu - dlatego potrzebujemy logowania.</p>
         <?php else: ?>
+            <fieldset class="ord-consents" data-role="consents">
+                <legend>Warunki zamówienia</legend>
+                <label class="ord-check">
+                    <input type="checkbox" data-role="terms" required>
+                    <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin DNCT</a>.</span>
+                </label>
+                <label class="ord-check ord-check-start">
+                    <input type="checkbox" data-role="immediateStart">
+                    <span>Żądam rozpoczęcia usługi niezwłocznie po potwierdzeniu płatności. Przyjmuję do wiadomości, że po pełnym wykonaniu usługi mogę utracić prawo odstąpienia, jeżeli są spełnione warunki ustawowe.</span>
+                </label>
+                <p class="ord-consents-hint">Bez tego żądania zapłacisz teraz, a usługę uruchomimy po 14 dniach od zawarcia umowy.</p>
+            </fieldset>
             <button type="button" class="ord-cta" data-role="pay"
                     <?php echo stripe_sales_enabled() ? '' : 'disabled'; ?>>
                 Przejdź do płatności
@@ -210,7 +222,6 @@ ob_start();
         <?php endif; ?>
 
         <p class="ord-legal">
-            Klikając, akceptujesz <a href="/regulamin">Regulamin</a>.
             Płatność obsługuje Stripe - nie przechowujemy danych Twojej karty.
             <?php if (stripe_is_test_mode()): ?>
                 <span class="ord-testmode">Tryb testowy - żadne pieniądze nie są pobierane.</span>
@@ -227,6 +238,7 @@ ob_start();
         'game'    => $spec['game_type'],
         'plan_id' => $spec['plan_id'],
         'slots'   => $spec['slots'],
+        'sales_enabled' => stripe_sales_enabled(),
         'quotes'  => array_map(
             static fn(array $byMode): array => array_map(
                 static fn(array $q): array => [

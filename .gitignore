@@ -17,3 +17,6 @@ backend/mail/vendor/
 
 # Raporty narzędzia /impeccable - lokalny artefakt recenzji, nie kod strony
 .impeccable/
+
+# Blokady i logi cronów (deferred-provision, stripe-recovery) - stan maszyny, nie kod
+backend/dane/
