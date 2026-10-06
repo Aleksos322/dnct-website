@@ -164,6 +164,12 @@
 
     // Start: miesiąc, jeśli jest - to najczęstszy wybór i domyślny w cenniku.
     var days = availableDays();
-    state.days = days.indexOf(30) !== -1 ? 30 : days[0];
+    // Okres i model przekazane z konfiguratora slotów (?days=&mode=) - nie pytamy drugi raz.
+    var params = new URLSearchParams(window.location.search);
+    var wantDays = parseInt(params.get('days') || '', 10);
+    state.days = days.indexOf(wantDays) !== -1 ? wantDays : (days.indexOf(30) !== -1 ? 30 : days[0]);
+    if (params.get('mode') === 'payment' || params.get('mode') === 'subscription') {
+        state.mode = params.get('mode');
+    }
     render();
 })();
