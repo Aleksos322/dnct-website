@@ -64,7 +64,17 @@ function provision_game_map(): array
             'nest'           => 7,
             'egg'            => 26,  // Project Zomboid B42
             'fallback_image' => 'ghcr.io/pterodactyl/yolks:debian',
-            'env' => static fn(array $order, array $alloc): array => [
+            // Drugi port na STEAM_PORT (-udpport). Ten sam port co SERVER_PORT
+            // kończył się "Connection Startup Failed. Code: 5" (port zajęty)
+            // i serwer w kółko wstawał od nowa (serwer aleksos322, 07.10.2026).
+            'extra_ports'    => 1,
+            // ProjectZomboid64.json ma na sztywno -Xmx8g, a serwer dostaje
+            // limit 6-12 GB: Java przekraczała limit, kontener ginął (OOM, 137).
+            // Plik nadpisuje każda aktualizacja ze Steama, więc poprawiamy go
+            // przy KAŻDYM starcie: 3/4 limitu RAM, reszta na pamięć poza stertą.
+            // Bez gwiazdki w arytmetyce - startup idzie przez niecytowane echo.
+            'startup_prefix' => 'sed -i -E "s/-Xmx[0-9]+[mMgG]/-Xmx$((SERVER_MEMORY-SERVER_MEMORY/4))m/" ProjectZomboid64.json ; ',
+            'env' => static fn(array $order, array $alloc, array $extra = []): array => [
                 'SERVER_NAME'   => 'ProjectZomboid',
                 'ADMIN_USER'    => (string)$order['user_name'],
                 // Hasło administratora gry losujemy per serwer. Stara wersja
@@ -89,7 +99,7 @@ function provision_game_map(): array
                 // Port, a nie identyfikator alokacji. Stara wersja wstawiała
                 // tu `$freeAllocationId`, czyli numer wiersza w bazie - serwer
                 // dostawał zupełnie inny port, niż faktycznie nasłuchiwał.
-                'STEAM_PORT'    => (string)$alloc['port'],
+                'STEAM_PORT'    => (string)($extra[0]['port'] ?? $alloc['port']),
             ],
         ],
 
@@ -125,7 +135,7 @@ function provision_game_map(): array
  *
  * @return array{id:int,port:int}|null
  */
-function provision_free_allocation(int $nodeId = PROVISION_NODE_ID): ?array
+function provision_free_allocation(int $nodeId = PROVISION_NODE_ID, array $pomin = []): ?array
 {
     $res = pterodactyl_api_request('GET', "/api/application/nodes/{$nodeId}/allocations?per_page=100");
 
@@ -137,7 +147,7 @@ function provision_free_allocation(int $nodeId = PROVISION_NODE_ID): ?array
 
     foreach ($res['body']['data'] as $row) {
         $attr = $row['attributes'] ?? [];
-        if (($attr['assigned'] ?? true) === false) {
+        if (($attr['assigned'] ?? true) === false && !in_array((int)$attr['id'], $pomin, true)) {
             return ['id' => (int)$attr['id'], 'port' => (int)$attr['port']];
         }
     }
@@ -204,6 +214,16 @@ function provision_server(array $order): array
         return ['ok' => false, 'error' => 'Brak wolnych portów na węźle ' . PROVISION_NODE_ID];
     }
 
+    // Gry z dodatkowym portem (Zomboid: STEAM_PORT) dostają kolejne wolne alokacje.
+    $extra = [];
+    for ($i = 0; $i < (int)($game['extra_ports'] ?? 0); $i++) {
+        $kolejna = provision_free_allocation(PROVISION_NODE_ID, array_merge([$alloc['id']], array_column($extra, 'id')));
+        if ($kolejna === null) {
+            return ['ok' => false, 'error' => 'Brak wolnych portów na węźle ' . PROVISION_NODE_ID];
+        }
+        $extra[] = $kolejna;
+    }
+
     $egg = provision_egg_defaults($game['nest'], $game['egg'], $game['fallback_image']);
 
     $label = $order['slots'] !== null
@@ -215,7 +235,7 @@ function provision_server(array $order): array
     // żeby dało się je pokazać klientowi w mailu/powiadomieniu. Wcześniej
     // to hasło znikało bezpowrotnie zaraz po wysłaniu do Pterodactyla -
     // klient nie miał ŻADNEGO sposobu, żeby się dowiedzieć, jakie dostał.
-    $environment = ($game['env'])($order, $alloc);
+    $environment = ($game['env'])($order, $alloc, $extra);
 
     $payload = [
         'name'        => ucfirst($gameType) . ' - ' . $order['user_name'],
@@ -241,15 +261,15 @@ function provision_server(array $order): array
         'feature_limits' => [
             'databases'   => 1,
             'backups'     => (int)$order['backups_limit'],
-            'allocations' => 1,
+            'allocations' => 1 + count($extra),
         ],
-        'allocation' => ['default' => $alloc['id']],
+        'allocation' => ['default' => $alloc['id'], 'additional' => array_column($extra, 'id')],
     ];
 
     // Pustą komendę pomijamy - Pterodactyl podstawi wtedy własną z jajka.
     // Wysłanie pustego napisu daje serwer, który nie ma czym wystartować.
     if ($egg['startup'] !== '') {
-        $payload['startup'] = $egg['startup'];
+        $payload['startup'] = ($game['startup_prefix'] ?? '') . $egg['startup'];
     }
 
     $res = pterodactyl_api_request('POST', '/api/application/servers', $payload);
