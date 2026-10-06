@@ -13,6 +13,12 @@
         <priority>0.9</priority>
     </url>
     <url>
+        <loc>https://game.dnct.pl/hosting-project-zomboid</loc>
+        <lastmod>2026-10-07</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
         <loc>https://game.dnct.pl/regulamin</loc>
         <lastmod>2026-10-04</lastmod>
         <changefreq>monthly</changefreq>

@@ -2020,3 +2020,13 @@
     .cennik-page .cnk-ping .pg5 { opacity: 1; }
 }
 
+
+/* Strona gry (/hosting-project-zomboid): wstęp pod nagłówkiem i FAQ */
+.cnk-focus-lead { margin: 1rem 0 0; max-width: 34rem; color: #cbd5e1; font-size: 1rem; line-height: 1.6; }
+.cnk-focus-faq { margin: 2.5rem 0 1.5rem; padding: clamp(1.25rem, 3vw, 2rem); border-radius: 1.25rem; }
+.cnk-focus-faq h2 { margin: 0 0 1rem; font-size: 1.25rem; font-weight: 800; color: #f1f5f9; }
+.cnk-focus-faq details { border-top: 1px solid rgba(148, 163, 184, 0.15); padding: 0.85rem 0; }
+.cnk-focus-faq summary { cursor: pointer; font-weight: 700; color: #e2e8f0; }
+.cnk-focus-faq details p { margin: 0.6rem 0 0; color: #cbd5e1; line-height: 1.6; }
+.cnk-focus-faq .cnk-focus-more { margin: 1rem 0 0; color: #94a3b8; font-size: 0.9rem; }
+.cnk-focus-faq a { color: #c4b5fd; }

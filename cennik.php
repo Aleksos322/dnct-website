@@ -60,6 +60,24 @@ const CENNIK_TRAILER_YT = '';
 /** Dokąd prowadzi przycisk demo. Panel wpuszcza przez to samo SSO co strona. */
 const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
+const CENNIK_STRONY_GIER = [
+    'zomboid' => [
+        'slug'        => 'hosting-project-zomboid',
+        'title'       => 'Hosting Project Zomboid - serwer od 29,99 zł/mies. | DNCT',
+        'description' => 'Serwer Project Zomboid (Build 42) od 29,99 zł miesięcznie: od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwerownia w Polsce. Uruchomienie od razu po płatności kartą lub BLIK-iem.',
+        'h1_accent'   => 'Hosting',
+        'h1_rest'     => 'Project Zomboid',
+        'lead'        => 'Serwer Build 42 dla Ciebie i znajomych - od 5 do 100 graczy. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam, bez czekania na nikogo.',
+        'faq'         => [
+            ['Ile kosztuje serwer Project Zomboid?', 'Od 29,99 zł miesięcznie za serwer na 5 graczy (6 GB RAM, 3 vCore). Cena rośnie z liczbą slotów - przesuń suwak wyżej, żeby zobaczyć dokładny pakiet. Płatność roczna liczy się jak jedenaście miesięcy.'],
+            ['Która wersja gry jest na serwerze?', 'Aktualny Build 42 z gałęzi publicznej Steama. Serwer sprawdza aktualizacje przy każdym starcie, więc nie musisz niczego wgrywać ręcznie.'],
+            ['Czy mogę dodać mody ze Steam Workshop?', 'Tak. Konfigurację serwera (w tym listę modów i Workshop ID) edytujesz w panelu, w menedżerze plików, a po restarcie serwer sam pobierze mody.'],
+            ['Jak szybko serwer jest gotowy?', 'Zakładamy go automatycznie zaraz po płatności. Pierwsze uruchomienie pobiera grę ze Steama (ok. 7 GB), co zwykle trwa kilka minut. Dane administratora gry dostajesz w mailu.'],
+            ['Gdzie stoi serwer?', 'Na naszym sprzęcie w Polsce, więc ping z polskich łączy jest niski. Serwerem zarządzasz w panelu: konsola, pliki, kopie zapasowe na żądanie i restart jednym kliknięciem.'],
+        ],
+    ],
+];
+
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
 $metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Stałe limity RAM i CPU, ochrona DDoS i dyski SSD.';
 $canonicalUrl    = 'https://game.dnct.pl/cennik';
@@ -163,6 +181,23 @@ foreach ($games as $gi => $g) {
 
 $isSellable     = static fn(array $g): bool => $g['plans'] !== [] || $g['tiers'] !== [];
 $gamesWithPlans = array_values(array_filter($games, $isSellable));
+
+/* Strona gry (np. /hosting-project-zomboid) to ten sam cennik z otwartą
+   zakładką tej gry i własnym tytułem - wrapper ustawia $focusGame przed
+   require. Bez tego wszystko jak w zwykłym /cennik. */
+$focusGame = $focusGame ?? null;
+$focus     = $focusGame !== null ? (CENNIK_STRONY_GIER[$focusGame] ?? null) : null;
+$activeIdx = 0;
+foreach ($gamesWithPlans as $gi => $g) {
+    if ($focus !== null && $g['type'] === $focusGame) {
+        $activeIdx = $gi;
+    }
+}
+if ($focus !== null) {
+    $pageTitle       = $focus['title'];
+    $metaDescription = $focus['description'];
+    $canonicalUrl    = 'https://game.dnct.pl/' . $focus['slug'];
+}
 $gamesSoon      = array_values(array_filter($games, static fn(array $g): bool => !$isSellable($g)));
 $periods        = $periods ?? [];
 $liveServers    = $liveServers ?? 0;
@@ -270,7 +305,7 @@ ob_start();
          ekranach dekoracje wchodziłyby pod treść. */ ?>
 <div class="cnk-decor-layer" aria-hidden="true">
     <?php foreach ($gamesWithPlans as $i => $game): ?>
-        <div class="cnk-decor-set<?php echo $i === 0 ? ' is-active' : ''; ?>"
+        <div class="cnk-decor-set<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
              data-decor-for="game-<?php echo htmlspecialchars($game['type']); ?>">
             <?php render_game_decor((string)$game['type']); ?>
         </div>
@@ -309,9 +344,16 @@ ob_start();
                      ekranu (bez JS zostaje widoczny od razu, normalnie) I
                      zrodlo dla animacji, wiec nie ma dwoch kopii tego samego
                      napisu do rozjechania przy edycji. */ ?>
+<?php if ($focus !== null): ?>
+            <h1 class="cnk-h1"><span class="cnk-h1-accent"><?php echo htmlspecialchars($focus['h1_accent']); ?></span><br>
+                <span><?php echo htmlspecialchars($focus['h1_rest']); ?></span>
+            </h1>
+            <p class="cnk-focus-lead"><?php echo htmlspecialchars($focus['lead']); ?></p>
+            <?php else: ?>
             <h1 class="cnk-h1"><span class="cnk-h1-accent" data-type-text>Serwer</span><span data-type-text>, który</span><br>
                 <span data-type-text data-type-pause="220">nie zwalnia</span>
             </h1>
+            <?php endif; ?>
         </div>
 
         <?php /* SZYNA OBOK NAGŁÓWKA, nie pod nim.
@@ -392,9 +434,9 @@ ob_start();
             <div class="cennik-tabs" role="tablist">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
                     <button type="button"
-                            class="cennik-tab<?php echo $i === 0 ? ' is-active' : ''; ?>"
+                            class="cennik-tab<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                             role="tab"
-                            aria-selected="<?php echo $i === 0 ? 'true' : 'false'; ?>"
+                            aria-selected="<?php echo $i === $activeIdx ? 'true' : 'false'; ?>"
                             data-target="game-<?php echo htmlspecialchars($game['type']); ?>">
                         <?php if (!empty($game['icon_img'])): ?>
                             <img src="/assets/media/Server_card/icons/<?php echo htmlspecialchars(basename($game['icon_img'])); ?>"
@@ -410,7 +452,7 @@ ob_start();
         <?php endif; ?>
 
         <?php foreach ($gamesWithPlans as $i => $game): ?>
-            <div class="cennik-panel<?php echo $i === 0 ? ' is-active' : ''; ?>"
+            <div class="cennik-panel<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                  id="game-<?php echo htmlspecialchars($game['type']); ?>"
                  role="tabpanel">
 
@@ -584,6 +626,19 @@ ob_start();
             </div>
         </div>
     </section>
+
+    <?php if ($focus !== null): ?>
+        <section class="cnk-focus-faq glass" aria-labelledby="cnk-focus-faq-h">
+            <h2 id="cnk-focus-faq-h">Najczęstsze pytania o <?php echo htmlspecialchars($focus['h1_rest']); ?></h2>
+            <?php foreach ($focus['faq'] as [$q, $a]): ?>
+                <details>
+                    <summary><?php echo htmlspecialchars($q); ?></summary>
+                    <p><?php echo htmlspecialchars($a); ?></p>
+                </details>
+            <?php endforeach; ?>
+            <p class="cnk-focus-more">Inne gry: <a href="/cennik">pełny cennik</a>.</p>
+        </section>
+    <?php endif; ?>
 
     <div class="cennik-note">
         <p>
