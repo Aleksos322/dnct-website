@@ -202,6 +202,12 @@ ob_start();
             <a class="ord-cta" href="/login?return_to=<?php echo htmlspecialchars(rawurlencode($returnTo)); ?>">Zaloguj się, żeby zamówić</a>
             <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu - dlatego potrzebujemy logowania.</p>
         <?php else: ?>
+            <?php $kodStartowy = strtoupper(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($_GET['kod'] ?? $_COOKIE['dnct_kod'] ?? '')) ?? ''); ?>
+            <label class="ord-promo">
+                <span>Kod rabatowy <small>(opcjonalnie)</small></span>
+                <input type="text" data-role="promo" maxlength="64" autocomplete="off" spellcheck="false"
+                       value="<?php echo htmlspecialchars(substr($kodStartowy, 0, 64)); ?>" placeholder="np. kod twórcy">
+            </label>
             <fieldset class="ord-consents" data-role="consents">
                 <legend>Warunki zamówienia</legend>
                 <label class="ord-check">

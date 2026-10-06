@@ -24,6 +24,7 @@
     var btnPay   = document.querySelector('[data-role="pay"]');
     var elTerms  = document.querySelector('[data-role="terms"]');
     var elImmediateStart = document.querySelector('[data-role="immediateStart"]');
+    var elPromo  = document.querySelector('[data-role="promo"]');
 
     function availableDays() {
         return Object.keys(data.quotes).map(Number).sort(function (a, b) { return a - b; });
@@ -133,7 +134,8 @@
                     period_days:  state.days,
                     billing_mode: state.mode,
                     terms_accepted: true,
-                    immediate_service_start: !!(elImmediateStart && elImmediateStart.checked)
+                    immediate_service_start: !!(elImmediateStart && elImmediateStart.checked),
+                    promo_code:   elPromo ? elPromo.value.trim() : ''
                 })
             })
                 .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })

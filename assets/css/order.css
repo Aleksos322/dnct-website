@@ -241,3 +241,8 @@
     .cennik-page .ord-cta:hover:not(:disabled) { transform: none; }
     .cennik-page .suc-spin { animation: none; }
 }
+.cennik-page .ord-promo { display: block; margin-top: 1.15rem; }
+.cennik-page .ord-promo span { display: block; margin-bottom: 0.4rem; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; }
+.cennik-page .ord-promo small { font-weight: 600; letter-spacing: 0; text-transform: none; color: #64748b; }
+.cennik-page .ord-promo input { width: 100%; padding: 0.6rem 0.8rem; border-radius: 0.6rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.55); color: #f1f5f9; font: inherit; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.cennik-page .ord-promo input:focus { outline: 2px solid #8b5cf6; outline-offset: 1px; }

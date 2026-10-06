@@ -42,6 +42,16 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
+// Link twórcy (?kod=NAZWA na dowolnej stronie) - zapamiętujemy kod na 30 dni,
+// formularz zamówienia wpisze go sam. Sprawdzenie ważności dopiero przy zakupie.
+if (isset($_GET['kod']) && !headers_sent()) {
+    $kodLinku = strtoupper(preg_replace('/[^A-Za-z0-9_-]/', '', (string)$_GET['kod']) ?? '');
+    if ($kodLinku !== '' && strlen($kodLinku) <= 64) {
+        setcookie('dnct_kod', $kodLinku, ['expires' => time() + 30 * 86400, 'path' => '/', 'secure' => !empty($_SERVER['HTTPS']), 'httponly' => false, 'samesite' => 'Lax']);
+        $_COOKIE['dnct_kod'] = $kodLinku;
+    }
+}
+
 $isLoggedIn = isset($_SESSION['authentik_username']);
 $username   = $_SESSION['authentik_username'] ?? null;
 $email      = $_SESSION['authentik_email'] ?? null;

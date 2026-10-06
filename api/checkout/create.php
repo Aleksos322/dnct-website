@@ -6,7 +6,7 @@
  * front ma przekierować przeglądarkę.
  *
  * Wejście:  { game_type, plan_id | slots, period_days, billing_mode,
- *             terms_accepted, immediate_service_start, csrf_token }
+ *             terms_accepted, immediate_service_start, promo_code?, csrf_token }
  * Wyjście:  { ok: true, url: "https://checkout.stripe.com/..." }
  *
  * CZEGO TU NIE MA, I TO CELOWO: kwoty. Klient przysyła wyłącznie to, CO wybrał;
@@ -20,6 +20,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/stripe.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/coupons.php';
 
 require_method('POST');
 csrf_guard();
@@ -81,8 +82,23 @@ if (!$immediateServiceStart && $quote['billing_mode'] === 'subscription') {
     );
 }
 
-$dnct    = dnct_db();
+$dnct = dnct_db();
+
+/* Kod z formularza sprawdzamy PRZED założeniem zamówienia - zły kod ma
+   zatrzymać klienta na stronie z komunikatem, nie zostawić wiszące zamówienie. */
+$promo = null;
+if (trim(request_string('promo_code')) !== '') {
+    $promo = coupon_for_checkout($dnct, request_string('promo_code'), $email);
+    if (!$promo['ok']) {
+        json_error($promo['error'], 422, ['promo_code' => $promo['error']], ['reason' => 'invalid_promo']);
+    }
+}
+
 $orderId = order_create($dnct, $quote, $email, $name, $immediateServiceStart);
+if ($promo !== null) {
+    // Po tym kodzie webhook przypisze klienta do partnera (backend/lib/partnerzy.php).
+    $dnct->prepare('UPDATE orders SET promo_code = ? WHERE id = ?')->execute([$promo['code'], $orderId]);
+}
 
 stripe_init();
 
@@ -123,11 +139,6 @@ try {
         'mode'       => $isSubscription ? 'subscription' : 'payment',
         'line_items' => [['price_data' => $priceData, 'quantity' => 1]],
 
-        // Kupony obsługuje Stripe. Włączenie tego pola daje w Checkoucie pole
-        // "kod rabatowy", a poprawność kodu, limity i termin ważności sprawdza
-        // Stripe - my nie liczymy zniżek u siebie (patrz migracja 001).
-        'allow_promotion_codes' => true,
-
         'customer_email'      => $email,
         'client_reference_id' => (string)$orderId,
         'metadata'            => [
@@ -139,6 +150,15 @@ try {
         'success_url' => $base . '/sukces?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url'  => $base . '/cennik',
     ];
+
+    /* Kupony obsługuje Stripe - my nie liczymy zniżek u siebie (migracja 001).
+       Kod podany u nas idzie jako `discounts`; bez kodu zostawiamy pole
+       "kod rabatowy" w Checkoucie. Stripe nie przyjmuje obu naraz. */
+    if ($promo !== null) {
+        $params['discounts'] = [$promo['discount']];
+    } else {
+        $params['allow_promotion_codes'] = true;
+    }
 
     /* Metadane trafiają TAKŻE na subskrypcję. Zdarzenia `invoice.*` przychodzą
        z identyfikatorem subskrypcji, nie sesji - bez tego przy pierwszym

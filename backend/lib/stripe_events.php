@@ -22,6 +22,7 @@ require_once __DIR__ . '/notifications.php';
 require_once __DIR__ . '/order_mail.php';
 require_once __DIR__ . '/plan_change.php';
 require_once __DIR__ . '/hosting_orders.php';
+require_once __DIR__ . '/partnerzy.php';
 
 /**
  * Rozdzielenie zdarzeń.
@@ -41,13 +42,27 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
             if (hosting_is_hosting_session($event->data->object)) {
                 return hosting_webhook_checkout_completed($dnct, $event->data->object);
             }
-            return webhook_checkout_completed($dnct, $event->data->object);
+            // Prowizja twórcy dopiero PO obsłudze - zamówienie ma już status i dane.
+            $ok = webhook_checkout_completed($dnct, $event->data->object);
+            if ($ok) {
+                partner_po_sesji($dnct, $event->data->object);
+            }
+            return $ok;
 
         case 'invoice.paid':
             if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
                 return hosting_webhook_invoice_paid($dnct, $h, $event->data->object);
             }
-            return webhook_invoice_paid($dnct, $event->data->object);
+            $ok = webhook_invoice_paid($dnct, $event->data->object);
+            if ($ok) {
+                partner_po_fakturze($dnct, $event->data->object);
+            }
+            return $ok;
+
+        // Tylko dla programu partnerskiego - sam zwrot obsługujemy ręcznie.
+        case 'charge.refunded':
+            partner_po_zwrocie($dnct, $event->data->object);
+            return true;
 
         case 'invoice.payment_failed':
             if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {

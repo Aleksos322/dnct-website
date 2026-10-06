@@ -17,6 +17,14 @@
  *   - Coupon         - sama zniżka (ile procent / ile złotych, jak długo),
  *   - PromotionCode  - kod, który klient wpisuje, wraz z limitami użycia.
  * Robimy oba naraz, bo osobno nie mają sensu dla nikogo poza Stripe'em.
+ *
+ * WYJĄTEK: kupon "na start" (first_order_only). Stripe nie umie sam sprawdzić
+ * "pierwszy zakup w DNCT" (jego restrictions.first_time_transaction patrzy na
+ * klienta Stripe'a, a my zakładamy nowego przy każdej sesji). Taki kupon NIE
+ * ma PromotionCode - w Checkoucie nie da się go wpisać. Klient podaje kod
+ * w naszym formularzu zamówienia, my sprawdzamy historię zakupów
+ * (coupon_for_checkout) i dopiero wtedy doklejamy zniżkę do sesji.
+ * Limit użyć i termin pilnuje dalej Stripe - na samym Couponie.
  */
 
 declare(strict_types=1);
@@ -34,7 +42,8 @@ function coupon_normalize_code(string $code): string
  * Zakłada kupon w Stripe i zapisuje odbicie u nas.
  *
  * @param array{code:string,percent_off?:float,amount_off?:int,duration:string,
- *              duration_months?:int,max_redemptions?:int,redeem_by?:string} $in
+ *              duration_months?:int,max_redemptions?:int,redeem_by?:string,
+ *              first_order_only?:bool,partner_id?:int} $in
  * @return array{ok:bool,error?:string,code?:string}
  */
 function coupon_create(PDO $dnct, array $in, string $createdBy): array
@@ -67,6 +76,8 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
     }
 
     $months = $duration === 'repeating' ? max(1, (int)($in['duration_months'] ?? 1)) : null;
+    $firstOnly = !empty($in['first_order_only']);
+    $partnerId = !empty($in['partner_id']) ? (int)$in['partner_id'] : null;
     $maxUse = !empty($in['max_redemptions']) ? max(1, (int)$in['max_redemptions']) : null;
 
     $redeemBy = null;
@@ -106,13 +117,21 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
             $couponParams['duration_in_months'] = $months;
         }
 
-        $coupon = \Stripe\Coupon::create($couponParams);
+        $promo = null;
+        if ($firstOnly) {
+            // Limity na samym Couponie - PromotionCode go nie owija (patrz nagłówek).
+            if ($maxUse !== null)   { $couponParams['max_redemptions'] = $maxUse; }
+            if ($redeemBy !== null) { $couponParams['redeem_by'] = $redeemBy; }
+            $coupon = \Stripe\Coupon::create($couponParams);
+        } else {
+            $coupon = \Stripe\Coupon::create($couponParams);
 
-        $promoParams = ['coupon' => $coupon->id, 'code' => $code];
-        if ($maxUse !== null)   { $promoParams['max_redemptions'] = $maxUse; }
-        if ($redeemBy !== null) { $promoParams['expires_at'] = $redeemBy; }
+            $promoParams = ['coupon' => $coupon->id, 'code' => $code];
+            if ($maxUse !== null)   { $promoParams['max_redemptions'] = $maxUse; }
+            if ($redeemBy !== null) { $promoParams['expires_at'] = $redeemBy; }
 
-        $promo = \Stripe\PromotionCode::create($promoParams);
+            $promo = \Stripe\PromotionCode::create($promoParams);
+        }
     } catch (Throwable $e) {
         error_log('Kupony: Stripe odmówił - ' . $e->getMessage());
         return ['ok' => false, 'error' => 'Stripe odrzucił kupon: ' . $e->getMessage()];
@@ -121,13 +140,13 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
     $stmt = $dnct->prepare(
         'INSERT INTO coupons
             (code, stripe_coupon_id, stripe_promo_id, percent_off, amount_off, currency,
-             duration, duration_months, max_redemptions, redeem_by, active, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)'
+             duration, duration_months, max_redemptions, redeem_by, active, first_order_only, partner_id, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)'
     );
     $stmt->execute([
         $code,
         $coupon->id,
-        $promo->id,
+        $promo?->id,
         $percent,
         $amount,
         $amount !== null ? 'pln' : null,
@@ -135,6 +154,8 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
         $months,
         $maxUse,
         $redeemBy !== null ? date('Y-m-d H:i:s', $redeemBy) : null,
+        $firstOnly ? 1 : 0,
+        $partnerId,
         $createdBy,
     ]);
 
@@ -156,7 +177,7 @@ function coupons_list(PDO $dnct): array
  */
 function coupons_sync(PDO $dnct): void
 {
-    $rows = $dnct->query('SELECT id, stripe_promo_id FROM coupons WHERE active = 1')->fetchAll(PDO::FETCH_ASSOC);
+    $rows = $dnct->query('SELECT id, stripe_coupon_id, stripe_promo_id FROM coupons WHERE active = 1')->fetchAll(PDO::FETCH_ASSOC);
     if (!$rows) {
         return;
     }
@@ -171,12 +192,18 @@ function coupons_sync(PDO $dnct): void
 
     foreach ($rows as $row) {
         try {
+            if ($row['stripe_promo_id'] === null) {
+                // Kupon "na start": licznik i ważność są na samym Couponie.
+                $c = \Stripe\Coupon::retrieve((string)$row['stripe_coupon_id']);
+                $update->execute([(int)$c->times_redeemed, $c->valid ? 1 : 0, (int)$row['id']]);
+                continue;
+            }
             $promo = \Stripe\PromotionCode::retrieve((string)$row['stripe_promo_id']);
             $update->execute([(int)$promo->times_redeemed, $promo->active ? 1 : 0, (int)$row['id']]);
         } catch (Throwable $e) {
             // Kupon skasowany ręcznie w panelu Stripe'a albo chwilowy błąd API.
             // Jedno i drugie nie może wywrócić listy pozostałych kuponów.
-            error_log('Kupony: nie odświeżono ' . $row['stripe_promo_id'] . ' - ' . $e->getMessage());
+            error_log('Kupony: nie odświeżono ' . ($row['stripe_promo_id'] ?? $row['stripe_coupon_id']) . ' - ' . $e->getMessage());
         }
     }
 }
@@ -192,17 +219,21 @@ function coupon_deactivate(PDO $dnct, int $id): array
 {
     $stmt = $dnct->prepare('SELECT stripe_promo_id FROM coupons WHERE id = ?');
     $stmt->execute([$id]);
-    $promoId = $stmt->fetchColumn();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$promoId) {
+    if (!$row) {
         return ['ok' => false, 'error' => 'Nie ma takiego kuponu.'];
     }
 
-    try {
-        stripe_init();
-        \Stripe\PromotionCode::update((string)$promoId, ['active' => false]);
-    } catch (Throwable $e) {
-        return ['ok' => false, 'error' => 'Stripe odmówił: ' . $e->getMessage()];
+    // Kupon "na start" nie ma kodu w Stripe - wystarczy wyłączyć go u nas,
+    // bo tylko nasz formularz zamówienia umie go doczepić do sesji.
+    if ($row['stripe_promo_id'] !== null) {
+        try {
+            stripe_init();
+            \Stripe\PromotionCode::update((string)$row['stripe_promo_id'], ['active' => false]);
+        } catch (Throwable $e) {
+            return ['ok' => false, 'error' => 'Stripe odmówił: ' . $e->getMessage()];
+        }
     }
 
     $dnct->prepare('UPDATE coupons SET active = 0 WHERE id = ?')->execute([$id]);
@@ -224,4 +255,55 @@ function coupon_describe(array $c): string
     };
 
     return $what . ' - ' . $how;
+}
+
+/**
+ * Czy ten e-mail kiedykolwiek za coś zapłacił (gry albo hosting WWW).
+ * `expires_at` ustawia dopiero opłata, więc łapie też zamówienia, które
+ * później zostały anulowane albo skasowane po wygaśnięciu.
+ */
+function customer_has_purchase(PDO $dnct, string $email): bool
+{
+    foreach (['orders', 'hosting_orders'] as $t) {
+        $st = $dnct->prepare("SELECT 1 FROM {$t} WHERE user_email = ?
+                                AND (status IN ('paid', 'provisioned') OR expires_at IS NOT NULL) LIMIT 1");
+        $st->execute([$email]);
+        if ($st->fetchColumn()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Kod z formularza zamówienia -> zniżka do sesji Checkout.
+ * Limity użyć i daty sprawdzi jeszcze Stripe; tu odsiewamy to, czego on nie
+ * wie: wyłączony kupon i "tylko pierwszy zakup".
+ *
+ * @return array{ok:bool,error?:string,code?:string,discount?:array<string,string>}
+ */
+function coupon_for_checkout(PDO $dnct, string $rawCode, string $email): array
+{
+    $code = coupon_normalize_code($rawCode);
+    $st = $dnct->prepare('SELECT * FROM coupons WHERE code = ?');
+    $st->execute([$code]);
+    $c = $st->fetch(PDO::FETCH_ASSOC);
+
+    if (!$c || (int)$c['active'] !== 1 || ($c['redeem_by'] !== null && strtotime((string)$c['redeem_by']) <= time())) {
+        return ['ok' => false, 'error' => 'Ten kod nie istnieje albo już wygasł.'];
+    }
+    if ($c['max_redemptions'] !== null && (int)$c['times_redeemed'] >= (int)$c['max_redemptions']) {
+        return ['ok' => false, 'error' => 'Ten kod został już wykorzystany.'];
+    }
+    if ((int)$c['first_order_only'] === 1 && customer_has_purchase($dnct, $email)) {
+        return ['ok' => false, 'error' => 'Ten kod działa tylko przy pierwszym zakupie.'];
+    }
+
+    return [
+        'ok'       => true,
+        'code'     => $code,
+        'discount' => $c['stripe_promo_id'] !== null
+            ? ['promotion_code' => (string)$c['stripe_promo_id']]
+            : ['coupon' => (string)$c['stripe_coupon_id']],
+    ];
 }
