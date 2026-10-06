@@ -519,7 +519,7 @@
     font-weight: 900;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: #7c6ba8;
+    color: #9584c4;
     margin-bottom: 1rem;
 }
 
@@ -790,12 +790,13 @@
 .cennik-page .plan-pick {
     position: relative;
     display: flex;              /* karta ma wypełnić komórkę siatki na wysokość */
-    cursor: pointer;
+    cursor: default;
     border-radius: 26px;
     transition: transform 0.2s ease, box-shadow 0.25s ease;
     outline: none;
 }
 .cennik-page .plan-pick:focus-visible { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+.cennik-page .plan-pick.is-selectable { cursor: pointer; }
 .cennik-page .plan-pick.is-selected { box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); }
 .cennik-page .plan-pick[data-plan-soldout="1"] { cursor: not-allowed; }
 .cennik-page .plan-pick[data-plan-soldout="1"]:hover { transform: none; }
@@ -1279,7 +1280,7 @@
 .cennik-page .cennik-note {
     text-align: center;
     font-size: 0.78rem;
-    color: #64748b;
+    color: #94a3b8;
 }
 .cennik-page .cennik-note a { color: #a78bfa; text-decoration: underline; text-underline-offset: 3px; }
 
