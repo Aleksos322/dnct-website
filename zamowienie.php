@@ -184,7 +184,7 @@ ob_start();
         <div class="ord-line"><span>Pakiet</span><strong><?php echo htmlspecialchars((string)$spec['label']); ?></strong></div>
         <div class="ord-line"><span>RAM</span><strong><?php echo (int)$spec['ram_mb']; ?> MB</strong></div>
         <div class="ord-line"><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)$spec['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
-        <div class="ord-line"><span>Dysk</span><strong><?php echo (int)$spec['ssd_mb']; ?> MB NVMe</strong></div>
+        <div class="ord-line"><span>Dysk</span><strong><?php echo (int)$spec['ssd_mb']; ?> MB SSD</strong></div>
         <div class="ord-line"><span>Backupy</span><strong><?php echo (int)$spec['backups_limit']; ?></strong></div>
         <div class="ord-line"><span>Okres</span><strong data-role="sumPeriod"></strong></div>
 

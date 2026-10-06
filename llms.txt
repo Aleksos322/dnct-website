@@ -1,7 +1,7 @@
 # DNCT Hosting
 
 > Hosting serwerów gier (Minecraft, Project Zomboid, Vintage Story i inne)
-> z ochroną DDoS, dyskami NVMe i wsparciem 24/7. Ceny od 3.99 PLN/miesiąc.
+> z ochroną DDoS, dyskami SSD i wsparciem 24/7. Ceny od 3.99 PLN/miesiąc.
 
 DNCT Hosting automatycznie uruchamia serwer do gry w kilka minut po
 opłaceniu, z panelem administracyjnym (Pterodactyl) do zarządzania plikami,

@@ -61,7 +61,7 @@ const CENNIK_TRAILER_YT = '';
 const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
-$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Gwarantowane zasoby bez oversellingu, ochrona DDoS i dyski NVMe.';
+$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Stałe limity RAM i CPU, ochrona DDoS i dyski SSD.';
 $canonicalUrl    = 'https://game.dnct.pl/cennik';
 $centerContent   = false;
 
@@ -202,7 +202,7 @@ foreach ($gamesWithPlans as $game) {
             '@type' => 'Product',
             'name'  => $game['name'] . ' - ' . $plan['name'],
             'description' => sprintf(
-                'Serwer %s: %s RAM, %s NVMe, %s vCore.',
+                'Serwer %s: %s RAM, %s SSD, %s vCore.',
                 $game['name'],
                 cennik_size((int)($plan['ram_mb'] ?? 0)),
                 cennik_size((int)($plan['ssd_mb'] ?? 0)),
@@ -217,8 +217,8 @@ foreach ($gamesWithPlans as $game) {
 $schemaFaq = [
     [
         'q' => 'Co jest wliczone w każdy plan hostingu DNCT?',
-        'a' => 'Pełny dostęp do panelu i konsoli, dyski NVMe bez współdzielenia RAM-u i CPU, '
-             . 'codzienne backupy z retencją 7 dni, ochrona DDoS (Cloudflare Magic Transit), '
+        'a' => 'Pełny dostęp do panelu i konsoli, dyski SSD ze stałymi limitami RAM-u i CPU, '
+             . 'kopie zapasowe w panelu na żądanie, ochrona DDoS, '
              . 'własna subdomena, zmiana wersji gry i wsparcie przez Discord bez systemu biletów.',
     ],
     [
@@ -228,10 +228,6 @@ $schemaFaq = [
     [
         'q' => 'Gdzie fizycznie stoją serwery DNCT Hosting?',
         'a' => 'Serwery stoją w Polsce, nie za granicą - krótsza droga oznacza niższy ping i mniej lagów w grze.',
-    ],
-    [
-        'q' => 'Czy RAM i CPU są dzielone z innymi klientami (overselling)?',
-        'a' => 'Nie. Zasoby są gwarantowane i nie są dzielone z nikim innym - zero oversellingu.',
     ],
     [
         'q' => 'Czy płatność roczna jest tańsza niż miesięczna?',
@@ -354,7 +350,7 @@ ob_start();
 
             <ul class="cnk-rail-points">
                 <li><span aria-hidden="true">✓</span> Gwarantowany RAM i CPU</li>
-                <li><span aria-hidden="true">✓</span> Dyski NVMe, bez oversellingu</li>
+                <li><span aria-hidden="true">✓</span> Dyski SSD, stałe limity RAM i CPU</li>
                 <li><span aria-hidden="true">✓</span> Ochrona DDoS w każdym planie</li>
             </ul>
         </aside>
@@ -538,9 +534,9 @@ ob_start();
             <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
             <ul class="cnk-list">
                 <li><span class="cnk-check" aria-hidden="true">✓</span> Pełny dostęp do panelu i konsoli</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Dyski NVMe, bez współdzielenia RAM-u i CPU</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Codzienne backupy z retencją 7 dni</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Ochrona DDoS: Cloudflare Magic Transit</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Dyski SSD, stałe limity RAM-u i CPU</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Kopie zapasowe w panelu na żądanie</li>
+                <li><span class="cnk-check" aria-hidden="true">✓</span> Ochrona DDoS</li>
                 <li><span class="cnk-check" aria-hidden="true">✓</span> Własna subdomena i zmiana wersji gry</li>
                 <li><span class="cnk-check" aria-hidden="true">✓</span> Wsparcie przez Discord, bez systemu biletów</li>
             </ul>
@@ -578,8 +574,8 @@ ob_start();
             </div>
 
             <div class="cnk-trust-item">
-                <strong>Zasoby są Twoje</strong>
-                <span>Zero oversellingu - RAM i CPU nie są dzielone z nikim innym.</span>
+                <strong>Twarde limity</strong>
+                <span>Każdy serwer ma w panelu własny, stały limit RAM i CPU.</span>
             </div>
 
             <div class="cnk-trust-item">

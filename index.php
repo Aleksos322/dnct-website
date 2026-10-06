@@ -136,7 +136,7 @@ require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 
 $pageTitle       = 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story - Od 3.99 PLN';
-$metaDescription = 'DNCT Hosting to serwery Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Start od 3.99 PLN, szybkie NVMe i wsparcie 24/7.';
+$metaDescription = 'DNCT Hosting to serwery Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Start od 3.99 PLN, szybkie dyski SSD i wsparcie 24/7.';
 $canonicalUrl    = 'https://game.dnct.pl/';
 $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
@@ -160,7 +160,7 @@ ob_start();
 
         <p class="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 px-4">
             Serwery Minecraft, Project Zomboid i Vintage Story.
-            Ochrona DDoS, szybkie NVMe i wsparcie 24/7.
+            Ochrona DDoS, szybkie dyski SSD i wsparcie 24/7.
         </p>
 
         <div class="flex flex-col md:flex-row justify-center gap-4 px-4">
@@ -222,12 +222,12 @@ ob_start();
             </h2>
             <p class="text-gray-400 mb-4">
                 DNCT Hosting to serwery dla Minecraft, Project Zomboid i Vintage Story,
-                od 3.99 PLN - stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
+                od 3.99 PLN - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
             </p>
             <p class="text-gray-400">
                 Serwery stoją na naszym własnym sprzęcie (Proxmox), nie na odsprzedanych
                 zasobach - stąd realna dostępność, nie tylko deklaracja. Do tego polska
-                infrastruktura, ochrona DDoS, codzienne backupy i wsparcie 24/7 przez Discord.
+                infrastruktura, ochrona DDoS, kopie zapasowe w panelu i wsparcie 24/7 przez Discord.
             </p>
         </div>
 
@@ -235,7 +235,7 @@ ob_start();
             <ul class="space-y-3 text-sm text-gray-300">
                 <?php foreach ([
                     'Ochrona DDoS i monitoring 24/7',
-                    'NVMe SSD, nowoczesne CPU, stabilne zasoby',
+                    'Dyski SSD, nowoczesne CPU, stabilne zasoby',
                     'Backupy i szybkie przywrócenie danych',
                     'Wsparcie dla modów i konfiguracji serwerów',
                     'Plany dla Minecraft, Zomboid i Vintage Story',

@@ -328,7 +328,7 @@ ob_start();
                 <div class="srv-specs">
                     <div><span>RAM</span><strong><?php echo srv_size((int)$o['ram_mb']); ?></strong></div>
                     <div><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)$o['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
-                    <div><span>Dysk NVMe</span><strong><?php echo srv_size((int)$o['ssd_mb']); ?></strong></div>
+                    <div><span>Dysk SSD</span><strong><?php echo srv_size((int)$o['ssd_mb']); ?></strong></div>
                     <div><span>Backupy</span><strong><?php echo (int)$o['backups_limit']; ?></strong></div>
                 </div>
 

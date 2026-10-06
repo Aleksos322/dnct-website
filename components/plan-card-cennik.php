@@ -92,7 +92,7 @@ function render_cennik_plan_card(array $p): void
     $specs = [
         ['label' => 'RAM',     'value' => (string)($p['ram'] ?? ''),
          'svg' => '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'],
-        ['label' => 'Dysk NVMe', 'value' => (string)($p['ssd'] ?? ''),
+        ['label' => 'Dysk SSD', 'value' => (string)($p['ssd'] ?? ''),
          'svg' => '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'],
         ['label' => 'Procesor', 'value' => (string)($p['cpu'] ?? ''),
          'svg' => '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>'],

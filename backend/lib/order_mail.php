@@ -189,7 +189,7 @@ function order_paid_text(array $v): string
         . "płatność {$v['amount']} zł została przyjęta, a serwer jest już uruchomiony.\n\n"
         . "Zamówienie #{$v['orderId']}\n"
         . "Gra: {$v['gameName']} ({$v['packageName']})\n"
-        . "Zasoby: {$v['ramMb']} MB RAM, {$v['cpuCores']} vCore, {$v['ssdMb']} MB NVMe\n"
+        . "Zasoby: {$v['ramMb']} MB RAM, {$v['cpuCores']} vCore, {$v['ssdMb']} MB SSD\n"
         . $credentials . "\n"
         . "OPŁACONE DO: {$v['expires']}\n"
         . "ZAWIESZENIE: {$v['suspends']}\n\n"

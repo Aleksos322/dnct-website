@@ -99,7 +99,7 @@ $isSubscription = $quote['billing_mode'] === 'subscription';
 
 $productName = sprintf('DNCT Hosting - %s (%s)', $quote['game_name'], $quote['label']);
 $productDesc = sprintf(
-    '%d MB RAM · %s vCore · %d MB NVMe · %s',
+    '%d MB RAM · %s vCore · %d MB SSD · %s',
     $quote['ram_mb'],
     rtrim(rtrim(number_format($quote['cpu_cores'], 1, '.', ''), '0'), '.'),
     $quote['ssd_mb'],

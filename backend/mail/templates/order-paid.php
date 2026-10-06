@@ -77,7 +77,7 @@ $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
                         </tr>
                         <tr>
                             <td style="padding:14px 18px; border-bottom:1px solid #f0f0f3; font-size:14px; color:#6b7280;">Zasoby</td>
-                            <td align="right" style="padding:14px 18px; border-bottom:1px solid #f0f0f3; font-size:14px; font-weight:700;"><?= (int)$ramMb ?> MB RAM · <?= $e($cpuCores) ?> vCore · <?= (int)$ssdMb ?> MB NVMe</td>
+                            <td align="right" style="padding:14px 18px; border-bottom:1px solid #f0f0f3; font-size:14px; font-weight:700;"><?= (int)$ramMb ?> MB RAM · <?= $e($cpuCores) ?> vCore · <?= (int)$ssdMb ?> MB SSD</td>
                         </tr>
                         <tr>
                             <td style="padding:14px 18px; font-size:14px; color:#6b7280;">Rozliczenie</td>
