@@ -23,6 +23,7 @@ require_once __DIR__ . '/order_mail.php';
 require_once __DIR__ . '/plan_change.php';
 require_once __DIR__ . '/hosting_orders.php';
 require_once __DIR__ . '/partnerzy.php';
+require_once __DIR__ . '/polecenia.php';
 
 /**
  * Rozdzielenie zdarzeń.
@@ -46,6 +47,7 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
             $ok = webhook_checkout_completed($dnct, $event->data->object);
             if ($ok) {
                 partner_po_sesji($dnct, $event->data->object);
+                polecenie_po_sesji($dnct, $event->data->object);
             }
             return $ok;
 

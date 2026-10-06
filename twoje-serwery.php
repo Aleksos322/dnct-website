@@ -64,6 +64,17 @@ if ($isLoggedIn) {
         error_log('twoje-serwery: baza panelu niedostępna - ' . $e->getMessage());
     }
 
+    // Kod "Poleć znajomemu" - powstaje przy pierwszym wejściu klienta z opłaconym zakupem.
+    $polecenie = null;
+    try {
+        require_once __DIR__ . '/backend/lib/polecenia.php';
+        if ($kodPolecenia = polecenie_kod($dnct, (string)$_SESSION['authentik_email'], (string)$_SESSION['authentik_username'])) {
+            $polecenie = ['kod' => (string)$kodPolecenia['code']] + polecenie_statystyki($dnct, (string)$_SESSION['authentik_email']);
+        }
+    } catch (Throwable $e) {
+        error_log('twoje-serwery: polecenia - ' . $e->getMessage());
+    }
+
     foreach ($orders as $order) {
         $card = srv_build_card($order, $panel, $salesOn);
         if ($card !== null) {
@@ -486,6 +497,31 @@ ob_start();
             </article>
         <?php endforeach; ?>
     </div>
+
+    <?php if ($polecenie !== null): $linkPolecenia = 'https://game.dnct.pl/?kod=' . rawurlencode($polecenie['kod']); ?>
+        <section class="srv-polec glass" aria-labelledby="srv-polec-h">
+            <div>
+                <h2 id="srv-polec-h">Poleć znajomemu</h2>
+                <p>Znajomy płaci <strong><?php echo POLECENIE_RABAT; ?>% mniej</strong> za pierwszy serwer, a Ty dostajesz <strong>+<?php echo POLECENIE_DNI; ?> dni</strong> do swojego, gdy zapłaci.</p>
+                <?php if ($polecenie['ile'] > 0): ?>
+                    <p class="srv-polec-wynik">Poleciłeś: <?php echo (int)$polecenie['ile']; ?> · zdobyte dni: <?php echo (int)$polecenie['dni']; ?></p>
+                <?php endif; ?>
+            </div>
+            <div class="srv-polec-kod">
+                <code><?php echo htmlspecialchars($polecenie['kod']); ?></code>
+                <button type="button" class="ord-cta srv-polec-btn" data-kopiuj="<?php echo htmlspecialchars($linkPolecenia); ?>">Kopiuj link</button>
+            </div>
+        </section>
+        <script>
+        document.querySelector('.srv-polec-btn')?.addEventListener('click', function () {
+            var b = this;
+            navigator.clipboard.writeText(b.dataset.kopiuj).then(function () {
+                b.textContent = 'Skopiowano';
+                setTimeout(function () { b.textContent = 'Kopiuj link'; }, 2000);
+            }, function () { window.prompt('Skopiuj link:', b.dataset.kopiuj); });
+        });
+        </script>
+    <?php endif; ?>
 
     <?php if (!$salesOn): ?>
         <p class="ord-hint">Przedłużanie i zmiana pakietu są chwilowo wyłączone - trwa przerwa techniczna.</p>

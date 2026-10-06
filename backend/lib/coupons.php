@@ -43,7 +43,7 @@ function coupon_normalize_code(string $code): string
  *
  * @param array{code:string,percent_off?:float,amount_off?:int,duration:string,
  *              duration_months?:int,max_redemptions?:int,redeem_by?:string,
- *              first_order_only?:bool,partner_id?:int} $in
+ *              first_order_only?:bool,partner_id?:int,polecajacy_email?:string} $in
  * @return array{ok:bool,error?:string,code?:string}
  */
 function coupon_create(PDO $dnct, array $in, string $createdBy): array
@@ -78,6 +78,7 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
     $months = $duration === 'repeating' ? max(1, (int)($in['duration_months'] ?? 1)) : null;
     $firstOnly = !empty($in['first_order_only']);
     $partnerId = !empty($in['partner_id']) ? (int)$in['partner_id'] : null;
+    $polecajacy = !empty($in['polecajacy_email']) ? (string)$in['polecajacy_email'] : null;
     $maxUse = !empty($in['max_redemptions']) ? max(1, (int)$in['max_redemptions']) : null;
 
     $redeemBy = null;
@@ -140,8 +141,8 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
     $stmt = $dnct->prepare(
         'INSERT INTO coupons
             (code, stripe_coupon_id, stripe_promo_id, percent_off, amount_off, currency,
-             duration, duration_months, max_redemptions, redeem_by, active, first_order_only, partner_id, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)'
+             duration, duration_months, max_redemptions, redeem_by, active, first_order_only, partner_id, polecajacy_email, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $code,
@@ -156,6 +157,7 @@ function coupon_create(PDO $dnct, array $in, string $createdBy): array
         $redeemBy !== null ? date('Y-m-d H:i:s', $redeemBy) : null,
         $firstOnly ? 1 : 0,
         $partnerId,
+        $polecajacy,
         $createdBy,
     ]);
 
