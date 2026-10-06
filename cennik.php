@@ -217,7 +217,38 @@ $liveServers    = $liveServers ?? 0;
    (Podstawowy: floor(6,99*0,5)+0,99 = 3,99). Schema z jedna cena klamala wiec
    wzgledem wlasnego opisu strony. */
 $schemaProducts = [];
+/* Obrazek jest WYMAGANY w "Merchant listings" - bez niego Search Console
+   zgłaszał błąd przy każdym planie i strona traciła wyniki rozszerzone. */
+$schemaImage = static fn(array $g): string => !empty($g['icon_img'])
+    ? 'https://game.dnct.pl/assets/media/Server_card/icons/' . basename((string)$g['icon_img'])
+    : 'https://game.dnct.pl/assets/media/icons/logo_s.png';
 foreach ($gamesWithPlans as $game) {
+    // Strona gry pokazuje w schemacie tylko swoją grę - wcześniej strona
+    // Zomboida ogłaszała Google dziewięć planów Minecrafta.
+    if ($focus !== null && $game['type'] !== $focusGame) {
+        continue;
+    }
+    // Gra slotowa: jeden produkt z przedziałem cen miesięcznych zamiast SKU.
+    if (!$game['plans'] && $game['tiers']) {
+        $ceny = array_map(static fn(array $t): float => (float)$t['price'], $game['tiers']);
+        $schemaProducts[] = [
+            '@type'       => 'Product',
+            'name'        => 'Serwer ' . $game['name'],
+            'description' => sprintf('Serwer %s od %d do %d graczy, cena miesięczna zależna od liczby slotów.',
+                $game['name'], (int)min(array_column($game['tiers'], 'slots')), (int)max(array_column($game['tiers'], 'slots'))),
+            'image'       => $schemaImage($game),
+            'brand'       => ['@type' => 'Brand', 'name' => 'DNCT Hosting'],
+            'offers'      => [
+                '@type'         => 'AggregateOffer',
+                'priceCurrency' => 'PLN',
+                'lowPrice'      => number_format(min($ceny), 2, '.', ''),
+                'highPrice'     => number_format(max($ceny), 2, '.', ''),
+                'offerCount'    => count($ceny),
+                'availability'  => 'https://schema.org/InStock',
+            ],
+        ];
+        continue;
+    }
     foreach ($game['plans'] as $plan) {
         $offers = [];
         foreach ($periods as $period) {
@@ -243,6 +274,7 @@ foreach ($gamesWithPlans as $game) {
                 cennik_size((int)($plan['ssd_mb'] ?? 0)),
                 (string)($plan['cpu_cores'] ?? '')
             ),
+            'image'  => $schemaImage($game),
             'brand'  => ['@type' => 'Brand', 'name' => 'DNCT Hosting'],
             'offers' => $offers,
         ];
@@ -269,6 +301,11 @@ $schemaFaq = [
         'a' => 'Tak - płatność roczna liczy się jak jedenaście miesięcy zamiast dwunastu, czyli rok taniej o miesiąc.',
     ],
 ];
+
+// Strona gry: FAQ w schemacie = FAQ widoczne na tej stronie.
+if ($focus !== null) {
+    $schemaFaq = array_map(static fn(array $f): array => ['q' => $f[0], 'a' => $f[1]], $focus['faq']);
+}
 
 $extraHead = '';
 if ($schemaProducts) {
