@@ -71,9 +71,10 @@ function provision_game_map(): array
             // ProjectZomboid64.json ma na sztywno -Xmx8g, a serwer dostaje
             // limit 6-12 GB: Java przekraczała limit, kontener ginął (OOM, 137).
             // Plik nadpisuje każda aktualizacja ze Steama, więc poprawiamy go
-            // przy KAŻDYM starcie: 3/4 limitu RAM, reszta na pamięć poza stertą.
+            // przy KAŻDYM starcie: 60% limitu RAM. 75% też padało na OOM przy
+            // generowaniu świata - Zomboid sporo trzyma poza stertą Javy.
             // Bez gwiazdki w arytmetyce - startup idzie przez niecytowane echo.
-            'startup_prefix' => 'sed -i -E "s/-Xmx[0-9]+[mMgG]/-Xmx$((SERVER_MEMORY-SERVER_MEMORY/4))m/" ProjectZomboid64.json ; ',
+            'startup_prefix' => 'sed -i -E "s/-Xmx[0-9]+[mMgG]/-Xmx$((SERVER_MEMORY/2+SERVER_MEMORY/10))m/" ProjectZomboid64.json ; ',
             'env' => static fn(array $order, array $alloc, array $extra = []): array => [
                 'SERVER_NAME'   => 'ProjectZomboid',
                 'ADMIN_USER'    => (string)$order['user_name'],
