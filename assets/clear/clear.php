@@ -133,15 +133,6 @@ if ($centerContent) {
              trzymają stary arkusz po wgraniu poprawki. Patrz backend/lib/assets.php. */ ?>
     <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
-    <?php /* CELOWO bez defer, mimo 407 KB. Proba defer (2026-09-01) zepsula
-             tlo FinisherHeader: jego inline-init na dole <body> jest
-             synchroniczny i wykonuje sie W TRAKCIE parsowania, czyli PRZED
-             deferowanym skryptem - div .finisher-header zostawal bez klas
-             Tailwinda (fixed/inset-0/z-0) w momencie gdy FinisherHeader
-             mierzyl kontener, plus widoczny FOUC (logo/przycisk Discord
-             migające bez stylow). Blokujace ladowanie jest tu bezpieczniejsze
-             niz szybsze. */ ?>
-    <script src="/assets/js/tailwind.js"></script>
     <?php /* System dzwiekow - syntezowany Web Audio API, zaladowany site-wide
              (nie tylko dla zalogowanych/dzwonka), zeby toasty gosci (np. po
              rejestracji) tez mialy dzwiek. Celowo BEZ defer: notifications.php
@@ -162,6 +153,13 @@ if ($centerContent) {
         }
         a { text-decoration: none; }
     </style>
+    <?php /* Tailwind zbudowany na serwerze (backend/tailwind/build.sh), nie skrypt
+             Play CDN - ten ważył 400 KB i blokował wyświetlanie na telefonie.
+             Link stoi NA KOŃCU <head>, dokładnie tam, gdzie skrypt doklejał swój
+             <style>: kolejność kaskady (Tailwind po naszych arkuszach i po
+             stylu inline wyżej) zostaje bez zmian. Po dodaniu nowych klas
+             Tailwinda w PHP/JS trzeba przebudować plik. */ ?>
+    <link rel="stylesheet" href="<?php echo asset('/assets/css/tailwind.css'); ?>">
 </head>
 <body class="bg-[#050505] text-[#f8f9fa] relative min-h-screen font-sans">
 

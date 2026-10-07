@@ -62,7 +62,6 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
     <meta property="og:title" content="Rejestracja | DNCT Hosting">
     <meta property="og:description" content="Stwórz konto i zacznij korzystać z serwerów Minecraft.">
     <meta property="og:image" content="https://game.dnct.pl/media/icons/LINKS.png">
-    <script src="/assets/js/tailwind.js"></script>
     <script src="/assets/js/lucide.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <!-- Ścieżka MUSI być bezwzględna. Strona jest serwowana pod czystym adresem
@@ -76,6 +75,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
     <link rel="stylesheet" href="/auth/register/register.css">
     <link rel="icon" type="image/png" href="/assets/media/icons/favicon.png">
     <link rel="apple-touch-icon" href="/assets/media/icons/favicon.png">
+    <link rel="stylesheet" href="/assets/css/tailwind.css?v=<?php echo @filemtime(dirname(__DIR__, 2) . '/assets/css/tailwind.css'); ?>">
 </head>
 <body class="register-page flex items-center justify-center min-h-screen p-6">
     <!-- TŁO ANIMOWANE - to samo, co na reszcie strony (assets/clear/clear.php).
