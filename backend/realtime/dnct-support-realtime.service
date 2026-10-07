@@ -1,0 +1,23 @@
+[Unit]
+Description=DNCT Support WebSocket gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/dnct.pl/public_html/WEB/beta.dnct.pl/backend/realtime
+Environment=DNCT_ENV_FILE=/var/www/dnct.pl/config/beta.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/backend/realtime/server.mjs
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/www/dnct.pl/public_html/WEB/beta.dnct.pl/backend/realtime
+
+[Install]
+WantedBy=multi-user.target

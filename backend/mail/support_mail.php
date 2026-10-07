@@ -1,0 +1,6 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__.'/mail.php';
+function send_support_received_mail(array $t): array { return send_mail((string)$t['customer_email'],'Potwierdzenie zgłoszenia #'.$t['public_id'].' — DNCT Hosting','<p>Otrzymaliśmy Twoje zgłoszenie <strong>#'.htmlspecialchars((string)$t['public_id'],ENT_QUOTES,'UTF-8').'</strong>. Odpowiemy tak szybko, jak to możliwe.</p>','Otrzymaliśmy zgłoszenie #'.$t['public_id'].'.','info'); }
+function send_support_reply_mail(array $t,string $body): array { return send_mail((string)$t['customer_email'],'Nowa odpowiedź w zgłoszeniu #'.$t['public_id'].' — DNCT Hosting','<p>Nowa odpowiedź w zgłoszeniu <strong>#'.htmlspecialchars((string)$t['public_id'],ENT_QUOTES,'UTF-8').'</strong>:</p><blockquote>'.nl2br(htmlspecialchars($body,ENT_QUOTES,'UTF-8')).'</blockquote>',"Nowa odpowiedź w zgłoszeniu #{$t['public_id']}:\n\n{$body}",'info'); }
+function send_support_resolved_mail(array $t): array { return send_mail((string)$t['customer_email'],'Zgłoszenie #'.$t['public_id'].' rozwiązane — DNCT Hosting','<p>Zgłoszenie <strong>#'.htmlspecialchars((string)$t['public_id'],ENT_QUOTES,'UTF-8').'</strong> zostało oznaczone jako rozwiązane.</p>',"Zgłoszenie #{$t['public_id']} zostało oznaczone jako rozwiązane.",'info'); }

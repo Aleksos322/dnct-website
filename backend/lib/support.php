@@ -1,0 +1,7 @@
+<?php
+declare(strict_types=1);
+const SUPPORT_MESSAGE_MIN = 20;
+const SUPPORT_MESSAGE_MAX = 2000;
+function support_categories(): array { return ['platnosci'=>'Finanse i Płatności / Płatności (ogólne)','zwrot'=>'Finanse i Płatności / Zwroty','platnosc-nie-przeszla'=>'Finanse i Płatności / Płatność nie przeszła','zaleglosc'=>'Finanse i Płatności / Zaleganie z płatnością','produkt'=>'Finanse i Płatności / Nie dostałem produktu','panel'=>'Kwestie Techniczne / Problemy z panelem','konsola'=>'Kwestie Techniczne / Konsola się nie odświeża','strona'=>'Kwestie Techniczne / Błędy na stronie głównej','wersja'=>'Kwestie Techniczne / Zmiana wersji silnika','minecraft'=>'Usługi - Serwery Gier / Serwery Minecraft','vintage'=>'Usługi - Serwery Gier / Serwery Vintage Story','zomboid'=>'Usługi - Serwery Gier / Serwery Project Zomboid','dns'=>'Usługi - Hosting WWW / Problemy z domeną/DNS','mysql'=>'Usługi - Hosting WWW / Bazy danych MySQL','ssl'=>'Usługi - Hosting WWW / Certyfikaty SSL','www'=>'Usługi - Hosting WWW / Hosting stron internetowych','znajomi'=>'Społeczność i Konto / Znajomi','gracze'=>'Społeczność i Konto / Gracze','wspolpraca'=>'Społeczność i Konto / Współpraca','inne'=>'Inne / Inne']; }
+function support_access_hash(): string { if(empty($_SESSION['support_access'])) $_SESSION['support_access']=bin2hex(random_bytes(32)); return hash('sha256',(string)$_SESSION['support_access']); }
+function support_clean_body(string $body): string { return preg_replace("/\r\n?/","\n",trim($body))??''; }

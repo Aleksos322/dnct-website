@@ -174,6 +174,7 @@ if ($centerContent) {
 
     <!-- CZAT SUPPORTU -->
     <?php require_once __DIR__ . '/support-chat.php'; ?>
+    <?php require_once __DIR__ . '/support-ticket-panel.php'; ?>
 
     <!-- TREŚĆ STRONY (wstrzykiwana przez podstrony) -->
     <main class="<?php echo $mainClasses; ?>">

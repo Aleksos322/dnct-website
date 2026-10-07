@@ -1,0 +1,11 @@
+{
+  "name": "dnct-support-realtime",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "mysql2": "^3.14.4",
+    "ws": "^8.18.0"
+  }
+}
