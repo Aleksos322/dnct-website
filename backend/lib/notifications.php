@@ -106,6 +106,7 @@ function get_notifications_for_user(PDO $pdo, string $userId, bool $isAdmin, int
             LEFT JOIN notification_reads r
                    ON r.notification_id = n.id AND r.user_id = :user_id
             WHERE (n.expires_at IS NULL OR n.expires_at > NOW())
+              AND r.hidden_at IS NULL
               AND (
                     n.target_type = 'all'
                     OR (n.target_type = 'admins' AND :is_admin = 1)
@@ -205,4 +206,28 @@ function mark_all_read(PDO $pdo, string $userId, bool $isAdmin): int
     $stmt->execute();
 
     return $stmt->rowCount();
+}
+
+/**
+ * Ukrywa powiadomienie dla jednego użytkownika (przycisk ✕ w centrum pomocy).
+ * Wiersz w notifications zostaje - inni adresaci dalej je widzą.
+ */
+function hide_notification(PDO $pdo, int $notificationId, string $userId, bool $isAdmin): void
+{
+    $sql = "INSERT INTO notification_reads (notification_id, user_id, hidden_at)
+            SELECT n.id, :user_id, NOW()
+            FROM notifications n
+            WHERE n.id = :notification_id
+              AND (
+                    n.target_type = 'all'
+                    OR (n.target_type = 'admins' AND :is_admin = 1)
+                    OR (n.target_type = 'user' AND n.target_user_id = :user_id2)
+                  )
+            ON DUPLICATE KEY UPDATE hidden_at = NOW()";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':user_id', $userId, PDO::PARAM_STR);
+    $stmt->bindValue(':user_id2', $userId, PDO::PARAM_STR);
+    $stmt->bindValue(':notification_id', $notificationId, PDO::PARAM_INT);
+    $stmt->bindValue(':is_admin', $isAdmin ? 1 : 0, PDO::PARAM_INT);
+    $stmt->execute();
 }
