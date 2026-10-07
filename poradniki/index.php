@@ -18,7 +18,7 @@ $lista = [
 
 ob_start(); ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">
-<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto;">
+<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <h1>Poradniki</h1>
     <p>Praktyczne instrukcje sprawdzone na naszych serwerach - Minecraft i Project Zomboid.</p>
     <?php foreach ($lista as [$slug, $tytul, $opis]): ?>
