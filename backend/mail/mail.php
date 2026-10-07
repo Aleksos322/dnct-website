@@ -124,6 +124,11 @@ function send_mail(string $to, string $subject, string $htmlBody, string $textBo
         return ['ok' => false, 'error' => 'Nieprawidłowy adres odbiorcy.'];
     }
 
+    // Wiadomość bez własnego szablonu dostaje ramkę DNCT (templates/ramka.php).
+    if (stripos($htmlBody, '<html') === false) {
+        $htmlBody = mail_ramka($subject, $htmlBody);
+    }
+
     try {
         return mail_deliver($to, $subject, $htmlBody, $textBody, $profile);
     } catch (Exception $e) {
@@ -180,6 +185,18 @@ function mail_deliver(string $to, string $subject, string $htmlBody, string $tex
     $mail->send();
 
     return ['ok' => true, 'error' => ''];
+}
+
+/** Owija gołą treść w ramkę DNCT; podtytuł to temat bez dopisku z nazwą firmy. */
+function mail_ramka(string $subject, string $content): string
+{
+    $subtitle = trim((string)preg_replace('/\s*[-—–]\s*DNCT Hosting\s*$/u', '', $subject));
+    try {
+        return render_mail_template('ramka', ['subtitle' => $subtitle, 'content' => $content]);
+    } catch (Throwable $e) {
+        error_log('Mail: ramka niedostępna - ' . $e->getMessage());
+        return $content;
+    }
 }
 
 /**
