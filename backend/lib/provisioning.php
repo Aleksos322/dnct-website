@@ -108,6 +108,10 @@ function provision_game_map(): array
             'nest'           => 9,
             'egg'            => 27,  // Vintage Story
             'fallback_image' => 'ghcr.io/pterodactyl/yolks:dotnet_8',
+            // Wymuszony obraz, nie domyślny z jajka: jajko ma dotnet_7/dotnet_8, a
+            // aktualne Vintage Story wymaga .NET 10 - serwer padał z kodem 150
+            // ("You must install or update .NET"). Sprawdzone 2026-10-07.
+            'image'          => 'ghcr.io/ptero-eggs/yolks:dotnet_10',
             // Klucze MUSZĄ być dokładnymi nazwami zmiennych egga (sprawdzone w
             // bazie panelu: RELEASE_VERSION/FILES_BRANCH/MAX_CLIENTS/SQLITE_TMPDIR,
             // trzy pierwsze `required`). Poprzednia wersja wysyłała VS_VERSION,
@@ -249,7 +253,7 @@ function provision_server(array $order): array
         'user'         => (int)$pteroUser['id'],
         'nest'         => $game['nest'],
         'egg'          => $game['egg'],
-        'docker_image' => $egg['image'],
+        'docker_image' => $game['image'] ?? $egg['image'],
         'environment'  => $environment,
         'limits' => [
             'memory' => (int)$order['ram_mb'],
