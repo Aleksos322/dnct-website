@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
-$pageTitle       = 'Poradniki: serwery Minecraft i Project Zomboid | DNCT';
+$pageTitle       = 'Poradniki: Minecraft, Project Zomboid, Vintage Story | DNCT';
 $metaDescription = 'Poradniki o serwerach Minecraft i Project Zomboid: jak postawić serwer, dodać pluginy, mody i modpacki, ustawić hasło, PvP i trudność świata.';
 $canonicalUrl    = 'https://game.dnct.pl/poradniki/';
 $centerContent   = false;
@@ -16,18 +16,20 @@ $lista = [
     ['mody-na-serwer-project-zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid', 'Workshop ID i Mod ID, kolejność bibliotek, co zrobić, gdy serwer nie startuje.'],
     ['ustawienia-serwera-project-zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie', 'ProjectZomboid.ini i SandboxVars - najważniejsze opcje z wyjaśnieniem.'],
     ['zapis-zomboid-na-serwer', 'Jak przenieść zapis Project Zomboid na serwer', 'Świat z gry jednoosobowej na serwer: co przechodzi, mody i podmiana zapisu.'],
+    ['jak-postawic-serwer-vintage-story', 'Jak postawić serwer Vintage Story', 'RAM, pierwszy start, łączenie, komenda /op i serverconfig.json.'],
+    ['mody-na-serwer-vintage-story', 'Jak dodać mody na serwer Vintage Story', 'Mody z ModDB w folderze data/Mods, mody u graczy i typowe błędy.'],
 ];
 
 ob_start(); ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">
 <article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <h1>Poradniki</h1>
-    <p>Praktyczne instrukcje sprawdzone na naszych serwerach - Minecraft i Project Zomboid.</p>
+    <p>Praktyczne instrukcje sprawdzone na naszych serwerach - Minecraft, Project Zomboid i Vintage Story.</p>
     <?php foreach ($lista as [$slug, $tytul, $opis]): ?>
         <h2><a href="/poradniki/<?php echo $slug; ?>" style="color:#f1f5f9;text-decoration:none;"><?php echo htmlspecialchars($tytul); ?></a></h2>
         <p><?php echo htmlspecialchars($opis); ?> <a href="/poradniki/<?php echo $slug; ?>">Czytaj</a></p>
     <?php endforeach; ?>
-    <p style="margin-top:2rem;">Szukasz serwera? <a href="/hosting-minecraft">Hosting Minecraft od 6,99 zł/mies.</a> · <a href="/hosting-project-zomboid">Hosting Project Zomboid od 29,99 zł/mies.</a></p>
+    <p style="margin-top:2rem;">Szukasz serwera? <a href="/hosting-minecraft">Hosting Minecraft od 6,99 zł/mies.</a> · <a href="/hosting-project-zomboid">Hosting Project Zomboid od 29,99 zł/mies.</a> · <a href="/hosting-vintage-story">Hosting Vintage Story od 19,99 zł/mies.</a></p>
 </article>
 <?php
 $content = ob_get_clean();

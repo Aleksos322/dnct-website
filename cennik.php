@@ -61,6 +61,21 @@ const CENNIK_TRAILER_YT = '';
 const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
 const CENNIK_STRONY_GIER = [
+    'vintagestory' => [
+        'slug'        => 'hosting-vintage-story',
+        'title'       => 'Hosting Vintage Story - serwer od 19,99 zł/mies. | DNCT',
+        'description' => 'Serwer Vintage Story od 19,99 zł miesięcznie: od 5 do 100 graczy, aktualna wersja gry, mody z ModDB, stały RAM i CPU, serwery w Polsce. Start zaraz po płatności.',
+        'h1_accent'   => 'Hosting',
+        'h1_rest'     => 'Vintage Story',
+        'lead'        => 'Serwer Vintage Story dla Ciebie i znajomych - od 5 do 100 graczy, zawsze na aktualnej wersji gry. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam.',
+        'faq'         => [
+            ['Ile kosztuje serwer Vintage Story?', 'Od 19,99 zł miesięcznie za serwer na 5 graczy (4 GB RAM, 3 vCore). Na 20 graczy to 30,99 zł, na 50 graczy 64,99 zł. Płatność roczna liczy się jak jedenaście miesięcy.'],
+            ['Która wersja gry jest na serwerze?', 'Aktualna stabilna wersja Vintage Story. Serwer działa na .NET 10, którego wymaga najnowsza wersja gry - nie musisz niczego doinstalowywać.'],
+            ['Czy mogę dodać mody?', 'Tak. Pliki .zip modów z ModDB (mods.vintagestory.at) wgrywasz w panelu do folderu data/Mods i restartujesz serwer. Opis krok po kroku jest w naszym poradniku.'],
+            ['Jak zostać administratorem na serwerze?', 'W konsoli panelu wpisz /op i nazwę swojego konta Vintage Story, np. /op TwojaNazwa. Serwer sprawdza nazwę w kontach gry, więc musi być prawdziwa.'],
+            ['Gdzie stoi serwer?', 'Na naszym sprzęcie w Polsce, więc ping z polskich łączy jest niski. Serwerem zarządzasz w panelu: konsola, pliki, kopie zapasowe na żądanie i restart jednym kliknięciem.'],
+        ],
+    ],
     'minecraft' => [
         'slug'        => 'hosting-minecraft',
         'title'       => 'Hosting Minecraft - serwer od 6,99 zł/mies. | DNCT',
