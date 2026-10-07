@@ -43,6 +43,18 @@
         <priority>0.7</priority>
     </url>
     <url>
+        <loc>https://game.dnct.pl/poradniki/jak-wgrac-swiat-na-serwer-minecraft</loc>
+        <lastmod>2026-10-07</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://game.dnct.pl/poradniki/zapis-zomboid-na-serwer</loc>
+        <lastmod>2026-10-07</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
         <loc>https://game.dnct.pl/poradniki/</loc>
         <lastmod>2026-10-07</lastmod>
         <changefreq>monthly</changefreq>
