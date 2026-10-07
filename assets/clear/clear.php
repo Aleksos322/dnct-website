@@ -244,16 +244,22 @@ if ($centerContent) {
        do przeliczenia rozmycia wszystkich tafli .glass, więc pełne 60 kl/s
        kosztowało telefon ~1,9 s procesora na każde 8 s (pomiar 2026-10-07);
        przy 20 kl/s o ~40% mniej. */
+    /* Na telefonie (wąski ekran albo dotyk) tło rysuje kilka klatek i STOI -
+       decyzja 2026-10-07 dla wyniku PageSpeed. Po zmianie rozmiaru okna (np.
+       chowający się pasek adresu) biblioteka czyści canvas, więc wtedy
+       dorysowujemy kilka klatek od nowa. */
+    var dnctTloStoi = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
     (function () {
       var P = FinisherHeader.prototype, rysuj = P.an;
       P.an = function () {
+        if (dnctTloStoi && (this._dnctN = (this._dnctN || 0) + 1) > 3) { this._dnctStop = true; return; }
         var t = performance.now();
         if (this._dnctT && t - this._dnctT < 48) { requestAnimationFrame(this.an.bind(this)); return; }
         this._dnctT = t;
         rysuj.call(this);
       };
     })();
-    new FinisherHeader({
+    var dnctTlo = new FinisherHeader({
       "count": 6,
       "size": { "min": 522, "max": 1008, "pulse": 0.1 },
       "speed": { "x": { "min": 0.03, "max": 0.15 }, "y": { "min": 0.03, "max": 0.15 } },
@@ -266,6 +272,14 @@ if ($centerContent) {
       "skew": 0,
       "shapes": ["c"]
     });
+    if (dnctTloStoi) {
+      window.addEventListener('resize', function () {
+        setTimeout(function () {
+          dnctTlo._dnctN = 0;
+          if (dnctTlo._dnctStop) { dnctTlo._dnctStop = false; requestAnimationFrame(dnctTlo.an.bind(dnctTlo)); }
+        }, 250);
+      });
+    }
     </script>
 
     <!-- OBECNOŚĆ (heartbeat) -->

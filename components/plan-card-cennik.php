@@ -124,8 +124,18 @@ function render_cennik_plan_card(array $p): void
 
         <div class="pcard-art">
             <?php if ($bgSrc !== ''): ?>
-                <img class="pcard-art-bg" src="<?php echo htmlspecialchars($bgSrc); ?>"
-                     alt="" loading="lazy" decoding="async">
+                <?php /* Telefon dostaje nieruchomą klatkę (*-stop.webp, 2-27 KB) zamiast
+                         animacji - decyzja 2026-10-07, animacje mieliły procesor
+                         telefonu. Warunek jak w clear.php przy tle: wąski ekran
+                         albo dotyk. */
+                      $bgStop = preg_match('/\.webp$/i', $bgSrc) ? substr($bgSrc, 0, -5) . '-stop.webp' : ''; ?>
+                <picture>
+                    <?php if ($bgStop !== '' && is_file(dirname(__DIR__) . $bgStop)): ?>
+                        <source media="(max-width: 768px), (pointer: coarse)" srcset="<?php echo htmlspecialchars($bgStop); ?>">
+                    <?php endif; ?>
+                    <img class="pcard-art-bg" src="<?php echo htmlspecialchars($bgSrc); ?>"
+                         alt="" loading="lazy" decoding="async">
+                </picture>
             <?php endif; ?>
             <?php if ($iconSrc !== ''): ?>
                 <span class="pcard-art-icon">
