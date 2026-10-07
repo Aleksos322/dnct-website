@@ -29,7 +29,7 @@ ob_start();
     .ptn-form .form-status.error { background:#4a1d28; color:#fecdd3; }
 </style>
 
-<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto;">
+<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <h1>Program dla twórców</h1>
     <p>Nagrywasz albo streamujesz Minecrafta? Dostajesz własny kod. Twoi widzowie płacą mniej za pierwszy serwer, a Ty zarabiasz na każdej ich płatności przez pół roku.</p>
 

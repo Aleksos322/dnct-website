@@ -84,7 +84,7 @@ ob_start();
     .legal ul { list-style: disc; padding-left: 1.5rem; }
     .legal li::marker { color: #a78bfa; }
 </style>
-<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto;">
+<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <nav class="pr-okruszki" aria-label="Okruszki">
         <a href="/">DNCT Hosting</a> › <a href="/poradniki/">Poradniki</a> › <?php echo htmlspecialchars($poradnik['tytul']); ?>
     </nav>
