@@ -3,9 +3,19 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p>Mody ze Steam Workshop dodaje się na serwerze Zomboid w pliku konfiguracyjnym - nie trzeba niczego wgrywać ręcznie. Serwer sam pobiera mody przy starcie, a gracze dostają je automatycznie przy wejściu.</p>
+<p>Mody ze Steam Workshop nie wymagają wgrywania plików. Serwer sam pobiera je przy starcie, a gracze dostają je automatycznie przy wejściu. Wystarczy powiedzieć serwerowi, których modów używać - w panelu albo w pliku konfiguracyjnym.</p>
 
-<h2>1. Gdzie jest plik konfiguracyjny</h2>
+<h2>Najprościej: zakładka Mody (PZ)</h2>
+<ol>
+    <li>W panelu serwera otwórz zakładkę <strong>Mody (PZ)</strong>.</li>
+    <li>Wklej <strong>link do moda</strong> ze Steam Workshop (np. <code>steamcommunity.com/sharedfiles/filedetails/?id=...</code>) albo sam numer ID i kliknij dodaj.</li>
+    <li>Panel sam odczyta z Workshopu nazwę i <strong>Mod ID</strong>. Jeśli przedmiot zawiera kilka modów albo mapę, zapyta, które włączyć.</li>
+    <li>Dodaj osobno mody wymagane przez ten mod (sekcja „Required items" na jego stronie w Steamie).</li>
+    <li>Zrestartuj serwer. Mod możesz później wstrzymać albo usunąć w tej samej zakładce.</li>
+</ol>
+<p>Zakładka wpisuje wszystko do pliku konfiguracyjnego za Ciebie. Poniżej opis ręcznej metody - przydaje się, gdy chcesz ustawić kolejność modów albo coś poprawić.</p>
+
+<h2>1. Ręcznie: gdzie jest plik konfiguracyjny</h2>
 <p>W panelu otwórz <strong>Menedżer plików</strong> i przejdź do:</p>
 <pre><code>.cache/Server/ProjectZomboid.ini</code></pre>
 <p>Folder <code>.cache</code> zaczyna się od kropki, więc na liście plików stoi na samej górze. Nazwa <code>ProjectZomboid.ini</code> bierze się od nazwy serwera (domyślnie <code>ProjectZomboid</code>).</p>

@@ -61,6 +61,21 @@ const CENNIK_TRAILER_YT = '';
 const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
 
 const CENNIK_STRONY_GIER = [
+    'minecraft' => [
+        'slug'        => 'hosting-minecraft',
+        'title'       => 'Hosting Minecraft - serwer od 6,99 zł/mies. | DNCT',
+        'description' => 'Serwer Minecraft od 6,99 zł miesięcznie (3,99 zł za tydzień): Paper, Fabric, Forge, pluginy i mody, stały RAM i CPU, dyski SSD, serwery w Polsce.',
+        'h1_accent'   => 'Hosting',
+        'h1_rest'     => 'Minecraft',
+        'lead'        => 'Serwer Minecraft na Paperze, Fabricu albo Forge - od 1,5 do 32 GB RAM. Silnik i wersję gry zmieniasz w panelu jednym kliknięciem, a serwer startuje zaraz po płatności.',
+        'faq'         => [
+            ['Ile kosztuje serwer Minecraft?', 'Od 6,99 zł miesięcznie albo 3,99 zł za tydzień (plan Podstawowy: 1,5 GB RAM, 1 vCore). Większe plany mają do 32 GB RAM i 8 vCore. Płatność roczna liczy się jak jedenaście miesięcy.'],
+            ['Jaki plan wybrać?', 'Dla kilku znajomych bez modów wystarczą 3-4 GB RAM. Serwer z pluginami dla kilkunastu osób to 6-8 GB, a modpacki zwykle potrzebują 8-10 GB i więcej.'],
+            ['Czy mogę zmienić wersję gry albo silnik?', 'Tak. W panelu, w zakładce Wersje (MC), wybierasz silnik (Paper, Purpur, Fabric, Forge, NeoForge i inne) i wersję Minecrafta. Przed zmianą zrób kopię zapasową.'],
+            ['Czy mogę instalować pluginy i mody?', 'Tak. Pluginy wgrywasz do folderu plugins na serwerze Paper, mody do folderu mods na Fabricu lub Forge - przez menedżer plików w panelu. Instrukcje są w naszych poradnikach.'],
+            ['Jak szybko serwer jest gotowy?', 'Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem. Adres serwera widzisz od razu w panelu, a w zakładce Subdomena możesz ustawić łatwiejszy do zapamiętania adres.'],
+        ],
+    ],
     'zomboid' => [
         'slug'        => 'hosting-project-zomboid',
         'title'       => 'Hosting Project Zomboid - serwer od 29,99 zł/mies. | DNCT',
