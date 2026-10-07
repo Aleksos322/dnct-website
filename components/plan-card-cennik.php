@@ -44,7 +44,19 @@ function cennik_card_media(?string $file, string $subdir): string
     if (str_starts_with($file, 'http') || str_starts_with($file, '/')) {
         return $file;
     }
-    return '/assets/media/Server_card/' . $subdir . '/' . $file;
+    $url = '/assets/media/Server_card/' . $subdir . '/' . $file;
+
+    /* Animowane tła GIF ważyły 1-1,9 MB każde (razem 13,6 MB na stronie) i
+       mieliły procesor telefonu. Obok leży animowany WebP (15 kl./s, ~5x
+       lżejszy) - podajemy go, jeśli istnieje. Nowy GIF wgrany do panelu działa
+       dalej, tylko bez zysku, dopóki ktoś nie doda mu wersji .webp. */
+    if (str_ends_with(strtolower($url), '.gif')) {
+        $webp = substr($url, 0, -4) . '.webp';
+        if (is_file(dirname(__DIR__) . $webp)) {
+            return $webp;
+        }
+    }
+    return $url;
 }
 
 /**
