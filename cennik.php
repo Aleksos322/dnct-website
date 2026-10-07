@@ -94,7 +94,7 @@ const CENNIK_STRONY_GIER = [
 ];
 
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
-$metaDescription = 'Cennik serwerów Minecraft i Project Zomboid: gotowe plany i serwery od 5 do 100 graczy. Stałe limity RAM i CPU, ochrona DDoS i dyski SSD.';
+$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story: gotowe plany i serwery na liczbę graczy. Stałe limity RAM i CPU, ochrona DDoS, dyski SSD.';
 $canonicalUrl    = 'https://game.dnct.pl/cennik';
 $centerContent   = false;
 

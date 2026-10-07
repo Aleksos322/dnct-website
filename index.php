@@ -102,7 +102,7 @@ require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 
 $pageTitle       = 'DNCT Hosting - serwery Minecraft i Project Zomboid';
-$metaDescription = 'Polski hosting serwerów Minecraft i Project Zomboid z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień. Dyski SSD, panel po polsku.';
+$metaDescription = 'Polski hosting serwerów Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień.';
 $canonicalUrl    = 'https://game.dnct.pl/';
 $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
@@ -125,7 +125,7 @@ ob_start();
         </h1>
 
         <p class="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 px-4">
-            Serwery Minecraft i Project Zomboid.
+            Serwery Minecraft, Project Zomboid i Vintage Story.
             Ochrona DDoS, szybkie dyski SSD i wsparcie na Discordzie.
         </p>
 
@@ -184,10 +184,10 @@ ob_start();
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
             <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                Hosting serwerów Minecraft i Project Zomboid
+                Hosting serwerów Minecraft, Project Zomboid i Vintage Story
             </h2>
             <p class="text-gray-400 mb-4">
-                DNCT Hosting to serwery dla Minecraft i Project Zomboid,
+                DNCT Hosting to serwery dla Minecraft, Project Zomboid i Vintage Story,
                 od 3,99 zł za tydzień - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
             </p>
             <p class="text-gray-400">
@@ -204,7 +204,7 @@ ob_start();
                     'Dyski SSD, nowoczesne CPU, stabilne zasoby',
                     'Backupy i szybkie przywrócenie danych',
                     'Wsparcie dla modów i konfiguracji serwerów',
-                    'Plany dla Minecraft i Project Zomboid',
+                    'Plany dla Minecraft, Project Zomboid i Vintage Story',
                 ] as $feature): ?>
                     <li class="flex items-start gap-3">
                         <svg class="w-4 h-4 text-purple-500 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
