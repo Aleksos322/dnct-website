@@ -22,6 +22,8 @@
             &nbsp;·&nbsp;
             <a href="/polityka-prywatnosci" class="hover:text-gray-400 transition-colors">Polityka Prywatności</a>
             &nbsp;·&nbsp;
+            <a href="/poradniki/" class="hover:text-gray-400 transition-colors">Poradniki</a>
+            &nbsp;·&nbsp;
             <a href="/partnerzy" class="hover:text-gray-400 transition-colors">Dla twórców</a>
             &nbsp;·&nbsp;
             <a href="/zglos-naruszenie" class="hover:text-gray-400 transition-colors">Zgłoś naruszenie</a>

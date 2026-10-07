@@ -673,7 +673,7 @@ ob_start();
                     <p><?php echo htmlspecialchars($a); ?></p>
                 </details>
             <?php endforeach; ?>
-            <p class="cnk-focus-more">Inne gry: <a href="/cennik">pełny cennik</a>.</p>
+            <p class="cnk-focus-more">Poradniki: <a href="/poradniki/">jak postawić serwer, dodać mody i ustawić świat</a> · Inne gry: <a href="/cennik">pełny cennik</a>.</p>
         </section>
     <?php endif; ?>
 
