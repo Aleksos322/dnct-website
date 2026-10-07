@@ -5,7 +5,7 @@ require_once dirname(__DIR__) . '/backend/bootstrap.php';
 ob_start(); ?>
 <p>Serwer Zomboid ma dwa pliki ustawień. Pierwszy decyduje o tym, <strong>kto i jak</strong> może grać (hasło, PvP, limit graczy). Drugi o tym, <strong>jak trudny</strong> jest świat (zombie, łup, prąd i woda). Oba znajdziesz w panelu, w menedżerze plików, w folderze:</p>
 <pre><code>.cache/Server/</code></pre>
-<p>Edytuj je przy <strong>wyłączonym</strong> serwerze: w konsoli wpisz <code>save</code>, kliknij <strong>Stop</strong>, zmień plik, zapisz i uruchom serwer ponownie.</p>
+<p>Najważniejsze opcje zmienisz też w zakładce <strong>Configi</strong> w panelu, bez szukania plików. Edytuj je przy <strong>wyłączonym</strong> serwerze: w konsoli wpisz <code>save</code>, kliknij <strong>Stop</strong>, zmień plik, zapisz i uruchom serwer ponownie.</p>
 
 <h2>ProjectZomboid.ini - zasady serwera</h2>
 <p>Najważniejsze linie (każda wygląda jak <code>Nazwa=wartość</code>):</p>

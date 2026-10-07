@@ -11,11 +11,15 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 
 ## Oferta
 - [Cennik](https://game.dnct.pl/cennik): plany Minecraft i serwery Project Zomboid od 5 do 100 graczy.
+- [Hosting Minecraft](https://game.dnct.pl/hosting-minecraft): Paper, Fabric, Forge, od 1,5 do 32 GB RAM, od 6,99 zł/mies.
 - [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid): serwer Build 42 od 29,99 zł/mies.
 - [Panel demo](https://game.dnct.pl/demo): podgląd panelu bez zakładania konta.
 - [Program dla twórców](https://game.dnct.pl/partnerzy): kod rabatowy dla widzów i prowizja dla twórcy.
 
 ## Poradniki
+- [Jak postawić serwer Minecraft](https://game.dnct.pl/poradniki/jak-postawic-serwer-minecraft)
+- [Pluginy na serwer Minecraft](https://game.dnct.pl/poradniki/pluginy-na-serwer-minecraft)
+- [Mody i modpacki na serwer Minecraft](https://game.dnct.pl/poradniki/mody-na-serwer-minecraft)
 - [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
 - [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
 - [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)

@@ -15,12 +15,23 @@
 declare(strict_types=1);
 
 const PORADNIKI = [
-    'jak-postawic-serwer-project-zomboid' => 'Jak postawić serwer Project Zomboid (Build 42)',
-    'mody-na-serwer-project-zomboid'      => 'Jak dodać mody ze Steam Workshop na serwer Zomboid',
-    'ustawienia-serwera-project-zomboid'  => 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie',
+    'jak-postawic-serwer-minecraft'       => ['minecraft', 'Jak postawić serwer Minecraft'],
+    'pluginy-na-serwer-minecraft'         => ['minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)'],
+    'mody-na-serwer-minecraft'            => ['minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)'],
+    'jak-postawic-serwer-project-zomboid' => ['zomboid', 'Jak postawić serwer Project Zomboid (Build 42)'],
+    'mody-na-serwer-project-zomboid'      => ['zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid'],
+    'ustawienia-serwera-project-zomboid'  => ['zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie'],
+];
+
+/* Ramka z ofertą pod poradnikiem - per gra. */
+const PORADNIKI_OFERTA = [
+    'zomboid'   => ['Serwer Project Zomboid od 29,99 zł miesięcznie', 'Od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-project-zomboid', 'Project Zomboid Build 42'],
+    'minecraft' => ['Serwer Minecraft od 6,99 zł miesięcznie', 'Paper, Fabric albo Forge, od 1,5 do 32 GB RAM, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-minecraft', 'Minecraft Java'],
 ];
 
 /** @var array{slug:string,tytul:string,title:string,opis:string,data:string,tresc:string} $poradnik */
+$gra    = PORADNIKI[$poradnik['slug']][0] ?? 'zomboid';
+$oferta = PORADNIKI_OFERTA[$gra];
 $url = 'https://game.dnct.pl/poradniki/' . $poradnik['slug'];
 
 $pageTitle       = $poradnik['title'];
@@ -78,19 +89,19 @@ ob_start();
         <a href="/">DNCT Hosting</a> › <a href="/poradniki/">Poradniki</a> › <?php echo htmlspecialchars($poradnik['tytul']); ?>
     </nav>
     <h1><?php echo htmlspecialchars($poradnik['tytul']); ?></h1>
-    <p class="pr-data">Aktualizacja: <?php echo htmlspecialchars(date('d.m.Y', strtotime($poradnik['data']))); ?> · Project Zomboid Build 42</p>
+    <p class="pr-data">Aktualizacja: <?php echo htmlspecialchars(date('d.m.Y', strtotime($poradnik['data']))); ?> · <?php echo htmlspecialchars($oferta[3]); ?></p>
 
     <?php echo $poradnik['tresc']; ?>
 
     <div class="pr-oferta">
-        <strong>Serwer Project Zomboid od 29,99 zł miesięcznie</strong>
-        <p>Od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.</p>
-        <a class="pr-btn" href="/hosting-project-zomboid">Zobacz pakiety</a>
+        <strong><?php echo htmlspecialchars($oferta[0]); ?></strong>
+        <p><?php echo htmlspecialchars($oferta[1]); ?></p>
+        <a class="pr-btn" href="<?php echo htmlspecialchars($oferta[2]); ?>">Zobacz pakiety</a>
     </div>
 
     <h2>Inne poradniki</h2>
     <ul class="pr-inne">
-        <?php foreach (PORADNIKI as $s => $t): if ($s === $poradnik['slug']) continue; ?>
+        <?php foreach (PORADNIKI as $s => [$g, $t]): if ($s === $poradnik['slug'] || $g !== $gra) continue; ?>
             <li><a href="/poradniki/<?php echo htmlspecialchars($s); ?>"><?php echo htmlspecialchars($t); ?></a></li>
         <?php endforeach; ?>
     </ul>
