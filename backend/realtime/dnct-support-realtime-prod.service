@@ -1,0 +1,27 @@
+# Bramka WebSocket czatu supportu - PRODUKCJA (game.dnct.pl, baza dnct).
+# Beta ma osobną jednostkę dnct-support-realtime.service (port 8981, beta.env).
+# Apache 000-dnct.pl.conf: ProxyPass /ws/support -> ws://127.0.0.1:8982/ws/support
+[Unit]
+Description=DNCT Support WebSocket gateway (produkcja)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/dnct.pl/public_html/WEB/-dnct.pl/backend/realtime
+Environment=DNCT_ENV_FILE=/var/www/dnct.pl/public_html/.env
+Environment=SUPPORT_REALTIME_PORT=8982
+Environment=SUPPORT_WS_ALLOWED_ORIGINS=https://game.dnct.pl,https://dnct.pl,http://admin.lan.dnct.pl,https://admin.lan.dnct.pl
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /var/www/dnct.pl/public_html/WEB/-dnct.pl/backend/realtime/server.mjs
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
