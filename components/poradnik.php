@@ -69,6 +69,9 @@ ob_start();
     .pr-oferta a.pr-btn { display: inline-block; padding: .65rem 1.2rem; border-radius: .6rem; background: #8b5cf6; color: #fff; font-weight: 700; text-decoration: none; }
     .pr-inne li { margin: .35rem 0; }
     .pr-data { font-size: .85rem; color: #94a3b8; margin: -1rem 0 1.5rem; }
+    .legal ol { list-style: decimal; padding-left: 1.5rem; }
+    .legal ul { list-style: disc; padding-left: 1.5rem; }
+    .legal li::marker { color: #a78bfa; }
 </style>
 <article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto;">
     <nav class="pr-okruszki" aria-label="Okruszki">
