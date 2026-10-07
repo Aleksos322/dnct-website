@@ -38,6 +38,8 @@ const RATE_LIMIT_NOTIFICATIONS = [60, 300]; // 60 żądań / 5 min
 // normalne przeglądanie - jedna karta zmieściłaby się nawet w 10/min.
 const RATE_LIMIT_AKTYWNOSC     = [10, 60];  // 10 żądań / minutę
 
+const RATE_LIMIT_SUPPORT_TICKET = [3, 3600]; // 3 nowe zgłoszenia / godzinę
+const RATE_LIMIT_SUPPORT_MESSAGE = [12, 60]; // 12 wiadomości / minutę
 function rate_limit_dir(): string
 {
     return sys_get_temp_dir() . '/dnct_rate_limit';
