@@ -52,7 +52,7 @@ quit                                   zapisuje i wyłącza serwer</code></pre>
 $poradnik = [
     'slug'  => 'jak-postawic-serwer-project-zomboid',
     'tytul' => 'Jak postawić serwer Project Zomboid (Build 42)',
-    'title' => 'Jak postawić serwer Project Zomboid (Build 42) - poradnik | DNCT Hosting',
+    'title' => 'Jak postawić serwer Project Zomboid (Build 42) | DNCT',
     'opis'  => 'Krok po kroku: ile RAM-u potrzebuje serwer Project Zomboid, pierwsze uruchomienie, łączenie przez IP i port, komendy administratora i najczęstsze błędy.',
     'data'  => '2026-10-07',
     'tresc' => (string)ob_get_clean(),

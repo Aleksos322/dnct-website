@@ -44,8 +44,8 @@ Mods=NazwaBiblioteki;NazwaModa</code></pre>
 $poradnik = [
     'slug'  => 'mody-na-serwer-project-zomboid',
     'tytul' => 'Jak dodać mody ze Steam Workshop na serwer Zomboid',
-    'title' => 'Mody na serwer Project Zomboid ze Steam Workshop - poradnik | DNCT Hosting',
-    'opis'  => 'Jak dodać mody ze Steam Workshop na serwer Project Zomboid (Build 42): gdzie jest ProjectZomboid.ini, Workshop ID i Mod ID, kolejność bibliotek i co zrobić, gdy serwer nie startuje.',
+    'title' => 'Mody na serwer Project Zomboid ze Steam Workshop | DNCT',
+    'opis'  => 'Jak dodać mody ze Steam Workshop na serwer Project Zomboid (Build 42): ProjectZomboid.ini, Workshop ID, Mod ID i co zrobić, gdy serwer nie startuje.',
     'data'  => '2026-10-07',
     'tresc' => (string)ob_get_clean(),
 ];

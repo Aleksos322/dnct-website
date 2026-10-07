@@ -2,7 +2,7 @@
 declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
-$pageTitle       = 'Poradniki Project Zomboid - serwer, mody, ustawienia | DNCT Hosting';
+$pageTitle       = 'Poradniki Project Zomboid: serwer, mody, ustawienia';
 $metaDescription = 'Poradniki o serwerach Project Zomboid: jak postawić serwer, jak dodać mody ze Steam Workshop i jak ustawić hasło, PvP i trudność świata.';
 $canonicalUrl    = 'https://game.dnct.pl/poradniki/';
 $centerContent   = false;

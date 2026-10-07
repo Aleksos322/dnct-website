@@ -1,17 +1,27 @@
 # DNCT Hosting
 
-> Hosting serwerów gier (Minecraft, Project Zomboid, Vintage Story i inne)
-> z ochroną DDoS, dyskami SSD i wsparciem 24/7. Ceny od 3.99 PLN/miesiąc.
+> Polski hosting serwerów gier: Minecraft i Project Zomboid. Serwery na własnym
+> sprzęcie w Polsce, dyski SSD, stały przydział RAM i CPU, ochrona DDoS.
+> Minecraft od 3,99 zł za tydzień (6,99 zł miesięcznie), Project Zomboid od 29,99 zł miesięcznie.
 
-DNCT Hosting automatycznie uruchamia serwer do gry w kilka minut po
-opłaceniu, z panelem administracyjnym (Pterodactyl) do zarządzania plikami,
-konsolą, bazą danych i backupami.
+DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK).
+Serwerem zarządza się w panelu po polsku: konsola, menedżer plików, kopie
+zapasowe na żądanie, zmiana wersji gry. Płatność jednorazowa albo abonament,
+płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 
 ## Oferta
-- [Cennik](https://game.dnct.pl/cennik): pełny cennik planów dla Minecraft,
-  Project Zomboid, Vintage Story.
-- [Twoje serwery](https://game.dnct.pl/twoje-serwery): dostępne gry i plany.
-- [Panel demo](https://game.dnct.pl/demo): wypróbowanie panelu bez zakładania konta.
+- [Cennik](https://game.dnct.pl/cennik): plany Minecraft i serwery Project Zomboid od 5 do 100 graczy.
+- [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid): serwer Build 42 od 29,99 zł/mies.
+- [Panel demo](https://game.dnct.pl/demo): podgląd panelu bez zakładania konta.
+- [Program dla twórców](https://game.dnct.pl/partnerzy): kod rabatowy dla widzów i prowizja dla twórcy.
+
+## Poradniki
+- [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
+- [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
+- [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)
+
+## Hosting stron WWW
+- [web.dnct.pl](https://web.dnct.pl/): hosting stron (w przygotowaniu, sprzedaż chwilowo wstrzymana).
 
 ## Zasady
 - [Regulamin](https://game.dnct.pl/regulamin)

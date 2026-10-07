@@ -101,8 +101,8 @@ try {
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 
-$pageTitle       = 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story - Od 3.99 PLN';
-$metaDescription = 'DNCT Hosting to serwery Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Start od 3.99 PLN, szybkie dyski SSD i wsparcie 24/7.';
+$pageTitle       = 'DNCT Hosting - serwery Minecraft i Project Zomboid';
+$metaDescription = 'Polski hosting serwerów Minecraft i Project Zomboid z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień. Dyski SSD, panel po polsku.';
 $canonicalUrl    = 'https://game.dnct.pl/';
 $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
@@ -125,8 +125,8 @@ ob_start();
         </h1>
 
         <p class="text-gray-400 text-base md:text-xl max-w-2xl mx-auto mb-10 px-4">
-            Serwery Minecraft, Project Zomboid i Vintage Story.
-            Ochrona DDoS, szybkie dyski SSD i wsparcie 24/7.
+            Serwery Minecraft i Project Zomboid.
+            Ochrona DDoS, szybkie dyski SSD i wsparcie na Discordzie.
         </p>
 
         <div class="flex flex-col md:flex-row justify-center gap-4 px-4">
@@ -184,27 +184,27 @@ ob_start();
     <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
             <h2 class="text-3xl md:text-4xl font-bold mb-4">
-                Hosting gier Minecraft, Project Zomboid i Vintage Story
+                Hosting serwerów Minecraft i Project Zomboid
             </h2>
             <p class="text-gray-400 mb-4">
-                DNCT Hosting to serwery dla Minecraft, Project Zomboid i Vintage Story,
-                od 3.99 PLN - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
+                DNCT Hosting to serwery dla Minecraft i Project Zomboid,
+                od 3,99 zł za tydzień - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
             </p>
             <p class="text-gray-400">
                 Serwery stoją na naszym własnym sprzęcie (Proxmox), nie na odsprzedanych
                 zasobach - stąd realna dostępność, nie tylko deklaracja. Do tego polska
-                infrastruktura, ochrona DDoS, kopie zapasowe w panelu i wsparcie 24/7 przez Discord.
+                infrastruktura, ochrona DDoS, kopie zapasowe w panelu i wsparcie przez Discord.
             </p>
         </div>
 
         <div class="glass p-6 rounded-2xl border border-white/5">
             <ul class="space-y-3 text-sm text-gray-300">
                 <?php foreach ([
-                    'Ochrona DDoS i monitoring 24/7',
+                    'Ochrona DDoS i stały monitoring serwerów',
                     'Dyski SSD, nowoczesne CPU, stabilne zasoby',
                     'Backupy i szybkie przywrócenie danych',
                     'Wsparcie dla modów i konfiguracji serwerów',
-                    'Plany dla Minecraft, Zomboid i Vintage Story',
+                    'Plany dla Minecraft i Project Zomboid',
                 ] as $feature): ?>
                     <li class="flex items-start gap-3">
                         <svg class="w-4 h-4 text-purple-500 mt-0.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -223,7 +223,7 @@ ob_start();
 <section id="pricing" class="cennik-page py-20 px-6 max-w-7xl mx-auto w-full">
     <div class="text-center mb-16">
         <h2 class="text-3xl font-bold mb-4">Wybierz plan hostingu gier</h2>
-        <p class="text-gray-400 text-sm md:text-base mb-4">Hosting Minecraft, Project Zomboid i Vintage Story</p>
+        <p class="text-gray-400 text-sm md:text-base mb-4">Hosting Minecraft i <a href="/hosting-project-zomboid" class="text-purple-400 hover:text-purple-300">Project Zomboid</a></p>
         <div class="w-24 h-1 bg-gradient-main mx-auto rounded-full"></div>
     </div>
 
