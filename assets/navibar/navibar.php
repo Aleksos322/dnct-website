@@ -23,6 +23,14 @@ if (!isset($isAdmin)) {
     }
 }
 
+// Pełny profil pozostaje prywatny niezależnie od avatara. Obraz pobiera
+// lokalny proxy endpoint, który odczytuje aktualny avatar z account.dnct.pl.
+$profileAvatarUrl = null;
+$profileAvatarUsername = (string)($_SESSION['authentik_username'] ?? '');
+if ($isLoggedIn && $profileAvatarUsername !== '') {
+    $profileAvatarUrl = '/avatar/' . rawurlencode($profileAvatarUsername);
+}
+
 // Adres przejścia do panelu. Z .env, żeby zmiana domeny panelu nie wymagała
 // szukania po plikach widoku. Fallback na wypadek braku wpisu w konfiguracji.
 $panelUrl = function_exists('env')
@@ -141,7 +149,13 @@ function navbar_class_mobile(bool $active): string
                 <div class="profile-magic-slide">
                     <span class="profile-text-profil">Panel</span>
                     <div class="profile-magic-avatar">
-                        <?php echo strtoupper(substr($username, 0, 1)); ?>
+                        <?php if ($profileAvatarUrl !== null): ?>
+                            <?php /* Bez zdjęcia w account.dnct.pl proxy zwraca 404 - wtedy wraca litera. */ ?>
+                            <img src="<?php echo htmlspecialchars($profileAvatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="profile-magic-avatar__image"
+                                 onerror="this.replaceWith(document.createTextNode(<?php echo htmlspecialchars(json_encode(strtoupper(substr((string)$username, 0, 1))), ENT_QUOTES, 'UTF-8'); ?>))">
+                        <?php else: ?>
+                            <?php echo strtoupper(substr($username, 0, 1)); ?>
+                        <?php endif; ?>
                     </div>
                 </div>
 

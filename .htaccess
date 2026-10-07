@@ -172,6 +172,7 @@ AddDefaultCharset UTF-8
     RewriteRule ^panel/?$        auth/to-panel.php          [L]
     RewriteRule ^demo/?$         auth/demo.php              [L]
     RewriteRule ^callback/?$     auth/callback.php          [L]
+    RewriteRule ^avatar/([A-Za-z0-9_.+-]{3,150})/?$ avatar.php?u=$1 [L,QSA]
 
     # --- (a2) reszta: /cokolwiek -> /cokolwiek.php, jeśli taki plik istnieje -
     # Dzięki temu każda nowa podstrona dostaje czysty adres bez dopisywania
