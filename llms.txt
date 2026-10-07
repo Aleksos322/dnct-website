@@ -1,8 +1,8 @@
 # DNCT Hosting
 
-> Polski hosting serwerów gier: Minecraft i Project Zomboid. Serwery na własnym
+> Polski hosting serwerów gier: Minecraft, Project Zomboid i Vintage Story. Serwery na własnym
 > sprzęcie w Polsce, dyski SSD, stały przydział RAM i CPU, ochrona DDoS.
-> Minecraft od 3,99 zł za tydzień (6,99 zł miesięcznie), Project Zomboid od 29,99 zł miesięcznie.
+> Minecraft od 3,99 zł za tydzień (6,99 zł miesięcznie), Project Zomboid od 29,99 zł miesięcznie, Vintage Story od 19,99 zł miesięcznie.
 
 DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK).
 Serwerem zarządza się w panelu po polsku: konsola, menedżer plików, kopie
@@ -10,7 +10,7 @@ zapasowe na żądanie, zmiana wersji gry. Płatność jednorazowa albo abonament
 płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 
 ## Oferta
-- [Cennik](https://game.dnct.pl/cennik): plany Minecraft i serwery Project Zomboid od 5 do 100 graczy.
+- [Cennik](https://game.dnct.pl/cennik): plany Minecraft oraz serwery Project Zomboid i Vintage Story na liczbę graczy.
 - [Hosting Minecraft](https://game.dnct.pl/hosting-minecraft): Paper, Fabric, Forge, od 1,5 do 32 GB RAM, od 6,99 zł/mies.
 - [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid): serwer Build 42 od 29,99 zł/mies.
 - [Panel demo](https://game.dnct.pl/demo): podgląd panelu bez zakładania konta.

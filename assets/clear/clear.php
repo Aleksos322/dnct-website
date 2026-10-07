@@ -58,7 +58,7 @@ $email      = $_SESSION['authentik_email'] ?? null;
 
 // Domyślne wartości SEO - nadpisywane przez stronę wywołującą, jeśli ustawione wcześniej
 $pageTitle       = $pageTitle       ?? 'DNCT Hosting | Serwery Minecraft, Project Zomboid, Vintage Story';
-$metaDescription = $metaDescription ?? 'Polski hosting serwerów Minecraft i Project Zomboid z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień. Dyski SSD, panel po polsku.';
+$metaDescription = $metaDescription ?? 'Polski hosting serwerów Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień.';
 $ogImage         = $ogImage         ?? 'https://game.dnct.pl/assets/media/icons/LINKS.png';
 // Kanoniczny adres na hoście, który naprawdę serwuje stronę (ten layout renderuje
 // też rejestracja na account.dnct.pl); nieznany host -> sklep gier.
