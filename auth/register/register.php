@@ -54,7 +54,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rejestracja w DNCT Hosting | Stwórz Konto Hostingu Gier</title>
-    <meta name="description" content="Zarejestruj się w DNCT Hosting i załóż konto dla serwerów Minecraft i gier. Szybka rejestracja, 24/7 support.">
+    <meta name="description" content="Zarejestruj się w DNCT Hosting i załóż konto dla serwerów Minecraft i gier. Jedno konto do strony i panelu serwerów.">
     <meta name="keywords" content="rejestracja hosting, minecraft account, konto hosting">
     <link rel="canonical" href="https://account.dnct.pl/register">
     <meta property="og:type" content="website">

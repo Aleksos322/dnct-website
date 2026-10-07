@@ -64,7 +64,7 @@ const CENNIK_STRONY_GIER = [
     'zomboid' => [
         'slug'        => 'hosting-project-zomboid',
         'title'       => 'Hosting Project Zomboid - serwer od 29,99 zł/mies. | DNCT',
-        'description' => 'Serwer Project Zomboid (Build 42) od 29,99 zł miesięcznie: od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwerownia w Polsce. Uruchomienie od razu po płatności kartą lub BLIK-iem.',
+        'description' => 'Serwer Project Zomboid (Build 42) od 29,99 zł/mies.: od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwery w Polsce. Start zaraz po płatności.',
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Project Zomboid',
         'lead'        => 'Serwer Build 42 dla Ciebie i znajomych - od 5 do 100 graczy. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam, bez czekania na nikogo.',
@@ -79,7 +79,7 @@ const CENNIK_STRONY_GIER = [
 ];
 
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
-$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story. Stałe limity RAM i CPU, ochrona DDoS i dyski SSD.';
+$metaDescription = 'Cennik serwerów Minecraft i Project Zomboid: gotowe plany i serwery od 5 do 100 graczy. Stałe limity RAM i CPU, ochrona DDoS i dyski SSD.';
 $canonicalUrl    = 'https://game.dnct.pl/cennik';
 $centerContent   = false;
 
