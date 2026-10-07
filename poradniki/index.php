@@ -11,9 +11,11 @@ $lista = [
     ['jak-postawic-serwer-minecraft', 'Jak postawić serwer Minecraft', 'Ile RAM-u, Paper czy Forge, pierwsze uruchomienie, server.properties i komendy.'],
     ['pluginy-na-serwer-minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)', 'Skąd brać pluginy, wgrywanie do folderu plugins, config.yml i typowe błędy.'],
     ['mody-na-serwer-minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)', 'Zmiana silnika, folder mods, modpacki z CurseForge i Modrinth.'],
+    ['jak-wgrac-swiat-na-serwer-minecraft', 'Jak wgrać własny świat na serwer Minecraft', 'Świat z gry jednoosobowej na serwer: pakowanie, wgrywanie, level-name, Nether i End.'],
     ['jak-postawic-serwer-project-zomboid', 'Jak postawić serwer Project Zomboid (Build 42)', 'Ile RAM-u potrzeba, pierwsze uruchomienie, łączenie przez IP i port, komendy admina.'],
     ['mody-na-serwer-project-zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid', 'Workshop ID i Mod ID, kolejność bibliotek, co zrobić, gdy serwer nie startuje.'],
     ['ustawienia-serwera-project-zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie', 'ProjectZomboid.ini i SandboxVars - najważniejsze opcje z wyjaśnieniem.'],
+    ['zapis-zomboid-na-serwer', 'Jak przenieść zapis Project Zomboid na serwer', 'Świat z gry jednoosobowej na serwer: co przechodzi, mody i podmiana zapisu.'],
 ];
 
 ob_start(); ?>

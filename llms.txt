@@ -20,6 +20,8 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 - [Jak postawić serwer Minecraft](https://game.dnct.pl/poradniki/jak-postawic-serwer-minecraft)
 - [Pluginy na serwer Minecraft](https://game.dnct.pl/poradniki/pluginy-na-serwer-minecraft)
 - [Mody i modpacki na serwer Minecraft](https://game.dnct.pl/poradniki/mody-na-serwer-minecraft)
+- [Jak wgrać świat na serwer Minecraft](https://game.dnct.pl/poradniki/jak-wgrac-swiat-na-serwer-minecraft)
+- [Przeniesienie zapisu Project Zomboid na serwer](https://game.dnct.pl/poradniki/zapis-zomboid-na-serwer)
 - [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
 - [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
 - [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)

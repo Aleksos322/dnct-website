@@ -18,9 +18,11 @@ const PORADNIKI = [
     'jak-postawic-serwer-minecraft'       => ['minecraft', 'Jak postawić serwer Minecraft'],
     'pluginy-na-serwer-minecraft'         => ['minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)'],
     'mody-na-serwer-minecraft'            => ['minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)'],
+    'jak-wgrac-swiat-na-serwer-minecraft' => ['minecraft', 'Jak wgrać własny świat na serwer Minecraft'],
     'jak-postawic-serwer-project-zomboid' => ['zomboid', 'Jak postawić serwer Project Zomboid (Build 42)'],
     'mody-na-serwer-project-zomboid'      => ['zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid'],
     'ustawienia-serwera-project-zomboid'  => ['zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie'],
+    'zapis-zomboid-na-serwer'             => ['zomboid', 'Jak przenieść zapis Project Zomboid na serwer'],
 ];
 
 /* Ramka z ofertą pod poradnikiem - per gra. */
