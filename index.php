@@ -223,7 +223,7 @@ ob_start();
 <section id="pricing" class="cennik-page py-20 px-6 max-w-7xl mx-auto w-full">
     <div class="text-center mb-16">
         <h2 class="text-3xl font-bold mb-4">Wybierz plan hostingu gier</h2>
-        <p class="text-gray-400 text-sm md:text-base mb-4">Hosting <a href="/hosting-minecraft" class="text-purple-400 hover:text-purple-300">Minecraft</a> i <a href="/hosting-project-zomboid" class="text-purple-400 hover:text-purple-300">Project Zomboid</a></p>
+        <p class="text-gray-400 text-sm md:text-base mb-4">Hosting <a href="/hosting-minecraft" class="text-purple-400 hover:text-purple-300">Minecraft</a>, <a href="/hosting-project-zomboid" class="text-purple-400 hover:text-purple-300">Project Zomboid</a> i <a href="/hosting-vintage-story" class="text-purple-400 hover:text-purple-300">Vintage Story</a></p>
         <div class="w-24 h-1 bg-gradient-main mx-auto rounded-full"></div>
     </div>
 

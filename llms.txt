@@ -12,6 +12,7 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 ## Oferta
 - [Cennik](https://game.dnct.pl/cennik): plany Minecraft oraz serwery Project Zomboid i Vintage Story na liczbę graczy.
 - [Hosting Minecraft](https://game.dnct.pl/hosting-minecraft): Paper, Fabric, Forge, od 1,5 do 32 GB RAM, od 6,99 zł/mies.
+- [Hosting Vintage Story](https://game.dnct.pl/hosting-vintage-story): serwer na aktualnej wersji gry, od 19,99 zł/mies.
 - [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid): serwer Build 42 od 29,99 zł/mies.
 - [Panel demo](https://game.dnct.pl/demo): podgląd panelu bez zakładania konta.
 - [Program dla twórców](https://game.dnct.pl/partnerzy): kod rabatowy dla widzów i prowizja dla twórcy.
@@ -22,6 +23,8 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 - [Mody i modpacki na serwer Minecraft](https://game.dnct.pl/poradniki/mody-na-serwer-minecraft)
 - [Jak wgrać świat na serwer Minecraft](https://game.dnct.pl/poradniki/jak-wgrac-swiat-na-serwer-minecraft)
 - [Przeniesienie zapisu Project Zomboid na serwer](https://game.dnct.pl/poradniki/zapis-zomboid-na-serwer)
+- [Jak postawić serwer Vintage Story](https://game.dnct.pl/poradniki/jak-postawic-serwer-vintage-story)
+- [Mody na serwer Vintage Story](https://game.dnct.pl/poradniki/mody-na-serwer-vintage-story)
 - [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
 - [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
 - [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)
