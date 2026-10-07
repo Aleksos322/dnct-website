@@ -27,7 +27,7 @@ ob_start();
     .abuse-form .form-status.error { background:#4a1d28; color:#fecdd3; }
 </style>
 
-<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto;">
+<article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <h1>Zgłoś potencjalnie nielegalną treść</h1>
     <p>Ten formularz służy do zgłaszania treści lub działań dostępnych w usługach DNCT Hosting, które mogą naruszać prawo. Nie wymaga konta DNCT ani Discorda.</p>
     <div class="info-box">
