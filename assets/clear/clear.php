@@ -239,10 +239,24 @@ if ($centerContent) {
              wszystkie błyskają w tej samej sekundzie. */ ?>
     <script src="<?php echo asset('/assets/js/glass-sheen.js'); ?>" defer></script>
     <script type="text/javascript">
+    /* 20 klatek/s zamiast 60, a prędkość x3 - ruch wygląda tak samo jak w panelu
+       (tam 60 kl/s i prędkość 0.01-0.05). Każda klatka tła zmusza przeglądarkę
+       do przeliczenia rozmycia wszystkich tafli .glass, więc pełne 60 kl/s
+       kosztowało telefon ~1,9 s procesora na każde 8 s (pomiar 2026-10-07);
+       przy 20 kl/s o ~40% mniej. */
+    (function () {
+      var P = FinisherHeader.prototype, rysuj = P.an;
+      P.an = function () {
+        var t = performance.now();
+        if (this._dnctT && t - this._dnctT < 48) { requestAnimationFrame(this.an.bind(this)); return; }
+        this._dnctT = t;
+        rysuj.call(this);
+      };
+    })();
     new FinisherHeader({
       "count": 6,
       "size": { "min": 522, "max": 1008, "pulse": 0.1 },
-      "speed": { "x": { "min": 0.01, "max": 0.05 }, "y": { "min": 0.01, "max": 0.05 } },
+      "speed": { "x": { "min": 0.03, "max": 0.15 }, "y": { "min": 0.03, "max": 0.15 } },
       "colors": {
         "background": "#050505",
         "particles": ["#4f7cfa", "#4f7cfa", "#885ef6", "#984ede", "#984ede", "#984ede", "#07ffd1", "#984ede", "#885ef6"]
