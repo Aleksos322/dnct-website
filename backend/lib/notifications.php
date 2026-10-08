@@ -28,6 +28,8 @@
  * jest po cichu pomijany.
  */
 
+require_once __DIR__ . '/ntfy.php';
+
 require_once __DIR__ . '/db.php';
 
 /** Czy zalogowany user jest adminem (superuserem Authentika). */
@@ -43,7 +45,12 @@ function notify_user(PDO $pdo, string $userId, string $type, string $title, stri
 
 function notify_admins(PDO $pdo, string $type, string $title, string $message, array $opts = []): ?int
 {
-    return dnct_insert_notification($pdo, $type, $title, $message, 'admins', null, $opts);
+    $id = dnct_insert_notification($pdo, $type, $title, $message, 'admins', null, $opts);
+    // Telefon admina (lib/ntfy.php). Duplikat event_key zwraca null - wtedy też bez drugiego dzwonka.
+    if ($id !== null) {
+        ntfy_from_admin_notification($type, $title, $message, $opts);
+    }
+    return $id;
 }
 
 function notify_all(PDO $pdo, string $type, string $title, string $message, array $opts = []): ?int
