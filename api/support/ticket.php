@@ -74,7 +74,7 @@ if($action==='create'){
         support_audit($db,$id,$username?:null,'created');
         $db->commit();
         // Dzwonek adminów na stronie; licznik w panelu admina odświeża się sam (api/wsparcie-licznik.php).
-        try{notify_admins($db,'info','Nowe zgłoszenie '.$number,$name.' - '.support_categories()[$category],['link'=>'http://admin.lan.dnct.pl/wsparcie','event_key'=>'support-new-'.$id]);}catch(Throwable $e){error_log('support notify: '.$e->getMessage());}
+        try{notify_admins($db,'info','Nowe zgłoszenie '.$number,$name.' - '.support_categories()[$category],['link'=>'http://admin.lan.dnct.pl/wsparcie','event_key'=>'support-new-'.$id,'ntfy'=>['awarie',4,'ticket']]);}catch(Throwable $e){error_log('support notify: '.$e->getMessage());}
     }catch(PDOException $e){if($db->inTransaction())$db->rollBack();if($e->getCode()!=='23000')throw $e;$q=$db->prepare('SELECT * FROM support_tickets WHERE request_key=:request OR active_owner_key=:owner ORDER BY id DESC LIMIT 1');$q->execute([':request'=>$requestKey,':owner'=>$owner]);$ticket=$q->fetch(PDO::FETCH_ASSOC);if($ticket)support_payload($db,$ticket,['already_exists'=>true]);throw $e;}
     $ticket=support_active_ticket($db,$username,$access);if($ticket) support_payload_after_create($db,$ticket);support_payload($db,$ticket);
 }

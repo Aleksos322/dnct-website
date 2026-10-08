@@ -30,6 +30,7 @@ require_once __DIR__ . '/lib/orders.php';
 require_once __DIR__ . '/lib/panel_sso.php';
 require_once __DIR__ . '/lib/gsc.php';
 require_once __DIR__ . '/lib/odwiedziny.php';
+require_once __DIR__ . '/lib/ntfy.php';
 
 // ------------------------------------------------------------
 // Sesja - ciasteczko niedostępne dla JS i wysyłane tylko po HTTPS.

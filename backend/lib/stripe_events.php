@@ -24,6 +24,7 @@ require_once __DIR__ . '/plan_change.php';
 require_once __DIR__ . '/hosting_orders.php';
 require_once __DIR__ . '/partnerzy.php';
 require_once __DIR__ . '/polecenia.php';
+require_once __DIR__ . '/ntfy.php';
 
 /**
  * Rozdzielenie zdarzeń.
@@ -60,6 +61,21 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
                 partner_po_fakturze($dnct, $event->data->object);
             }
             return $ok;
+
+        /* Spór o płatność (chargeback). Stripe daje kilka dni na odpowiedź -
+           przegapiony termin to utracone pieniądze i opłata za spór. Samą
+           odpowiedź składa się ręcznie w panelu Stripe. */
+        case 'charge.dispute.created':
+            $d = $event->data->object;
+            notify_admins(
+                $dnct,
+                'error',
+                'Spór płatności (chargeback): ' . pricing_format((int)($d->amount ?? 0)) . ' zł',
+                'Powód: ' . (string)($d->reason ?? '?') . ', płatność ' . (string)($d->charge ?? '?')
+                . '. Odpowiedz w panelu Stripe przed terminem.',
+                ['event_key' => 'dispute-' . (string)($d->id ?? $event->id)]
+            );
+            return true;
 
         // Tylko dla programu partnerskiego - sam zwrot obsługujemy ręcznie.
         case 'charge.refunded':
@@ -246,6 +262,17 @@ function webhook_provision_paid_order(PDO $dnct, array $order): bool
         $result['game_admin_password'] ?? null
     );
 
+    ntfy_send(
+        'sprzedaz',
+        'Nowy serwer: ' . (string)$order['game_type'] . ' - ' . pricing_format((int)$order['amount_gross']) . ' zł',
+        (string)$order['user_email'] . "\n"
+        . round((int)$order['ram_mb'] / 1024, 1) . ' GB RAM, ' . (int)$order['period_days'] . ' dni, '
+        . ($order['billing_mode'] === 'subscription' ? 'abonament' : 'jednorazowo')
+        . ', zamówienie #' . $orderId,
+        4,
+        'moneybag'
+    );
+
     return true;
 }
 
@@ -336,6 +363,13 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
     }
 
     order_extend($dnct, (int)$parent['id'], (int)$order['period_days']);
+    ntfy_send(
+        'sprzedaz',
+        'Przedłużenie: +' . (int)$order['period_days'] . ' dni - ' . pricing_format((int)$order['amount_gross']) . ' zł',
+        (string)$order['user_email'] . ', serwer z zamówienia #' . (int)$parent['id'],
+        3,
+        'repeat'
+    );
 
     /* PRZEJŚCIE NA ABONAMENT. Klient dokupił okres, wybierając odnawianie -
        od teraz to zamówienie nadrzędne jest abonamentem i kolejne faktury mają
@@ -493,6 +527,13 @@ function webhook_plan_change_paid(PDO $dnct, array $order): bool
         'Pakiet zmieniony',
         'Serwer działa już na nowych zasobach. Data ważności bez zmian.'
     );
+    ntfy_send(
+        'sprzedaz',
+        'Zmiana pakietu: dopłata ' . pricing_format((int)$order['amount_gross']) . ' zł',
+        (string)$order['user_email'] . ', teraz ' . round((int)$order['ram_mb'] / 1024, 1) . ' GB RAM',
+        3,
+        'arrow_up'
+    );
 
     return true;
 }
@@ -554,6 +595,13 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
             'success',
             'Abonament przedłużony',
             'Płatność się powiodła - serwer działa dalej przez kolejny okres.'
+        );
+        ntfy_send(
+            'sprzedaz',
+            'Odnowienie abonamentu: ' . pricing_format((int)($invoice->amount_paid ?? 0)) . ' zł',
+            (string)$order['user_email'] . ', zamówienie #' . (int)$order['id'],
+            2,
+            'repeat'
         );
     } else {
         // Ten sam powód co w webhook_extension_paid() - bez sprawdzenia
@@ -661,6 +709,15 @@ function webhook_subscription_deleted(PDO $dnct, $subscription): bool
         'info',
         'Abonament nie będzie odnawiany',
         'Serwer działa do końca opłaconego okresu. Możesz go wznowić w każdej chwili.'
+    );
+    // Dobry moment, żeby zapytać klienta, co było nie tak.
+    ntfy_send(
+        'sprzedaz',
+        'Anulowany abonament',
+        (string)$order['user_email'] . ', zamówienie #' . (int)$order['id']
+        . ', serwer działa do ' . (string)($order['expires_at'] ?? '?'),
+        3,
+        'wave'
     );
 
     return true;

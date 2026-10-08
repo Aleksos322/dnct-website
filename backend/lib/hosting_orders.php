@@ -287,6 +287,13 @@ function hosting_activate_paid_order(PDO $dnct, array $order): bool
     $dnct->prepare('UPDATE hosting_orders SET status = "provisioned", hosting_user = ? WHERE id = ?')
          ->execute([(string)$res['user'], $id]);
     hosting_announce_paid($dnct, hosting_order_by($dnct, 'id', $id));
+    ntfy_send(
+        'sprzedaz',
+        'Nowy hosting WWW: ' . (string)$order['package'] . ' - ' . pricing_format((int)$order['amount_gross']) . ' zł',
+        (string)$order['user_email'] . ', ' . (int)$order['period_days'] . ' dni, zamówienie #' . $id,
+        4,
+        'moneybag'
+    );
     return true;
 }
 
@@ -336,6 +343,7 @@ function hosting_webhook_subscription_deleted(PDO $dnct, array $order): bool
     $dnct->prepare('UPDATE hosting_orders SET billing_mode = "payment" WHERE id = ?')->execute([(int)$order['id']]);
     notify_user($dnct, (string)$order['user_name'], 'info', 'Abonament hostingu nie będzie odnawiany',
         'Strony działają do końca opłaconego okresu (' . hosting_fmt_date((string)$order['expires_at']) . '). Możesz przedłużyć w każdej chwili.');
+    ntfy_send('sprzedaz', 'Anulowany abonament hostingu WWW', (string)$order['user_email'] . ', zamówienie #' . (int)$order['id'], 3, 'wave');
     return true;
 }
 
