@@ -541,10 +541,11 @@ $tytul = ($tydzien ? 'Raport tygodnia ' : 'Raport dnia ') . $okresTxt;
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 
 // Okres wprost, z godzinami - "raport dnia 09.10" nie mówi, czy to doba od północy.
-$okresPelny = 'od ' . $start->format('d.m.Y H:i') . ' do ' . $koniec->modify('-1 minute')->format('d.m.Y H:i');
-$tekst = $tytul . "\nOkres: " . $okresPelny . " (czas polski)\n\n";
-$html = '<p style="margin:0 0 16px;color:#6b7280;font-size:13px;">Okres: <strong style="color:#333;">' . $e($okresPelny) . '</strong> (czas polski). '
-    . 'Google Search Console ma ok. 3 dni opóźnienia, więc jego dane mają własny zakres, podany przy wierszu.</p>';
+$okresPelny = $tydzien
+    ? $start->format('d.m.Y') . ' 00:00 - ' . $koniec->modify('-1 minute')->format('d.m.Y H:i')
+    : $start->format('d.m.Y') . ', 00:00-23:59';
+$tekst = $tytul . "\n" . $okresPelny . "\n\n";
+$html = '<p style="margin:0 0 14px;color:#9ca3af;font-size:12px;">' . $e($okresPelny) . '</p>';
 if ($uwagi) {
     $tekst .= "WYMAGA UWAGI\n" . implode("\n", array_map(static fn($u) => '- ' . $u, $uwagi)) . "\n\n";
     $html .= '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin:0 0 20px;">'
