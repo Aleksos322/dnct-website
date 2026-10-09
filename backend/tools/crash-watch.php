@@ -63,7 +63,7 @@ foreach ($servers as $s) {
 
     if ($s['status'] === 'install_failed') {
         if ($was !== null && ($was['status'] ?? null) !== 'install_failed') {
-            $alerts[] = ['Nieudana instalacja serwera', $label . ' - instalacja w panelu zakończona błędem.', 5, 'package', $link];
+            $alerts[] = ['Nieudana instalacja serwera', $label . ' - instalacja w panelu zakończona błędem.', 5, 'package', $link, $s['name'], 'instalacja'];
         }
         $next[$uuid] = ['status' => 'install_failed', 'state' => null, 'uptime' => 0, 'at' => $now];
         continue;
@@ -106,13 +106,13 @@ foreach ($servers as $s) {
     }
 
     $alerts[] = $stopped
-        ? ['Serwer padł: ' . $s['name'], $label . ' jest offline, a nikt nie kliknął stop w panelu. Crash albo /stop wpisane w grze.', 5, 'rotating_light', $link]
-        : ['Serwer się zrestartował: ' . $s['name'], $label . ' sam wstał od nowa (crash z automatycznym restartem).', 4, 'warning', $link];
+        ? ['Serwer padł: ' . $s['name'], $label . ' jest offline, a nikt nie kliknął stop w panelu. Crash albo /stop wpisane w grze.', 5, 'rotating_light', $link, $s['name'], 'offline']
+        : ['Serwer się zrestartował: ' . $s['name'], $label . ' sam wstał od nowa (crash z automatycznym restartem).', 4, 'warning', $link, $s['name'], 'restart'];
 }
 
 // Węzeł nie odpowiada - jeden zbiorczy alarm zamiast kilkudziesięciu.
 if ($apiErrors >= 5 && ($prev['_api_errors'] ?? 0) < 5) {
-    $alerts[] = ['Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. Sprawdź węzeł.', 5, 'skull', 'https://panel.dnct.pl/admin/nodes'];
+    $alerts[] = ['Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. Sprawdź węzeł.', 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
 }
 $next['_api_errors'] = $apiErrors;
 
@@ -121,10 +121,14 @@ if ($firstRun) {
     $alerts = [];
 }
 
-foreach ($alerts as [$title, $msg, $prio, $tags, $click]) {
+// Dziennik dla raportu admina (backend/tools/raport.php liczy z niego crashe).
+$awarieLog = dirname(__DIR__, 4) . '/storage/raporty/awarie.jsonl';
+
+foreach ($alerts as [$title, $msg, $prio, $tags, $click, $serwer, $rodzaj]) {
     echo date('Y-m-d H:i:s') . ' crash-watch: ' . $title . ' - ' . $msg . "\n";
     if (!$dryRun) {
         ntfy_send('awarie', $title, $msg, $prio, $tags, $click);
+        @file_put_contents($awarieLog, json_encode(['ts' => $now, 'serwer' => $serwer, 'rodzaj' => $rodzaj], JSON_UNESCAPED_UNICODE) . "\n", FILE_APPEND | LOCK_EX);
     }
 }
 
