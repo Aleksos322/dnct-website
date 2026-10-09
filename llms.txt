@@ -35,3 +35,4 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 ## Zasady
 - [Regulamin](https://game.dnct.pl/regulamin)
 - [Polityka prywatności](https://game.dnct.pl/polityka-prywatnosci)
+- [Status usług](https://status.dnct.pl): stan strony, panelu, logowania i węzłów gier sprawdzany co minutę, historia 90 dni i lista przerw.

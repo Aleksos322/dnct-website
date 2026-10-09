@@ -168,6 +168,7 @@ ob_start();
         <h2>7. SLA, Dostępność i Rekompensaty</h2>
         <p>DNCT nie składa obecnie gwarancji dostępności wyrażonej procentowo. Zdarzenia wpływające na usługę można zgłosić zgodnie z pkt 13; DNCT bada je indywidualnie i podejmuje działania naprawcze.</p>
         <p>Jeżeli przepisy przyznają Klientowi określone środki ochrony lub rekompensatę, niniejszy Regulamin ich nie ogranicza. Planowane zasady SLA i automatycznych rekompensat mogą zostać wprowadzone dopiero po wdrożeniu niezależnego monitoringu oraz publicznego raportowania dostępności.</p>
+        <p>Bieżący stan usług oraz historia przerw z ostatnich 90 dni są publikowane na stronie <a href="https://status.dnct.pl">status.dnct.pl</a>. Pomiar prowadzi DNCT z własnej infrastruktury; strona ma charakter informacyjny i nie stanowi gwarancji dostępności ani podstawy do automatycznej rekompensaty.</p>
       </section>
 
       <section>
