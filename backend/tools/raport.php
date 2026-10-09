@@ -540,8 +540,11 @@ $sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $ty
 $tytul = ($tydzien ? 'Raport tygodnia ' : 'Raport dnia ') . $okresTxt;
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 
-$tekst = $tytul . "\n\n";
-$html = '';
+// Okres wprost, z godzinami - "raport dnia 09.10" nie mówi, czy to doba od północy.
+$okresPelny = 'od ' . $start->format('d.m.Y H:i') . ' do ' . $koniec->modify('-1 minute')->format('d.m.Y H:i');
+$tekst = $tytul . "\nOkres: " . $okresPelny . " (czas polski)\n\n";
+$html = '<p style="margin:0 0 16px;color:#6b7280;font-size:13px;">Okres: <strong style="color:#333;">' . $e($okresPelny) . '</strong> (czas polski). '
+    . 'Google Search Console ma ok. 3 dni opóźnienia, więc jego dane mają własny zakres, podany przy wierszu.</p>';
 if ($uwagi) {
     $tekst .= "WYMAGA UWAGI\n" . implode("\n", array_map(static fn($u) => '- ' . $u, $uwagi)) . "\n\n";
     $html .= '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin:0 0 20px;">'
@@ -573,6 +576,7 @@ $wyslane = send_mail($adres, $tytul . ' - DNCT Hosting', $html, $tekst, 'info');
 echo date('Y-m-d H:i:s') . ' raport: ' . $tytul . ' -> ' . $adres . ': ' . ($wyslane['ok'] ? 'wysłano' : 'BŁĄD ' . $wyslane['error']) . "\n";
 
 $telefon = implode("\n", array_filter([
+    '🗓 ' . $okresPelny,
     isset($skrot['pieniadze']) ? '💰 ' . $skrot['pieniadze'] : null,
     isset($skrot['klienci']) ? '👤 ' . $skrot['klienci'] : null,
     isset($skrot['serwery']) ? '🖥 ' . $skrot['serwery'] : null,
