@@ -98,6 +98,7 @@ ob_start();
             <div class="about-text-links">
                 <a href="/regulamin">Regulamin <span aria-hidden="true">→</span></a>
                 <a href="/polityka-prywatnosci">Polityka prywatności <span aria-hidden="true">→</span></a>
+                <a href="https://status.dnct.pl">Status usług na żywo <span aria-hidden="true">→</span></a>
             </div>
         </article>
     </section>
