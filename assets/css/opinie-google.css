@@ -1,0 +1,73 @@
+/* Opinie z Google - components/opinie-google.php, ruch: assets/js/opinie-google.js.
+   Nagłówek 1:1 z pasma Discorda (layout.css: .discord-eyebrow/.discord-heading),
+   karty to wspólne .glass z navbar.css. Gwiazdki bursztynowe - jedyny kolor poza
+   ametystem, bo to język Google, który gość zna. */
+
+.opinie-naglowek {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+    margin-bottom: 2.2rem;
+}
+.opinie-eyebrow {
+    display: inline-block; font-size: 0.68rem; font-weight: 900; letter-spacing: 0.28em;
+    text-transform: uppercase; color: #a78bfa;
+}
+.opinie-tytul {
+    margin: 0.5rem 0 0; font-size: clamp(1.75rem, 3.5vw, 2.5rem); font-weight: 800;
+    letter-spacing: -0.02em; color: #f8fafc;
+}
+
+.opinie-ocena {
+    display: inline-flex; align-items: center; gap: 0.9rem; padding: 0.8rem 1.15rem;
+    border-radius: 1rem; transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s;
+}
+.opinie-ocena:hover { transform: translateY(-2px); border-color: rgba(167, 139, 250, 0.45); }
+.opinie-ocena strong { font-size: 2.1rem; font-weight: 800; line-height: 1; color: #f8fafc; }
+.opinie-ocena > span { display: flex; flex-direction: column; gap: 0.15rem; }
+.opinie-ocena-opis { font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
+.opinie-gwiazdki { margin: 0; color: #fbbf24; letter-spacing: 0.12em; font-size: 0.95rem; line-height: 1; }
+
+/* Taśma: maska wygasza brzegi, żeby karty wjeżdżały z mgły, a nie spod krawędzi. */
+.opinie-tasma {
+    overflow-x: auto; scrollbar-width: none; padding: 0.5rem 0 1rem;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.opinie-tasma::-webkit-scrollbar { display: none; }
+.opinie-tor {
+    display: flex; width: max-content; margin: 0; padding: 0 0 0 1.5rem; list-style: none;
+}
+.opinie-tasma.is-ruch { overflow: hidden; }
+.opinie-tasma.is-ruch .opinie-tor {
+    padding-left: 0;
+    animation: opinie-jazda var(--opinie-czas, 60s) linear infinite;
+}
+.opinie-tasma.is-ruch:hover .opinie-tor,
+.opinie-tasma.is-ruch:focus-within .opinie-tor { animation-play-state: paused; }
+@keyframes opinie-jazda { to { transform: translateX(var(--opinie-przesuw, -50%)); } }
+
+/* Odstęp marginesem, nie gap - wtedy połowa toru to dokładnie jeden zestaw i pętla nie skacze. */
+.opinie-karta {
+    flex: none; width: 21rem; margin-right: 1.1rem; padding: 1.3rem 1.4rem;
+    border-radius: 1.4rem; display: flex; flex-direction: column; gap: 0.75rem;
+}
+.opinie-autor { display: flex; align-items: center; gap: 0.75rem; }
+.opinie-autor img, .opinie-inicjal { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+.opinie-inicjal {
+    display: grid; place-items: center; font-weight: 800; color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+.opinie-autor div { display: flex; flex-direction: column; min-width: 0; }
+.opinie-autor a, .opinie-autor span:not(.opinie-inicjal) {
+    font-weight: 700; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.opinie-autor a:hover { color: #c4b5fd; }
+.opinie-autor small { font-size: 0.75rem; color: #64748b; }
+.opinie-karta blockquote {
+    margin: 0; font-size: 0.9rem; line-height: 1.65; color: #cbd5e1;
+    display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
+}
+.opinie-zrodlo { margin: 0.4rem 0 0; text-align: center; font-size: 0.72rem; color: #64748b; }
+
+@media (max-width: 640px) {
+    .opinie-karta { width: 17.5rem; }
+}
