@@ -289,6 +289,7 @@ $discordShown   = array_slice($discordMembers, 0, 12);
 $discordExtra   = max(0, count($discordMembers) - count($discordShown));
 $discordOnline  = (int)($discordWidget['presence_count'] ?? count($discordMembers));
 ?>
+<?php /* Opinie z Google - znika sama, gdy nie ma klucza albo opinii. */ require __DIR__ . '/components/opinie-google.php'; ?>
 <section class="discord-band py-24 px-6 w-full relative overflow-hidden">
     <div class="discord-band-glow" aria-hidden="true"></div>
     <div class="max-w-5xl mx-auto relative z-10">
