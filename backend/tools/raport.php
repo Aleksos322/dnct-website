@@ -66,9 +66,8 @@ $doPl = $koniec->format('Y-m-d H:i:s');
 $dzienOd = $start->format('Y-m-d');
 $dzienDo = $koniec->modify('-1 day')->format('Y-m-d');
 
-$okresTxt = $tydzien
-    ? $start->format('d.m') . '-' . $koniec->modify('-1 day')->format('d.m.Y')
-    : $start->format('d.m.Y');
+// Okres w tytule: od/do, czyli doba (albo tydzień) od północy do północy.
+$okresTxt = $start->format('d.m.Y') . '/' . $koniec->format('d.m.Y');
 
 /** Sprawy do załatwienia - lądują na górze maila i w skrócie na telefon. */
 $uwagi = [];
@@ -540,12 +539,8 @@ $sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $ty
 $tytul = ($tydzien ? 'Raport tygodnia ' : 'Raport dnia ') . $okresTxt;
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 
-// Okres wprost, z godzinami - "raport dnia 09.10" nie mówi, czy to doba od północy.
-$okresPelny = $tydzien
-    ? $start->format('d.m.Y') . ' 00:00 - ' . $koniec->modify('-1 minute')->format('d.m.Y H:i')
-    : $start->format('d.m.Y') . ', 00:00-23:59';
-$tekst = $tytul . "\n" . $okresPelny . "\n\n";
-$html = '<p style="margin:0 0 14px;color:#9ca3af;font-size:12px;">' . $e($okresPelny) . '</p>';
+$tekst = $tytul . "\n\n";
+$html = '';
 if ($uwagi) {
     $tekst .= "WYMAGA UWAGI\n" . implode("\n", array_map(static fn($u) => '- ' . $u, $uwagi)) . "\n\n";
     $html .= '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin:0 0 20px;">'
@@ -577,7 +572,6 @@ $wyslane = send_mail($adres, $tytul . ' - DNCT Hosting', $html, $tekst, 'info');
 echo date('Y-m-d H:i:s') . ' raport: ' . $tytul . ' -> ' . $adres . ': ' . ($wyslane['ok'] ? 'wysłano' : 'BŁĄD ' . $wyslane['error']) . "\n";
 
 $telefon = implode("\n", array_filter([
-    '🗓 ' . $okresPelny,
     isset($skrot['pieniadze']) ? '💰 ' . $skrot['pieniadze'] : null,
     isset($skrot['klienci']) ? '👤 ' . $skrot['klienci'] : null,
     isset($skrot['serwery']) ? '🖥 ' . $skrot['serwery'] : null,
