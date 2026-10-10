@@ -68,6 +68,17 @@ const CENNIK_STRONY_GIER = [
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Vintage Story',
         'lead'        => 'Serwer Vintage Story dla Ciebie i znajomych - od 5 do 100 graczy, zawsze na aktualnej wersji gry. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam.',
+        'choice_title' => 'Dobierz serwer Vintage Story do ekipy',
+        'choice'      => [
+            ['Na start', '5 graczy', '4 GB RAM i 3 vCore za 19,99 zł / mies.'],
+            ['Większa ekipa', '20 graczy', '30,99 zł / mies.; liczbę slotów wybierasz przed zakupem.'],
+            ['Duży świat', '50 graczy', '64,99 zł / mies.; dalej zarządzasz wszystkim z jednego panelu.'],
+        ],
+        'steps'       => [
+            'Wybierasz liczbę graczy i opłacasz serwer kartą albo BLIK-iem.',
+            'Po automatycznym utworzeniu logujesz się do panelu i uruchamiasz świat.',
+            'Mody .zip wrzucasz do data/Mods, a administrację nadajesz komendą /op.',
+        ],
         'faq'         => [
             ['Ile kosztuje serwer Vintage Story?', 'Od 19,99 zł miesięcznie za serwer na 5 graczy (4 GB RAM, 3 vCore). Na 20 graczy to 30,99 zł, na 50 graczy 64,99 zł. Płatność roczna liczy się jak jedenaście miesięcy.'],
             ['Która wersja gry jest na serwerze?', 'Aktualna stabilna wersja Vintage Story. Serwer działa na .NET 10, którego wymaga najnowsza wersja gry - nie musisz niczego doinstalowywać.'],
@@ -83,6 +94,17 @@ const CENNIK_STRONY_GIER = [
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Minecraft',
         'lead'        => 'Serwer Minecraft na Paperze, Fabricu albo Forge - od 1,5 do 32 GB RAM. Silnik i wersję gry zmieniasz w panelu jednym kliknięciem, a serwer startuje zaraz po płatności.',
+        'choice_title' => 'Jaki serwer Minecraft wybrać?',
+        'choice'      => [
+            ['Vanilla dla znajomych', '3–4 GB RAM', 'Dobry punkt startowy dla kilku osób bez modów.'],
+            ['Pluginy i większa ekipa', '6–8 GB RAM', 'Dla serwera z pluginami i kilkunastoma graczami.'],
+            ['Modpack', '8–10 GB RAM lub więcej', 'Wybierz więcej zasobów, jeśli używasz większego modpacka.'],
+        ],
+        'steps'       => [
+            'Wybierasz plan i opłacasz go kartą albo BLIK-iem.',
+            'Serwer powstaje automatycznie; adres zobaczysz w panelu.',
+            'W zakładce Wersje (MC) ustawiasz Paper, Fabric, Forge lub inną wersję, a potem dodajesz pluginy albo mody.',
+        ],
         'faq'         => [
             ['Ile kosztuje serwer Minecraft?', 'Od 6,99 zł miesięcznie albo 3,99 zł za tydzień (plan Podstawowy: 1,5 GB RAM, 1 vCore). Większe plany mają do 32 GB RAM i 8 vCore. Płatność roczna liczy się jak jedenaście miesięcy.'],
             ['Jaki plan wybrać?', 'Dla kilku znajomych bez modów wystarczą 3-4 GB RAM. Serwer z pluginami dla kilkunastu osób to 6-8 GB, a modpacki zwykle potrzebują 8-10 GB i więcej.'],
@@ -98,6 +120,17 @@ const CENNIK_STRONY_GIER = [
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Project Zomboid',
         'lead'        => 'Serwer Build 42 dla Ciebie i znajomych - od 5 do 100 graczy. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam, bez czekania na nikogo.',
+        'choice_title' => 'Dobierz serwer Project Zomboid',
+        'choice'      => [
+            ['Początek', '5 graczy', '6 GB RAM i 3 vCore za 29,99 zł / mies.'],
+            ['Większa grupa', 'Więcej slotów', 'Przesuń suwak w konfiguratorze — od razu zobaczysz parametry i cenę.'],
+            ['Serwer z modami', 'Steam Workshop', 'Listę modów i Workshop ID ustawiasz w plikach panelu, a serwer pobierze je po restarcie.'],
+        ],
+        'steps'       => [
+            'Wybierasz liczbę graczy i opłacasz serwer kartą albo BLIK-iem.',
+            'Serwer zakłada się automatycznie; przy pierwszym starcie pobiera pliki gry ze Steama.',
+            'Dane administratora dostajesz e-mailem, a konfigurację, mody i restart obsługujesz w panelu.',
+        ],
         'faq'         => [
             ['Ile kosztuje serwer Project Zomboid?', 'Od 29,99 zł miesięcznie za serwer na 5 graczy (6 GB RAM, 3 vCore). Cena rośnie z liczbą slotów - przesuń suwak wyżej, żeby zobaczyć dokładny pakiet. Płatność roczna liczy się jak jedenaście miesięcy.'],
             ['Która wersja gry jest na serwerze?', 'Aktualny Build 42 z gałęzi publicznej Steama. Serwer sprawdza aktualizacje przy każdym starcie, więc nie musisz niczego wgrywać ręcznie.'],
@@ -498,7 +531,7 @@ ob_start();
                  jedna - to jedyny sposób, żeby klient w ogóle zauważył, że
                  hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
-            <div class="cennik-tabs" role="tablist">
+            <div class="cennik-tabs" id="plans" role="tablist">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
                     <button type="button"
                             class="cennik-tab<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
@@ -695,6 +728,32 @@ ob_start();
     </section>
 
     <?php if ($focus !== null): ?>
+        <section class="cnk-focus-guide glass" aria-labelledby="cnk-focus-guide-h">
+            <div class="cnk-focus-guide-head">
+                <div>
+                    <p class="cnk-focus-kicker">Zanim kupisz</p>
+                    <h2 id="cnk-focus-guide-h"><?php echo htmlspecialchars($focus['choice_title']); ?></h2>
+                </div>
+                <a href="#plans">Zobacz pakiety <span aria-hidden="true">↓</span></a>
+            </div>
+            <div class="cnk-focus-choice-grid">
+                <?php foreach ($focus['choice'] as [$label, $value, $description]): ?>
+                    <article class="cnk-focus-choice">
+                        <p><?php echo htmlspecialchars($label); ?></p>
+                        <h3><?php echo htmlspecialchars($value); ?></h3>
+                        <span><?php echo htmlspecialchars($description); ?></span>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+            <div class="cnk-focus-steps">
+                <h3>Od zakupu do gry</h3>
+                <ol>
+                    <?php foreach ($focus['steps'] as $step): ?>
+                        <li><?php echo htmlspecialchars($step); ?></li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
+        </section>
         <section class="cnk-focus-faq glass" aria-labelledby="cnk-focus-faq-h">
             <h2 id="cnk-focus-faq-h">Najczęstsze pytania o <?php echo htmlspecialchars($focus['h1_rest']); ?></h2>
             <?php foreach ($focus['faq'] as [$q, $a]): ?>

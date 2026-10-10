@@ -2030,4 +2030,24 @@
 .cnk-focus-faq details p { margin: 0.6rem 0 0; color: #cbd5e1; line-height: 1.6; }
 .cnk-focus-faq .cnk-focus-more { margin: 1rem 0 0; color: #94a3b8; font-size: 0.9rem; }
 .cnk-focus-faq a { color: #c4b5fd; }
+.cnk-focus-guide { margin: 2.5rem 0 1.5rem; padding: clamp(1.25rem, 3vw, 2rem); border-radius: 1.25rem; }
+.cnk-focus-guide-head { display: flex; gap: 1rem; align-items: end; justify-content: space-between; margin-bottom: 1.25rem; }
+.cnk-focus-guide-head h2 { margin: .25rem 0 0; color: #f8fafc; font-size: clamp(1.35rem, 2.8vw, 1.9rem); font-weight: 800; }
+.cnk-focus-guide-head a { flex: 0 0 auto; color: #c4b5fd; font-size: .9rem; font-weight: 700; }
+.cnk-focus-kicker { margin: 0; color: #a78bfa; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.cnk-focus-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.cnk-focus-choice { min-height: 9.5rem; padding: 1.1rem; border: 1px solid rgba(148, 163, 184, .18); border-radius: .9rem; background: rgba(9, 8, 14, .45); }
+.cnk-focus-choice p { margin: 0; color: #94a3b8; font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.cnk-focus-choice h3 { margin: .55rem 0 .45rem; color: #f1f5f9; font-size: 1.1rem; font-weight: 800; line-height: 1.25; }
+.cnk-focus-choice span { color: #cbd5e1; font-size: .9rem; line-height: 1.5; }
+.cnk-focus-steps { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(148, 163, 184, .15); }
+.cnk-focus-steps h3 { margin: 0 0 .8rem; color: #e2e8f0; font-size: 1rem; font-weight: 800; }
+.cnk-focus-steps ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; margin: 0; padding: 0; list-style: none; counter-reset: focus-step; }
+.cnk-focus-steps li { counter-increment: focus-step; display: flex; gap: .65rem; color: #cbd5e1; font-size: .9rem; line-height: 1.5; }
+.cnk-focus-steps li::before { content: counter(focus-step); display: grid; place-items: center; flex: 0 0 1.55rem; height: 1.55rem; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; font-size: .75rem; font-weight: 800; }
+@media (max-width: 700px) {
+    .cnk-focus-guide-head { align-items: flex-start; flex-direction: column; }
+    .cnk-focus-choice-grid, .cnk-focus-steps ol { grid-template-columns: 1fr; }
+    .cnk-focus-choice { min-height: 0; }
+}
 .cennik-page .pcard-art picture { display: contents; }

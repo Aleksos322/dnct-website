@@ -171,19 +171,25 @@ function gsc_sites(): array
  *
  * @param string $siteUrl Dokładnie tak jak zwraca gsc_sites() - dla property
  *                         typu Domain to "sc-domain:dnct.pl", NIE adres URL.
+ * @param array $filters Opcjonalne filtry wymiarów GSC, np. po adresie strony.
  * @return array{rows: array, error: ?string}
  */
-function gsc_search_analytics(string $siteUrl, int $days = 28, array $dimensions = ['query']): array
+function gsc_search_analytics(string $siteUrl, int $days = 28, array $dimensions = ['query'], array $filters = []): array
 {
     $end   = date('Y-m-d', strtotime('-2 days'));   // GSC ma ok. 2-dniowe opóźnienie danych
     $start = date('Y-m-d', strtotime('-' . ($days + 2) . ' days'));
 
-    $res = gsc_request('POST', GSC_SEARCHANALYTICS_BASE . '/sites/' . rawurlencode($siteUrl) . '/searchAnalytics/query', [
+    $body = [
         'startDate'  => $start,
         'endDate'    => $end,
         'dimensions' => $dimensions,
         'rowLimit'   => 25,
-    ]);
+    ];
+    if ($filters !== []) {
+        $body['dimensionFilterGroups'] = [['filters' => $filters]];
+    }
+
+    $res = gsc_request('POST', GSC_SEARCHANALYTICS_BASE . '/sites/' . rawurlencode($siteUrl) . '/searchAnalytics/query', $body);
 
     if ($res['http_code'] !== 200) {
         error_log('GSC: search analytics HTTP ' . $res['http_code'] . ': ' . json_encode($res['body']));
