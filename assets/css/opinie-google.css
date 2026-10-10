@@ -49,6 +49,10 @@
 .opinie-karta {
     flex: none; width: 21rem; margin-right: 1.1rem; padding: 1.3rem 1.4rem;
     border-radius: 1.4rem; display: flex; flex-direction: column; gap: 0.75rem;
+    /* Taśma ma mask-image, a pod maską Chrome rysuje backdrop-filter i przebłysk
+       .glass jako prostokąt, ignorując border-radius - stąd kwadratowa poświata
+       wystająca za zaokrąglone rogi. clip-path przycina wszystkie warstwy naraz. */
+    clip-path: inset(0 round 1.4rem);
 }
 .opinie-autor { display: flex; align-items: center; gap: 0.75rem; }
 .opinie-autor img, .opinie-inicjal { width: 40px; height: 40px; border-radius: 50%; flex: none; }
