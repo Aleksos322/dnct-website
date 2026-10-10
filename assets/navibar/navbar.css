@@ -57,6 +57,10 @@
     content: '';
     position: absolute;
     inset: 0;
+    /* Bez tego warstwa przebłysku jest prostokątem: gradient się powtarza,
+       więc jasny pas potrafi stanąć na stałe w rogu i wystawać za zaokrąglenie
+       tafli jako "kwadratowy róg" (najczęściej prawy dolny, przez kąt 105deg). */
+    border-radius: inherit;
     background: linear-gradient(
         105deg,
         transparent 42%,
