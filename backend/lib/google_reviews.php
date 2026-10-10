@@ -70,12 +70,12 @@ function google_reviews(): ?array
         }
     }
 
-    if (!is_array($dane) || empty($dane['reviews'])) {
+    if (!is_array($dane)) {
         return null;
     }
 
     $opinie = [];
-    foreach ($dane['reviews'] as $r) {
+    foreach ($dane['reviews'] ?? [] as $r) {
         $tekst = trim((string)($r['text']['text'] ?? $r['originalText']['text'] ?? ''));
         $gwiazdki = (int)($r['rating'] ?? 0);
         if ($tekst === '' || $gwiazdki < GOOGLE_REVIEWS_MIN_GWIAZDEK) {
@@ -92,13 +92,30 @@ function google_reviews(): ?array
         ];
     }
 
+    // Google nie oddaje treści opinii przez API (świeża wizytówka) - wtedy
+    // teksty przepisane ręcznie z wizytówki (backend/data/opinie-reczne.php).
+    // Ocena i liczba opinii dalej idą z API.
+    if ($opinie === []) {
+        $reczne = @include dirname(__DIR__) . '/data/opinie-reczne.php';
+        foreach (is_array($reczne) ? $reczne : [] as $r) {
+            $opinie[] = [
+                'autor'    => (string)$r['autor'],
+                'zdjecie'  => '',
+                'profil'   => '',
+                'gwiazdki' => (int)($r['gwiazdki'] ?? 5),
+                'tekst'    => trim((string)$r['tekst']),
+                'kiedy'    => (string)($r['kiedy'] ?? ''),
+            ];
+        }
+    }
+
     if ($opinie === []) {
         return null;
     }
 
     return [
         'rating'  => (float)($dane['rating'] ?? 0),
-        'count'   => (int)($dane['userRatingCount'] ?? count($dane['reviews'])),
+        'count'   => (int)($dane['userRatingCount'] ?? count($opinie)),
         'url'     => (string)($dane['googleMapsUri'] ?? ''),
         'reviews' => $opinie,
     ];
