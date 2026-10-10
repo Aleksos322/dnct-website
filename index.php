@@ -141,16 +141,7 @@ ob_start();
                     Sprawdź ofertę
                 </a>
 
-                <?php if ($demoUrl !== ''): ?>
-                    <!-- Konto poglądowe: wpuszcza do panelu bez zakładania konta -->
-                    <a href="<?php echo htmlspecialchars($demoUrl); ?>"
-                       class="glass px-10 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-white/10 transition-all w-full md:w-auto">
-                        <svg class="w-5 h-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-                        </svg>
-                        Wypróbuj demo
-                    </a>
-                <?php endif; ?>
+                <?php /* "Wypróbuj demo" zdjęte z hero - demo ma własne pasmo niżej (components/panel-band.php). */ ?>
             <?php endif; ?>
 
             <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener"
