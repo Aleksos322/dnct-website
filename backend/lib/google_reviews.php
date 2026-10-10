@@ -100,7 +100,7 @@ function google_reviews(): ?array
         foreach (is_array($reczne) ? $reczne : [] as $r) {
             $opinie[] = [
                 'autor'    => (string)$r['autor'],
-                'zdjecie'  => '',
+                'zdjecie'  => (string)($r['zdjecie'] ?? ''),
                 'profil'   => '',
                 'gwiazdki' => (int)($r['gwiazdki'] ?? 5),
                 'tekst'    => trim((string)$r['tekst']),

@@ -54,24 +54,30 @@ $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repea
         </div>
         <div class="opinie-ocena-obok">
             <?php /* Odręczny dopisek jak "sprawdź nasz panel!" w paśmie panelu
-                     (cennik.css .pnl-scribble) - strzałka celuje w ocenę,
-                     sam napis prowadzi prosto do formularza opinii. */ ?>
-            <a class="opinie-scribble" href="<?php echo htmlspecialchars(OPINIE_LINK_WYSTAW); ?>" target="_blank" rel="noopener">
+                     (cennik.css .pnl-scribble) - strzałka celuje w przycisk
+                     "Wystaw opinię" pod oceną. */ ?>
+            <div class="opinie-scribble" aria-hidden="true">
                 <span class="opinie-hand">zostaw nam opinię!</span>
-                <svg class="opinie-arrow" viewBox="0 0 90 56" fill="none" aria-hidden="true">
-                    <path class="opinie-arrow-line" d="M4 50C26 56 52 50 68 34 76 26 80 18 81 8"
+                <svg class="opinie-arrow" viewBox="0 0 92 56" fill="none">
+                    <path class="opinie-arrow-line" d="M4 44C24 54 50 50 66 38 74 32 80 28 86 25"
                           stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path class="opinie-arrow-head" d="M81 8 69 21M81 8l5 17"
+                    <path class="opinie-arrow-head" d="M86 25 73 23M86 25l-7 12"
                           stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-            </a>
-            <a class="opinie-ocena glass" href="<?php echo htmlspecialchars($opinieGoogle['url']); ?>" target="_blank" rel="noopener">
-                <strong><?php echo number_format($opinieGoogle['rating'], 1, ',', ''); ?></strong>
-                <span>
-                    <span class="opinie-gwiazdki" aria-hidden="true"><?php echo $opinieGwiazdki((int)round($opinieGoogle['rating'])); ?></span>
-                    <span class="opinie-ocena-opis"><?php echo $opinieGoogle['count'] . ' ' . $opinieOdmiana($opinieGoogle['count']); ?> w Google <span aria-hidden="true">→</span></span>
-                </span>
-            </a>
+            </div>
+            <div class="opinie-ocena-kolumna">
+                <a class="opinie-ocena glass" href="<?php echo htmlspecialchars($opinieGoogle['url']); ?>" target="_blank" rel="noopener">
+                    <strong><?php echo number_format($opinieGoogle['rating'], 1, ',', ''); ?></strong>
+                    <span>
+                        <span class="opinie-gwiazdki" aria-hidden="true"><?php echo $opinieGwiazdki((int)round($opinieGoogle['rating'])); ?></span>
+                        <span class="opinie-ocena-opis"><?php echo $opinieGoogle['count'] . ' ' . $opinieOdmiana($opinieGoogle['count']); ?> w Google <span aria-hidden="true">→</span></span>
+                    </span>
+                </a>
+                <a class="opinie-wystaw" href="<?php echo htmlspecialchars(OPINIE_LINK_WYSTAW); ?>" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+                    Wystaw opinię
+                </a>
+            </div>
         </div>
     </div>
 
@@ -94,8 +100,8 @@ $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repea
                             <small><?php echo htmlspecialchars($o['kiedy']); ?></small>
                         </div>
                     </div>
-                    <p class="opinie-gwiazdki" aria-label="<?php echo $o['gwiazdki']; ?> na 5 gwiazdek"><?php echo $opinieGwiazdki($o['gwiazdki']); ?></p>
-                    <blockquote><?php echo nl2br(htmlspecialchars($o['tekst'])); ?></blockquote>
+                    <p class="opinie-gwiazdki opinie-gwiazdki-karta" aria-label="<?php echo $o['gwiazdki']; ?> na 5 gwiazdek"><?php for ($g = 1; $g <= 5; $g++): ?><span class="<?php echo $g <= $o['gwiazdki'] ? 'is-pelna' : ''; ?>" style="--i:<?php echo $g; ?>" aria-hidden="true">★</span><?php endfor; ?></p>
+                    <blockquote><?php echo htmlspecialchars($o['tekst']); ?></blockquote>
                 </li>
             <?php endforeach; ?>
         </ul>
