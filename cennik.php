@@ -637,30 +637,41 @@ ob_start();
              powody, dla których warto zaryzykować pierwszy zakup. Rozdzielenie
              tych dwóch rzeczy jest celowe: pierwsze to specyfikacja, drugie to
              zaufanie, i mieszanie ich osłabia oba. */ ?>
-    <section class="cnk-split">
+    <?php /* Animacje pasma: assets/js/cennik-split.js. Lewa lista "odhacza się"
+             po kolei, gdy wjedzie w kadr, a rachunek na dole zjeżdża do 0 zł.
+             Prawa kolumna przełącza aktywny punkt jak "Jak to działa"
+             (pasek postępu, pauza pod kursorem, klik przeskakuje), a każdy punkt
+             ma swoją scenkę po lewej. Bez JS / przy reduced-motion wszystko
+             stoi w stanie końcowym - treść nigdy nie zależy od animacji. */ ?>
+    <section class="cnk-split" data-split>
         <div class="cnk-split-col cnk-included">
             <span class="cnk-eyebrow">W każdym planie</span>
             <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
-            <ul class="cnk-list">
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Pełny dostęp do panelu i konsoli</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Dyski SSD, stałe limity RAM-u i CPU</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Kopie zapasowe w panelu na żądanie</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Ochrona DDoS</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Własna subdomena i zmiana wersji gry</li>
-                <li><span class="cnk-check" aria-hidden="true">✓</span> Wsparcie przez Discord, bez systemu biletów</li>
+            <ul class="cnk-list" data-odhacz>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Pełny dostęp do panelu i konsoli</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Dyski SSD, stałe limity RAM-u i CPU</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Kopie zapasowe w panelu na żądanie</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Ochrona DDoS</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Własna subdomena i zmiana wersji gry</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Wsparcie przez Discord, bez systemu biletów</li>
             </ul>
+            <div class="cnk-rachunek">
+                <span>Dopłaty za to wszystko</span>
+                <strong><span data-rachunek>0,00</span> zł</strong>
+            </div>
         </div>
 
-        <div class="cnk-split-col cnk-trust">
+        <div class="cnk-split-col cnk-trust" data-cykl>
             <span class="cnk-eyebrow">Zanim klikniesz</span>
             <h2 class="cnk-h2">Ryzykujesz mniej, niż myślisz</h2>
 
-            <div class="cnk-trust-item cnk-trust-hero">
-                <span class="cnk-trust-big"><span class="cnk-trust-num" data-role="count">24</span><span class="cnk-trust-unit">h</span></span>
+            <div class="cnk-trust-item cnk-trust-hero" data-krok>
+                <span class="cnk-trust-wiz"><span class="cnk-trust-big"><span class="cnk-trust-num" data-role="count">24</span><span class="cnk-trust-unit">h</span></span></span>
                 <div>
                     <strong>na rezygnację</strong>
                     <span>Nie spodobało się? Piszesz na Discordzie i odzyskujesz pieniądze.</span>
                 </div>
+                <span class="cnk-trust-bar" aria-hidden="true"><i></i></span>
             </div>
 
             <?php /* PING NA PASKACH Z GRY. Zamiast pisać "niski ping" - liczba,
@@ -668,28 +679,43 @@ ob_start();
                      każdy grający zna z listy serwerów. Napełnia się od jednej
                      kreski do pięciu i wraca; ruch mówi to samo, co zdanie
                      obok, tylko szybciej. */ ?>
-            <div class="cnk-trust-item cnk-ping-item">
-                <span class="cnk-ping" aria-hidden="true">
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <img src="/assets/media/minecraft/Server_Ping_<?php echo $i; ?>.webp"
-                             alt="" class="pg pg<?php echo $i; ?>" loading="lazy" decoding="async">
-                    <?php endfor; ?>
+            <div class="cnk-trust-item cnk-ping-item" data-krok>
+                <span class="cnk-trust-wiz">
+                    <span class="cnk-ping" aria-hidden="true">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <img src="/assets/media/minecraft/Server_Ping_<?php echo $i; ?>.webp"
+                                 alt="" class="pg pg<?php echo $i; ?>" loading="lazy" decoding="async">
+                        <?php endfor; ?>
+                    </span>
                 </span>
                 <div>
                     <strong>Serwery w Polsce</strong>
                     <span>Stoją u nas, nie za granicą. Krótsza droga do serwera to niższy
                           ping i mniej lagów w grze.</span>
                 </div>
+                <span class="cnk-trust-bar" aria-hidden="true"><i></i></span>
             </div>
 
-            <div class="cnk-trust-item">
-                <strong>Twarde limity</strong>
-                <span>Każdy serwer ma w panelu własny, stały limit RAM i CPU.</span>
+            <div class="cnk-trust-item" data-krok>
+                <span class="cnk-trust-wiz" aria-hidden="true">
+                    <span class="cnk-limit"><i></i><b></b></span>
+                </span>
+                <div>
+                    <strong>Twarde limity</strong>
+                    <span>Każdy serwer ma w panelu własny, stały limit RAM i CPU.</span>
+                </div>
+                <span class="cnk-trust-bar" aria-hidden="true"><i></i></span>
             </div>
 
-            <div class="cnk-trust-item">
-                <strong>Rok taniej o miesiąc</strong>
-                <span>Płatność roczna liczy się jak jedenaście miesięcy, nie dwanaście.</span>
+            <div class="cnk-trust-item" data-krok>
+                <span class="cnk-trust-wiz" aria-hidden="true">
+                    <span class="cnk-rok"><span class="cnk-rok-stare">12</span><span class="cnk-rok-nowe">11</span></span>
+                </span>
+                <div>
+                    <strong>Rok taniej o miesiąc</strong>
+                    <span>Płatność roczna liczy się jak jedenaście miesięcy, nie dwanaście.</span>
+                </div>
+                <span class="cnk-trust-bar" aria-hidden="true"><i></i></span>
             </div>
         </div>
     </section>
@@ -738,6 +764,7 @@ ob_start();
 </div>
 
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/cennik-split.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 
 </div><!-- /.cennik-page -->

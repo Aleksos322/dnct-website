@@ -2031,3 +2031,137 @@
 .cnk-focus-faq .cnk-focus-more { margin: 1rem 0 0; color: #94a3b8; font-size: 0.9rem; }
 .cnk-focus-faq a { color: #c4b5fd; }
 .cennik-page .pcard-art picture { display: contents; }
+
+/* ==========================================================================
+   PASMO "BEZ GWIAZDEK" / "RYZYKUJESZ MNIEJ" - ANIMACJE (cennik-split.js)
+
+   Język ruchu wzięty z "Jak to działa" (jak-to-dziala.css): aktywny punkt
+   dostaje ramkę i pasek postępu, pętla stoi pod kursorem i poza ekranem.
+   Stany startowe (.is-czeka) ustawia WYŁĄCZNIE skrypt, więc bez JS i przy
+   reduced-motion wszystko jest od razu widoczne w stanie końcowym.
+   ========================================================================== */
+
+/* --- Lewa kolumna: ptaszki rysowane kreską, wiersze wjeżdżają po kolei --- */
+.cennik-page .cnk-check {
+    display: inline-grid; place-items: center;
+    width: 1.25rem; height: 1.25rem; margin-top: 0.05rem;
+    border-radius: 50%; background: rgba(34, 197, 94, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.28);
+}
+.cennik-page .cnk-check svg { width: 0.8rem; height: 0.8rem; fill: none; stroke: #22c55e; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.cennik-page .cnk-check path { stroke-dasharray: 18; stroke-dashoffset: 0; }
+
+.cennik-page [data-odhacz].is-czeka li { opacity: 0; transform: translateX(-8px); }
+.cennik-page [data-odhacz].is-czeka .cnk-check { transform: scale(0.4); background: transparent; }
+.cennik-page [data-odhacz].is-czeka .cnk-check path { stroke-dashoffset: 18; }
+.cennik-page [data-odhacz] li,
+.cennik-page [data-odhacz] .cnk-check,
+.cennik-page [data-odhacz] .cnk-check path {
+    transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, stroke-dashoffset 0.45s ease 0.15s;
+    transition-delay: calc(var(--n, 0) * 160ms);
+}
+.cennik-page [data-odhacz] .cnk-check path { transition-delay: calc(var(--n, 0) * 160ms + 150ms); }
+
+/* Rachunek pod listą: "dopłaty" zjeżdżają do zera po odhaczeniu wszystkiego. */
+.cennik-page .cnk-rachunek {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+    margin-top: 1.1rem; padding: 0.95rem 1.1rem;
+    border-radius: 14px; border: 1px dashed rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.05);
+    font-size: 0.82rem; color: #94a3b8;
+}
+.cennik-page .cnk-rachunek strong {
+    font-size: 1.35rem; font-weight: 900; color: #4ade80;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.cennik-page .cnk-rachunek.is-liczy strong { color: #f87171; }
+.cennik-page .cnk-rachunek.is-zero { animation: cnkRachunek 0.6s ease; }
+@keyframes cnkRachunek { 40% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12); border-color: rgba(34, 197, 94, 0.6); } }
+
+/* --- Prawa kolumna: jedna siatka dla wszystkich punktów --------------------
+   Wcześniej tylko dwa punkty miały coś po lewej, a dwa nie - kolumna rwała
+   się wizualnie. Teraz każdy ma swoją "scenkę" w stałym polu 4.4rem. */
+.cennik-page .cnk-trust-item {
+    position: relative;
+    display: grid; grid-template-columns: 4.4rem 1fr; align-items: start; gap: 0.9rem;
+    padding: 0.95rem 0.8rem; margin: 0 -0.8rem;
+    border: 1px solid transparent; border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-radius: 14px; cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+.cennik-page .cnk-trust-item:last-child { border-bottom-color: transparent; }
+.cennik-page .cnk-trust-item.is-active {
+    background: rgba(139, 92, 246, 0.09);
+    border-color: rgba(139, 92, 246, 0.42);
+}
+.cennik-page .cnk-trust-wiz { display: flex; align-items: center; min-height: 2.1rem; }
+.cennik-page .cnk-trust-hero { padding-top: 0.95rem; }
+.cennik-page .cnk-ping-item { display: grid; }
+.cennik-page .cnk-trust-item > div { min-width: 0; }
+
+.cennik-page .cnk-trust-bar {
+    position: absolute; left: 0.8rem; right: 0.8rem; bottom: 0.35rem;
+    height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.05); opacity: 0;
+}
+.cennik-page .cnk-trust-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+.cennik-page [data-cykl].is-playing .cnk-trust-item.is-active .cnk-trust-bar { opacity: 1; }
+.cennik-page [data-cykl].is-playing .cnk-trust-item.is-active .cnk-trust-bar i { animation: jtdSplitFill var(--cykl-ms, 3800ms) linear forwards; }
+.cennik-page [data-cykl].is-paused .cnk-trust-item.is-active .cnk-trust-bar i { animation-play-state: paused; }
+@keyframes jtdSplitFill { to { width: 100%; } }
+
+/* Twarde limity: pasek zużycia wjeżdża pod sam limit i staje - nie przebija go. */
+.cennik-page .cnk-limit {
+    position: relative; display: block; width: 3.6rem; height: 1.15rem;
+    border-radius: 6px; background: rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); overflow: hidden;
+}
+.cennik-page .cnk-limit i {
+    position: absolute; inset: 3px auto 3px 3px; width: calc(78% - 3px);
+    border-radius: 3px; background: linear-gradient(90deg, #22c55e, #8b5cf6);
+}
+.cennik-page .cnk-limit b {
+    position: absolute; top: -2px; bottom: -2px; right: 18%;
+    width: 2px; background: #f8fafc; border-radius: 2px; opacity: 0.85;
+}
+.cennik-page .cnk-trust-item.is-active .cnk-limit i { animation: cnkLimit 2.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes cnkLimit {
+    0%   { width: 0; }
+    55%  { width: calc(80% - 3px); }
+    70%  { width: calc(76% - 3px); }
+    85%  { width: calc(79% - 3px); }
+    100% { width: calc(78% - 3px); }
+}
+
+/* Rok taniej: "12" przekreśla się i ustępuje "11". */
+.cennik-page .cnk-rok { position: relative; display: inline-grid; min-width: 2.2ch; }
+.cennik-page .cnk-rok > span { grid-area: 1 / 1; font-variant-numeric: tabular-nums; }
+.cennik-page .cnk-rok-stare { opacity: 0; -webkit-text-fill-color: #64748b; position: relative; }
+.cennik-page .cnk-trust-item.is-active .cnk-rok-stare { animation: cnkRokStare 2.2s ease both; }
+.cennik-page .cnk-trust-item.is-active .cnk-rok-nowe { animation: cnkRokNowe 2.2s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.cennik-page .cnk-trust-item.is-active .cnk-rok::after {
+    content: ''; position: absolute; left: -8%; right: -8%; top: 52%; height: 3px;
+    border-radius: 2px; background: #f87171; transform-origin: left;
+    animation: cnkRokKreska 2.2s ease both;
+}
+@keyframes cnkRokStare { 0%, 45% { opacity: 1; transform: none; } 70%, 100% { opacity: 0; transform: translateY(-40%); } }
+@keyframes cnkRokNowe { 0%, 50% { opacity: 0; transform: translateY(40%) scale(0.7); } 80%, 100% { opacity: 1; transform: none; } }
+@keyframes cnkRokKreska { 0%, 12% { transform: scaleX(0); opacity: 1; } 40% { transform: scaleX(1); opacity: 1; } 55%, 100% { transform: scaleX(1); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .cnk-trust-item.is-active .cnk-limit i,
+    .cennik-page .cnk-trust-item.is-active .cnk-rok-stare,
+    .cennik-page .cnk-trust-item.is-active .cnk-rok-nowe,
+    .cennik-page .cnk-trust-item.is-active .cnk-rok::after { animation: none; }
+}
+/* Cyfry "12/11": gradient na KAŻDEJ cyfrze osobno, nie na rodzicu. Przy
+   background-clip: text na rodzicu tło przebija przez glify WSZYSTKICH
+   potomków, także tych z opacity: 0 - "12" i "11" nakładały się na siebie.
+   Specyficzność 0,6,1 bije ogólną regułę opisu punktów (span:not(...) wyżej). */
+.cennik-page .cnk-trust .cnk-trust-item .cnk-trust-wiz .cnk-rok > span {
+    font-size: 1.65rem; font-weight: 900; line-height: 1; margin-top: 0.1rem;
+}
+.cennik-page .cnk-trust .cnk-trust-item .cnk-trust-wiz .cnk-rok > .cnk-rok-nowe {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.cennik-page .cnk-trust .cnk-trust-item .cnk-trust-wiz .cnk-rok > .cnk-rok-stare { color: #64748b; }
