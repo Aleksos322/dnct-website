@@ -379,22 +379,6 @@ ob_start();
     <?php endforeach; ?>
 </div>
 
-<?php /* PŁYWAJĄCA PLAKIETKA Z LICZNIKIEM.
-         Szyna obok nagłówka przykleja się do krawędzi dopiero od 1400 px, bo
-         niżej nie ma marginesu, w którym mogłaby stanąć - przy typowych 1000 px
-         CSS zostaje go szesnaście pikseli. Licznik zniknąłby więc po pierwszym
-         geście przewijania u niemal wszystkich odwiedzających.
-
-         Ta plakietka jest odpowiedzią: mała, w rogu, pokazuje się DOPIERO gdy
-         licznik z hero wyjedzie z ekranu. Ma aria-hidden, bo powtarza liczbę,
-         która jest już na stronie - czytnik ekranu przeczytałby ją dwa razy. */ ?>
-<?php if ($liveServers > 0): ?>
-    <div class="cnk-live-float" data-role="liveFloat" aria-hidden="true">
-        <span class="cnk-live-dot"></span>
-        <strong><?php echo $liveServers; ?></strong>
-        <span>serwerów online</span>
-    </div>
-<?php endif; ?>
 
 <div class="cnk-wrap">
 
@@ -423,46 +407,9 @@ ob_start();
             <?php endif; ?>
         </div>
 
-        <?php /* SZYNA OBOK NAGŁÓWKA, nie pod nim.
-                 Wcześniej stał tu akapit o gwarantowanym RAM-ie, a licznik
-                 serwerów wisiał osobno - razem spychały karty o pół ekranu
-                 w dół. Przeniesienie tych informacji pod nagłówek nic by nie
-                 dało: zajęłyby dokładnie ten sam pion.
-
-                 Po prawej stronie nagłówka jest puste miejsce i to ono je
-                 przyjmuje - karty idą w górę o całą wysokość tego bloku,
-                 a nie o różnicę w wysokości akapitu.
-
-                 Od 1400 px szyna ODKLEJA SIĘ od hero i przywiera do prawej
-                 krawędzi okna (position: fixed), więc licznik towarzyszy
-                 przewijaniu zamiast zniknąć po pierwszym geście. Niżej nie ma
-                 jej gdzie przykleić - weszłaby na treść. */ ?>
-        <aside class="cnk-rail glass" aria-label="Skrót informacji o hostingu">
-            <?php if ($liveServers > 0): ?>
-                <?php /* Licznik z bazy panelu, liczony przy każdym wejściu. Nie jest
-                         ozdobą: to jedyna liczba na tej stronie, której nie da się
-                         podważyć, bo pochodzi z działających maszyn.
-
-                         `data-count-to` uruchamia naliczanie od zera po wejściu
-                         w kadr (cennik.js). Liczba, która się DOLICZA, czyta się
-                         jak odczyt z żywego systemu; ta sama liczba wpisana na
-                         sztywno wygląda jak element grafiki. */ ?>
-                <div class="cnk-live">
-                    <span class="cnk-live-eyebrow">
-                        <span class="cnk-live-dot" aria-hidden="true"></span>
-                        Na żywo
-                    </span>
-                    <span class="cnk-live-num" data-count-to="<?php echo $liveServers; ?>"><?php echo $liveServers; ?></span>
-                    <span class="cnk-live-label">serwerów działa w tej chwili</span>
-                </div>
-            <?php endif; ?>
-
-            <ul class="cnk-rail-points">
-                <li><span aria-hidden="true">✓</span> Gwarantowany RAM i CPU</li>
-                <li><span aria-hidden="true">✓</span> Dyski SSD, stałe limity RAM i CPU</li>
-                <li><span aria-hidden="true">✓</span> Ochrona DDoS w każdym planie</li>
-            </ul>
-        </aside>
+        <?php /* Szyna "Na żywo / N serwerów" usunięta 2026-10-11 na prośbę
+                 właściciela; licznik i plakietka (cennik.js: initLiveFloat,
+                 initLiveCount) same się wyłączają, gdy nie ma .cnk-rail. */ ?>
     </div>
 </section>
 
