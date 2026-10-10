@@ -120,13 +120,47 @@ function mailer_factory(string $profile = 'default'): PHPMailer
  */
 function send_mail(string $to, string $subject, string $htmlBody, string $textBody, string $profile = 'default'): array
 {
-    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
-        return ['ok' => false, 'error' => 'Nieprawidłowy adres odbiorcy.'];
-    }
-
-    // Wiadomość bez własnego szablonu dostaje ramkę DNCT (templates/ramka.php).
+    // Ramka DNCT dokładana tutaj, żeby dziennik (mail_log) pokazywał dokładnie to, co poszło.
     if (stripos($htmlBody, '<html') === false) {
         $htmlBody = mail_ramka($subject, $htmlBody);
+    }
+    $wynik = send_mail_wykonaj($to, $subject, $htmlBody, $textBody, $profile);
+    mail_dziennik($to, $subject, $profile, $wynik, $htmlBody);
+    return $wynik;
+}
+
+/**
+ * Zapis próby wysyłki do mail_log (admin -> Maile). Nigdy nie przerywa wysyłki:
+ * brak tabeli albo bazy kończy się wpisem w error_log.
+ */
+function mail_dziennik(string $to, string $subject, string $profile, array $wynik, string $html): void
+{
+    try {
+        // Skąd poszedł mail: plik i funkcja, które wywołały send_mail().
+        $slad = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 6);
+        $zrodlo = null;
+        foreach ($slad as $i => $k) {
+            if (($k['function'] ?? '') === 'send_mail') {
+                $fn = $slad[$i + 1]['function'] ?? '';
+                $zrodlo = ($fn !== '' && !in_array($fn, ['require', 'require_once', 'include', 'include_once'], true) ? $fn . ' @ ' : '')
+                    . basename((string)($k['file'] ?? ''));
+                break;
+            }
+        }
+        $zrodlo = $zrodlo ?: basename((string)($_SERVER['SCRIPT_FILENAME'] ?? 'cli'));
+        dnct_db()->prepare('INSERT INTO mail_log (to_email, subject, profile, ok, error, html, zrodlo) VALUES (?, ?, ?, ?, ?, ?, ?)')
+            ->execute([mb_substr($to, 0, 254), mb_substr($subject, 0, 255), $profile, !empty($wynik['ok']) ? 1 : 0,
+                       !empty($wynik['ok']) ? null : mb_substr((string)($wynik['error'] ?? ''), 0, 500), $html, mb_substr($zrodlo, 0, 120)]);
+    } catch (Throwable $e) {
+        error_log('mail_dziennik: ' . $e->getMessage());
+    }
+}
+
+/** Właściwa wysyłka (dawne send_mail) - bez dziennika. */
+function send_mail_wykonaj(string $to, string $subject, string $htmlBody, string $textBody, string $profile = 'default'): array
+{
+    if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+        return ['ok' => false, 'error' => 'Nieprawidłowy adres odbiorcy.'];
     }
 
     try {
