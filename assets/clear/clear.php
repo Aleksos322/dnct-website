@@ -110,10 +110,18 @@ if ($centerContent) {
         '@context' => 'https://schema.org',
         '@type'    => 'Organization',
         'name'     => 'DNCT Hosting',
+        // Krótka nazwa marki - wizytówka Google nazywa się "DNCT" i na "dnct"
+        // (bez słowa "hosting", za które licytują reklamy OVH itd.) ma stać na górze.
+        'alternateName' => ['DNCT', 'DNCT.pl'],
         'url'      => 'https://game.dnct.pl',
         'logo'     => 'https://game.dnct.pl/assets/media/icons/LINKS.png',
+        'telephone' => '+48 536 180 706',
+        'email'    => 'support@dnct.pl',
+        'areaServed' => 'PL',
         'sameAs'   => [
             'https://discord.gg/4kcXP5WmQ8',
+            // Wizytówka Google (Knowledge Graph /g/11zy3hs6c7) - łączy stronę z profilem firmy.
+            'https://www.google.com/search?kgmid=/g/11zy3hs6c7',
         ],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
     <script type="application/ld+json"><?php echo json_encode([
