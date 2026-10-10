@@ -26,6 +26,30 @@
 .opinie-ocena-opis { font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
 .opinie-gwiazdki { margin: 0; color: #fbbf24; letter-spacing: 0.12em; font-size: 0.95rem; line-height: 1; }
 
+/* Odręczny dopisek przy ocenie - ten sam język co "sprawdź nasz panel!"
+   (cennik.css .pnl-scribble): bursztyn, krój odręczny z systemu, linia
+   strzałki "dopisuje się", gdy nagłówek wjedzie w kadr (klasa is-widoczne
+   z opinie-google.js). Bez JS albo przy reduced-motion stoi narysowany. */
+.opinie-ocena-obok { display: flex; align-items: center; gap: 0.35rem; }
+.opinie-scribble {
+    display: flex; align-items: flex-end; gap: 0.15rem; color: #fbbf24;
+    text-decoration: none; padding-top: 1.6rem;
+}
+.opinie-hand {
+    font-family: 'Segoe Script', 'Bradley Hand', 'Ink Free', 'Brush Script MT', 'Comic Sans MS', cursive;
+    font-size: 1.2rem; font-weight: 700; white-space: nowrap;
+    transform: rotate(-6deg); transform-origin: right bottom;
+}
+.opinie-scribble:hover .opinie-hand { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.opinie-arrow { width: 72px; height: 45px; flex: none; overflow: visible; margin-bottom: 0.9rem; }
+.opinie-scribble.is-czeka .opinie-arrow path { stroke-dasharray: 160; stroke-dashoffset: 160; }
+.opinie-scribble.is-czeka .opinie-hand { opacity: 0; }
+.opinie-scribble.is-widoczne .opinie-arrow path { animation: opinieRysuj 0.9s ease forwards; }
+.opinie-scribble.is-widoczne .opinie-arrow .opinie-arrow-head { animation-delay: 0.85s; }
+.opinie-scribble.is-widoczne .opinie-hand { animation: opinieDopisek 0.5s ease 0.2s forwards; }
+@keyframes opinieRysuj { to { stroke-dashoffset: 0; } }
+@keyframes opinieDopisek { from { opacity: 0; translate: -6px 4px; } to { opacity: 1; translate: 0 0; } }
+
 /* Taśma: maska wygasza brzegi, żeby karty wjeżdżały z mgły, a nie spod krawędzi. */
 .opinie-tasma {
     overflow-x: auto; scrollbar-width: none; padding: 0.5rem 0 1rem;
@@ -74,4 +98,11 @@
 
 @media (max-width: 640px) {
     .opinie-karta { width: 17.5rem; }
+    /* Na wąskim ekranie obok oceny nie ma miejsca - dopisek schodzi pod nią,
+       strzałka odwrócona w poziomie celuje w górę, w ocenę. */
+    .opinie-ocena-obok { flex-direction: column-reverse; align-items: flex-start; gap: 0; }
+    .opinie-scribble { flex-direction: row-reverse; padding: 0 0 0 2.2rem; }
+    .opinie-arrow { transform: scaleX(-1); width: 56px; margin-bottom: 0.4rem; }
+    .opinie-hand { font-size: 1.1rem; transform-origin: left bottom; }
+}
 }

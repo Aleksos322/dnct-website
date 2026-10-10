@@ -9,6 +9,18 @@
  * Bez JS albo przy prefers-reduced-motion zostaje zwykły rząd do przewijania.
  */
 (function () {
+    // Dopisek "zostaw nam opinię!" rysuje się dopiero, gdy nagłówek wjedzie w kadr.
+    var dopisek = document.querySelector('.opinie-scribble');
+    if (dopisek && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        dopisek.classList.add('is-czeka');
+        var obs = new IntersectionObserver(function (wpisy) {
+            if (!wpisy[0].isIntersecting) return;
+            dopisek.classList.add('is-widoczne');
+            obs.disconnect();
+        }, { threshold: 0.6 });
+        obs.observe(dopisek);
+    }
+
     var tasma = document.querySelector('[data-opinie]');
     var tor = tasma && tasma.querySelector('[data-opinie-tor]');
     if (!tor) return;

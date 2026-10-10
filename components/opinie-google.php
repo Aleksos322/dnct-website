@@ -31,6 +31,9 @@ if ($opinieGoogle === null) {
     return;
 }
 
+/** Bezpośredni formularz "Napisz opinię" w wizytówce DNCT. */
+const OPINIE_LINK_WYSTAW = 'https://g.page/r/CRwe2fxVy-gHEBM/review';
+
 /** "1 opinia", "3 opinie", "5 opinii". */
 $opinieOdmiana = static function (int $n): string {
     if ($n === 1) {
@@ -49,13 +52,27 @@ $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repea
             <span class="opinie-eyebrow">Opinie z Google</span>
             <h2 id="opinie-tytul" class="opinie-tytul">Co mówią gracze</h2>
         </div>
-        <a class="opinie-ocena glass" href="<?php echo htmlspecialchars($opinieGoogle['url']); ?>" target="_blank" rel="noopener">
-            <strong><?php echo number_format($opinieGoogle['rating'], 1, ',', ''); ?></strong>
-            <span>
-                <span class="opinie-gwiazdki" aria-hidden="true"><?php echo $opinieGwiazdki((int)round($opinieGoogle['rating'])); ?></span>
-                <span class="opinie-ocena-opis"><?php echo $opinieGoogle['count'] . ' ' . $opinieOdmiana($opinieGoogle['count']); ?> w Google <span aria-hidden="true">→</span></span>
-            </span>
-        </a>
+        <div class="opinie-ocena-obok">
+            <?php /* Odręczny dopisek jak "sprawdź nasz panel!" w paśmie panelu
+                     (cennik.css .pnl-scribble) - strzałka celuje w ocenę,
+                     sam napis prowadzi prosto do formularza opinii. */ ?>
+            <a class="opinie-scribble" href="<?php echo htmlspecialchars(OPINIE_LINK_WYSTAW); ?>" target="_blank" rel="noopener">
+                <span class="opinie-hand">zostaw nam opinię!</span>
+                <svg class="opinie-arrow" viewBox="0 0 90 56" fill="none" aria-hidden="true">
+                    <path class="opinie-arrow-line" d="M4 50C26 56 52 50 68 34 76 26 80 18 81 8"
+                          stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path class="opinie-arrow-head" d="M81 8 69 21M81 8l5 17"
+                          stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+            <a class="opinie-ocena glass" href="<?php echo htmlspecialchars($opinieGoogle['url']); ?>" target="_blank" rel="noopener">
+                <strong><?php echo number_format($opinieGoogle['rating'], 1, ',', ''); ?></strong>
+                <span>
+                    <span class="opinie-gwiazdki" aria-hidden="true"><?php echo $opinieGwiazdki((int)round($opinieGoogle['rating'])); ?></span>
+                    <span class="opinie-ocena-opis"><?php echo $opinieGoogle['count'] . ' ' . $opinieOdmiana($opinieGoogle['count']); ?> w Google <span aria-hidden="true">→</span></span>
+                </span>
+            </a>
+        </div>
     </div>
 
     <div class="opinie-tasma" data-opinie>
