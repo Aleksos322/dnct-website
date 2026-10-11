@@ -31,11 +31,8 @@ if ($isLoggedIn && $profileAvatarUsername !== '') {
     $profileAvatarUrl = '/avatar/' . rawurlencode($profileAvatarUsername);
 }
 
-// Adres przejścia do panelu. Z .env, żeby zmiana domeny panelu nie wymagała
-// szukania po plikach widoku. Fallback na wypadek braku wpisu w konfiguracji.
-$panelUrl = function_exists('env')
-    ? (string)env('PANEL_SSO_URL', 'https://panel.dnct.pl/extensions/vikingsso/auth/auto')
-    : 'https://panel.dnct.pl/extensions/vikingsso/auth/auto';
+// Profil użytkownika jest wspólny dla usług DNCT.
+$profileUrl = 'https://account.dnct.pl/';
 /* ---------------------------------------------------------------------------
    PODŚWIETLENIE AKTYWNEJ POZYCJI
 
@@ -135,8 +132,8 @@ function navbar_class_mobile(bool $active): string
         <!-- Główny zewnętrzny kontener (Cała pigułka z obramowaniem) -->
         <div class="profile-magic-wrapper">
 
-            <!-- Interaktywny przycisk - na hover pokazuje "Panel" i przenosi od razu do panelu (SSO) -->
-            <a href="<?php echo htmlspecialchars($panelUrl); ?>" class="profile-magic-btn">
+            <!-- Interaktywny przycisk - na hover pokazuje "Profil" i otwiera konto DNCT -->
+            <a href="<?php echo htmlspecialchars($profileUrl); ?>" class="profile-magic-btn">
 
                 <!-- Spód: nazwa użytkownika, nieruchoma - zakrywa ją wjeżdżająca warstwa -->
                 <div class="profile-magic-text-container">
@@ -145,9 +142,9 @@ function navbar_class_mobile(bool $active): string
                     </span>
                 </div>
 
-                <!-- Warstwa jadąca: tło + napis "Panel" + avatar, wszystko naraz -->
+                <!-- Warstwa jadąca: tło + napis "Profil" + avatar, wszystko naraz -->
                 <div class="profile-magic-slide">
-                    <span class="profile-text-profil">Panel</span>
+                    <span class="profile-text-profil">Profil</span>
                     <div class="profile-magic-avatar">
                         <?php if ($profileAvatarUrl !== null): ?>
                             <?php /* Bez zdjęcia w account.dnct.pl proxy zwraca 404 - wtedy wraca litera. */ ?>
