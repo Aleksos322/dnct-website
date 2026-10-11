@@ -211,6 +211,14 @@ function decor_sets(): array
  */
 function render_game_decor(string $type): void
 {
+    /* Vintage Story ma osobną, dużą scenę zamiast sześciu drobiazgów -
+       krajobraz z porami roku, burza czasowa, kuźnia (components/vs-world.php). */
+    if ($type === 'vintagestory') {
+        require_once __DIR__ . '/vs-world.php';
+        render_vs_world();
+        return;
+    }
+
     $set = decor_sets()[$type] ?? null;
     if ($set === null) {
         return;

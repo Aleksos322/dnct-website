@@ -362,6 +362,7 @@ $extraHead .= '<script type="application/ld+json">' . json_encode([
 ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-vs.css'); ?>">
 
 <div class="cennik-page">
 
@@ -712,6 +713,7 @@ ob_start();
 
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-split.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/cennik-vs.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 
 </div><!-- /.cennik-page -->

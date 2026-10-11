@@ -1,0 +1,43 @@
+/* Koła zębate po bokach cennika Vintage Story (components/vs-world.php).
+   Każde koło dostaje w atrybucie style: --x/--y (px od krawędzi i od --top
+   grupy), --size (px), --o, --dir, --dur, --k (przełożenie). Liczby bez
+   jednostek, bo całość skaluje --gs - na węższym ekranie grupa maleje
+   w całości i koła dalej się stykają. --vs-turn ustawia cennik-vs.js. */
+
+.vs-scene { position: absolute; inset: 0; --gs: 1; }
+
+.vs-gear {
+    width: calc(var(--size) * 1px * var(--gs));
+    height: calc(var(--size) * 1px * var(--gs));
+    top: calc(var(--top) + var(--y) * 1px * var(--gs));
+}
+.vs-gear.is-left  { left:  calc(var(--x) * 1px * var(--gs)); }
+.vs-gear.is-right { right: calc(var(--x) * 1px * var(--gs)); }
+/* Paralaksa z cennik.js daje każdemu elementowi inne tempo - pary kół
+   rozjechałyby się i przestały zazębiać. Koła stoją w miejscu. */
+.vs-scene .vs-gear { translate: none; }
+
+/* .cnk-decor-item svg w cennik.css unosi rysunek (decorFloat) - koło ma
+   się tylko kręcić. Obrót od przewijania idzie przez `rotate`, pętla przez
+   transform na <g>, więc oba się sumują. */
+.vs-scene .vs-gear svg {
+    animation: none;
+    rotate: calc(var(--vs-turn, 0deg) * var(--k, 1));
+}
+.vs-gear .vs-spin {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: vsSpin var(--dur, 70s) linear infinite;
+    animation-direction: var(--dir, normal);
+}
+@keyframes vsSpin { to { transform: rotate(360deg); } }
+
+/* węższe ekrany: margines jest mniejszy, koła też */
+@media (max-width: 1400px) {
+    .vs-scene { --gs: 0.78; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vs-gear .vs-spin { animation: none; }
+    .vs-scene .vs-gear svg { rotate: none; }
+}
