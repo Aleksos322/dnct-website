@@ -8,6 +8,16 @@
  */
 
 return [
+    // Dopisane 12.10.2026 z wizytówki (zrzut od właściciela). Nikola Flejmer
+    // pominięta - wystawiła same gwiazdki, bez treści, a taśma pokazuje tylko opinie z tekstem.
+    ['autor' => 'Magdalena Zw', 'zdjecie' => '/assets/media/opinie/magdalena.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Korzystam z usług DNCT Hosting od dłuższego czasu i jestem bardzo zadowolona. To naprawdę szybki i niezawodny hosting WWW, który działa stabilnie nawet przy większym ruchu na stronie. Proces rejestracji domen, konfiguracji poczty oraz zarządzania usługami jest prosty i intuicyjny. Na duży plus zasługuje również profesjonalne wsparcie techniczne, które szybko pomaga rozwiązać każdy problem. Jeśli ktoś szuka sprawdzonego hostingu internetowego, serwerów VPS lub miejsca dla sklepu internetowego i strony firmowej, zdecydowanie polecam DNCT Hosting'],
+    ['autor' => 'Maciek Owczarzak', 'zdjecie' => '/assets/media/opinie/maciek.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Szczerze polecam! Korzystam z tego hostingu od pewnego czasu i jestem ogromnie zadowolony. Wszystko działa bez żadnych opóźnień, a stabilność serwera jest na najwyższym poziomie!!!'],
+    ['autor' => 'Agata Bik', 'zdjecie' => '/assets/media/opinie/agata.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'super hosting, świetna obsługa, serdecznie polecam!!!'],
+    ['autor' => 'Blanka Osiak', 'zdjecie' => '/assets/media/opinie/blanka.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Super hosting , bardzo szybka odsługa , aktywni prowadzący , giga polecam'],
     ['autor' => 'Smooth', 'zdjecie' => '/assets/media/opinie/smooth.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Szczerze polecam ten hosting!:D Rzadko trafia się na hosting, który podchodzi do graczy i klientów z taką pasją i zaangażowaniem. Serwery śmigają bez jakichkolwiek lagów, panel jest mega dobrze wykonany, a support na Discordzie reaguje błyskawicznie. Super robota chłopaki, oby tak dalej!'],
     ['autor' => 'Bartłomiej Samborski', 'zdjecie' => '/assets/media/opinie/bartlomiej.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',

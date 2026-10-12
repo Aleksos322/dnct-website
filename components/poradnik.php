@@ -19,12 +19,15 @@ const PORADNIKI = [
     'pluginy-na-serwer-minecraft'         => ['minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)'],
     'mody-na-serwer-minecraft'            => ['minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)'],
     'jak-wgrac-swiat-na-serwer-minecraft' => ['minecraft', 'Jak wgrać własny świat na serwer Minecraft'],
+    'serwer-minecraft-dla-znajomych'      => ['minecraft', 'Serwer Minecraft dla znajomych: jaki plan wybrać?'],
     'jak-postawic-serwer-project-zomboid' => ['zomboid', 'Jak postawić serwer Project Zomboid (Build 42)'],
     'mody-na-serwer-project-zomboid'      => ['zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid'],
     'ustawienia-serwera-project-zomboid'  => ['zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie'],
     'zapis-zomboid-na-serwer'             => ['zomboid', 'Jak przenieść zapis Project Zomboid na serwer'],
+    'serwer-project-zomboid-dla-znajomych' => ['zomboid', 'Serwer Project Zomboid dla znajomych: koszt i dobór'],
     'jak-postawic-serwer-vintage-story'   => ['vintagestory', 'Jak postawić serwer Vintage Story'],
     'mody-na-serwer-vintage-story'        => ['vintagestory', 'Jak dodać mody na serwer Vintage Story'],
+    'serwer-vintage-story-dla-znajomych'  => ['vintagestory', 'Serwer Vintage Story dla znajomych: jaki plan wybrać?'],
 ];
 
 /* Ramka z ofertą pod poradnikiem - per gra. */

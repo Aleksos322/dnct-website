@@ -12,10 +12,9 @@
  * później rozjedzie się z tym w backend/lib/pricing.php, a różnicę zauważy
  * dopiero klient, porównując ekran z rachunkiem.
  *
- * CO TU JEST, A CZEGO NIE MA. Strona pokazuje stan HANDLOWY: za co zapłacono,
- * do kiedy jest opłacone, czy abonament się odnawia. Konsola, pliki i backupy
- * są w panelu i mają tam zostać - dublowanie ich tutaj oznaczałoby dwa miejsca
- * do utrzymania i dwa źródła prawdy o tym samym serwerze.
+ * Strona jest podsumowaniem usługi, nie drugim panelem Pterodactyla. Pokazuje
+ * stan handlowy oraz lekki odczyt realnego stanu maszyny; konsola, pliki,
+ * tworzenie i przywracanie backupów nadal są wyłącznie w panelu gry.
  */
 
 declare(strict_types=1);
@@ -79,6 +78,50 @@ if ($isLoggedIn) {
         $card = srv_build_card($order, $panel, $salesOn);
         if ($card !== null) {
             $cards[] = $card;
+        }
+    }
+
+    /* Serwer może należeć do konta w panelu, choć nie powstał przez obecny
+       checkout (np. został dodany ręcznie). Nie chowamy go wtedy przed jego
+       właścicielem, ale nie wymyślamy mu płatności ani terminu ważności. */
+    if ($panel !== null) {
+        $knownServerIds = [];
+        foreach ($orders as $order) {
+            if (!empty($order['ptero_server_id'])) {
+                $knownServerIds[(int)$order['ptero_server_id']] = true;
+            }
+        }
+
+        try {
+            $owner = $dnct->prepare(
+                'SELECT pterodactyl_user_id FROM user_profiles WHERE authentik_username = ? LIMIT 1'
+            );
+            $owner->execute([(string)$_SESSION['authentik_username']]);
+            $panelUserId = (int)$owner->fetchColumn();
+
+            if ($panelUserId > 0) {
+                $servers = $panel->prepare(
+                    'SELECT s.id, s.name, s.status, s.memory, s.cpu, s.disk, s.backup_limit, s.created_at,
+                            n.name AS nest_name, e.name AS egg_name,
+                            COALESCE(a.ip_alias, a.ip) AS host, a.port
+                       FROM servers s
+                  LEFT JOIN nests n ON n.id = s.nest_id
+                  LEFT JOIN eggs e ON e.id = s.egg_id
+                  LEFT JOIN allocations a ON a.id = s.allocation_id
+                      WHERE s.owner_id = ?
+                   ORDER BY s.created_at DESC, s.id DESC'
+                );
+                $servers->execute([$panelUserId]);
+
+                foreach ($servers->fetchAll(PDO::FETCH_ASSOC) as $server) {
+                    if (!isset($knownServerIds[(int)$server['id']])) {
+                        $cards[] = srv_build_panel_only_card($server);
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            // Zakupione usługi zostają widoczne nawet przy awarii odczytu panelu.
+            error_log('twoje-serwery: serwery dodane ręcznie - ' . $e->getMessage());
         }
     }
 }
@@ -246,6 +289,34 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
     return $card;
 }
 
+/** @param array<string,mixed> $server @return array<string,mixed> */
+function srv_build_panel_only_card(array $server): array
+{
+    $host = trim((string)($server['host'] ?? ''));
+    $port = (int)($server['port'] ?? 0);
+    $game = trim((string)($server['nest_name'] ?? ''));
+    $egg = trim((string)($server['egg_name'] ?? ''));
+
+    return [
+        'panel_only' => true,
+        'server_name' => (string)$server['name'],
+        'game_name' => $game !== '' ? $game : 'Serwer gry',
+        'egg_name' => $egg !== '' ? $egg : '—',
+        'created_at' => (string)$server['created_at'],
+        'address' => $host !== '' && $port > 0 ? $host . ':' . $port : null,
+        'suspended' => ($server['status'] ?? '') === 'suspended',
+        'tone' => ($server['status'] ?? '') === 'suspended' ? 'warn' : 'ok',
+        'state' => ($server['status'] ?? '') === 'suspended' ? 'Serwer zawieszony' : 'Aktywny w panelu',
+        'ram_mb' => (int)$server['memory'],
+        'cpu_cores' => ((int)$server['cpu']) / 100,
+        'ssd_mb' => (int)$server['disk'],
+        'backups_limit' => (int)$server['backup_limit'],
+        // Puste celowo: ten serwer nie ma powiązanego zamówienia do rozliczeń.
+        'periods' => [], 'plans' => [], 'renews' => false,
+        'is_subscription' => false, 'in_grace' => false,
+    ];
+}
+
 /** Megabajty na czytelny zapis. */
 function srv_size(int $mb): string
 {
@@ -292,30 +363,35 @@ ob_start();
 
 <?php else: ?>
     <div class="srv-list">
-        <?php foreach ($cards as $c): $o = $c['order']; ?>
+        <?php foreach ($cards as $c): $isPanelOnly = !empty($c['panel_only']); $o = $c['order'] ?? null; ?>
             <article class="srv glass is-<?php echo $c['tone']; ?>"
-                     data-order="<?php echo (int)$o['id']; ?>"
+                     <?php if (!$isPanelOnly): ?>data-order="<?php echo (int)$o['id']; ?>"<?php endif; ?>
                      data-periods="<?php echo htmlspecialchars(json_encode($c['periods'], JSON_UNESCAPED_UNICODE), ENT_QUOTES); ?>"
                      data-plans="<?php echo htmlspecialchars(json_encode($c['plans'], JSON_UNESCAPED_UNICODE), ENT_QUOTES); ?>">
 
                 <header class="srv-head">
                     <div class="srv-ident">
-                        <?php if ($c['game_icon']): ?>
+                        <?php if (!$isPanelOnly && $c['game_icon']): ?>
                             <img class="srv-icon" src="<?php echo htmlspecialchars($c['game_icon']); ?>"
                                  alt="" width="44" height="44" loading="lazy">
                         <?php endif; ?>
                         <div>
                             <h2 class="srv-name">
-                                <?php echo htmlspecialchars(ucfirst((string)$o['game_type'])); ?>
+                                <?php echo htmlspecialchars($isPanelOnly ? $c['server_name'] : ucfirst((string)$o['game_type'])); ?>
                                 <span class="srv-spec">
-                                    <?php echo htmlspecialchars(
+                                    <?php echo htmlspecialchars($isPanelOnly ? $c['game_name'] :
                                         $c['plan_name'] ?? ($o['slots'] !== null ? (int)$o['slots'] . ' slotów' : 'pakiet własny')
                                     ); ?>
                                 </span>
                             </h2>
                             <p class="srv-sub">
-                                Zamówienie #<?php echo (int)$o['id']; ?>
-                                · kupione <?php echo htmlspecialchars(czas_fmt((string)$o['created_at'], 'd.m.Y')); ?>
+                                <?php if ($isPanelOnly): ?>
+                                    Dodany bezpośrednio w panelu
+                                    · utworzony <?php echo htmlspecialchars(czas_fmt((string)$c['created_at'], 'd.m.Y')); ?>
+                                <?php else: ?>
+                                    Zamówienie #<?php echo (int)$o['id']; ?>
+                                    · kupione <?php echo htmlspecialchars(czas_fmt((string)$o['created_at'], 'd.m.Y')); ?>
+                                <?php endif; ?>
                                 <?php if ($c['suspended']): ?>
                                     · <strong class="srv-flag">serwer zawieszony</strong>
                                 <?php endif; ?>
@@ -336,13 +412,38 @@ ob_start();
                     </div>
                 <?php endif; ?>
 
+                <?php if (!$isPanelOnly && !empty($o['ptero_server_id']) && $o['status'] === 'provisioned'): ?>
+                    <section class="srv-live" data-role="live" aria-live="polite" aria-busy="true">
+                        <div class="srv-live-head">
+                            <div><span>Stan serwera</span><strong>Ładuję aktualne dane…</strong></div>
+                            <button type="button" class="srv-live-refresh" data-role="refreshLive" disabled>Odśwież</button>
+                        </div>
+                        <div class="srv-live-grid">
+                            <div><span>Stan</span><strong data-live="state"><i class="srv-loading"></i> sprawdzam</strong></div>
+                            <div><span>RAM teraz</span><strong data-live="memory"><i class="srv-loading"></i></strong></div>
+                            <div><span>Procesor teraz</span><strong data-live="cpu"><i class="srv-loading"></i></strong></div>
+                            <div><span>Dysk teraz</span><strong data-live="disk"><i class="srv-loading"></i></strong></div>
+                            <div><span>Backupy</span><strong data-live="backups"><i class="srv-loading"></i></strong><small data-live="backupLast">sprawdzam ostatnią kopię</small></div>
+                            <div><span>Czas działania</span><strong data-live="uptime"><i class="srv-loading"></i></strong></div>
+                        </div>
+                        <p class="srv-live-note" data-role="liveNote">Dane odświeżają się niezależnie od reszty strony.</p>
+                    </section>
+                <?php endif; ?>
+
                 <div class="srv-specs">
-                    <div><span>RAM</span><strong><?php echo srv_size((int)$o['ram_mb']); ?></strong></div>
-                    <div><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)$o['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
-                    <div><span>Dysk SSD</span><strong><?php echo srv_size((int)$o['ssd_mb']); ?></strong></div>
-                    <div><span>Backupy</span><strong><?php echo (int)$o['backups_limit']; ?></strong></div>
+                    <div><span>RAM</span><strong><?php echo srv_size((int)($isPanelOnly ? $c['ram_mb'] : $o['ram_mb'])); ?></strong></div>
+                    <div><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)($isPanelOnly ? $c['cpu_cores'] : $o['cpu_cores']), 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
+                    <div><span>Dysk SSD</span><strong><?php echo srv_size((int)($isPanelOnly ? $c['ssd_mb'] : $o['ssd_mb'])); ?></strong></div>
+                    <div><span>Backupy</span><strong><?php echo (int)($isPanelOnly ? $c['backups_limit'] : $o['backups_limit']); ?></strong></div>
                 </div>
 
+                <?php if ($isPanelOnly): ?>
+                <div class="srv-facts">
+                    <div><span>Silnik</span><strong><?php echo htmlspecialchars($c['egg_name']); ?></strong></div>
+                    <div><span>Rozliczenie</span><strong>Poza zamówieniami DNCT</strong></div>
+                    <div><span>Stan</span><strong><?php echo htmlspecialchars($c['state']); ?></strong></div>
+                </div>
+                <?php else: ?>
                 <div class="srv-facts">
                     <div>
                         <span>Opłacone do</span>
@@ -375,21 +476,22 @@ ob_start();
                         <strong><?php echo pricing_format((int)$o['amount_gross']); ?> zł</strong>
                     </div>
                 </div>
+                <?php endif; ?>
 
-                <?php if ($o['status'] === 'failed'): ?>
+                <?php if (!$isPanelOnly && $o['status'] === 'failed'): ?>
                     <p class="srv-alert">
                         Płatność doszła, ale serwer nie został utworzony automatycznie.
                         Wiemy o tym i zajmiemy się tym ręcznie - napisz na Discordzie, jeśli chcesz przyspieszyć.
                     </p>
-                <?php elseif ($c['in_grace']): ?>
+                <?php elseif (!$isPanelOnly && $c['in_grace']): ?>
                     <p class="srv-alert">
                         Nie udało się pobrać opłaty. Serwer działa do
                         <?php echo htmlspecialchars(czas_fmt((string)$o['grace_until'], 'd.m.Y, H:i')); ?> -
                         popraw dane karty albo przedłuż jednorazowo.
                     </p>
-                <?php elseif ($c['renews']): ?>
+                <?php elseif (!$isPanelOnly && $c['renews']): ?>
                     <p class="srv-note">Ten serwer odnawia się sam. Kolejny okres pobierze się automatycznie.</p>
-                <?php elseif ($c['is_subscription']): ?>
+                <?php elseif (!$isPanelOnly && $c['is_subscription']): ?>
                     <p class="srv-note">Abonament wyłączony - serwer działa do końca opłaconego okresu.</p>
                 <?php endif; ?>
 

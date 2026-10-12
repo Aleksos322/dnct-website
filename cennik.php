@@ -559,42 +559,41 @@ ob_start();
              Zapowiedź bez terminu nic nie daje klientowi, a nam wisi nad głową:
              im dłużej "wkrótce" nie nadchodzi, tym gorzej wygląda cała strona.
              Zamiana na rozmowę kosztuje nas jedno kliknięcie, a daje realny
-             sygnał, o co ludzie pytają. */ ?>
-    <div class="cennik-ask glass">
-        <div class="cennik-ask-text">
-            <h2>Szukasz innej gry?</h2>
-            <p>
-                Napisz do nas na Discordzie - coś poradzimy. Postawimy serwer pod grę,
-                której nie ma w cenniku, albo powiemy wprost, że się nie da.
+             sygnał, o co ludzie pytają.
+
+             UKŁAD (12.10.2026, z makiety 01): "Szukasz innej gry?" i "Bez
+             gwiazdek i dopłat" obok siebie, pod nimi "Ryzykujesz mniej" jako
+             cztery kafle w rzędzie. Animacje bez zmian - assets/js/cennik-split.js
+             szuka [data-odhacz], [data-rachunek], [data-cykl] i [data-krok]
+             wewnątrz [data-split], więc całość siedzi w jednym opakowaniu.
+             Style układu: blok "UKŁAD V2" na końcu cennik.css. */ ?>
+    <section class="cnk-split cnk-split--v2" data-split>
+        <div class="cnk-duo">
+            <div class="cennik-ask glass">
+                <span class="cnk-eyebrow">Inna gra</span>
+                <h2>Szukasz innej gry?</h2>
+                <p>
+                    Napisz do nas na Discordzie - coś poradzimy. Postawimy serwer pod grę,
+                    której nie ma w cenniku, albo powiemy wprost, że się nie da.
+                </p>
                 <?php if ($gamesSoon): ?>
-                    Najczęściej pytacie o:
-                    <?php echo htmlspecialchars(implode(', ', array_column($gamesSoon, 'name'))); ?>.
+                    <p class="cennik-ask-often">
+                        Najczęściej pytacie o:
+                        <?php foreach ($gamesSoon as $soon): ?>
+                            <b><?php echo htmlspecialchars((string)$soon['name']); ?></b>
+                        <?php endforeach; ?>
+                    </p>
                 <?php endif; ?>
-            </p>
-        </div>
+                <a class="cennik-ask-btn" href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                    Napisz na Discordzie
+                </a>
+                <span class="cennik-ask-q" aria-hidden="true">?</span>
+            </div>
 
-        <a class="cennik-ask-btn" href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-            Napisz na Discordzie
-        </a>
-    </div>
-
-    <!-- ============ CO ZAWSZE W CENIE / DLACZEGO MY ============ -->
-    <?php /* Dwie kolumny zamiast rzędu kafelków na dole. Po lewej to, czego
-             karty planów nie muszą już powtarzać dziewięć razy; po prawej
-             powody, dla których warto zaryzykować pierwszy zakup. Rozdzielenie
-             tych dwóch rzeczy jest celowe: pierwsze to specyfikacja, drugie to
-             zaufanie, i mieszanie ich osłabia oba. */ ?>
-    <?php /* Animacje pasma: assets/js/cennik-split.js. Lewa lista "odhacza się"
-             po kolei, gdy wjedzie w kadr, a rachunek na dole zjeżdża do 0 zł.
-             Prawa kolumna przełącza aktywny punkt jak "Jak to działa"
-             (pasek postępu, pauza pod kursorem, klik przeskakuje), a każdy punkt
-             ma swoją scenkę po lewej. Bez JS / przy reduced-motion wszystko
-             stoi w stanie końcowym - treść nigdy nie zależy od animacji. */ ?>
-    <section class="cnk-split" data-split>
-        <div class="cnk-split-col cnk-included">
-            <span class="cnk-eyebrow">W każdym planie</span>
-            <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
+            <div class="cnk-split-col cnk-included glass">
+                <span class="cnk-eyebrow">W każdym planie</span>
+                <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
             <ul class="cnk-list" data-odhacz>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Pełny dostęp do panelu i konsoli</li>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Dyski SSD, stałe limity RAM-u i CPU</li>
@@ -607,12 +606,14 @@ ob_start();
                 <span>Dopłaty za to wszystko</span>
                 <strong><span data-rachunek>0,00</span> zł</strong>
             </div>
+            </div>
         </div>
 
-        <div class="cnk-split-col cnk-trust" data-cykl>
+        <div class="cnk-trust cnk-trust--row" data-cykl>
             <span class="cnk-eyebrow">Zanim klikniesz</span>
             <h2 class="cnk-h2">Ryzykujesz mniej, niż myślisz</h2>
 
+            <div class="cnk-trust-grid">
             <div class="cnk-trust-item cnk-trust-hero" data-krok>
                 <span class="cnk-trust-wiz"><span class="cnk-trust-big"><span class="cnk-trust-num" data-role="count">24</span><span class="cnk-trust-unit">h</span></span></span>
                 <div>
@@ -664,6 +665,7 @@ ob_start();
                     <span>Płatność roczna liczy się jak jedenaście miesięcy, nie dwanaście.</span>
                 </div>
                 <span class="cnk-trust-bar" aria-hidden="true"><i></i></span>
+            </div>
             </div>
         </div>
     </section>

@@ -1,0 +1,326 @@
+/* Pasmo "Jak to działa" (components/jak-to-dziala.php).
+   Wszystko pod .jtd - nie zależy od Tailwinda, więc nie wymaga przebudowy
+   tailwind.css. Animacje ruszają tylko na .is-active, a pętlę i pauzę poza
+   ekranem prowadzi assets/js/jak-to-dziala.js. */
+
+/* Opakowanie ma .cennik-page tylko dla wspólnych .cnk-eyebrow/.cnk-h2.
+   cennik.css daje .cennik-page margin-top: -90px (podciągnięcie cennika pod
+   navbar) - tu wsunęłoby to pasmo pod "Zobacz, zanim zapłacisz". */
+.cennik-page.jtd-wrap { margin-top: 0; }
+
+.jtd {
+    --jtd-ink: #f1f5f9;
+    --jtd-muted: #64748b;
+    --jtd-amethyst: #8b5cf6;
+    --jtd-ok: #22c55e;
+    --jtd-step-ms: 4200ms;      /* ten sam czas co STEP_MS w JS */
+
+    /* Trzy dzieci: opis, kroki, scenka. Na szerokim ekranie scenka po prawej
+       przez oba wiersze; na wąskim kolejno opis -> scenka -> kroki. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    grid-template-areas: "copy stage" "steps stage";
+    grid-template-rows: auto 1fr;
+    align-items: center;
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+    margin-top: clamp(1.75rem, 3.5vw, 2.75rem);
+    padding: clamp(1.75rem, 4vw, 3rem);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.25), rgba(139, 92, 246, 0.07));
+    text-align: left;
+}
+
+.jtd-copy { grid-area: copy; align-self: end; }
+.jtd-steps { grid-area: steps; align-self: start; }
+.jtd-stage { grid-area: stage; }
+
+.jtd-lead {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin: 0 0 1.5rem;
+    max-width: 42ch;
+}
+
+/* ---------- lista kroków ---------- */
+.jtd-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+
+.jtd-step {
+    position: relative;
+    width: 100%;
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    padding: 0.75rem 0.9rem 0.9rem;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+.jtd-step:hover { background: rgba(255, 255, 255, 0.03); }
+.jtd-step:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+.jtd-step.is-active {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(139, 92, 246, 0.35);
+}
+
+.jtd-num {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    color: var(--jtd-muted);
+    padding-top: 0.2rem;
+    min-width: 1.6rem;
+}
+.jtd-step.is-active .jtd-num { color: #a78bfa; }
+
+.jtd-step-text { display: grid; gap: 0.15rem; }
+.jtd-step-text strong { font-size: 0.98rem; font-weight: 700; color: #cbd5e1; }
+.jtd-step-text span { font-size: 0.82rem; line-height: 1.5; color: var(--jtd-muted); }
+.jtd-step.is-active .jtd-step-text strong { color: var(--jtd-ink); }
+
+/* pasek postępu aktywnego kroku */
+.jtd-bar { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.35rem; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.05); opacity: 0; }
+.jtd-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+.jtd.is-playing .jtd-step.is-active .jtd-bar { opacity: 1; }
+.jtd.is-playing .jtd-step.is-active .jtd-bar i { animation: jtd-fill var(--jtd-step-ms) linear forwards; }
+.jtd.is-paused .jtd-step.is-active .jtd-bar i { animation-play-state: paused; }
+@keyframes jtd-fill { to { width: 100%; } }
+
+/* ---------- scena ---------- */
+.jtd-stage { min-width: 0; }  /* grid-area wyżej */
+
+.jtd-window {
+    position: relative;
+    aspect-ratio: 16 / 11;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(20, 16, 34, 0.92), rgba(8, 8, 14, 0.96));
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.jtd-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.3rem;
+    padding: 0 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.jtd-titlebar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); }
+.jtd-url {
+    margin-left: 0.6rem;
+    padding: 0.2rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.7rem;
+    color: #94a3b8;
+}
+
+.jtd-scene {
+    position: absolute;
+    inset: 2.3rem 0 0;
+    display: grid;
+    place-items: center;
+    padding: clamp(0.9rem, 3vw, 1.6rem);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+}
+.jtd-scene.is-active { opacity: 1; transform: none; }
+
+.jtd-label {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+.jtd-muted { font-size: 0.75rem; color: var(--jtd-muted); }
+
+/* 1. plany */
+.jtd-plans { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+.jtd-plan {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0.9rem 0.8rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+}
+.jtd-plan strong { font-size: clamp(1.1rem, 2.4vw, 1.5rem); font-weight: 800; color: var(--jtd-ink); }
+.jtd-pick {
+    position: absolute;
+    top: -0.6rem;
+    right: 0.6rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    opacity: 0;
+    transform: scale(0.85);
+}
+.is-active .jtd-plan-pick { animation: jtd-select 0.4s ease 1.5s forwards; }
+.is-active .jtd-pick { animation: jtd-pop 0.3s ease 1.6s forwards; }
+@keyframes jtd-select {
+    to { border-color: transparent; box-shadow: 0 0 0 2px #8b5cf6, 0 14px 44px rgba(139, 92, 246, 0.3); transform: translateY(-4px); }
+}
+@keyframes jtd-pop { to { opacity: 1; transform: none; } }
+
+/* kursor jedzie do środkowej karty i "klika" */
+.jtd-cursor {
+    position: absolute;
+    left: 82%;
+    top: 85%;
+    width: 18px;
+    height: 18px;
+    border-radius: 50% 50% 50% 0;
+    background: #f8fafc;
+    transform: rotate(-30deg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+}
+.is-active .jtd-cursor { animation: jtd-cursor 2.2s ease 0.2s forwards; }
+@keyframes jtd-cursor {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    60%  { left: 52%; top: 58%; }
+    66%  { left: 52%; top: 58%; transform: rotate(-30deg) scale(0.8); }
+    72%  { left: 52%; top: 58%; transform: rotate(-30deg) scale(1); }
+    100% { left: 52%; top: 58%; opacity: 1; }
+}
+
+/* 2. BLIK */
+.jtd-pay { display: grid; justify-items: center; gap: 0.9rem; }
+.jtd-blik { display: flex; gap: 0.45rem; }
+.jtd-blik i {
+    display: grid;
+    place-items: center;
+    width: clamp(2rem, 5vw, 2.6rem);
+    height: clamp(2.5rem, 6vw, 3.1rem);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    font-style: normal;
+    font-size: clamp(1.1rem, 2.6vw, 1.45rem);
+    font-weight: 800;
+    color: transparent;
+}
+.is-active .jtd-blik i { animation: jtd-digit 0.2s ease forwards; }
+.is-active .jtd-blik i:nth-child(1) { animation-delay: 0.3s; }
+.is-active .jtd-blik i:nth-child(2) { animation-delay: 0.5s; }
+.is-active .jtd-blik i:nth-child(3) { animation-delay: 0.7s; }
+.is-active .jtd-blik i:nth-child(4) { animation-delay: 0.9s; }
+.is-active .jtd-blik i:nth-child(5) { animation-delay: 1.1s; }
+.is-active .jtd-blik i:nth-child(6) { animation-delay: 1.3s; }
+@keyframes jtd-digit { to { color: var(--jtd-ink); border-color: rgba(139, 92, 246, 0.45); } }
+
+.jtd-paid {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    opacity: 0;
+    transform: translateY(6px);
+}
+.jtd-paid svg { width: 14px; height: 14px; }
+.is-active .jtd-paid { animation: jtd-pop 0.35s ease 2s forwards; }
+
+/* 3. konsola */
+.jtd-console {
+    width: 100%;
+    align-self: stretch;
+    padding: 0.4rem 0.2rem;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: clamp(0.62rem, 1.4vw, 0.78rem);
+    line-height: 1.9;
+    color: #cbd5e1;
+}
+.jtd-console p { margin: 0; opacity: 0; transform: translateX(-4px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jtd-console b { color: #fbbf24; font-weight: 700; }
+.jtd-console .jtd-ok { color: #4ade80; }
+.is-active .jtd-console p { animation: jtd-line 0.25s ease forwards; }
+.is-active .jtd-console p:nth-child(1) { animation-delay: 0.2s; }
+.is-active .jtd-console p:nth-child(2) { animation-delay: 0.8s; }
+.is-active .jtd-console p:nth-child(3) { animation-delay: 1.5s; }
+.is-active .jtd-console p:nth-child(4) { animation-delay: 2.1s; }
+.is-active .jtd-console p:nth-child(5) { animation-delay: 2.9s; }
+@keyframes jtd-line { to { opacity: 1; transform: none; } }
+
+/* 4. serwer działa */
+.jtd-live { width: min(100%, 22rem); display: grid; gap: 1rem; }
+.jtd-live-head { display: flex; align-items: center; gap: 0.55rem; }
+.jtd-live-head .jtd-label { color: #4ade80; }
+.jtd-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--jtd-ok); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+.is-active .jtd-dot { animation: jtd-pulse 1.6s ease-out infinite; }
+@keyframes jtd-pulse { to { box-shadow: 0 0 0 9px rgba(34, 197, 94, 0); } }
+
+.jtd-addr {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+}
+.jtd-addr strong { font-size: clamp(1rem, 2.4vw, 1.25rem); font-weight: 800; color: var(--jtd-ink); }
+
+.jtd-meters { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.jtd-meters > div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.03);
+}
+.jtd-count { font-size: 1.05rem; font-weight: 800; color: var(--jtd-ink); }
+.jtd-meter { height: 6px; margin-top: 0.45rem; border-radius: 6px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+.jtd-meter i { display: block; height: 100%; width: 8%; border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #3b82f6); }
+.is-active .jtd-meter i { animation: jtd-ram 3s ease 0.4s forwards; }
+@keyframes jtd-ram { to { width: 46%; } }
+
+/* ---------- telefon ---------- */
+@media (max-width: 860px) {
+    .jtd { grid-template-columns: 1fr; grid-template-areas: "copy" "stage" "steps"; grid-template-rows: auto; row-gap: 1.25rem; }
+    /* sceny są absolutne, więc okno potrzebuje stałej wysokości mieszczącej najwyższą (4.) */
+    .jtd-window { aspect-ratio: auto; height: 19.5rem; }
+}
+@media (max-width: 480px) {
+    .jtd-plans { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+    .jtd-plan { padding: 0.7rem 0.55rem; }
+    .jtd-step-text span { display: none; }  /* same tytuły - opisy powtarza scenka */
+}
+
+/* ---------- mniej ruchu ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .jtd-scene { transition: none; transform: none; }
+    .jtd-scene *, .jtd-bar i { animation: none !important; }
+    /* stan końcowy każdej scenki od razu */
+    .jtd-pick, .jtd-paid, .jtd-console p { opacity: 1; transform: none; }
+    .jtd-blik i { color: var(--jtd-ink); }
+    .jtd-plan-pick { box-shadow: 0 0 0 2px #8b5cf6; }
+    .jtd-meter i { width: 46%; }
+    .jtd-cursor { display: none; }
+}
