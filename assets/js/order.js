@@ -58,6 +58,13 @@
             return;
         }
 
+        // Podbicie kwoty (order.css .is-bump) tylko przy realnej zmianie
+        if (elPrice.textContent !== q.amount && elPrice.textContent !== '-') {
+            var box = elPrice.parentNode;
+            box.classList.remove('is-bump');
+            void box.offsetWidth;   // restart animacji
+            box.classList.add('is-bump');
+        }
         elPrice.textContent  = q.amount;
         elPeriod.textContent = q.label;
         elPer.textContent    = state.mode === 'subscription' ? '/ ' + q.label.toLowerCase() : 'jednorazowo';

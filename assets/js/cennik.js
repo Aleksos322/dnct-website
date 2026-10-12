@@ -669,6 +669,20 @@
             { deleteCount: 'nie zawodzi'.length, text: 'daje przewagę!' }
         ];
 
+        // Wersja EN/DE (backend/lib/i18n.php): ostatnia linia nagłówka przyszła
+        // już przetłumaczona z serwera, więc kroki kasują CAŁĄ linię i wpisują
+        // gotowe warianty - polskie końcówki ("zwalnia") nie mają tu sensu.
+        var I18N_LINIE = {
+            en: ['never slows down', 'never holds back', 'never lets you down', 'gives you the edge!'],
+            de: ['nicht bremst', 'nicht limitiert', 'nicht ausfällt', 'dir den Vorsprung gibt!']
+        };
+        var jezyk = (window.DNCT_I18N && window.DNCT_I18N.lang) || 'pl';
+        if (I18N_LINIE[jezyk]) {
+            CYCLE_STEPS = I18N_LINIE[jezyk].slice(1).map(function (t, i) {
+                return { deleteCount: I18N_LINIE[jezyk][i].length, text: t };
+            });
+        }
+
         // Kazdy wpisany znak to WLASNY text node (insertAdjacentText nigdy
         // nie skleja go z sasiednim) - dzieki temu kasowanie to zawsze
         // "usun ostatni text node przed kursorem", bez liczenia offsetow

@@ -278,6 +278,12 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 </ol>
                 <p class="home-p3d-hint" aria-hidden="true">Przewiń, żeby obejrzeć kolejne plany</p>
                 <a href="/cennik" class="home-p3d-more">Zobacz pełną ofertę (więcej gier) &rarr;</a>
+                <?php /* Pominięcie sekcji: przypięta karuzela zajmuje kilka ekranów
+                         przewijania, a nie każdy chce oglądać wszystkie plany. */ ?>
+                <button type="button" class="home-p3d-skip" data-p3d-skip>
+                    <span class="home-p3d-skip-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+                    Pomiń plany
+                </button>
             </div>
 
             <div class="home-p3d-stage">
@@ -342,8 +348,23 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
 
         <div class="home-bento-hw glass home-reveal" style="--d:1">
             <p class="home-hw-big">Własny sprzęt.<small>Proxmox w Polsce, nie odsprzedane zasoby - dlatego „Wyprzedane” w cenniku znaczy naprawdę wyprzedane.</small></p>
-            <div class="home-rack" aria-hidden="true">
-                <i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i>
+            <?php /* Miniaturowa szafa serwerowa (13.10.2026). Po wejściu w kadr
+                     serwery wsuwają się po kolei i "bootują" (diody zasilania),
+                     potem migają dyski i zmienia się obciążenie (home.js), a po
+                     szynach płynie sygnał danych. Etykiety są poglądowe - nie
+                     opisują konkretnej konfiguracji węzłów. */ ?>
+            <div class="hw-rack" data-hw-rack aria-hidden="true">
+                <span class="hw-rail hw-rail-l"><i></i></span>
+                <span class="hw-rail hw-rail-r"><i></i></span>
+                <?php foreach (['PL-01', 'PL-02', 'PL-03', 'PL-04', 'BACKUP'] as $k => $etykieta): ?>
+                    <div class="hw-unit" style="--k:<?php echo $k; ?>">
+                        <span class="hw-power"></span>
+                        <span class="hw-name"><b>DNCT</b> <?php echo $etykieta; ?></span>
+                        <span class="hw-bays"><?php for ($d = 0; $d < 6; $d++): ?><i></i><?php endfor; ?></span>
+                        <span class="hw-load"><i></i></span>
+                        <span class="hw-net"><i></i><i></i></span>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -374,164 +395,87 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
 
 <!-- ============ DISCORD ============ -->
 <?php
-/* Zamiast osadzonego iframe'a Discorda (obcy, blurple wygląd, generyczny
-   na każdej stronie, która go wstawi) - własny, ostatni akcent strony:
-   prawdziwe avatary i status graczy pobrane po stronie serwera (patrz
-   $discordWidget wyżej), w tej samej kolorystyce statusów co panel
-   powiadomień (zielony/bursztyn/czerwień). To ostatnia rzecz, którą
-   widzi odwiedzający przed stopką - ma zostawić wrażenie żywej, a nie
-   wypożyczonej społeczności. */
+/* DISCORD - SCENA SPOŁECZNOŚCI (12.10.2026, trzecia wersja).
+   Jeden punkt skupienia zamiast trzech: na środku nagłówek, licznik i
+   przycisk, a wokół - po całej szerokości pasma - prawdziwe avatary
+   z widgetu serwera (pobrane po stronie serwera, patrz $discordWidget
+   wyżej) w kilku warstwach głębi. Warstwy przesuwają się za kursorem
+   (paralaksa), każdy avatar lekko się unosi, a co chwilę któryś "mówi"
+   zieloną falą jak w kanale głosowym. Kolor obwódki = status
+   (zielony/bursztyn/czerwień), ten sam co w powiadomieniach.
+   Wygląd: home.css (blok "DISCORD: SCENA"), ruch: home.js. */
 $discordStatusColor = ['online' => '#22c55e', 'idle' => '#fbbf24', 'dnd' => '#ef4444'];
 $discordMembers = is_array($discordWidget['members'] ?? null) ? $discordWidget['members'] : [];
-$discordShown   = array_slice($discordMembers, 0, 12);
-$discordExtra   = max(0, count($discordMembers) - count($discordShown));
 $discordOnline  = (int)($discordWidget['presence_count'] ?? count($discordMembers));
+/* Miejsca na avatary: [x %, y %, rozmiar px, głębia 0-1]. Środek pasma
+   zostaje pusty pod tekst. Kolejność = ważność: na telefonie pokazuje
+   się tylko początek listy (CSS: .dcx-av:nth-child(n+9)). */
+$discordSloty = [
+    [7, 22, 66, 1], [93, 24, 64, 1], [16, 64, 54, 0.75], [86, 62, 56, 0.8],
+    [5, 82, 46, 0.6], [95, 80, 48, 0.65], [25, 30, 42, 0.5], [76, 34, 44, 0.5],
+    [26, 82, 38, 0.45], [74, 84, 40, 0.45], [13, 42, 30, 0.3], [88, 44, 30, 0.3],
+    [33, 12, 32, 0.35], [66, 10, 34, 0.35], [35, 92, 28, 0.25], [64, 93, 28, 0.25],
+    [44, 6, 24, 0.2], [56, 95, 24, 0.2], [3, 50, 26, 0.25], [97, 52, 26, 0.25],
+];
+$discordShown = array_slice($discordMembers, 0, count($discordSloty));
+$discordExtra = max(0, $discordOnline - count($discordShown));
 ?>
 <?php /* Opinie z Google są teraz paskiem w przypiętej sekcji planów (#pricing) -
          widać je razem z kartami. Osobna sekcja zniknęła, żeby się nie dublowały. */ ?>
-<section class="discord-band py-24 px-6 w-full relative overflow-hidden">
-    <div class="discord-band-glow" aria-hidden="true"></div>
-    <div class="home-wide mx-auto relative z-10">
-        <div class="discord-panel glass p-8 md:p-14 rounded-[2rem]" data-reveal>
-            <div class="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 md:gap-14 items-center">
-                <div class="text-center md:text-left">
-                    <span class="discord-eyebrow">Społeczność</span>
-                    <h2 class="discord-heading">Dołącz do rozmowy</h2>
-                    <p class="text-gray-400 mt-4 mb-8 text-sm md:text-base max-w-md mx-auto md:mx-0">
-                        Masz pytania? Potrzebujesz pomocy technicznej? Jesteśmy na Discordzie -
-                        zwykle odpisujemy w kilka minut.
-                    </p>
-                    <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener"
-                       class="inline-flex items-center gap-3 bg-[#5865F2] px-6 md:px-8 py-4 rounded-xl font-bold hover:scale-105 hover:brightness-110 transition-all shadow-xl shadow-indigo-500/20 w-full md:w-auto justify-center">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                        </svg>
-                        Otwórz zaproszenie
-                    </a>
-                </div>
+<section class="dcx" data-dcx>
+    <div class="home-wrap">
+        <div class="dcx-stage glass">
+            <div class="dcx-glow" aria-hidden="true"></div>
+            <svg class="dcx-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+
+            <div class="dcx-copy">
+                <span class="dcx-live"><i aria-hidden="true"></i><b data-dcx-count="<?php echo $discordOnline; ?>"><?php echo $discordOnline; ?></b> na żywo na naszym Discordzie</span>
+                <h2 class="dcx-h2">Dołącz do rozmowy</h2>
+                <p class="dcx-lead">
+                    Masz pytania? Potrzebujesz pomocy technicznej? Jesteśmy na Discordzie -
+                    zwykle odpisujemy w kilka minut.
+                </p>
 
                 <?php if ($discordShown): ?>
-                <?php
-                /* Orbita: licznik w środku, avatary na dwóch pierścieniach,
-                   które obracają się bardzo wolno w przeciwne strony. Kąty
-                   liczymy tu, CSS tylko je obraca (--a, pierścień w klasie). */
-                $orbitInner = array_slice($discordShown, 0, 5);
-                $orbitOuter = array_slice($discordShown, 5);
-                ?>
-                <div class="discord-live">
-                    <div class="discord-orbit">
-                        <?php foreach (['inner' => $orbitInner, 'outer' => $orbitOuter] as $ringName => $ringMembers):
-                            if (!$ringMembers) continue;
-                            $n = count($ringMembers);
-                            $offset = $ringName === 'outer' ? 360 / $n / 2 : -90;
-                        ?>
-                        <div class="discord-orbit-ring is-<?php echo $ringName; ?>" aria-hidden="true">
-                            <?php foreach ($ringMembers as $k => $m):
-                                $status = in_array($m['status'] ?? '', ['online', 'idle', 'dnd'], true) ? $m['status'] : 'online';
-                                $name   = (string)($m['username'] ?? 'gracz');
-                                $activity = !empty($m['game']['name']) ? ' - gra w ' . $m['game']['name'] : '';
-                                $i = $ringName === 'outer' ? $k + 5 : $k;
-                            ?>
-                            <span class="discord-orbit-item" style="--a:<?php echo round($offset + 360 / $n * $k, 2); ?>deg">
-                                <span class="discord-orbit-face">
-                                    <img class="discord-avatar" style="--i:<?php echo $i; ?>; --ring:<?php echo $discordStatusColor[$status]; ?>"
-                                         src="<?php echo htmlspecialchars((string)($m['avatar_url'] ?? '')); ?>"
-                                         alt="" title="<?php echo htmlspecialchars($name . $activity); ?>"
-                                         width="44" height="44" loading="lazy" decoding="async">
-                                </span>
-                            </span>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php endforeach; ?>
-
-                        <div class="discord-orbit-core">
-                            <span class="discord-live-number" data-count-target="<?php echo $discordOnline; ?>">0</span>
-                            <span class="discord-live-label"><span class="discord-live-dot" aria-hidden="true"></span>na żywo teraz</span>
-                            <?php if ($discordExtra > 0): ?>
-                            <span class="discord-orbit-more">+<?php echo $discordExtra; ?> więcej</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-                <?php else: ?>
-                <div class="discord-live discord-live-fallback">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                    </svg>
-                    <p>Porozmawiaj z nami na Discordzie</p>
+                <div class="dcx-faces" aria-hidden="true">
+                    <?php foreach (array_slice($discordShown, 0, 8) as $k => $m):
+                        $status = in_array($m['status'] ?? '', ['online', 'idle', 'dnd'], true) ? $m['status'] : 'online';
+                    ?>
+                        <span class="dcx-av" style="--k:<?php echo $k; ?>; --ring:<?php echo $discordStatusColor[$status]; ?>">
+                            <img src="<?php echo htmlspecialchars((string)($m['avatar_url'] ?? '')); ?>" alt="" width="44" height="44" loading="lazy" decoding="async">
+                        </span>
+                    <?php endforeach; ?>
+                    <?php if ($discordExtra > 0): ?><span class="dcx-av dcx-av-more">+<?php echo $discordExtra; ?></span><?php endif; ?>
                 </div>
                 <?php endif; ?>
+
+                <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener" class="dcx-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                    <span>Dołącz do DNCT<span class="dcx-btn-long"> na Discordzie</span></span>
+                    <span class="dcx-btn-ar" aria-hidden="true">→</span>
+                </a>
+            </div>
+
+            <?php /* Kanał #pomoc: rozmowy w pętli (pytanie -> "DNCT Support pisze..."
+                     -> odpowiedź -> reakcja). Pokazuje to, co mówi tekst obok,
+                     zamiast tylko to twierdzić. Rozmowy są przykładowe, nagłówek
+                     mówi "podgląd". Wiadomości dokłada home.js. */ ?>
+            <div class="dnct-discord-demo" data-dc-chat>
+                <div class="dc-chat-head" aria-hidden="true">
+                    <span class="dc-chat-hash">#</span><b>pomoc</b>
+                    <span class="dc-chat-sub">podgląd</span>
+                    <span class="dc-chat-on"><i></i>Support online</span>
+                </div>
+                <div class="dc-chat-body" data-dc-body aria-hidden="true"></div>
+                <a class="dc-chat-join" href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                    <span><span class="dc-chat-join-long">Masz pytanie? </span><b>Dołącz na Discord DNCT</b></span>
+                    <span class="dc-chat-join-ar" aria-hidden="true">→</span>
+                </a>
             </div>
         </div>
     </div>
 </section>
-
-<script>
-(function () {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const panel = document.querySelector('.discord-band [data-reveal]');
-    const counter = document.querySelector('.discord-live-number');
-    if (!panel) return;
-
-    function countUp() {
-        if (!counter) return;
-        const target = parseInt(counter.dataset.countTarget || '0', 10);
-        if (reduceMotion || !target) {
-            counter.textContent = String(target);
-            return;
-        }
-        const start = performance.now();
-        const dur = 900;
-        function tick(now) {
-            const p = Math.min(1, (now - start) / dur);
-            const eased = 1 - Math.pow(1 - p, 3);
-            counter.textContent = String(Math.round(target * eased));
-            if (p < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-    }
-
-    if (reduceMotion) {
-        panel.classList.add('is-revealed');
-        countUp();
-        return;
-    }
-
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (!entry.isIntersecting) return;
-            panel.classList.add('is-revealed');
-            countUp();
-            io.disconnect();
-        });
-    }, { threshold: 0.35 });
-    io.observe(panel);
-
-    /* "Mówi": co 1,5-2,5 s od jednego losowego avatara rozchodzi się zielona
-       fala na ~1,1 s (CSS .discord-orbit-item.is-speaking). Tylko gdy pasmo jest na ekranie i karta
-       widoczna - poza ekranem pętla stoi. Nigdy dwa razy z rzędu ten sam. */
-    const avatars = Array.from(panel.querySelectorAll('.discord-orbit-item'));
-    if (avatars.length < 2) return;
-    let speakTimer = null, last = -1, onScreen = false;
-
-    function speak() {
-        clearTimeout(speakTimer);
-        if (!onScreen || document.hidden) return;
-        let i = Math.floor(Math.random() * avatars.length);
-        if (i === last) i = (i + 1) % avatars.length;
-        last = i;
-        avatars[i].classList.add('is-speaking');
-        setTimeout(() => avatars[i].classList.remove('is-speaking'), 1100);
-        speakTimer = setTimeout(speak, 1500 + Math.random() * 1000);
-    }
-
-    new IntersectionObserver((entries) => {
-        onScreen = entries[0].isIntersecting;
-        if (onScreen) speakTimer = setTimeout(speak, 1400); else clearTimeout(speakTimer);
-    }, { threshold: 0.2 }).observe(panel);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && onScreen) speak(); });
-})();
-</script>
 
 <?php /* Ten sam skrypt co na cenniku - stąd guard w initPlanPicks() dla kart
          bez data-plan-id (karty-wizytówki tutaj nie zaznaczają się, tylko

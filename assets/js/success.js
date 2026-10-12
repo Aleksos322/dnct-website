@@ -140,9 +140,11 @@
 
     function showMeta(b) {
         if (!elMeta) return;
-        var bits = ['Kwota: ' + b.amount + ' zł'];
-        if (b.billing_mode === 'subscription') bits.push('abonament odnawialny');
-        if (b.expires_at) bits.push('opłacone do ' + b.expires_at);
+        // DNCT_T: tłumaczenie EN/DE z assets/js/i18n.js (w PL go nie ma).
+        var T = window.DNCT_T || function (t) { return t; };
+        var bits = [T('Kwota:') + ' ' + b.amount + ' zł'];
+        if (b.billing_mode === 'subscription') bits.push(T('abonament odnawialny'));
+        if (b.expires_at) bits.push(T('opłacone do') + ' ' + b.expires_at);
         elMeta.textContent = bits.join(' · ');
         elMeta.hidden = false;
     }

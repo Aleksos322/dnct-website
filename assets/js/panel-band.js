@@ -99,13 +99,15 @@
     /**
      * Makieta panelu z zakładkami (components/panel-band.php, [data-pnl-mock]).
      *
-     * Zakładki przełączają się same co PNL_MS, dopóki ktoś czegoś nie kliknie -
-     * od pierwszego kliknięcia zostaje to, co wybrał (autoodtwarzanie, które
-     * zabiera komuś zakładkę spod palca, irytuje bardziej, niż pomaga).
+     * Zakładki przełączają się same co PNL_MS. Kliknięcie wstrzymuje pętlę na
+     * PNL_PAUZA_MS, żeby nikt nie tracił zakładki spod palca, a potem pętla
+     * wraca sama. Wcześniej klik zatrzymywał ją na zawsze i po jednym
+     * przypadkowym kliknięciu (np. "Start") makieta wyglądała na zepsutą.
      * Pod kursorem pętla stoi, poza ekranem nic nie liczy. Scenka rusza od
      * początku przy każdym wejściu: zdjęcie .is-active + reflow + założenie.
      */
     var PNL_MS = 6000;
+    var PNL_PAUZA_MS = 8000;
 
     function initMock() {
         var mock = document.querySelector('[data-pnl-mock]');
@@ -115,7 +117,7 @@
         var scenes = mock.querySelectorAll('[data-pnl-scene]');
         var title = mock.querySelector('[data-pnl-title]');
         var points = document.querySelectorAll('[data-pnl-goto]');
-        var current = 0, timer = null, visible = false, hovered = false, chosen = false;
+        var current = 0, timer = null, visible = false, hovered = false, chosen = false, resume = null;
 
         mock.style.setProperty('--pnl-ms', PNL_MS + 'ms');
 
@@ -150,7 +152,13 @@
             mock.classList.add('is-playing');
             timer = setTimeout(function () { show(current + 1); play(); }, PNL_MS);
         }
-        function choose(i) { chosen = true; stop(); show(i); }
+        function choose(i) {
+            chosen = true;
+            stop();
+            show(i);
+            clearTimeout(resume);
+            resume = setTimeout(function () { chosen = false; play(); }, PNL_PAUZA_MS);
+        }
 
         tabs.forEach(function (t, n) {
             t.addEventListener('click', function () { choose(n); });

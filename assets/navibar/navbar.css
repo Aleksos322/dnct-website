@@ -662,3 +662,27 @@
         height: 100%;
     }
 }
+
+/* ==========================================================================
+   PRZEŁĄCZNIK JĘZYKA PL / EN / DE (backend/lib/i18n.php)
+   ========================================================================== */
+.nav-lang {
+    display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.nav-lang-opt {
+    padding: 0.28rem 0.55rem; border-radius: 999px; color: #94a3b8;
+    font-family: 'Montserrat', sans-serif; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em;
+    text-decoration: none; transition: color 0.2s ease, background 0.2s ease;
+}
+.nav-lang-opt:hover { color: #fff; }
+.nav-lang-opt.is-active { color: #fff; background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+@media (max-width: 480px) {
+    .nav-lang-opt { padding: 0.25rem 0.42rem; font-size: 0.64rem; }
+}
+.nav-lang--mobile { display: none; }
+@media (max-width: 640px) {
+    .nav-lang:not(.nav-lang--mobile) { display: none; }
+    .nav-lang--mobile { display: inline-flex; align-self: center; margin: 0.6rem auto 0.2rem; }
+    .nav-lang--mobile .nav-lang-opt { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
+}

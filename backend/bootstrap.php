@@ -31,6 +31,7 @@ require_once __DIR__ . '/lib/panel_sso.php';
 require_once __DIR__ . '/lib/gsc.php';
 require_once __DIR__ . '/lib/odwiedziny.php';
 require_once __DIR__ . '/lib/ntfy.php';
+require_once __DIR__ . '/lib/i18n.php';
 
 // ------------------------------------------------------------
 // Sesja - ciasteczko niedostępne dla JS i wysyłane tylko po HTTPS.
@@ -60,3 +61,8 @@ if (PHP_SAPI !== 'cli') {
     ob_start(static function (string $b): string { $GLOBALS['odwiedziny_bajty'] += strlen($b); return $b; }, 8192);
     register_shutdown_function('odwiedziny_po_zadaniu');
 }
+
+// Wersja EN/DE (lib/i18n.php): bufor z tłumaczeniem całej strony, wewnątrz
+// bufora statystyk, więc ten liczy już przetłumaczone bajty. Dla PL nic się
+// nie uruchamia.
+i18n_start();
