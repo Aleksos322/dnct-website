@@ -44,6 +44,61 @@ $opinieOdmiana = static function (int $n): string {
     return ($d >= 2 && $d <= 4 && ($s < 12 || $s > 14)) ? 'opinie' : 'opinii';
 };
 $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repeat('☆', 5 - $n);
+
+/* WARIANT "PASEK" (12.10.2026) - niski pasek opinii wbudowany w przypiętą
+   sekcję planów 3D na stronie głównej (index.php ustawia $opinieWariant).
+   Ocena + "Wystaw opinię" z lewej, przesuwająca się taśma krótkich kart.
+   Kolejność losowana tu, nie w JS - strona i tak nie jest cache'owana. */
+if (($opinieWariant ?? '') === 'pasek') {
+    $opinieKarty = $opinieGoogle['reviews'];
+    shuffle($opinieKarty);
+    $inicjaly = static function (string $autor): string {
+        $czesci = preg_split('/\s+/u', trim($autor)) ?: [];
+        $i = mb_strtoupper(mb_substr($czesci[0] ?? '?', 0, 1));
+        if (isset($czesci[1])) {
+            $i .= mb_strtoupper(mb_substr($czesci[1], 0, 1));
+        }
+        return $i;
+    };
+    ?>
+    <div class="op-pasek" aria-label="Opinie z Google">
+        <div class="op-pasek-ocena">
+            <a class="op-pasek-wynik" href="<?php echo htmlspecialchars($opinieGoogle['url']); ?>" target="_blank" rel="noopener">
+                <strong><?php echo number_format($opinieGoogle['rating'], 1, ',', ''); ?></strong>
+                <span>
+                    <span class="op-pasek-gw" aria-hidden="true"><?php echo $opinieGwiazdki((int)round($opinieGoogle['rating'])); ?></span>
+                    <small><?php echo $opinieGoogle['count'] . ' ' . $opinieOdmiana($opinieGoogle['count']); ?> w Google →</small>
+                </span>
+            </a>
+            <a class="op-pasek-wystaw" href="<?php echo htmlspecialchars(OPINIE_LINK_WYSTAW); ?>" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+                Wystaw opinię
+            </a>
+        </div>
+        <div class="op-pasek-tasma">
+            <ul class="op-pasek-tor">
+                <?php foreach ([false, true] as $kopia): /* druga kopia domyka pętlę taśmy */ ?>
+                    <?php foreach ($opinieKarty as $o): ?>
+                        <li class="op-pasek-karta"<?php echo $kopia ? ' aria-hidden="true"' : ''; ?>>
+                            <div class="op-pasek-autor">
+                                <?php if ($o['zdjecie'] !== ''): ?>
+                                    <img src="<?php echo htmlspecialchars($o['zdjecie']); ?>" alt="" width="34" height="34" loading="lazy" referrerpolicy="no-referrer">
+                                <?php else: ?>
+                                    <span aria-hidden="true"><?php echo htmlspecialchars($inicjaly($o['autor'])); ?></span>
+                                <?php endif; ?>
+                                <b><?php echo htmlspecialchars($o['autor']); ?></b>
+                                <i aria-label="<?php echo $o['gwiazdki']; ?> na 5 gwiazdek"><?php for ($g = 1; $g <= 5; $g++): ?><span class="<?php echo $g <= $o['gwiazdki'] ? 'is-pelna' : ''; ?>" style="--i:<?php echo $g; ?>" aria-hidden="true">★</span><?php endfor; ?></i>
+                            </div>
+                            <p><?php echo htmlspecialchars($o['tekst']); ?></p>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+    <?php
+    return;
+}
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/opinie-google.css'); ?>">
 <section class="opinie py-20 w-full relative overflow-hidden" aria-labelledby="opinie-tytul">

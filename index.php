@@ -36,7 +36,10 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
     );
     $showcasePlans = $pdo
-        ->query('SELECT * FROM hosting_plans WHERE id IN (1, 3, 9) AND is_active = 1 ORDER BY price ASC')
+        /* Wszystkie aktywne plany Minecrafta (od 12.10.2026) - sekcja przewija je
+           w 3D (assets/js/home.js), więc pełna lista ma sens; wcześniej stały
+           tu trzy wybrane: id 1, 3 i 9. */
+        ->query("SELECT * FROM hosting_plans WHERE type = 'minecraft' AND is_active = 1 ORDER BY price ASC")
         ->fetchAll();
 
     /* Dostępność z realnej pojemności węzła klienckiego - ta sama funkcja, co
@@ -245,15 +248,78 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
 <script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 </section>
 
-<!-- ============ JAK TO DZIAŁA ============ -->
-<?php /* Zaraz po "Zobacz, zanim zapłacisz": panel już widział, teraz dostaje
-         odpowiedź na "a co się dzieje po zapłacie". Klasa .cennik-page daje
-         wspólne .cnk-eyebrow i .cnk-h2. */ ?>
-<section class="px-6 home-wide mx-auto w-full cennik-page jtd-wrap">
-    <link rel="stylesheet" href="<?php echo asset('/assets/css/jak-to-dziala.css'); ?>">
-    <?php render_jak_to_dziala(); ?>
-    <script src="<?php echo asset('/assets/js/jak-to-dziala.js'); ?>" defer></script>
+<!-- ============ PLANY ============ -->
+<?php /* PLANY W 3D (12.10.2026). Sekcja przypina się do ekranu (sticky), a
+         przewijanie obraca karuzelą: aktywny plan z przodu, sąsiednie
+         odsunięte w głąb i obrócone. Długość przewijania rośnie z liczbą
+         planów (--n). Pozycje liczy assets/js/home.js; bez JS i przy
+         reduced-motion sekcja jest zwykłym poziomym rzędem do przesuwania.
+
+         Karta ta sama co w cenniku (components/plan-card-cennik.php) w tym
+         samym wrapperze .plan-pick - wygląd zostaje 1:1 z cennikiem. */ ?>
+<?php if ($showcasePlans): ?>
+<section id="pricing" class="cennik-page home-p3d" data-plans3d style="--n:<?php echo count($showcasePlans); ?>">
+    <div class="home-p3d-sticky">
+        <div class="home-wrap home-p3d-grid">
+            <div class="home-p3d-copy">
+                <h2>Wybierz plan hostingu gier</h2>
+                <p class="home-p3d-sub">Hosting <a href="/hosting-minecraft">Minecraft</a>, <a href="/hosting-project-zomboid">Project Zomboid</a> i <a href="/hosting-vintage-story">Vintage Story</a></p>
+
+                <div class="home-p3d-count" aria-live="polite">
+                    <b data-p3d-now>01</b><span>/ <?php echo str_pad((string)count($showcasePlans), 2, '0', STR_PAD_LEFT); ?></span>
+                </div>
+                <ol class="home-p3d-index">
+                    <?php foreach ($showcasePlans as $k => $row): ?>
+                        <li><button type="button" data-p3d-go="<?php echo $k; ?>"<?php echo !empty($row['sold_out']) ? ' class="is-out"' : ''; ?>>
+                            <span><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></span>
+                            <em><?php echo number_format((float)($row['price'] ?? 0), 2, ',', ''); ?> zł</em>
+                        </button></li>
+                    <?php endforeach; ?>
+                </ol>
+                <p class="home-p3d-hint" aria-hidden="true">Przewiń, żeby obejrzeć kolejne plany</p>
+                <a href="/cennik" class="home-p3d-more">Zobacz pełną ofertę (więcej gier) &rarr;</a>
+            </div>
+
+            <div class="home-p3d-stage">
+                <?php foreach ($showcasePlans as $k => $row):
+                    $ramMb = (int)($row['ram_mb'] ?? 0);
+                    $ssdMb = (int)($row['ssd_mb'] ?? 0);
+                ?>
+                    <div class="home-p3d-card" data-p3d="<?php echo $k; ?>">
+                        <div class="plan-pick">
+                            <?php render_cennik_plan_card([
+                                'name'       => $row['name'] ?? '',
+                                'price'      => $row['price'] ?? '',
+                                'old_price'  => $row['old_price'] ?? 0,
+                                'is_on_sale' => !empty($row['is_on_sale']),
+                                'popular'    => !empty($row['popular']),
+                                // Stan liczony z pojemności węzła (backend/lib/capacity.php).
+                                'sold_out'   => !empty($row['sold_out']),
+                                'fits'       => $row['fits'] ?? null,
+                                'ram'        => $ramMb >= 1024 ? ($ramMb / 1024) . 'GB' : $ramMb . 'MB',
+                                'cpu'        => ($row['cpu_cores'] ?? 0) . ' vCore',
+                                'ssd'        => $ssdMb >= 1024 ? ($ssdMb / 1024) . 'GB' : $ssdMb . 'MB',
+                                'backups'    => $row['backups_limit'] ?? 0,
+                                'bg'         => $row['background_img'] ?? '',
+                                'icon'       => $row['icon_img'] ?? '',
+                                // Karta na stronie głównej prowadzi do pełnego cennika.
+                                'href'       => '/cennik',
+                                'cta'        => 'Zobacz szczegóły',
+                            ]); ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <?php /* Opinie widoczne RAZEM z kartami przez całe przewijanie planów -
+                 kompaktowy wariant komponentu (znika sam, gdy nie ma opinii). */ ?>
+        <div class="home-wrap home-p3d-opinie">
+            <?php $opinieWariant = 'pasek'; require __DIR__ . '/components/opinie-google.php'; ?>
+        </div>
+    </div>
 </section>
+<?php endif; ?>
 
 <!-- ============ O HOSTINGU (treść pod wyszukiwarki) ============ -->
 <?php /* Bento: opis po lewej, "Własny sprzęt" po prawej, cztery cechy pod
@@ -295,61 +361,16 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
     </div>
 </section>
 
-<!-- ============ PLANY ============ -->
-<?php if ($showcasePlans): ?>
-<section id="pricing" class="cennik-page py-20 px-6 home-wide mx-auto w-full">
-    <div class="text-center mb-16">
-        <h2 class="text-3xl font-bold mb-4">Wybierz plan hostingu gier</h2>
-        <p class="text-gray-400 text-sm md:text-base mb-4">Hosting <a href="/hosting-minecraft" class="text-purple-400 hover:text-purple-300">Minecraft</a>, <a href="/hosting-project-zomboid" class="text-purple-400 hover:text-purple-300">Project Zomboid</a> i <a href="/hosting-vintage-story" class="text-purple-400 hover:text-purple-300">Vintage Story</a></p>
-        <div class="w-24 h-1 bg-gradient-main mx-auto rounded-full"></div>
-    </div>
-
-    <?php /* Ta sama karta (components/plan-card-cennik.php) i ten sam wrapper
-             .plan-pick co w cenniku - hover/lift/obwodka liczone sa wylacznie
-             wzgledem .plan-pick w cennik.css. Bez tej klasy sekcja i tak
-             dostaje style (.cennik-page dodane do <section> wyzej), ale karty
-             musza byc w tym samym wrapperze co tam, zeby wygladaly identycznie,
-             nie tylko "podobnie". Bez interaktywnego wyboru planu (data-plan-id,
-             role="button") - tu karta linkuje wprost do /cennik, nie zaznacza. */ ?>
-    <div class="plans-grid gap-8 items-stretch">
-        <?php foreach ($showcasePlans as $row):
-            $ramMb = (int)($row['ram_mb'] ?? 0);
-            $ssdMb = (int)($row['ssd_mb'] ?? 0);
-        ?>
-            <div class="plan-pick">
-                <?php render_cennik_plan_card([
-                    'name'       => $row['name'] ?? '',
-                    'price'      => $row['price'] ?? '',
-                    'old_price'  => $row['old_price'] ?? 0,
-                    'is_on_sale' => !empty($row['is_on_sale']),
-                    'popular'    => !empty($row['popular']),
-                    // Stan liczony z pojemności węzła (backend/lib/capacity.php),
-                    // a nie wymuszony na sztywno.
-                    'sold_out'   => !empty($row['sold_out']),
-                    'fits'       => $row['fits'] ?? null,
-                    'ram'        => $ramMb >= 1024 ? ($ramMb / 1024) . 'GB' : $ramMb . 'MB',
-                    'cpu'        => ($row['cpu_cores'] ?? 0) . ' vCore',
-                    'ssd'        => $ssdMb >= 1024 ? ($ssdMb / 1024) . 'GB' : $ssdMb . 'MB',
-                    'backups'    => $row['backups_limit'] ?? 0,
-                    'bg'         => $row['background_img'] ?? '',
-                    'icon'       => $row['icon_img'] ?? '',
-                    // Karta na stronie glownej prowadzi do pelnego cennika,
-                    // nie zamawia bezposrednio - stad wlasny href/cta zamiast
-                    // domyslnego "Zamawiam" z komponentu.
-                    'href'       => '/cennik',
-                    'cta'        => 'Zobacz szczegóły',
-                ]); ?>
-            </div>
-        <?php endforeach; ?>
-    </div>
-
-    <div class="mt-12 text-center">
-        <a href="/cennik" class="text-gray-400 hover:text-white underline decoration-[#8b5cf6] decoration-2 underline-offset-4 transition-all">
-            Zobacz pełną ofertę (więcej gier) &rarr;
-        </a>
-    </div>
+<!-- ============ JAK TO DZIAŁA ============ -->
+<?php /* Kolejność strony (12.10.2026, decyzja właściciela): hero -> panel ->
+         plany -> o hostingu -> "Jak to działa" -> Discord. Tu odpowiedź na
+         "a co się dzieje po zapłacie", tuż przed zaproszeniem na Discorda.
+         Klasa .cennik-page daje wspólne .cnk-eyebrow i .cnk-h2. */ ?>
+<section class="px-6 home-wide mx-auto w-full cennik-page jtd-wrap">
+    <link rel="stylesheet" href="<?php echo asset('/assets/css/jak-to-dziala.css'); ?>">
+    <?php render_jak_to_dziala(); ?>
+    <script src="<?php echo asset('/assets/js/jak-to-dziala.js'); ?>" defer></script>
 </section>
-<?php endif; ?>
 
 <!-- ============ DISCORD ============ -->
 <?php
@@ -366,7 +387,8 @@ $discordShown   = array_slice($discordMembers, 0, 12);
 $discordExtra   = max(0, count($discordMembers) - count($discordShown));
 $discordOnline  = (int)($discordWidget['presence_count'] ?? count($discordMembers));
 ?>
-<?php /* Opinie z Google - znika sama, gdy nie ma klucza albo opinii. */ require __DIR__ . '/components/opinie-google.php'; ?>
+<?php /* Opinie z Google są teraz paskiem w przypiętej sekcji planów (#pricing) -
+         widać je razem z kartami. Osobna sekcja zniknęła, żeby się nie dublowały. */ ?>
 <section class="discord-band py-24 px-6 w-full relative overflow-hidden">
     <div class="discord-band-glow" aria-hidden="true"></div>
     <div class="home-wide mx-auto relative z-10">
