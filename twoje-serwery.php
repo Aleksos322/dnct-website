@@ -12,10 +12,9 @@
  * później rozjedzie się z tym w backend/lib/pricing.php, a różnicę zauważy
  * dopiero klient, porównując ekran z rachunkiem.
  *
- * CO TU JEST, A CZEGO NIE MA. Strona pokazuje stan HANDLOWY: za co zapłacono,
- * do kiedy jest opłacone, czy abonament się odnawia. Konsola, pliki i backupy
- * są w panelu i mają tam zostać - dublowanie ich tutaj oznaczałoby dwa miejsca
- * do utrzymania i dwa źródła prawdy o tym samym serwerze.
+ * Strona jest podsumowaniem usługi, nie drugim panelem Pterodactyla. Pokazuje
+ * stan handlowy oraz lekki odczyt realnego stanu maszyny; konsola, pliki,
+ * tworzenie i przywracanie backupów nadal są wyłącznie w panelu gry.
  */
 
 declare(strict_types=1);
@@ -411,6 +410,24 @@ ob_start();
                         <button type="button" class="srv-copy" data-role="copy"
                                 data-value="<?php echo htmlspecialchars($c['address'], ENT_QUOTES); ?>">Kopiuj</button>
                     </div>
+                <?php endif; ?>
+
+                <?php if (!$isPanelOnly && !empty($o['ptero_server_id']) && $o['status'] === 'provisioned'): ?>
+                    <section class="srv-live" data-role="live" aria-live="polite" aria-busy="true">
+                        <div class="srv-live-head">
+                            <div><span>Stan serwera</span><strong>Ładuję aktualne dane…</strong></div>
+                            <button type="button" class="srv-live-refresh" data-role="refreshLive" disabled>Odśwież</button>
+                        </div>
+                        <div class="srv-live-grid">
+                            <div><span>Stan</span><strong data-live="state"><i class="srv-loading"></i> sprawdzam</strong></div>
+                            <div><span>RAM teraz</span><strong data-live="memory"><i class="srv-loading"></i></strong></div>
+                            <div><span>Procesor teraz</span><strong data-live="cpu"><i class="srv-loading"></i></strong></div>
+                            <div><span>Dysk teraz</span><strong data-live="disk"><i class="srv-loading"></i></strong></div>
+                            <div><span>Backupy</span><strong data-live="backups"><i class="srv-loading"></i></strong><small data-live="backupLast">sprawdzam ostatnią kopię</small></div>
+                            <div><span>Czas działania</span><strong data-live="uptime"><i class="srv-loading"></i></strong></div>
+                        </div>
+                        <p class="srv-live-note" data-role="liveNote">Dane odświeżają się niezależnie od reszty strony.</p>
+                    </section>
                 <?php endif; ?>
 
                 <div class="srv-specs">

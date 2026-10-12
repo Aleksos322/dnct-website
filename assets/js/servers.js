@@ -155,6 +155,105 @@
         }
 
         /* ---------------------------------------------------------------
+           Bieżący stan usługi
+
+           To osobne, lekkie żądanie GET. Karta z terminem, adresem i
+           płatnością jest gotowa od razu, nawet gdy Wings konkretnego
+           serwera jest właśnie niedostępny.
+           --------------------------------------------------------------- */
+        var live = card.querySelector('[data-role="live"]');
+        if (live) {
+            var btnRefreshLive = live.querySelector('[data-role="refreshLive"]');
+            var liveNote = live.querySelector('[data-role="liveNote"]');
+
+            if (btnRefreshLive) {
+                btnRefreshLive.addEventListener('click', loadLive);
+            }
+            loadLive();
+
+            function loadLive() {
+                if (btnRefreshLive) btnRefreshLive.disabled = true;
+                live.setAttribute('aria-busy', 'true');
+                if (liveNote) liveNote.textContent = 'Pobieram dane bezpośrednio z panelu…';
+
+                fetch('/api/server-status.php?order_id=' + encodeURIComponent(orderId), {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store',
+                    credentials: 'same-origin'
+                })
+                    .then(function (r) { return r.json().then(function (body) { return { ok: r.ok && body.ok, body: body }; }); })
+                    .then(function (res) {
+                        if (!res.ok) throw new Error(res.body.message || 'Nie udało się pobrać stanu.');
+                        renderLive(res.body);
+                    })
+                    .catch(function () {
+                        setLive('state', 'chwilowo niedostępny', 'srv-live-state-warn');
+                        setLive('memory', '—'); setLive('cpu', '—'); setLive('disk', '—'); setLive('backups', '—'); setLive('uptime', '—');
+                        if (liveNote) liveNote.textContent = 'Nie udało się teraz połączyć z maszyną. Dane o usłudze powyżej pozostają aktualne.';
+                    })
+                    .finally(function () {
+                        live.setAttribute('aria-busy', 'false');
+                        if (btnRefreshLive) btnRefreshLive.disabled = false;
+                    });
+            }
+
+            function renderLive(data) {
+                var states = {
+                    running: ['działa', 'srv-live-state-ok'],
+                    starting: ['uruchamia się', 'srv-live-state-warn'],
+                    stopping: ['zatrzymuje się', 'srv-live-state-warn'],
+                    offline: ['wyłączony', 'srv-live-state-warn'],
+                    suspended: ['zawieszony', 'srv-live-state-bad']
+                };
+                var state = states[data.state] || ['brak odczytu', 'srv-live-state-warn'];
+                setLive('state', state[0], state[1]);
+
+                var r = data.resources;
+                setLive('memory', r ? bytes(r.memory_bytes) : 'brak odczytu');
+                setLive('cpu', r ? number(r.cpu_absolute, 1) + '%' : 'brak odczytu');
+                setLive('disk', r ? bytes(r.disk_bytes) : 'brak odczytu');
+                setLive('uptime', r ? duration(r.uptime) : '—');
+                setLive('backups', data.backups.used + ' / ' + data.backups.limit);
+
+                var last = live.querySelector('[data-live="backupLast"]');
+                if (last) last.textContent = data.backups.last ? 'ostatnia: ' + data.backups.last : 'brak ukończonej kopii';
+                if (liveNote) liveNote.textContent = r
+                    ? 'Stan odczytany teraz. Kliknij „Odśwież”, aby pobrać go ponownie.'
+                    : 'Panel potwierdził usługę, ale maszyna nie podała aktualnego zużycia.';
+            }
+
+            function setLive(name, value, tone) {
+                var el = live.querySelector('[data-live="' + name + '"]');
+                if (!el) return;
+                el.textContent = value;
+                el.classList.remove('srv-live-state-ok', 'srv-live-state-warn', 'srv-live-state-bad');
+                if (tone) el.classList.add(tone);
+            }
+
+            function bytes(value) {
+                value = Number(value) || 0;
+                var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                var i = 0;
+                while (value >= 1024 && i < units.length - 1) { value /= 1024; i++; }
+                return number(value, value >= 10 || i === 0 ? 0 : 1) + ' ' + units[i];
+            }
+
+            function duration(seconds) {
+                seconds = Math.max(0, Number(seconds) || 0);
+                if (seconds < 60) return 'mniej niż minutę';
+                var minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + ' min';
+                var hours = Math.floor(minutes / 60);
+                if (hours < 48) return hours + ' h';
+                return Math.floor(hours / 24) + ' dni';
+            }
+
+            function number(value, digits) {
+                return new Intl.NumberFormat('pl-PL', { maximumFractionDigits: digits }).format(Number(value) || 0);
+            }
+        }
+
+        /* ---------------------------------------------------------------
            Wysyłka
            --------------------------------------------------------------- */
         function post(url, body, btn, originalLabel) {

@@ -1,0 +1,226 @@
+/* Strona główna: hero z kartą serwera, chipy gier i "O hostingu" jako bento.
+   Układ przeniesiony z makiety 01 "Ametyst" (12.10.2026), wygląd z naszego
+   świata: .glass z navbar.css, tło FinisherHeader, Montserrat, fiolet.
+   Zwykły CSS zamiast klas Tailwinda - nic tu nie wymaga przebudowy
+   tailwind.css. */
+
+.home-wrap {
+    width: 100%;
+    max-width: 95rem;              /* = .home-wide pasm niżej */
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 3vw, 2.5rem);
+}
+/* Szersze pasma strony głównej (panel, "Jak to działa", plany, Discord) -
+   przy max-w-7xl (80rem) strona na dużym ekranie wyglądała na ściśniętą. */
+.home-wide { width: 100%; max-width: 95rem; }
+
+.home-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c4b5fd;
+}
+.home-eyebrow::before { content: ""; width: 18px; height: 2px; border-radius: 2px; background: currentColor; }
+
+/* ---------- HERO ---------- */
+/* Podciągnięcie pod navbar jak w cenniku: .page-main ma pt-32 dla całego
+   serwisu, tu oddajemy część tego odstępu. */
+/* Hero na prawie cały ekran: treść pionowo na środku zamiast przyklejonej do navbara. */
+.home-hero { position: relative; display: grid; align-items: center; min-height: calc(100svh - 60px); margin-top: -90px; padding: 3rem 0 4.5rem; overflow: hidden; }
+@media (max-width: 700px) { .home-hero { margin-top: -50px; } }
+.home-hero-glow {
+    position: absolute; z-index: -1; top: -10%; left: -10%;
+    width: 820px; height: 820px; border-radius: 50%;
+    background: rgba(124, 58, 237, 0.13); filter: blur(120px); pointer-events: none;
+}
+
+.home-hero-grid {
+    display: grid;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+}
+
+.home-h1 {
+    margin: 1rem 0 0;
+    font-size: clamp(2.9rem, 5.2vw, 5.6rem);
+    font-weight: 800;   /* navbar.css ładuje Montserrat 500/700/800 - 900 byłoby podrabiane */
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+}
+/* Każda linia wjeżdża spod własnej maski. Bez JS i przy reduced-motion
+   stoi od razu (animacja startuje z CSS, nie ze skryptu). */
+/* Maska wjazdu linii. Przy line-height 0.98 ogonki (ę, y, g) i akcenty (ć, ś)
+   wystają poza pudełko linii - padding poszerza maskę, a ujemny margines
+   oddaje to miejsce, więc odstępy między liniami się nie zmieniają. */
+.home-line { display: block; overflow: hidden; padding: 0.1em 0 0.24em; margin: -0.1em 0 -0.24em; }
+/* Gradient (.gradient-text, background-clip: text) maluje tylko w pudełku
+   napisu - przy line-height 0.98 ogonki y/g/ę wychodziły poza nie i znikały.
+   Padding rozszerza pole gradientu, ujemny margines oddaje miejsce. */
+.home-line > span { padding: 0.06em 0.08em 0.24em 0; margin: -0.06em -0.08em -0.24em 0; }
+.home-line > span { display: inline-block; animation: homeLine 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(0.1s + var(--d, 0) * 0.09s); }
+@keyframes homeLine { from { transform: translateY(105%); } }
+
+.home-in { animation: homeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(0.15s + var(--d, 0) * 0.08s); }
+@keyframes homeIn { from { opacity: 0; translate: 0 18px; } }
+
+.home-lead { margin: 1.8rem 0 0; max-width: 40rem; color: #94a3b8; font-size: clamp(1.08rem, 1.3vw, 1.3rem); line-height: 1.7; }
+
+.home-cta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2.4rem; }
+.home-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem;
+    min-height: 58px; padding: 0 1.8rem; border-radius: 16px;
+    font-weight: 700; font-size: 1.05rem; color: #fff; text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, background 0.25s ease;
+}
+.home-btn svg { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.home-btn:hover { transform: translateY(-2px); }
+.home-btn:hover svg { transform: translateX(3px); }
+.home-btn.glass { position: relative; }
+.home-btn.glass:hover { background-color: rgba(255, 255, 255, 0.06); }
+.home-btn-main { border-color: transparent; box-shadow: 0 10px 30px -12px rgba(139, 92, 246, 0.9); }
+.home-btn-main:hover { box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); }
+
+.home-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.6rem; }
+.home-chip {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    padding: 0.4rem 1.05rem 0.4rem 0.4rem; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03);
+    font-size: 0.92rem; font-weight: 600; color: #cbd5e1; text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.home-chip:hover { color: #fff; border-color: #8b5cf6; transform: translateY(-2px); }
+.home-chip b {
+    display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%;
+    font-size: 0.62rem; letter-spacing: 0.03em; color: #fff; background: #6d28d9;
+}
+.home-chip img {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.home-chip:hover img { transform: rotate(-8deg) scale(1.08); }
+.home-chip[data-g="minecraft"]:hover { border-color: #5fa64a; }
+.home-chip[data-g="zomboid"]:hover { border-color: #e08a3c; }
+.home-chip[data-g="vintagestory"]:hover { border-color: #8fae4a; }
+
+/* Karta serwera */
+.home-card {
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.home-card-top { display: flex; align-items: center; gap: 0.7rem; padding: 1.15rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.07); font-size: 0.95rem; }
+.home-card-top strong { color: #f1f5f9; }
+.home-card-addr { color: #64748b; }
+.home-card-on {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.3rem 0.7rem; border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12); color: #4ade80; font-size: 0.72rem; font-weight: 700;
+}
+.home-card-on i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; animation: homePulse 1.8s ease-out infinite; }
+@keyframes homePulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); } 100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } }
+
+.home-card-stats { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+.home-card-stats > div { display: grid; gap: 0.25rem; padding: 1.15rem 1.5rem; }
+.home-card-stats > div + div { border-left: 1px solid rgba(255, 255, 255, 0.07); }
+.home-card-stats span:first-child { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #64748b; }
+.home-card-stats b { font-size: 1.35rem; color: #f1f5f9; }
+.home-bar { display: block; height: 4px; margin-top: 0.35rem; border-radius: 4px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+.home-bar i { display: block; height: 100%; width: var(--v); border-radius: inherit; background: linear-gradient(90deg, #8b5cf6, #3b82f6); animation: homeBar 4s ease-in-out infinite alternate; }
+@keyframes homeBar { to { width: calc(var(--v) + 12%); } }
+
+.home-card-console {
+    height: 300px; overflow: hidden; padding: 1.2rem 1.5rem;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.82rem; line-height: 1.8; color: #cbd5e1;
+    background: rgba(0, 0, 0, 0.25);
+    mask-image: linear-gradient(180deg, transparent, #000 22%);
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%);
+}
+.home-card-console > div { white-space: pre-wrap; word-break: break-word; animation: homeConsoleLine 0.3s ease both; }
+.home-card-console .t { color: #64748b; }
+.home-card-console .ok { color: #4ade80; }
+.home-card-console .warn { color: #fbbf24; }
+.home-card-console .cmd { color: #c4b5fd; }
+.home-card-console .cur { display: inline-block; width: 0.55em; height: 1em; margin-left: 2px; vertical-align: -0.15em; background: #a78bfa; animation: homeCaret 1s steps(1) infinite; }
+@keyframes homeConsoleLine { from { opacity: 0; transform: translateX(-4px); } }
+@keyframes homeCaret { 50% { opacity: 0; } }
+.home-card-input { display: flex; gap: 0.6rem; padding: 1rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.07); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; color: #64748b; }
+.home-card-input b { color: #a78bfa; }
+
+@media (max-width: 960px) {
+    .home-hero-grid { grid-template-columns: 1fr; }
+    .home-hero { min-height: 0; }
+}
+@media (max-width: 520px) {
+    .home-btn { flex: 1 1 auto; }
+    .home-card-stats > div { padding: 0.8rem; }
+    .home-card-stats b { font-size: 0.95rem; }
+    .home-card-addr { display: none; }
+}
+
+/* ---------- O HOSTINGU: bento ---------- */
+.home-about { padding: 5rem 0; }
+.home-bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.25rem; }
+.home-bento > .glass { border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.07); padding: clamp(1.6rem, 2.6vw, 2.4rem); }
+
+.home-bento-intro { grid-column: span 7; display: grid; gap: 1rem; align-content: start; }
+.home-bento-intro h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+.home-bento-intro p { margin: 0; color: #94a3b8; line-height: 1.8; font-size: 1.05rem; }
+
+.home-bento-hw {
+    grid-column: span 5; display: grid; align-content: space-between; gap: 1.5rem;
+    background-image: linear-gradient(160deg, rgba(139, 92, 246, 0.22), rgba(139, 92, 246, 0.02) 70%);
+}
+.home-hw-big { margin: 0; font-size: clamp(2.6rem, 5vw, 4.4rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; }
+.home-hw-big small { display: block; margin-top: 0.9rem; font-size: 0.95rem; font-weight: 600; letter-spacing: 0; line-height: 1.5; color: #94a3b8; }
+.home-rack { display: grid; gap: 6px; }
+.home-rack i { position: relative; height: 14px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.07); overflow: hidden; }
+.home-rack i::after {
+    content: ""; position: absolute; right: 8px; top: 4px; width: 4px; height: 4px; border-radius: 50%;
+    background: #22c55e; box-shadow: -8px 0 0 #22c55e, -16px 0 0 rgba(34, 197, 94, 0.3);
+    animation: homeBlink 1.6s steps(2) infinite; animation-delay: calc(var(--k, 0) * 0.27s);
+}
+@keyframes homeBlink { 50% { opacity: 0.35; } }
+
+.home-bento-feat {
+    grid-column: span 3; display: grid; gap: 1rem; align-content: start;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+}
+.home-bento-feat:hover { transform: translateY(-4px); border-color: rgba(167, 139, 250, 0.35); }
+.home-feat-ico { width: 50px; height: 50px; display: grid; place-items: center; border-radius: 12px; background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+.home-feat-ico svg { width: 24px; height: 24px; }
+.home-bento-feat p { margin: 0; font-weight: 700; font-size: 1.08rem; line-height: 1.45; color: #e2e8f0; }
+
+@media (max-width: 960px) {
+    .home-bento-intro, .home-bento-hw { grid-column: span 12; }
+    .home-bento-feat { grid-column: span 6; }
+}
+@media (max-width: 520px) { .home-bento-feat { grid-column: span 12; } }
+
+/* Wejście w kadr - klasę .is-in dokłada home.js. Stan startowy ustawia
+   dopiero skrypt (.home-js), więc bez JS wszystko widać od razu. */
+.home-js .home-reveal { opacity: 0; transform: translateY(22px); }
+.home-js .home-reveal.is-in {
+    opacity: 1; transform: none;
+    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+    transition-delay: calc(var(--d, 0) * 70ms), calc(var(--d, 0) * 70ms), 0s;
+}
+.home-js .home-bento-feat.home-reveal.is-in:hover { transform: translateY(-4px); transition-delay: 0s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .home-line > span, .home-in { animation: none; }
+    .home-chip:hover img { transform: none; }
+    .home-bar i, .home-rack i::after, .home-card-on i, .home-card-console .cur { animation: none; }
+    .home-js .home-reveal { opacity: 1; transform: none; }
+    .home-card { transform: none; }
+}

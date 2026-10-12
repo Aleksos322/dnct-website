@@ -73,7 +73,7 @@ function archive_download_url(array $archive): string
 /**
  * @return array{code:int,json:?array,error:?string}
  */
-function ptero_client_request(string $method, string $path, ?array $body = null): array
+function ptero_client_request(string $method, string $path, ?array $body = null, int $timeout = 30): array
 {
     $key = trim((string)env('PTERO_CLIENT_KEY', ''));
     if ($key === '') {
@@ -85,7 +85,7 @@ function ptero_client_request(string $method, string $path, ?array $body = null)
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST  => $method,
-        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_TIMEOUT        => max(1, min(30, $timeout)),
         CURLOPT_HTTPHEADER     => [
             'Authorization: Bearer ' . $key,
             'Content-Type: application/json',

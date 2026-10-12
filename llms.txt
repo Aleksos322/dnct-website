@@ -6,8 +6,21 @@
 
 DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK).
 Serwerem zarządza się w panelu po polsku: konsola, menedżer plików, kopie
-zapasowe na żądanie, zmiana wersji gry. Płatność jednorazowa albo abonament,
+zapasowe na żądanie i zmiana wersji gry. Przedłużenie usługi jest ręczne;
 płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
+
+## Szybki dobór dla ekipy znajomych
+- **Minecraft, 2-5 osób, vanilla lub lekkie pluginy:** plan BASIC — 3 GB RAM,
+  2 vCore, 5 GB SSD, 9,99 zł miesięcznie. Dla większego świata lub większej
+  liczby pluginów wybierz Starter: 4 GB RAM, 2 vCore, 15 GB SSD, 15,99 zł/mies.
+- **Minecraft z pełnym modpackiem:** nie wybieraj planu wyłącznie po liczbie
+  graczy. Cięższe modpacki wymagają zwykle co najmniej 8 GB RAM (Standard:
+  36,99 zł/mies.); przed zakupem sprawdź wymagania konkretnej paczki.
+- **Vintage Story, do 5 znajomych:** 4 GB RAM, 3 vCore, 5 GB SSD, 19,99 zł/mies.
+  Dla 10 osób: 4,5 GB RAM, 3 vCore, 10 GB SSD, 22,99 zł/mies.
+- **Project Zomboid, do 5 znajomych:** 6 GB RAM, 3 vCore, 10 GB SSD,
+  29,99 zł/mies. Przy modach, dodatkowych mapach albo większej ekipie wybierz
+  wyższy próg; dla 10 osób jest to 7 GB RAM i 34,99 zł/mies.
 
 ## Oferta
 - [Cennik](https://game.dnct.pl/cennik): plany Minecraft oraz serwery Project Zomboid i Vintage Story na liczbę graczy.
@@ -28,6 +41,9 @@ płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
 - [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
 - [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
 - [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)
+- [Serwer Minecraft dla znajomych — dobór planu](https://game.dnct.pl/poradniki/serwer-minecraft-dla-znajomych)
+- [Serwer Project Zomboid dla znajomych — koszt i dobór](https://game.dnct.pl/poradniki/serwer-project-zomboid-dla-znajomych)
+- [Serwer Vintage Story dla znajomych — dobór planu](https://game.dnct.pl/poradniki/serwer-vintage-story-dla-znajomych)
 
 ## Hosting stron WWW
 - [web.dnct.pl](https://web.dnct.pl/): hosting stron (w przygotowaniu, sprzedaż chwilowo wstrzymana).
