@@ -153,6 +153,13 @@
             else window.scrollTo({ top: y, behavior: 'smooth' });
         };
         goBtns.forEach(function (b) { b.addEventListener('click', function () { goTo(+b.getAttribute('data-p3d-go')); }); });
+        // "Pomiń plany": przewija do pierwszej sekcji za karuzelą.
+        var skip = p3d.querySelector('[data-p3d-skip]');
+        if (skip) skip.addEventListener('click', function () {
+            var y = p3d.getBoundingClientRect().top + window.scrollY + p3d.offsetHeight - 40;
+            if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: 1.2 });
+            else window.scrollTo({ top: y, behavior: 'smooth' });
+        });
         cards.forEach(function (c, i) {
             c.addEventListener('click', function () { if (!c.classList.contains('is-front')) goTo(i); });
         });
@@ -257,6 +264,216 @@
                 pop.addEventListener('mouseenter', function () { clearTimeout(zamknij); });
             });
         });
+    }
+
+    /* --- Discord: scena społeczności ([data-dcx]) ----------------------- */
+    /* 1. Po wejściu w kadr avatary wyskakują po kolei, licznik liczy od zera.
+       2. Co 1,4-2,4 s losowy avatar "mówi" (zielona fala). Nigdy dwa razy
+          z rzędu ten sam; poza ekranem i na ukrytej karcie pętla stoi. */
+    var dcx = document.querySelector('[data-dcx]');
+    if (dcx && !reduce && 'IntersectionObserver' in window) {
+        var dcxAv = Array.prototype.slice.call(dcx.querySelectorAll('.dcx-av:not(.dcx-av-more)'));
+        var dcxNum = dcx.querySelector('[data-dcx-count]');
+        var dcxCel = dcxNum ? parseInt(dcxNum.getAttribute('data-dcx-count'), 10) || 0 : 0;
+        var dcxWidac = false, dcxMowi = null, dcxOstatni = -1;
+
+        dcx.classList.add('is-czeka');
+        if (dcxNum) dcxNum.textContent = '0';
+
+        var dcxLicz = function () {
+            if (!dcxNum || !dcxCel) return;
+            var t0 = performance.now();
+            (function f(t) {
+                var k = Math.min(1, (t - t0) / 1100);
+                dcxNum.textContent = String(Math.round(dcxCel * (1 - Math.pow(1 - k, 3))));
+                if (k < 1) requestAnimationFrame(f);
+            })(t0);
+        };
+        var dcxMow = function () {
+            clearTimeout(dcxMowi);
+            if (!dcxWidac || document.hidden || dcxAv.length < 2) return;
+            var widoczne = dcxAv.filter(function (a) { return a.offsetParent !== null; });
+            if (widoczne.length < 2) return;
+            var i = Math.floor(Math.random() * widoczne.length);
+            if (i === dcxOstatni) i = (i + 1) % widoczne.length;
+            dcxOstatni = i;
+            var a = widoczne[i];
+            a.classList.add('is-speaking');
+            setTimeout(function () { a.classList.remove('is-speaking'); }, 1300);
+            dcxMowi = setTimeout(dcxMow, 1400 + Math.random() * 1000);
+        };
+
+        new IntersectionObserver(function (en) {
+            var byl = dcxWidac;
+            dcxWidac = en[0].isIntersecting;
+            if (dcxWidac && dcx.classList.contains('is-czeka')) {
+                dcx.classList.remove('is-czeka');
+                dcx.classList.add('is-in');
+                dcxLicz();
+            }
+            if (dcxWidac && !byl) dcxMowi = setTimeout(dcxMow, 1200); else if (!dcxWidac) clearTimeout(dcxMowi);
+        }, { threshold: 0.3 }).observe(dcx);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden && dcxWidac) dcxMow(); });
+
+    }
+
+    /* --- Discord: kanał #pomoc w pętli ([data-dc-chat]) ------------------ */
+    /* Rozmowa po rozmowie: pytanie gracza -> "DNCT Support pisze..." ->
+       odpowiedź -> reakcja. Najstarsze wiadomości odjeżdżają w górę, gdy
+       brakuje miejsca. Pętla stoi poza ekranem i na ukrytej karcie.
+       Przy reduced-motion: od razu jedna rozmowa, bez pętli.
+       Odpowiedzi zgadzają się z tym, jak naprawdę działa panel i strona. */
+    var dc = document.querySelector('[data-dc-chat]');
+    if (dc) {
+        var dcBody = dc.querySelector('[data-dc-body]');
+        var ROZMOWY = [
+            { gracz: ['kuba_mc', '#3ba55c'], pyt: 'Jak wgrać plugin na serwer?',
+              odp: 'Wrzuć plik .jar do folderu plugins w zakładce Pliki i zrestartuj serwer 👌', reakcja: '❤️' },
+            { gracz: ['ola.pz', '#eb459e'], pyt: 'Da się dodać mody ze Steam Workshop do Zomboida?',
+              odp: 'Tak - Workshop ID wpisujesz w konfiguracji serwera w panelu, po restarcie mody pobiorą się same.', reakcja: '🔥' },
+            { gracz: ['tomek_vs', '#faa61a'], pyt: 'Mogę zmienić pakiet w trakcie okresu?',
+              odp: 'Jasne - w „Twoich serwerach” kliknij „Zmień pakiet”, dopłacasz tylko proporcjonalną różnicę.', reakcja: '👍' },
+            { gracz: ['mati2010', '#5865f2'], pyt: 'Jak dać znajomemu dostęp do konsoli bez podawania hasła?',
+              odp: 'W panelu zakładka Udostępnij - zapraszasz go i zaznaczasz, co może robić. Hasło zostaje u Ciebie.', reakcja: '🙏' },
+            { gracz: ['wiktoria', '#ed4245'], pyt: 'Zmieniłam wersję i świat zniknął 😭',
+              odp: 'Spokojnie - w zakładce Backupy przywrócisz kopię sprzed zmiany jednym kliknięciem.', reakcja: '❤️' }
+        ];
+        var typing = document.createElement('div');
+        typing.className = 'dc-typing';
+        typing.setAttribute('aria-hidden', 'true');
+        typing.innerHTML = '<span class="dc-dots"><i></i><i></i><i></i></span><span><b>DNCT Support</b> pisze...</span>';
+        dc.insertBefore(typing, dc.querySelector('.dc-chat-join'));
+
+        var godzina = function (plus) {
+            var d = new Date(Date.now() + plus * 60000);
+            return 'Dziś o ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+        };
+        var wiadomosc = function (kto, kolor, tekst, czas, staff) {
+            var m = document.createElement('div');
+            m.className = 'dc-msg';
+            var av = document.createElement('span');
+            av.className = 'dc-av';
+            if (staff) {
+                var img = document.createElement('img');
+                img.src = '/assets/media/icons/favicon.png';
+                img.alt = '';
+                av.appendChild(img);
+            } else {
+                av.style.background = kolor;
+                av.textContent = kto.charAt(0).toUpperCase();
+            }
+            var meta = document.createElement('div');
+            meta.className = 'dc-meta';
+            meta.innerHTML = '<span class="dc-name' + (staff ? ' is-staff' : '') + '"></span>' + (staff ? '<span class="dc-tag">SUPPORT</span>' : '') + '<span class="dc-time"></span>';
+            meta.querySelector('.dc-name').textContent = kto;
+            meta.querySelector('.dc-time').textContent = czas;
+            var p = document.createElement('p');
+            p.className = 'dc-text';
+            p.textContent = tekst;
+            var tresc = document.createElement('div');
+            tresc.appendChild(meta);
+            tresc.appendChild(p);
+            m.appendChild(av);
+            m.appendChild(tresc);
+            dcBody.appendChild(m);
+            // Za mało miejsca: najstarsze wiadomości odjeżdżają w górę. Mierzymy
+            // samą treść (od pierwszej do ostatniej wiadomości) - scrollHeight
+            // przy justify-content: flex-end nie mówi prawdy o przepełnieniu.
+            var miejsce = dcBody.clientHeight - 24;
+            var zywe = Array.prototype.filter.call(dcBody.children, function (el) { return !el.classList.contains('is-out'); });
+            while (zywe.length > 1) {
+                var gora = zywe[0];
+                var zajete = m.offsetTop + m.offsetHeight + 40 - gora.offsetTop;   // +40 na reakcję
+                if (zajete <= miejsce) break;
+                gora.classList.add('is-out');
+                setTimeout(function (el) { return function () { el.remove(); }; }(gora), 380);
+                zywe.shift();
+            }
+            return tresc;
+        };
+
+        var nr = 0, dcTimer = null, dcOn = false;
+        var czekaj = function (ms, fn) { dcTimer = setTimeout(function () { if (dcOn) fn(); }, ms); };
+        var rozmowa = function () {
+            var r = ROZMOWY[nr % ROZMOWY.length];
+            nr += 1;
+            wiadomosc(r.gracz[0], r.gracz[1], r.pyt, godzina(0), false);
+            czekaj(1200, function () {
+                typing.classList.add('is-on');
+                czekaj(2200, function () {
+                    typing.classList.remove('is-on');
+                    var odp = wiadomosc('DNCT Support', '', r.odp, godzina(1), true);
+                    czekaj(1100, function () {
+                        var re = document.createElement('span');
+                        re.className = 'dc-react';
+                        re.textContent = r.reakcja + ' 1';
+                        odp.appendChild(re);
+                        czekaj(3200, rozmowa);
+                    });
+                });
+            });
+        };
+
+        if (reduce) {
+            wiadomosc(ROZMOWY[0].gracz[0], ROZMOWY[0].gracz[1], ROZMOWY[0].pyt, godzina(0), false);
+            wiadomosc('DNCT Support', '', ROZMOWY[0].odp, godzina(1), true);
+        } else if ('IntersectionObserver' in window) {
+            var dcWidac = false;
+            var dcStart = function () { if (!dcOn) { dcOn = true; rozmowa(); } };
+            var dcStop = function () { dcOn = false; clearTimeout(dcTimer); typing.classList.remove('is-on'); };
+            new IntersectionObserver(function (en) {
+                dcWidac = en[0].isIntersecting;
+                if (dcWidac && !document.hidden) dcStart(); else dcStop();
+            }, { threshold: 0.3 }).observe(dc);
+            document.addEventListener('visibilitychange', function () {
+                if (document.hidden) dcStop(); else if (dcWidac) dcStart();
+            });
+        }
+    }
+
+    /* --- Szafa serwerowa w kaflu "Własny sprzęt" ([data-hw-rack]) -------- */
+    /* Po wejściu w kadr: serwery wsuwają się i bootują (CSS .is-boot), potem
+       pętla co 90 ms zapala losowe diody dysków i sieci, a co 1,6 s zmienia
+       obciążenie każdego serwera (płynnie, w okolicy poprzedniej wartości).
+       Poza ekranem i na ukrytej karcie pętla stoi. */
+    var hw = document.querySelector('[data-hw-rack]');
+    if (hw && !reduce && 'IntersectionObserver' in window) {
+        var hwJednostki = Array.prototype.slice.call(hw.querySelectorAll('.hw-unit'));
+        var hwDiody = Array.prototype.slice.call(hw.querySelectorAll('.hw-bays i, .hw-net i'));
+        var hwObc = hwJednostki.map(function () { return 0.25 + Math.random() * 0.4; });
+        var hwTimer = null, hwLoadTimer = null, hwWidac = false, hwRuszyla = false;
+
+        hw.classList.add('is-czeka');
+        var hwMig = function () {
+            hwDiody.forEach(function (d) { d.classList.toggle('is-on', Math.random() < 0.28); });
+            hwTimer = setTimeout(hwMig, 90 + Math.random() * 60);
+        };
+        var hwLoad = function () {
+            hwJednostki.forEach(function (u, i) {
+                hwObc[i] = Math.min(0.92, Math.max(0.12, hwObc[i] + (Math.random() - 0.5) * 0.3));
+                u.style.setProperty('--load', hwObc[i].toFixed(2));
+            });
+            hwLoadTimer = setTimeout(hwLoad, 1600);
+        };
+        var hwStop = function () { clearTimeout(hwTimer); clearTimeout(hwLoadTimer); };
+        var hwStart = function () {
+            hwStop();
+            if (!hwWidac || document.hidden) return;
+            // pierwsze miganie dopiero po bootowaniu (ostatnia dioda ok. 1,6 s)
+            setTimeout(function () { if (hwWidac) { hwMig(); hwLoad(); } }, hwRuszyla ? 0 : 1700);
+            hwRuszyla = true;
+        };
+        new IntersectionObserver(function (en) {
+            hwWidac = en[0].isIntersecting;
+            if (hwWidac) {
+                hw.classList.remove('is-czeka');
+                hw.classList.add('is-boot');
+                hwStart();
+            } else {
+                hwStop();
+            }
+        }, { threshold: 0.35 }).observe(hw);
+        document.addEventListener('visibilitychange', function () { if (document.hidden) hwStop(); else hwStart(); });
     }
 
     /* --- Wejście kafli w kadr ------------------------------------------ */

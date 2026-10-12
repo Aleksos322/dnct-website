@@ -7,21 +7,8 @@ $metaDescription = 'Poradniki o serwerach Minecraft i Project Zomboid: jak posta
 $canonicalUrl    = 'https://game.dnct.pl/poradniki/';
 $centerContent   = false;
 
-$lista = [
-    ['jak-postawic-serwer-minecraft', 'Jak postawić serwer Minecraft', 'Ile RAM-u, Paper czy Forge, pierwsze uruchomienie, server.properties i komendy.'],
-    ['pluginy-na-serwer-minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)', 'Skąd brać pluginy, wgrywanie do folderu plugins, config.yml i typowe błędy.'],
-    ['mody-na-serwer-minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)', 'Zmiana silnika, folder mods, modpacki z CurseForge i Modrinth.'],
-    ['jak-wgrac-swiat-na-serwer-minecraft', 'Jak wgrać własny świat na serwer Minecraft', 'Świat z gry jednoosobowej na serwer: pakowanie, wgrywanie, level-name, Nether i End.'],
-    ['serwer-minecraft-dla-znajomych', 'Serwer Minecraft dla znajomych: jaki plan wybrać?', 'Konkretny dobór RAM-u i planu dla vanilla, pluginów oraz modpacków.'],
-    ['jak-postawic-serwer-project-zomboid', 'Jak postawić serwer Project Zomboid (Build 42)', 'Ile RAM-u potrzeba, pierwsze uruchomienie, łączenie przez IP i port, komendy admina.'],
-    ['mody-na-serwer-project-zomboid', 'Jak dodać mody ze Steam Workshop na serwer Zomboid', 'Workshop ID i Mod ID, kolejność bibliotek, co zrobić, gdy serwer nie startuje.'],
-    ['ustawienia-serwera-project-zomboid', 'Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie', 'ProjectZomboid.ini i SandboxVars - najważniejsze opcje z wyjaśnieniem.'],
-    ['zapis-zomboid-na-serwer', 'Jak przenieść zapis Project Zomboid na serwer', 'Świat z gry jednoosobowej na serwer: co przechodzi, mody i podmiana zapisu.'],
-    ['serwer-project-zomboid-dla-znajomych', 'Serwer Project Zomboid dla znajomych: koszt i dobór', 'Ile kosztuje prywatny świat, ile RAM-u potrzeba i kiedy wybrać większy pakiet.'],
-    ['jak-postawic-serwer-vintage-story', 'Jak postawić serwer Vintage Story', 'RAM, pierwszy start, łączenie, komenda /op i serverconfig.json.'],
-    ['mody-na-serwer-vintage-story', 'Jak dodać mody na serwer Vintage Story', 'Mody z ModDB w folderze data/Mods, mody u graczy i typowe błędy.'],
-    ['serwer-vintage-story-dla-znajomych', 'Serwer Vintage Story dla znajomych: jaki plan wybrać?', 'Dobór pakietu dla małej osady, modów i większej ekipy.'],
-];
+// Lista w backend/data/poradniki.php - ta sama zasila podpowiedzi pod zamówieniem.
+$lista = array_map(static fn(array $p): array => [$p[0], $p[2], $p[3]], require dirname(__DIR__) . '/backend/data/poradniki.php');
 
 ob_start(); ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/legal.css'); ?>">

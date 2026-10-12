@@ -118,8 +118,11 @@ ob_start();
 <div class="cnk-wrap">
 
 <section class="ord-head">
-    <span class="cnk-eyebrow">Zamówienie</span>
-    <h1 class="cnk-h1">Jeszcze tylko dwa wybory</h1>
+    <div>
+        <span class="cnk-eyebrow">Zamówienie</span>
+        <h1 class="cnk-h1">Jeszcze tylko dwa wybory</h1>
+    </div>
+    <a class="ord-head-back" href="/cennik"><span aria-hidden="true">←</span> <span>Wróć do cennika</span></a>
 </section>
 
 <?php if ($error !== null): ?>
@@ -175,23 +178,53 @@ ob_start();
         <?php /* Uczciwie o ograniczeniu, ZANIM klient wybierze i zdziwi się
                  w Checkoucie, że nie ma BLIK-a. */ ?>
         <p class="ord-hint" data-role="methodsHint"></p>
+
+        <?php if ($isLoggedIn): ?>
+            <?php $kodStartowy = strtoupper(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($_GET['kod'] ?? $_COOKIE['dnct_kod'] ?? '')) ?? ''); ?>
+            <label class="ord-promo">
+                <span class="ord-h2">Kod rabatowy <small>(opcjonalnie)</small></span>
+                <input type="text" data-role="promo" maxlength="64" autocomplete="off" spellcheck="false"
+                       value="<?php echo htmlspecialchars(substr($kodStartowy, 0, 64)); ?>" placeholder="np. kod twórcy">
+            </label>
+        <?php endif; ?>
+
+        <?php /* Dół lewej karty: obie karty mają tę samą wysokość (grid
+                 stretch), a margin-top:auto dosuwa ten blok do dołu, więc
+                 zamiast pustej dziury pod wyborami jest "co dalej". */ ?>
+        <div class="ord-next">
+            <h2 class="ord-h2">Co dalej</h2>
+            <ol class="ord-steps">
+                <li><span class="ord-step-n">1</span><div><strong>Płacisz w Stripe</strong><span>Kartą albo BLIK-iem, na bezpiecznej stronie płatności.</span></div></li>
+                <li><span class="ord-step-n">2</span><div><strong>Serwer powstaje sam</strong><span>Zakładamy go na Twoim koncie, bez czekania na nas.</span></div></li>
+                <li><span class="ord-step-n">3</span><div><strong>Wchodzisz do panelu</strong><span>Konsola, pliki i backupy na panel.dnct.pl.</span></div></li>
+            </ol>
+        </div>
     </div>
 
     <aside class="ord-summary glass">
         <h2 class="ord-h2">Podsumowanie</h2>
 
-        <div class="ord-line"><span>Gra</span><strong><?php echo htmlspecialchars((string)$spec['game_name']); ?></strong></div>
-        <div class="ord-line"><span>Pakiet</span><strong><?php echo htmlspecialchars((string)$spec['label']); ?></strong></div>
-        <div class="ord-line"><span>RAM</span><strong><?php echo (int)$spec['ram_mb']; ?> MB</strong></div>
-        <div class="ord-line"><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)$spec['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
-        <div class="ord-line"><span>Dysk</span><strong><?php echo (int)$spec['ssd_mb']; ?> MB SSD</strong></div>
-        <div class="ord-line"><span>Backupy</span><strong><?php echo (int)$spec['backups_limit']; ?></strong></div>
-        <div class="ord-line"><span>Okres</span><strong data-role="sumPeriod"></strong></div>
+        <?php /* Pakiet jako nagłówek karty, parametry w siatce 4 kafelków -
+                 dawniej 7 wierszy tabeli wypychało przycisk płatności
+                 pod dolną krawędź ekranu nawet na 1920x1080. */ ?>
+        <div class="ord-prod">
+            <span class="ord-prod-game"><?php echo htmlspecialchars((string)$spec['game_name']); ?></span>
+            <strong class="ord-prod-plan"><?php echo htmlspecialchars((string)$spec['label']); ?></strong>
+        </div>
+        <dl class="ord-specs">
+            <div><dt>RAM</dt><dd><?php echo (int)$spec['ram_mb']; ?> MB</dd></div>
+            <div><dt>Procesor</dt><dd><?php echo rtrim(rtrim(number_format((float)$spec['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</dd></div>
+            <div><dt>Dysk</dt><dd><?php echo (int)$spec['ssd_mb']; ?> MB SSD</dd></div>
+            <div><dt>Backupy</dt><dd><?php echo (int)$spec['backups_limit']; ?></dd></div>
+        </dl>
 
-        <div class="ord-total">
-            <span data-role="sumPrice">-</span>
-            <span class="ord-total-cur">zł</span>
-            <span class="ord-total-per" data-role="sumPer"></span>
+        <div class="ord-price">
+            <div class="ord-total" data-i18n-pln>
+                <span data-role="sumPrice">-</span>
+                <span class="ord-total-cur">zł</span>
+                <span class="ord-total-per" data-role="sumPer"></span>
+            </div>
+            <div class="ord-period"><span>Okres</span><strong data-role="sumPeriod"></strong></div>
         </div>
 
         <?php if (!$isLoggedIn): ?>
@@ -202,21 +235,21 @@ ob_start();
             <a class="ord-cta" href="/login?return_to=<?php echo htmlspecialchars(rawurlencode($returnTo)); ?>">Zaloguj się, żeby zamówić</a>
             <p class="ord-hint">Serwer zakładamy na Twoim koncie w panelu - dlatego potrzebujemy logowania.</p>
         <?php else: ?>
-            <?php $kodStartowy = strtoupper(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($_GET['kod'] ?? $_COOKIE['dnct_kod'] ?? '')) ?? ''); ?>
-            <label class="ord-promo">
-                <span>Kod rabatowy <small>(opcjonalnie)</small></span>
-                <input type="text" data-role="promo" maxlength="64" autocomplete="off" spellcheck="false"
-                       value="<?php echo htmlspecialchars(substr($kodStartowy, 0, 64)); ?>" placeholder="np. kod twórcy">
-            </label>
             <fieldset class="ord-consents" data-role="consents">
                 <legend>Warunki zamówienia</legend>
+                <?php /* Natywny checkbox zostaje (klawiatura, czytniki ekranu,
+                         order.js czyta .checked) - jest tylko niewidoczny pod
+                         całą klikalną kafelką; widać rysowany .ord-box. */ ?>
                 <label class="ord-check">
                     <input type="checkbox" data-role="terms" required>
-                    <span>Akceptuję <a href="/regulamin" target="_blank" rel="noopener">Regulamin DNCT</a>.</span>
+                    <span class="ord-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
+                    <span class="ord-check-text"><span data-i18n="@zgoda-akceptuje">Akceptuję</span> <a href="/regulamin" target="_blank" rel="noopener">Regulamin DNCT</a>.</span>
+                    <span class="ord-req">wymagane</span>
                 </label>
                 <label class="ord-check ord-check-start">
                     <input type="checkbox" data-role="immediateStart">
-                    <span>Żądam rozpoczęcia usługi niezwłocznie po potwierdzeniu płatności. Przyjmuję do wiadomości, że po pełnym wykonaniu usługi mogę utracić prawo odstąpienia, jeżeli są spełnione warunki ustawowe.</span>
+                    <span class="ord-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
+                    <span class="ord-check-text">Żądam rozpoczęcia usługi niezwłocznie po potwierdzeniu płatności. Przyjmuję do wiadomości, że po pełnym wykonaniu usługi mogę utracić prawo odstąpienia, jeżeli są spełnione warunki ustawowe.</span>
                 </label>
                 <p class="ord-consents-hint">Bez tego żądania zapłacisz teraz, a usługę uruchomimy po 14 dniach od zawarcia umowy.</p>
             </fieldset>
@@ -235,6 +268,39 @@ ob_start();
         </p>
     </aside>
 </div>
+
+<?php
+/* Pomoc pod zamówieniem: poradniki do TEJ gry, którą klient kupuje
+   (lista wspólna z /poradniki/), plus Discord na pytania spoza poradników. */
+$poradnikiGry = array_values(array_filter(
+    require __DIR__ . '/backend/data/poradniki.php',
+    static fn(array $p): bool => $p[1] === (string)$spec['game_type']
+));
+?>
+<?php if ($poradnikiGry !== []): ?>
+<section class="ord-help" aria-labelledby="ord-help-h">
+    <div class="ord-help-head">
+        <h2 class="ord-help-h" id="ord-help-h">Pomoc: <?php echo htmlspecialchars((string)$spec['game_name']); ?></h2>
+        <p class="ord-help-sub">Poradniki od nas, krok po kroku - zanim zapłacisz albo zaraz po starcie serwera.</p>
+    </div>
+    <?php $poradnikiGry = array_slice($poradnikiGry, 0, 5); $kart = count($poradnikiGry) + 1; ?>
+    <div class="ord-help-grid" style="--ord-help-cols: <?php echo $kart % 3 === 0 ? 3 : ($kart % 4 === 0 ? 4 : 3); ?>">
+        <?php foreach ($poradnikiGry as $p): ?>
+            <a class="ord-help-card glass" href="/poradniki/<?php echo htmlspecialchars($p[0]); ?>">
+                <strong><?php echo htmlspecialchars($p[2]); ?></strong>
+                <span><?php echo htmlspecialchars($p[3]); ?></span>
+                <em class="ord-help-go" aria-hidden="true">→</em>
+            </a>
+        <?php endforeach; ?>
+        <a class="ord-help-card ord-help-dc glass" href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener">
+            <strong>Nie ma tu odpowiedzi?</strong>
+            <span>Zapytaj na naszym Discordzie - odpisują ludzie, nie bot.</span>
+            <em class="ord-help-go" aria-hidden="true">→</em>
+        </a>
+    </div>
+    <a class="ord-help-all" href="/poradniki/">Wszystkie poradniki</a>
+</section>
+<?php endif; ?>
 
 <?php /* Wszystkie warianty cenowe policzone po stronie serwera. Front wybiera
          z tej listy, a nie liczy. */ ?>

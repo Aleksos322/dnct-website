@@ -86,7 +86,7 @@ ob_start();
             <?php endif; ?>
         </div>
 
-        <div class="suc-meta" data-role="meta" hidden></div>
+        <div class="suc-meta" data-role="meta" data-i18n-pln hidden></div>
 
         <?php /* Wypełnia JS z pola "debug" w odpowiedzi /api/checkout/status.php -
                  tam obecne WYŁĄCZNIE gdy dnct_is_admin(), więc zwykły klient
