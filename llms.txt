@@ -2,53 +2,117 @@
 
 > Polski hosting serwerów gier: Minecraft, Project Zomboid i Vintage Story. Serwery na własnym
 > sprzęcie w Polsce, dyski SSD, stały przydział RAM i CPU, ochrona DDoS.
-> Minecraft od 3,99 zł za tydzień (6,99 zł miesięcznie), Project Zomboid od 29,99 zł miesięcznie, Vintage Story od 19,99 zł miesięcznie.
+> Minecraft od 6,99 zł miesięcznie, Project Zomboid od 29,99 zł miesięcznie, Vintage Story od 19,99 zł miesięcznie.
 
-DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK).
-Serwerem zarządza się w panelu po polsku: konsola, menedżer plików, kopie
-zapasowe na żądanie i zmiana wersji gry. Przedłużenie usługi jest ręczne;
-płatność roczna liczy się jak jedenaście miesięcy. Wsparcie przez Discord.
+DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK; abonament tylko kartą).
+Można zapłacić jednorazowo (przypomnimy przed końcem okresu) albo w abonamencie, który odnawia
+się sam i da się go wyłączyć w każdej chwili. Płatność roczna to 12 miesięcy w cenie 11 (miesiąc gratis).
+Serwerem zarządza się w panelu: konsola, menedżer plików, kopie zapasowe na żądanie, zmiana
+wersji gry, subdomena. Pakiet można zmienić w trakcie (dopłata proporcjonalna). Wsparcie przez Discord.
+Wszystkie ceny poniżej to ceny brutto w złotych (PLN).
 
 ## Szybki dobór dla ekipy znajomych
-- **Minecraft, 2-5 osób, vanilla lub lekkie pluginy:** plan BASIC — 3 GB RAM,
-  2 vCore, 5 GB SSD, 9,99 zł miesięcznie. Dla większego świata lub większej
-  liczby pluginów wybierz Starter: 4 GB RAM, 2 vCore, 15 GB SSD, 15,99 zł/mies.
-- **Minecraft z pełnym modpackiem:** nie wybieraj planu wyłącznie po liczbie
-  graczy. Cięższe modpacki wymagają zwykle co najmniej 8 GB RAM (Standard:
-  36,99 zł/mies.); przed zakupem sprawdź wymagania konkretnej paczki.
-- **Vintage Story, do 5 znajomych:** 4 GB RAM, 3 vCore, 5 GB SSD, 19,99 zł/mies.
-  Dla 10 osób: 4,5 GB RAM, 3 vCore, 10 GB SSD, 22,99 zł/mies.
-- **Project Zomboid, do 5 znajomych:** 6 GB RAM, 3 vCore, 10 GB SSD,
-  29,99 zł/mies. Przy modach, dodatkowych mapach albo większej ekipie wybierz
-  wyższy próg; dla 10 osób jest to 7 GB RAM i 34,99 zł/mies.
+- **Minecraft, 2-5 osób, vanilla lub lekkie pluginy:** plan Budżetowy - 3 GB RAM, 2 vCore, 5 GB SSD, 9,99 zł miesięcznie. Dla większego świata lub więcej pluginów: Podstawowy - 4 GB RAM, 15 GB SSD, 15,99 zł/mies.
+- **Minecraft z pełnym modpackiem:** zwykle co najmniej 8 GB RAM, czyli plan Standardowy (8 GB RAM, 36,99 zł/mies.). Sprawdź wymagania konkretnej paczki.
+- **Vintage Story, do 5 znajomych:** 4 GB RAM, 3 vCore, 5 GB SSD, 19,99 zł/mies. Dla 10 osób: 4,5 GB RAM, 22,99 zł/mies.
+- **Project Zomboid, do 5 znajomych:** 6 GB RAM, 3 vCore, 10 GB SSD, 29,99 zł/mies. Dla 10 osób: 7 GB RAM, 34,99 zł/mies.
+
+## Cennik Minecraft (gotowe pakiety)
+Szczegóły: https://game.dnct.pl/hosting-minecraft
+
+| Pakiet | RAM | CPU | SSD | Backupy | Tydzień | Miesiąc | Rok |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| DEVeloperski | 1,5 GB | 1 vCore | 2,5 GB | 4 | 4,99 zł | 6,99 zł | 76,89 zł |
+| Budżetowy | 3 GB | 2 vCore | 5 GB | 1 | 6,99 zł | 9,99 zł | 109,89 zł |
+| Podstawowy | 4 GB | 2 vCore | 15 GB | 1 | 10,99 zł | 15,99 zł | 175,89 zł |
+| Standardowy | 8 GB | 3 vCore | 45 GB | 2 | 24,99 zł | 36,99 zł | 406,89 zł |
+| Zaawansowany | 10 GB | 4 vCore | 60 GB | 2 | 29,99 zł | 43,99 zł | 483,89 zł |
+| Mistrzowski | 14 GB | 4 vCore | 80 GB | 4 | 43,99 zł | 64,99 zł | 714,89 zł |
+| Elitarny | 18 GB | 5 vCore | 100 GB | 4 | 53,99 zł | 79,99 zł | 879,89 zł |
+| LEGENDARNY | 24 GB | 6 vCore | 150 GB | 4 | 80,99 zł | 119,99 zł | 1 319,89 zł |
+| LEGENDARNY + | 32 GB | 8 vCore | 200 GB | 4 | 113,99 zł | 169,99 zł | 1 869,89 zł |
+
+## Cennik Project Zomboid (cena zależy od liczby graczy)
+Szczegóły i konfigurator: https://game.dnct.pl/hosting-project-zomboid
+
+| Sloty | RAM | CPU | SSD | Backupy | Tydzień | Miesiąc | Rok |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 | 6 GB | 3 vCore | 10 GB | 1 | 20,99 zł | 29,99 zł | 329,89 zł |
+| 10 | 7 GB | 3 vCore | 15 GB | 1 | 23,99 zł | 34,99 zł | 384,89 zł |
+| 15 | 8 GB | 3 vCore | 15 GB | 1 | 26,99 zł | 39,99 zł | 439,89 zł |
+| 20 | 9 GB | 3 vCore | 20 GB | 1 | 31,99 zł | 47,49 zł | 522,39 zł |
+| 25 | 10 GB | 4 vCore | 25 GB | 2 | 33,99 zł | 49,99 zł | 549,89 zł |
+| 30 | 11 GB | 4 vCore | 25 GB | 2 | 39,99 zł | 59,49 zł | 654,39 zł |
+| 35 | 13 GB | 4 vCore | 25 GB | 2 | 43,99 zł | 64,99 zł | 714,89 zł |
+| 40 | 15 GB | 4 vCore | 25 GB | 2 | 48,99 zł | 72,49 zł | 797,39 zł |
+| 45 | 17 GB | 5 vCore | 30 GB | 3 | 53,99 zł | 79,99 zł | 879,89 zł |
+| 50 | 20 GB | 5 vCore | 30 GB | 3 | 66,99 zł | 99,99 zł | 1 099,89 zł |
+| 55 | 21 GB | 5 vCore | 30 GB | 3 | 73,99 zł | 109,99 zł | 1 209,89 zł |
+| 60 | 23 GB | 5 vCore | 30 GB | 3 | 77,99 zł | 116,49 zł | 1 281,39 zł |
+| 65 | 25 GB | 6 vCore | 35 GB | 4 | 86,99 zł | 129,99 zł | 1 429,89 zł |
+| 70 | 27 GB | 6 vCore | 35 GB | 4 | 93,99 zł | 139,99 zł | 1 539,89 zł |
+| 75 | 29 GB | 6 vCore | 35 GB | 4 | 100,99 zł | 149,99 zł | 1 649,89 zł |
+| 80 | 31 GB | 6 vCore | 40 GB | 4 | 106,99 zł | 159,99 zł | 1 759,89 zł |
+| 85 | 33 GB | 7 vCore | 45 GB | 5 | 113,99 zł | 169,99 zł | 1 869,89 zł |
+| 90 | 35 GB | 7 vCore | 45 GB | 5 | 120,99 zł | 179,99 zł | 1 979,89 zł |
+| 95 | 37 GB | 8 vCore | 50 GB | 5 | 126,99 zł | 189,99 zł | 2 089,89 zł |
+| 100 | 40 GB | 8 vCore | 50 GB | 5 | 133,99 zł | 199,99 zł | 2 199,89 zł |
+
+## Cennik Vintage Story (cena zależy od liczby graczy)
+Szczegóły i konfigurator: https://game.dnct.pl/hosting-vintage-story
+
+| Sloty | RAM | CPU | SSD | Backupy | Tydzień | Miesiąc | Rok |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 5 | 4 GB | 3 vCore | 5 GB | 1 | 13,99 zł | 19,99 zł | 219,89 zł |
+| 10 | 4,5 GB | 3 vCore | 10 GB | 1 | 15,99 zł | 22,99 zł | 252,89 zł |
+| 15 | 5 GB | 3 vCore | 10 GB | 1 | 17,99 zł | 25,99 zł | 285,89 zł |
+| 20 | 6 GB | 3 vCore | 15 GB | 1 | 20,99 zł | 30,99 zł | 340,89 zł |
+| 25 | 6,5 GB | 4 vCore | 15 GB | 2 | 22,99 zł | 32,99 zł | 362,89 zł |
+| 30 | 7 GB | 4 vCore | 15 GB | 2 | 26,99 zł | 38,99 zł | 428,89 zł |
+| 35 | 8,5 GB | 4 vCore | 15 GB | 2 | 28,99 zł | 41,99 zł | 461,89 zł |
+| 40 | 10 GB | 4 vCore | 15 GB | 2 | 31,99 zł | 46,99 zł | 516,89 zł |
+| 45 | 11 GB | 5 vCore | 20 GB | 3 | 34,99 zł | 51,99 zł | 571,89 zł |
+| 50 | 13 GB | 5 vCore | 20 GB | 3 | 43,99 zł | 64,99 zł | 714,89 zł |
+| 55 | 13,5 GB | 5 vCore | 20 GB | 3 | 48,99 zł | 71,99 zł | 791,89 zł |
+| 60 | 15 GB | 5 vCore | 20 GB | 3 | 50,99 zł | 75,99 zł | 835,89 zł |
+| 65 | 16 GB | 6 vCore | 25 GB | 4 | 56,99 zł | 84,99 zł | 934,89 zł |
+| 70 | 17,5 GB | 6 vCore | 25 GB | 4 | 60,99 zł | 90,99 zł | 1 000,89 zł |
+| 75 | 19 GB | 6 vCore | 25 GB | 4 | 65,99 zł | 97,99 zł | 1 077,89 zł |
+| 80 | 20 GB | 6 vCore | 25 GB | 4 | 69,99 zł | 103,99 zł | 1 143,89 zł |
+| 85 | 21,5 GB | 7 vCore | 30 GB | 5 | 74,99 zł | 110,99 zł | 1 220,89 zł |
+| 90 | 23 GB | 7 vCore | 30 GB | 5 | 78,99 zł | 116,99 zł | 1 286,89 zł |
+| 95 | 24 GB | 8 vCore | 35 GB | 5 | 82,99 zł | 123,99 zł | 1 363,89 zł |
+| 100 | 26 GB | 8 vCore | 35 GB | 5 | 86,99 zł | 129,99 zł | 1 429,89 zł |
 
 ## Oferta
-- [Cennik](https://game.dnct.pl/cennik): plany Minecraft oraz serwery Project Zomboid i Vintage Story na liczbę graczy.
-- [Hosting Minecraft](https://game.dnct.pl/hosting-minecraft): Paper, Fabric, Forge, od 1,5 do 32 GB RAM, od 6,99 zł/mies.
-- [Hosting Vintage Story](https://game.dnct.pl/hosting-vintage-story): serwer na aktualnej wersji gry, od 19,99 zł/mies.
-- [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid): serwer Build 42 od 29,99 zł/mies.
+- [Cennik](https://game.dnct.pl/cennik): wszystkie gry na jednej stronie.
+- [Hosting Minecraft](https://game.dnct.pl/hosting-minecraft)
+- [Hosting Project Zomboid](https://game.dnct.pl/hosting-project-zomboid)
+- [Hosting Vintage Story](https://game.dnct.pl/hosting-vintage-story)
+- [Dobierz serwer](https://game.dnct.pl/wybierz-serwer): kalkulator - gra, liczba graczy, styl gry.
 - [Panel demo](https://game.dnct.pl/demo): podgląd panelu bez zakładania konta.
 - [Program dla twórców](https://game.dnct.pl/partnerzy): kod rabatowy dla widzów i prowizja dla twórcy.
 
 ## Poradniki
 - [Jak postawić serwer Minecraft](https://game.dnct.pl/poradniki/jak-postawic-serwer-minecraft)
-- [Pluginy na serwer Minecraft](https://game.dnct.pl/poradniki/pluginy-na-serwer-minecraft)
-- [Mody i modpacki na serwer Minecraft](https://game.dnct.pl/poradniki/mody-na-serwer-minecraft)
-- [Jak wgrać świat na serwer Minecraft](https://game.dnct.pl/poradniki/jak-wgrac-swiat-na-serwer-minecraft)
-- [Przeniesienie zapisu Project Zomboid na serwer](https://game.dnct.pl/poradniki/zapis-zomboid-na-serwer)
+- [Jak dodać pluginy na serwer Minecraft (Paper)](https://game.dnct.pl/poradniki/pluginy-na-serwer-minecraft)
+- [Mody i modpacki na serwer Minecraft (Fabric, Forge)](https://game.dnct.pl/poradniki/mody-na-serwer-minecraft)
+- [Jak wgrać własny świat na serwer Minecraft](https://game.dnct.pl/poradniki/jak-wgrac-swiat-na-serwer-minecraft)
+- [Serwer Minecraft dla znajomych: jaki plan wybrać?](https://game.dnct.pl/poradniki/serwer-minecraft-dla-znajomych)
+- [Jak postawić serwer Project Zomboid (Build 42)](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
+- [Jak dodać mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
+- [Ustawienia serwera Zomboid: hasło, PvP, gracze, kopie](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)
+- [Jak przenieść zapis Project Zomboid na serwer](https://game.dnct.pl/poradniki/zapis-zomboid-na-serwer)
+- [Serwer Project Zomboid dla znajomych: koszt i dobór](https://game.dnct.pl/poradniki/serwer-project-zomboid-dla-znajomych)
 - [Jak postawić serwer Vintage Story](https://game.dnct.pl/poradniki/jak-postawic-serwer-vintage-story)
-- [Mody na serwer Vintage Story](https://game.dnct.pl/poradniki/mody-na-serwer-vintage-story)
-- [Jak postawić serwer Project Zomboid](https://game.dnct.pl/poradniki/jak-postawic-serwer-project-zomboid)
-- [Mody ze Steam Workshop na serwer Zomboid](https://game.dnct.pl/poradniki/mody-na-serwer-project-zomboid)
-- [Ustawienia serwera Zomboid](https://game.dnct.pl/poradniki/ustawienia-serwera-project-zomboid)
-- [Serwer Minecraft dla znajomych — dobór planu](https://game.dnct.pl/poradniki/serwer-minecraft-dla-znajomych)
-- [Serwer Project Zomboid dla znajomych — koszt i dobór](https://game.dnct.pl/poradniki/serwer-project-zomboid-dla-znajomych)
-- [Serwer Vintage Story dla znajomych — dobór planu](https://game.dnct.pl/poradniki/serwer-vintage-story-dla-znajomych)
-
-## Hosting stron WWW
-- [web.dnct.pl](https://web.dnct.pl/): hosting stron (w przygotowaniu, sprzedaż chwilowo wstrzymana).
+- [Jak dodać mody na serwer Vintage Story](https://game.dnct.pl/poradniki/mody-na-serwer-vintage-story)
+- [Serwer Vintage Story dla znajomych: jaki plan wybrać?](https://game.dnct.pl/poradniki/serwer-vintage-story-dla-znajomych)
 
 ## Zasady
-- [Regulamin](https://game.dnct.pl/regulamin)
+- [Regulamin](https://game.dnct.pl/regulamin): w tym 24 h na zwrot pieniędzy za nowe zamówienie.
 - [Polityka prywatności](https://game.dnct.pl/polityka-prywatnosci)
 - [Status usług](https://status.dnct.pl): stan strony, panelu, logowania i węzłów gier sprawdzany co minutę, historia 90 dni i lista przerw.
+
+Strona dostępna także po angielsku (?lang=en) i niemiecku (?lang=de); ceny w euro są tam tylko poglądowe, płatność idzie w PLN.
+
+<!-- wygenerowano 13.10.2026 12:45 przez backend/tools/llms.php -->

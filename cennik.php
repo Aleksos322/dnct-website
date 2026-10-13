@@ -258,7 +258,40 @@ foreach ($gamesWithPlans as $game) {
     if ($focus !== null && $game['type'] !== $focusGame) {
         continue;
     }
-    // Gra slotowa: jeden produkt z przedziałem cen miesięcznych zamiast SKU.
+    // Gra slotowa NA STRONIE GRY: każdy próg jako osobny produkt z cenami
+    // za każdy okres - jak plany Minecrafta (13.10.2026). Wcześniej był tylko
+    // przedział "od-do", więc czat AI czy Google nie znały ceny np. 20 slotów.
+    if (!$game['plans'] && $game['tiers'] && $focus !== null) {
+        foreach ($game['tiers'] as $tier) {
+            $offers = [];
+            foreach ($periods as $period) {
+                $offers[] = [
+                    '@type'         => 'Offer',
+                    'name'          => 'Rozliczenie: ' . $period['label'] . ' (' . (int)$period['days'] . ' dni)',
+                    'price'         => number_format(pricing_apply_period((float)$tier['price'], $period), 2, '.', ''),
+                    'priceCurrency' => 'PLN',
+                    'availability'  => empty($tier['sold_out'])
+                        ? 'https://schema.org/InStock'
+                        : 'https://schema.org/OutOfStock',
+                    'url'           => 'https://game.dnct.pl/zamowienie?game=' . rawurlencode((string)$game['type']) . '&slots=' . (int)$tier['slots'],
+                ];
+            }
+            $schemaProducts[] = [
+                '@type'       => 'Product',
+                'name'        => $game['name'] . ' - ' . (int)$tier['slots'] . ' slotów',
+                'description' => sprintf('Serwer %s dla %d graczy: %s GB RAM, %s vCore, %d GB SSD, %d backupy.',
+                    $game['name'], (int)$tier['slots'],
+                    rtrim(rtrim(number_format((float)$tier['ram_gb'], 1, '.', ''), '0'), '.'),
+                    rtrim(rtrim(number_format((float)$tier['cpu_cores'], 1, '.', ''), '0'), '.'),
+                    (int)round((int)$tier['ssd_mb'] / 1024), (int)$tier['backups_limit']),
+                'image'       => $schemaImage($game),
+                'brand'       => ['@type' => 'Brand', 'name' => 'DNCT Hosting'],
+                'offers'      => $offers,
+            ];
+        }
+        continue;
+    }
+    // Gra slotowa w ogólnym cenniku: jeden produkt z przedziałem cen.
     if (!$game['plans'] && $game['tiers']) {
         $ceny = array_map(static fn(array $t): float => (float)$t['price'], $game['tiers']);
         $schemaProducts[] = [

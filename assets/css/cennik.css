@@ -1597,6 +1597,28 @@
 .cennik-page .cfg-legal a     { color: #94a3b8; }
 .cennik-page .cfg-testmode    { display: block; margin-top: 0.3rem; color: #fbbf24; font-weight: 700; }
 
+/* Tabela wszystkich progów pod konfiguratorem (slot-configurator.php) -
+   zwinięta, bo suwak wystarcza ludziom; jest dla porównania i dla botów. */
+.cennik-page .cfg-table { margin-top: 1.25rem; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.02); }
+.cennik-page .cfg-table summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.95rem 1.25rem; cursor: pointer; list-style: none;
+    color: #cbd5e1; font-size: 0.85rem; font-weight: 800;
+}
+.cennik-page .cfg-table summary::-webkit-details-marker { display: none; }
+.cennik-page .cfg-table summary::after { content: '+'; color: #a78bfa; font-size: 1.2rem; line-height: 1; transition: rotate 0.2s ease; }
+.cennik-page .cfg-table[open] summary::after { rotate: 45deg; }
+.cennik-page .cfg-table summary:hover { color: #fff; }
+.cennik-page .cfg-table-wrap { overflow-x: auto; padding: 0 1.25rem; }
+.cennik-page .cfg-table table { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.cennik-page .cfg-table th { padding: 0.55rem 0.6rem; text-align: right; color: #64748b; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.cennik-page .cfg-table td { padding: 0.5rem 0.6rem; text-align: right; color: #cbd5e1; white-space: nowrap; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.cennik-page .cfg-table th:first-child, .cennik-page .cfg-table td:first-child { text-align: left; }
+.cennik-page .cfg-table td strong { color: #fff; }
+.cennik-page .cfg-table tbody tr:hover td { background: rgba(139, 92, 246, 0.06); }
+.cennik-page .cfg-table tr.is-out td { color: #64748b; text-decoration: line-through; }
+.cennik-page .cfg-table-note { margin: 0; padding: 0.75rem 1.25rem 1rem; font-size: 0.7rem; color: #64748b; }
+
 /* Podbicie wartości przy zmianie progu (cennik.js dokłada .is-bump) */
 .cennik-page .cfg .is-bump { animation: cfgBump 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes cfgBump { from { opacity: 0.3; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }

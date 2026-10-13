@@ -130,6 +130,7 @@ function i18n_wzorce(): array
         ['^Hosting (Minecraft|Project Zomboid|Vintage Story) - serwer od (.+)/mies\. \| DNCT$', '$1 server hosting from $2/mo | DNCT', '$1 Server-Hosting ab $2/Monat | DNCT'],
         ['^\+(\d+) więcej$', '+$1 more', '+$1 weitere'],
         ['^Pomoc: (Minecraft|Project Zomboid|Vintage Story)$', 'Help: $1', 'Hilfe: $1'],
+        ['^Wszystkie progi i ceny - (.+)$', 'All tiers and prices - $1', 'Alle Stufen und Preise - $1'],
         // Poradniki (components/poradnik.php, poradniki/index.php)
         ['^Aktualizacja: ([\d.]+) · (.+)$', 'Updated: $1 · $2', 'Aktualisiert: $1 · $2'],
         ['^Hosting (Minecraft|Project Zomboid|Vintage Story) od (.+)/mies\.$', '$1 hosting from $2/mies.', '$1-Hosting ab $2/mies.'],
