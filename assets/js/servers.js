@@ -10,6 +10,7 @@
 (function () {
     'use strict';
 
+    var T = window.DNCT_T || function (t) { return t; };
     var dataEl = document.getElementById('srv-data');
     if (!dataEl) return;
 
@@ -131,8 +132,10 @@
                 // Zejście niżej dzieje się OD RĘKI i przestawia zasoby
                 // działającego serwera - to restart, więc pytamy.
                 if (plan && plan.direction === 'down') {
-                    var extra = plan.bonus_days > 0 ? '\n\nDostaniesz ' + plan.bonus_days + ' dni więcej.' : '';
-                    if (!window.confirm('Zmienić pakiet na ' + plan.name + '?\n\nSerwer zostanie zrestartowany.' + extra)) {
+                    // T(): wersja EN/DE (assets/js/i18n.js) - okna confirm nie są
+                    // częścią strony, więc słownik nie złapie ich sam.
+                    var extra = plan.bonus_days > 0 ? '\n\n' + T('Dostaniesz dodatkowe dni:') + ' ' + plan.bonus_days : '';
+                    if (!window.confirm(T('Zmienić pakiet na') + ' ' + T(plan.name) + '?\n\n' + T('Serwer zostanie zrestartowany.') + extra)) {
                         return;
                     }
                 }
@@ -147,7 +150,7 @@
         var btnCancel = card.querySelector('[data-role="cancelSub"]');
         if (btnCancel) {
             btnCancel.addEventListener('click', function () {
-                if (!window.confirm('Wyłączyć automatyczne odnawianie?\n\nSerwer działa do końca opłaconego okresu - nic nie tracisz.')) {
+                if (!window.confirm(T('Wyłączyć automatyczne odnawianie?') + '\n\n' + T('Serwer działa do końca opłaconego okresu - nic nie tracisz.'))) {
                     return;
                 }
                 post('/api/subscription/cancel.php', { order_id: orderId }, btnCancel, 'Zrezygnuj z odnawiania');

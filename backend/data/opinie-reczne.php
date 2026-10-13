@@ -8,6 +8,14 @@
  */
 
 return [
+    // Dopisane 13.10.2026 z wizytówki (zrzuty od właściciela). Adam Oryszczuk
+    // bez zdjęcia w Google (sama litera) - komponent pokaże inicjały.
+    ['autor' => 'antoxpl', 'zdjecie' => '/assets/media/opinie/antoxpl.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Korzystam z DNCT Hosting i jestem bardzo zadowolony z ich usług! Świetna jakość, stabilne działanie i profesjonalne podejście do klienta. Kontakt przebiega sprawnie, a wszelkie pytania i problemy są szybko rozwiązywane. Zdecydowanie polecam DNCT Hosting każdemu, kto szuka solidnego i godnego zaufania hostingu! 💪 🔥'],
+    ['autor' => 'HIXI1', 'zdjecie' => '/assets/media/opinie/hixi1.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Polecam serdecznie hosting, stabilne serwery fajna przepustowość, generalnie za taką cenę jak najbardziej polecam! W dodatku jest przyjazne dla osób lgbtq+++ co uważam za duży plus.'],
+    ['autor' => 'Adam Oryszczuk', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Mega polecam hosting 😁'],
     // Dopisane 12.10.2026 z wizytówki (zrzut od właściciela). Nikola Flejmer
     // pominięta - wystawiła same gwiazdki, bez treści, a taśma pokazuje tylko opinie z tekstem.
     ['autor' => 'Magdalena Zw', 'zdjecie' => '/assets/media/opinie/magdalena.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',

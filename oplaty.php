@@ -126,7 +126,9 @@ ob_start();
         </div>
         <div class="op-sum-item">
             <span class="op-sum-label">Łącznie</span>
-            <strong class="op-sum-value"><?php echo pricing_format($suma); ?> <span>zł</span></strong>
+            <?php /* Kwoty zostają w złotych także w EN/DE (data-i18n-pln,
+                     assets/js/i18n.js) - tyle naprawdę pobrał Stripe. */ ?>
+            <strong class="op-sum-value" data-i18n-pln><span><?php echo pricing_format($suma); ?></span> <span>zł</span></strong>
         </div>
     </div>
 
@@ -163,8 +165,8 @@ ob_start();
                     <?php echo $r['billing_mode'] === 'subscription' ? 'Abonament' : 'Jednorazowo'; ?>
                 </span>
 
-                <span class="op-amount op-right" data-label="Kwota">
-                    <?php echo pricing_format((int)$r['amount_gross']); ?> zł
+                <span class="op-amount op-right" data-label="Kwota" data-i18n-pln>
+                    <span><?php echo pricing_format((int)$r['amount_gross']); ?></span> zł
                 </span>
             </div>
         <?php endforeach; ?>

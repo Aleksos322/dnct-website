@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle = 'Program dla twórców - DNCT Hosting';
-$metaDescription = 'Nagrywasz albo streamujesz Minecrafta? Twoi widzowie dostają 10% zniżki na start, Ty 15% od ich płatności przez 6 miesięcy i darmowy serwer Pro.';
+$metaDescription = 'Nagrywasz albo streamujesz Minecrafta? Twoi widzowie dostają 10% zniżki na start, Ty 15% od ich płatności przez 6 miesięcy i darmowy serwer Zaawansowany.';
 $canonicalUrl = 'https://game.dnct.pl/partnerzy';
 $centerContent = false;
 $csrfToken = csrf_token();
@@ -36,7 +36,7 @@ ob_start();
     <div class="ptn-zalety">
         <div><strong>-10%</strong><span>dla widza na pierwszy zakup z Twoim kodem</span></div>
         <div><strong>15%</strong><span>dla Ciebie od każdej płatności tego widza przez 6 miesięcy</span></div>
-        <div><strong>Pro</strong><span>darmowy serwer na czas współpracy: 10 GB RAM, 4 vCore, 60 GB SSD</span></div>
+        <div><strong>Zaawansowany</strong><span>darmowy serwer na czas współpracy: 10 GB RAM, 4 vCore, 60 GB SSD</span></div>
     </div>
 
     <h2>Jak to działa</h2>

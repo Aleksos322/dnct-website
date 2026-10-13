@@ -159,7 +159,11 @@ function render_cennik_plan_card(array $p): void
             <?php endif; ?>
         </div>
 
-        <h3 class="pcard-name"><?php echo htmlspecialchars((string)($p['name'] ?? '')); ?></h3>
+        <?php /* LEGENDARNY + (tylko najwyższy pakiet) piszemy odręcznym bursztynem, tym samym
+                 co dopiski ze strzałkami (.pnl-hand) - szczyt oferty ma się
+                 wyróżniać. Klasa po polskiej nazwie z bazy, więc działa też
+                 w EN/DE, gdzie nazwę podmienia dopiero filtr tłumaczeń. */ ?>
+        <h3 class="pcard-name<?php echo str_ends_with(trim((string)($p['name'] ?? '')), '+') ? ' is-legend' : ''; ?>"><?php echo htmlspecialchars((string)($p['name'] ?? '')); ?></h3>
 
         <ul class="pcard-specs">
             <?php foreach ($specs as $s): ?>

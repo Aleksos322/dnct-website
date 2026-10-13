@@ -38,6 +38,19 @@ const PORADNIKI_OFERTA = [
 ];
 
 /** @var array{slug:string,tytul:string,title:string,opis:string,data:string,tresc:string} $poradnik */
+/* Wersja EN/DE (13.10.2026): pełne tłumaczenie treści leży obok, w
+   backend/data/poradniki-i18n/<slug>.php - całe akapity, nie słownik po
+   kawałkach, bo linki i pogrubienia w środku zdań rozbijałyby szyk.
+   Brak pliku albo języka = poradnik zostaje po polsku. Ceny w tłumaczeniu
+   piszemy w złotych ("19,99 zł") - na euro przelicza je filtr i18n. */
+$poradnikLang = function_exists('i18n_lang') ? i18n_lang() : 'pl';
+$poradnikPlik = dirname(__DIR__) . '/backend/data/poradniki-i18n/' . basename($poradnik['slug']) . '.php';
+if ($poradnikLang !== 'pl' && is_file($poradnikPlik)) {
+    $poradnikTl = (require $poradnikPlik)[$poradnikLang] ?? null;
+    if (is_array($poradnikTl)) {
+        $poradnik = array_merge($poradnik, array_intersect_key($poradnikTl, array_flip(['tytul', 'title', 'opis', 'tresc'])));
+    }
+}
 $gra    = PORADNIKI[$poradnik['slug']][0] ?? 'zomboid';
 $oferta = PORADNIKI_OFERTA[$gra];
 $url = 'https://game.dnct.pl/poradniki/' . $poradnik['slug'];
@@ -56,7 +69,7 @@ $extraHead = '<script type="application/ld+json">' . json_encode([
             'description'   => $poradnik['opis'],
             'datePublished' => $poradnik['data'],
             'dateModified'  => $poradnik['data'],
-            'inLanguage'    => 'pl',
+            'inLanguage'    => $poradnikLang,
             'mainEntityOfPage' => $url,
             'author'        => ['@type' => 'Organization', 'name' => 'DNCT Hosting', 'url' => 'https://game.dnct.pl'],
             'publisher'     => ['@type' => 'Organization', 'name' => 'DNCT Hosting',
