@@ -639,3 +639,15 @@
 .hw-bays i::after { left: 2px; right: 2px; bottom: 2px; height: 4px; background: #14532d; }
 .hw-bays i.is-on::after { background: #86efac; box-shadow: 0 0 8px #4ade80, 0 0 2px #fff; }
 .hw-net i { width: 6px; height: 6px; }
+
+/* ============ KOMUNIKAT (otwarty ręczny wpis z status.dnct.pl) ============ */
+.home-notice {
+    display: flex; gap: .75rem; align-items: flex-start; max-width: 36rem; margin: 1rem 0 1.5rem;
+    padding: .85rem 1rem; border-radius: 14px; border: 1px solid rgba(251, 191, 36, .45);
+    background: rgba(120, 53, 15, .4); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    color: #fde68a; font-size: .9rem; line-height: 1.5; text-decoration: none;
+}
+.home-notice strong { display: block; color: #fef3c7; }
+.home-notice-dot { flex: none; width: .6rem; height: .6rem; margin-top: .45rem; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, .2); }
+.home-notice-link { display: block; margin-top: .35rem; color: #fcd34d; text-decoration: underline; text-underline-offset: 3px; }
+.home-notice:hover .home-notice-link, .home-notice:focus-visible .home-notice-link { color: #fff; }

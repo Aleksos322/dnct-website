@@ -117,6 +117,17 @@ try {
     $discordWidget = null;
 }
 
+// Komunikat z status.dnct.pl: otwarty ręczny wpis (status_incydenty.reczny = 1).
+// Zamknięcie wpisu na stronie statusu zdejmuje go też stąd.
+$komunikat = null;
+try {
+    $komunikat = dnct_db()->query(
+        'SELECT opis, poczatek FROM status_incydenty WHERE reczny = 1 AND koniec IS NULL AND opis IS NOT NULL ORDER BY poczatek DESC LIMIT 1'
+    )->fetch(PDO::FETCH_ASSOC) ?: null;
+} catch (Throwable $e) {
+    error_log('index: komunikat ze statusu - ' . $e->getMessage());
+}
+
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/components/jak-to-dziala.php';
@@ -146,6 +157,16 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
     <div class="home-hero-glow" aria-hidden="true"></div>
     <div class="home-wrap home-hero-grid">
         <div class="home-hero-copy">
+            <?php if ($komunikat !== null): ?>
+                <a class="home-notice" href="https://status.dnct.pl" target="_blank" rel="noopener">
+                    <span class="home-notice-dot" aria-hidden="true"></span>
+                    <span>
+                        <strong>Komunikat</strong>
+                        <?php echo htmlspecialchars((string)$komunikat['opis']); ?>
+                        <span class="home-notice-link">Stan usług na status.dnct.pl</span>
+                    </span>
+                </a>
+            <?php endif; ?>
             <h1 class="home-h1">
                 <?php if ($isLoggedIn): ?>
                     <span class="home-line"><span style="--d:1">Cześć, <?php echo htmlspecialchars((string)$username); ?>!</span></span>
