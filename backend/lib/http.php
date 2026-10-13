@@ -22,7 +22,25 @@ function json_response(array $payload, int $status = 200): never
 /** Sukces: {"ok":true, ...} */
 function json_ok(array $payload = []): never
 {
+    if (isset($payload['message']) && is_string($payload['message'])) {
+        $payload['message'] = json_tlumacz($payload['message']);
+    }
     json_response(['ok' => true] + $payload);
+}
+
+/**
+ * Komunikat dla człowieka w języku strony (EN/DE, backend/lib/i18n.php).
+ * API nie przechodzi przez filtr tłumaczeń HTML, więc teksty z json_error()
+ * i json_ok() tłumaczymy tu - tym samym słownikiem i wzorcami. Tekst bez
+ * wpisu zostaje po polsku.
+ */
+function json_tlumacz(string $tekst): string
+{
+    if (!function_exists('i18n_lang') || i18n_lang() === 'pl') {
+        return $tekst;
+    }
+    $t = trim((string)preg_replace('~\s+~u', ' ', $tekst));
+    return i18n_ceny(i18n_tekst($t, i18n_lang()) ?? $t, i18n_lang());
 }
 
 /**
@@ -35,8 +53,8 @@ function json_error(string $message, int $status = 422, array $fieldErrors = [],
 {
     json_response([
         'ok'      => false,
-        'message' => $message,
-        'errors'  => (object)$fieldErrors,
+        'message' => json_tlumacz($message),
+        'errors'  => (object)array_map(static fn($e) => is_string($e) ? json_tlumacz($e) : $e, $fieldErrors),
     ] + $extra, $status);
 }
 

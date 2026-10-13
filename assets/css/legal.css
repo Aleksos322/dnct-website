@@ -147,3 +147,16 @@
     .legal { line-height: 1.7; }
     .legal h2 { margin-top: 2rem; }
 }
+
+/* Tłumaczenie dokumentu (backend/lib/i18n.php, i18n_dokument): dopisek,
+   że wiąże wersja polska - widoczny, ale nie krzyczy. */
+.legal .legal-tl-note {
+    margin: 0 0 1.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 12px;
+    background: rgba(251, 191, 36, 0.08);
+    color: #fde68a;
+    font-size: 0.85rem;
+}
+.legal .legal-tl-note a { color: #fbbf24; }

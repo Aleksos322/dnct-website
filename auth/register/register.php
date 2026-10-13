@@ -351,7 +351,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                             <label class="consent" for="accept-terms">
                                 <input type="checkbox" class="consent-box" id="accept-terms" name="terms" value="1" required>
                                 <span>
-                                    Akceptuję <a href="/regulamin" target="_blank" rel="noopener noreferrer">Regulamin</a>
+                                    <span data-i18n="@zgoda-akceptuje">Akceptuję</span> <a href="/regulamin" target="_blank" rel="noopener noreferrer">Regulamin</a>
                                     oraz <a href="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer">Politykę Prywatności</a>.
                                     <span class="text-red-400">*</span>
                                 </span>

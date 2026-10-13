@@ -133,6 +133,45 @@ function i18n_wzorce(): array
         // Poradniki (components/poradnik.php, poradniki/index.php)
         ['^Aktualizacja: ([\d.]+) · (.+)$', 'Updated: $1 · $2', 'Aktualisiert: $1 · $2'],
         ['^Hosting (Minecraft|Project Zomboid|Vintage Story) od (.+)/mies\.$', '$1 hosting from $2/mies.', '$1-Hosting ab $2/mies.'],
+        // Status (status.php)
+        ['^Odczyt: (.+) · odśwież stronę, aby wykonać nowy test\.$', 'Checked: $1 · refresh the page to run a new check.', 'Geprüft: $1 · lade die Seite neu für eine neue Prüfung.'],
+        ['^Odczytano konfigurację (\d+) węzła/węzłów\.$', 'Read the configuration of $1 node(s).', 'Konfiguration von $1 Node(s) gelesen.'],
+        // Dobierz serwer (assets/js/wybierz-serwer.js) - kolejność ma znaczenie, pierwszy pasujący wygrywa
+        ['^(\d+) (?:osoba|osoby|osób)$', '$1 players', '$1 Spieler'],
+        ['^Dla (\d+) (?:osoba|osoby|osób) i trybu mody / modpack celujemy w co najmniej (\d+) GB RAM\.$', 'For $1 players with mods / a modpack we aim for at least $2 GB RAM.', 'Für $1 Spieler mit Mods / Modpack planen wir mindestens $2 GB RAM ein.'],
+        ['^Dla (\d+) (?:osoba|osoby|osób) i trybu pluginy celujemy w co najmniej (\d+) GB RAM\.$', 'For $1 players with plugins we aim for at least $2 GB RAM.', 'Für $1 Spieler mit Plugins planen wir mindestens $2 GB RAM ein.'],
+        ['^Dla (\d+) (?:osoba|osoby|osób) i trybu vanilla celujemy w co najmniej (\d+) GB RAM\.$', 'For $1 players on vanilla we aim for at least $2 GB RAM.', 'Für $1 Spieler mit Vanilla planen wir mindestens $2 GB RAM ein.'],
+        ['^Wybraliśmy pierwszy dostępny próg, który mieści (\d+) (?:osoba|osoby|osób) jednocześnie\.$', 'We picked the first available tier that fits $1 players at once.', 'Wir haben die erste verfügbare Stufe gewählt, die $1 Spieler gleichzeitig fasst.'],
+        ['^(\d+) slotów · (.+) SSD · od (.+) / mies\.$', '$1 slots · $2 SSD · from $3 / mo', '$1 Slots · $2 SSD · ab $3 / Monat'],
+        ['^(.+) SSD · od (.+) / mies\.$', '$1 SSD · from $2 / mo', '$1 SSD · ab $2 / Monat'],
+        // Komunikaty API sklejane z liczbami/nazwami (http.php json_tlumacz)
+        ['^Kolejny kod możesz wysłać za (\d+) s\.$', 'You can send another code in $1 s.', 'Einen neuen Code kannst du in $1 s senden.'],
+        ['^Kod musi składać się z (\d+) cyfr\.$', 'The code must be $1 digits.', 'Der Code muss aus $1 Ziffern bestehen.'],
+        ['^Nieprawidłowy kod\. Pozostałe próby: (\d+)\.$', 'Wrong code. Attempts left: $1.', 'Falscher Code. Verbleibende Versuche: $1.'],
+        ['^Nazwa użytkownika musi mieć od (\d+) do (\d+) znaków\.$', 'The username must be $1 to $2 characters.', 'Der Benutzername muss $1 bis $2 Zeichen lang sein.'],
+        ['^Hasło może mieć maksymalnie (\d+) znaków\.$', 'The password can be at most $1 characters.', 'Das Passwort darf höchstens $1 Zeichen haben.'],
+        ['^Maksymalna długość to (\d+) znaków\.$', 'The maximum length is $1 characters.', 'Die maximale Länge beträgt $1 Zeichen.'],
+        ['^Czy chodziło o @(\S+)\? Domena @(\S+) nie przyjmuje poczty\.$', 'Did you mean @$1? The domain @$2 doesn\'t accept email.', 'Meintest du @$1? Die Domain @$2 nimmt keine E-Mails an.'],
+        ['^Domena @(\S+) nie przyjmuje poczty\. Sprawdź, czy nie ma literówki\.$', 'The domain @$1 doesn\'t accept email. Check for a typo.', 'Die Domain @$1 nimmt keine E-Mails an. Prüf auf Tippfehler.'],
+        ['^Pakiet zmieniony na (.+)\. Niewykorzystana różnica wróciła jako (\d+) dni\.$', 'Plan changed to $1. The unused difference came back as $2 days.', 'Paket geändert auf $1. Die ungenutzte Differenz kam als $2 Tage zurück.'],
+        ['^Pakiet zmieniony na (.+)\.$', 'Plan changed to $1.', 'Paket geändert auf $1.'],
+        ['^Masz już pakiet (.+)\. Przedłuż go albo napisz do nas, jeśli chcesz zmienić pakiet\.$', 'You already have the $1 plan. Renew it or write to us if you want to change plans.', 'Du hast schon das Paket $1. Verlängere es oder schreib uns, wenn du wechseln willst.'],
+        ['^(.+) Numer sprawy: (.+)\.$', '$1 Case number: $2.', '$1 Fallnummer: $2.'],
+        // Rejestracja (auth/register/register.js)
+        ['^Postęp rejestracji: krok (\d) z 3$', 'Sign-up progress: step $1 of 3', 'Registrierungsfortschritt: Schritt $1 von 3'],
+        ['^Wpisz pełny (\d+)-cyfrowy kod\.$', 'Enter the full $1-digit code.', 'Gib den vollständigen $1-stelligen Code ein.'],
+        ['^Wyślij ponownie za (\d+) s$', 'Resend in $1 s', 'Erneut senden in $1 s'],
+        ['^Kod wygaśnie za (\d+:\d\d)$', 'The code expires in $1', 'Der Code läuft ab in $1'],
+        ['^Złamanie: ([\d\s.,]+) (?:sekunda|sekundy|sekund)$', 'Time to crack: $1 s', 'Zeit zum Knacken: $1 s'],
+        ['^Złamanie: ([\d\s.,]+) (?:minuta|minuty|minut)$', 'Time to crack: $1 min', 'Zeit zum Knacken: $1 min'],
+        ['^Złamanie: ([\d\s.,]+) (?:godzina|godziny|godzin)$', 'Time to crack: $1 h', 'Zeit zum Knacken: $1 Std.'],
+        ['^Złamanie: ([\d\s.,]+) (?:dzień|dni)$', 'Time to crack: $1 days', 'Zeit zum Knacken: $1 Tage'],
+        ['^Złamanie: ([\d\s.,]+) (?:miesiąc|miesiące|miesięcy)$', 'Time to crack: $1 months', 'Zeit zum Knacken: $1 Monate'],
+        ['^Złamanie: ([\d\s.,]+) (?:rok|lata|lat)$', 'Time to crack: $1 years', 'Zeit zum Knacken: $1 Jahre'],
+        ['^Złamanie: ([\d\s.,]+) tys\. lat$', 'Time to crack: $1 thousand years', 'Zeit zum Knacken: $1 Tausend Jahre'],
+        ['^Złamanie: ([\d\s.,]+) mln lat$', 'Time to crack: $1 million years', 'Zeit zum Knacken: $1 Millionen Jahre'],
+        ['^Złamanie: ([\d\s.,]+) mld lat$', 'Time to crack: $1 billion years', 'Zeit zum Knacken: $1 Milliarden Jahre'],
+        ['^Złamanie: ([\d\s.,]+) bln lat$', 'Time to crack: $1 trillion years', 'Zeit zum Knacken: $1 Billionen Jahre'],
         // Historia opłat (oplaty.php, oplaty_okres)
         ['^(\d+) lata$', '$1 years', '$1 Jahre'],
         ['^(\d+) miesiące$', '$1 months', '$1 Monate'],
@@ -280,7 +319,10 @@ function i18n_start(): void
         return;
     }
     $skrypt = (string)($_SERVER['SCRIPT_NAME'] ?? '');
-    if (str_starts_with($skrypt, '/api/') || str_starts_with($skrypt, '/auth/') || basename($skrypt) === 'pobierz.php') {
+    // /auth/ to przekierowania (logowanie, callback), z wyjątkiem kreatora
+    // rejestracji - to zwykła strona HTML, której nowy klient musi rozumieć.
+    $authStrona = str_starts_with($skrypt, '/auth/') && $skrypt !== '/auth/register/register.php';
+    if (str_starts_with($skrypt, '/api/') || $authStrona || basename($skrypt) === 'pobierz.php') {
         return;
     }
     ob_start('i18n_filtr');
@@ -294,4 +336,31 @@ function i18n_link(string $lang): string
     parse_str((string)parse_url($uri, PHP_URL_QUERY), $q);
     $q['lang'] = $lang;
     return $sciezka . '?' . http_build_query($q);
+}
+
+/**
+ * Dokumenty prawne w EN/DE (regulamin, polityka prywatności, umowa
+ * powierzenia): pełne tłumaczenie wnętrza bloku .legal leży w
+ * backend/data/prawne-i18n/<slug>.php - jak poradniki, całe akapity, nie
+ * słownik. Wiąże wersja polska; tłumaczenie dostaje na górze dopisek, że
+ * jest informacyjne. Brak pliku albo języka = dokument zostaje po polsku.
+ */
+function i18n_dokument(string $slug, string $html, ?string &$tytul = null, ?string &$opis = null): string
+{
+    $lang = i18n_lang();
+    $plik = dirname(__DIR__) . '/data/prawne-i18n/' . basename($slug) . '.php';
+    if ($lang === 'pl' || !is_file($plik)) {
+        return $html;
+    }
+    $tl = (require $plik)[$lang] ?? null;
+    if (!is_array($tl) || empty($tl['tresc'])
+        || !preg_match('~^(.*?<div class="legal[^"]*"[^>]*>)(.*)(</div>\s*)$~s', $html, $m)) {
+        return $html;
+    }
+    $tytul = $tl['title'] ?? $tytul;
+    $opis  = $tl['opis'] ?? $opis;
+    $dopisek = $lang === 'de'
+        ? 'Diese Übersetzung dient nur zur Information. Rechtlich verbindlich ist ausschließlich die <a href="?lang=pl">polnische Fassung</a>.'
+        : 'This translation is provided for information only. Only the <a href="?lang=pl">Polish version</a> is legally binding.';
+    return $m[1] . "\n    <p class=\"legal-tl-note\">" . $dopisek . "</p>\n" . $tl['tresc'] . $m[3];
 }

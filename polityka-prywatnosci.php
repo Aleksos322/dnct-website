@@ -432,5 +432,5 @@ ob_start();
         </p>
 </div>
 <?php
-$content = ob_get_clean();
+$content = i18n_dokument('polityka-prywatnosci', (string)ob_get_clean(), $pageTitle, $metaDescription);
 require __DIR__ . '/assets/clear/clear.php';
