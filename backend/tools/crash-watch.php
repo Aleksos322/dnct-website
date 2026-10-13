@@ -117,8 +117,13 @@ foreach ($servers as $s) {
 }
 
 // Węzeł nie odpowiada - jeden zbiorczy alarm zamiast kilkudziesięciu.
+// API panelu idzie przez Cloudflare, więc najpierw ustalamy, czy padł węzeł,
+// czy łącze (lib/siec.php) - inaczej przerwa u dostawcy wygląda jak awaria Wingsa.
 if ($apiErrors >= 5 && ($prev['_api_errors'] ?? 0) < 5) {
-    $alerts[] = ['Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. Sprawdź węzeł.', 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
+    $siec = siec_diagnoza();
+    $alerts[] = $siec['wezly'] === true
+        ? ['Brak łącza z internetem', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 4, 'globe_with_meridians', 'https://status.dnct.pl', null, 'lacze']
+        : ['Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
 }
 $next['_api_errors'] = $apiErrors;
 
