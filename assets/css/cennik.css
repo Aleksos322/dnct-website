@@ -943,7 +943,7 @@
     text-align: center;
 }
 
-/* LEGENDARNY / LEGENDARNY + (plan-card-cennik.php): odręczny bursztyn jak
+/* LEGENDARNY + (plan-card-cennik.php, nazwa kończy się na "+"): odręczny bursztyn jak
    dopiski ze strzałkami (.pnl-hand), lekko przekrzywiony. */
 .cennik-page .pcard-name.is-legend,
 .home-p3d-index .is-legend {
@@ -2252,6 +2252,10 @@
     color: #64748b;
     white-space: nowrap;
 }
+/* Wersja EN/DE: kwota siedzi w CSS, więc filtr tłumaczeń (backend/lib/i18n.php)
+   jej nie widzi - język bierzemy z <html lang>, który ten filtr podmienia. */
+html[lang="en"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0.00 €"; }
+html[lang="de"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0,00 €"; }
 
 /* "Ryzykujesz mniej" - cztery kafle */
 .cennik-page .cnk-trust--row {

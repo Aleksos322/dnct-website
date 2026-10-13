@@ -124,7 +124,7 @@
         var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, lista = [];
         while ((n = w.nextNode())) lista.push(n);
         lista.forEach(zrobWezel);
-        ['title', 'aria-label', 'placeholder'].forEach(function (a) {
+        ['title', 'aria-label', 'placeholder', 'data-label'].forEach(function (a) {
             var els = root.querySelectorAll ? root.querySelectorAll('[' + a + ']') : [];
             Array.prototype.forEach.call(els, function (el) {
                 var t = el.getAttribute(a), tr = tlumacz(t);

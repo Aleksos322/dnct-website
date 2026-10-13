@@ -271,7 +271,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 <ol class="home-p3d-index">
                     <?php foreach ($showcasePlans as $k => $row): ?>
                         <li><button type="button" data-p3d-go="<?php echo $k; ?>"<?php echo !empty($row['sold_out']) ? ' class="is-out"' : ''; ?>>
-                            <span<?php echo str_starts_with(mb_strtoupper((string)($row['name'] ?? '')), 'LEGENDARN') ? ' class="is-legend"' : ''; ?>><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></span>
+                            <span<?php echo str_ends_with(trim((string)($row['name'] ?? '')), '+') ? ' class="is-legend"' : ''; ?>><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></span>
                             <em><?php echo number_format((float)($row['price'] ?? 0), 2, ',', ''); ?> zł</em>
                         </button></li>
                     <?php endforeach; ?>
