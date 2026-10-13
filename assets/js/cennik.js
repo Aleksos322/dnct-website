@@ -165,9 +165,68 @@
         var elMethodsHint = root.querySelector('[data-role="methodsHint"]');
         var elError = root.querySelector('[data-role="error"]');
         var btnSel  = root.querySelector('[data-role="select"]');
+        var elStatus = root.querySelector('[data-role="status"]');
+        var slider  = root.querySelector('[data-role="slider"]');
+        var bubble  = root.querySelector('[data-role="bubble"]');
+        var ticks   = root.querySelectorAll('.cfg-tick');
+        var meters  = {
+            ram: root.querySelector('[data-role="ramMeter"]'),
+            dysk: root.querySelector('[data-role="dyskMeter"]'),
+            cpu: root.querySelector('[data-role="cpuMeter"]'),
+            backupy: root.querySelector('[data-role="backupyMeter"]')
+        };
+        // Maksima do pasków "ile z najwyższego progu" w kafelkach parametrów
+        var maxOf = function (k) { return Math.max.apply(null, tiers.map(function (t) { return t[k]; })) || 1; };
+        var max = { ram: maxOf('ram'), disk: maxOf('disk'), cpu: maxOf('cpu'), backups: maxOf('backups') };
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var shownPrice = null, priceAnim = null, lastIndex = null;
 
         var current = periods.find(function (p) { return p.days === 30; }) || periods[0];
         var mode    = 'payment';
+
+        // Podbicie (cfgBump w cennik.css) - restart animacji przez reflow
+        function bump(el) {
+            if (!el || reduce) return;
+            el.classList.remove('is-bump');
+            void el.offsetWidth;
+            el.classList.add('is-bump');
+        }
+
+        // Cena "dojeżdża" do nowej kwoty zamiast przeskakiwać (~280 ms)
+        function showPrice(value) {
+            if (shownPrice === null || reduce) {
+                shownPrice = value;
+                elPrice.textContent = money(value);
+                return;
+            }
+            var from = shownPrice, start = null;
+            shownPrice = value;
+            if (priceAnim) cancelAnimationFrame(priceAnim);
+            priceAnim = requestAnimationFrame(function step(ts) {
+                if (start === null) start = ts;
+                var t = Math.min(1, (ts - start) / 280);
+                var e = 1 - Math.pow(1 - t, 3);
+                elPrice.textContent = money(t < 1 ? from + (value - from) * e : value);
+                if (t < 1) priceAnim = requestAnimationFrame(step);
+            });
+        }
+
+        // Postęp suwaka (--p) i pozycja dymka - ten sam wzór co .cfg-tick w CSS
+        function renderSlider(index, tier) {
+            var n = Math.max(1, tiers.length - 1);
+            var p = index / n;
+            if (slider) slider.style.setProperty('--p', p);
+            if (bubble && range) {
+                var w = range.offsetWidth, thumb = 26;
+                var x = thumb / 2 + p * (w - thumb) - bubble.offsetWidth / 2;
+                bubble.style.setProperty('--bx', Math.round(x) + 'px');
+                bubble.textContent = tier.slots;
+            }
+            ticks.forEach(function (t, i) {
+                t.classList.toggle('is-current', i === index);
+                t.classList.toggle('is-past', i < index);
+            });
+        }
 
         // Ten sam wzór co backend/lib/pricing.php: zaokrąglamy w dół TYLKO gdy
         // okres ma własną końcówkę (adjust). Progi slotowe mają ceny całkowite,
@@ -180,8 +239,11 @@
         }
 
         function render() {
-            var tier = tiers[parseInt(range.value, 10)] || tiers[0];
+            var index = parseInt(range.value, 10) || 0;
+            var tier = tiers[index] || tiers[0];
             var total = priceFor(tier, current);
+            var tierChanged = lastIndex !== null && lastIndex !== index;
+            lastIndex = index;
 
             elSlots.textContent  = tier.slots;
             elPakiet.textContent = tier.slots + ' slotów';
@@ -189,8 +251,15 @@
             elCpu.textContent    = tier.cpu + ' vCore';
             elDysk.textContent   = (tier.disk / 1024) + ' GB';
             elBackup.textContent = tier.backups;
-            elPrice.textContent  = money(total);
+            showPrice(total);
             elHint.textContent   = slotHint(tier.slots);
+
+            if (tierChanged) [elSlots, elRam, elCpu, elDysk, elBackup].forEach(bump);
+            if (meters.ram) meters.ram.style.setProperty('--m', (tier.ram / max.ram).toFixed(3));
+            if (meters.dysk) meters.dysk.style.setProperty('--m', (tier.disk / max.disk).toFixed(3));
+            if (meters.cpu) meters.cpu.style.setProperty('--m', (tier.cpu / max.cpu).toFixed(3));
+            if (meters.backupy) meters.backupy.style.setProperty('--m', (tier.backups / max.backups).toFixed(3));
+            renderSlider(index, tier);
 
             // Ile PEŁNYCH miesięcy obejmuje okres. Dzielenie przez 30 dawało dla
             // roku 12.17 miesiąca, przez co cena odniesienia rosła do 790.83 zł,
@@ -259,16 +328,17 @@
                 }
             }
 
+            // Ostrzeżenie zastępuje podpowiedź w tym samym polu (.cfg-status
+            // .is-warn) - wysokość karty się nie zmienia.
             if (elScarce) {
+                var low = !soldOut && tier.fits !== null && tier.fits !== undefined && tier.fits <= 4;
                 if (soldOut) {
                     elScarce.textContent = 'Ta liczba slotów jest chwilowo niedostępna - wybierz inną.';
-                    elScarce.style.display = '';
-                } else if (tier.fits !== null && tier.fits !== undefined && tier.fits <= 4) {
+                } else if (low) {
                     elScarce.textContent = 'Zostały ' + tier.fits + ' wolne miejsca na węźle dla tej liczby slotów.';
-                    elScarce.style.display = '';
-                } else {
-                    elScarce.style.display = 'none';
                 }
+                elScarce.classList.toggle('is-out', soldOut);
+                if (elStatus) elStatus.classList.toggle('is-warn', soldOut || low);
             }
         }
 
@@ -314,6 +384,21 @@
         }
 
         range.addEventListener('input', render);
+        ticks.forEach(function (t) {
+            t.addEventListener('click', function () {
+                range.value = t.getAttribute('data-index');
+                render();
+                range.focus({ preventScroll: true });
+            });
+        });
+        // Dymek liczy pozycję w px - przeliczamy przy każdej zmianie szerokości,
+        // także gdy ukryta zakładka gry (szerokość 0) staje się widoczna.
+        var rerenderSlider = function () {
+            var i = parseInt(range.value, 10) || 0;
+            renderSlider(i, tiers[i] || tiers[0]);
+        };
+        if ('ResizeObserver' in window) new ResizeObserver(rerenderSlider).observe(range);
+        else window.addEventListener('resize', rerenderSlider);
 
         root.querySelectorAll('.cfg-period').forEach(function (btn) {
             btn.addEventListener('click', function () {
