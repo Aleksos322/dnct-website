@@ -53,6 +53,11 @@ $servers = panel_db()->query(
 )->fetchAll(PDO::FETCH_ASSOC);
 
 $apiErrors = 0;
+// 429 = limit zapytań panelu (720/min na KONTO, wspólny z kartą panelu admina,
+// której dashboard odpytuje każdy serwer). To nie awaria - 2026-10-13 dało
+// dwa fałszywe "Brak łącza". Po pierwszym 429 dalsze zapytania i tak dostaną
+// 429, więc kończymy rundę i zostawiamy stary stan.
+$limitPanelu = false;
 
 foreach ($servers as $s) {
     $uuid = (string)$s['uuid'];
@@ -75,8 +80,22 @@ foreach ($servers as $s) {
         continue;
     }
 
+    if ($limitPanelu) {
+        if ($was !== null) {
+            $next[$uuid] = $was;
+        }
+        continue;
+    }
+
     $res = ptero_client_request('GET', '/api/client/servers/' . $short . '/resources', null, 10);
     $attr = $res['json']['attributes'] ?? null;
+    if ($res['code'] === 429) {
+        $limitPanelu = true;
+        if ($was !== null) {
+            $next[$uuid] = $was;
+        }
+        continue;
+    }
     if ($res['code'] !== 200 || !is_array($attr)) {
         $apiErrors++;
         // Zostawiamy stary stan - chwilowy błąd API nie może wyglądać jak crash.
@@ -121,11 +140,14 @@ foreach ($servers as $s) {
 // czy łącze (lib/siec.php) - inaczej przerwa u dostawcy wygląda jak awaria Wingsa.
 if ($apiErrors >= 5 && ($prev['_api_errors'] ?? 0) < 5) {
     $siec = siec_diagnoza();
-    $alerts[] = $siec['wezly'] === true
+    $alerts[] = $siec['wezly'] === true && (!$siec['internet'] || !$siec['cloudflare'])
         ? ['Brak łącza z internetem', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 4, 'globe_with_meridians', 'https://status.dnct.pl', null, 'lacze']
-        : ['Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
+        : [$siec['wezly'] === true ? 'Panel nie odpowiada' : 'Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
 }
 $next['_api_errors'] = $apiErrors;
+if ($limitPanelu) {
+    echo date('Y-m-d H:i:s') . " crash-watch: limit zapytań panelu (429) - runda przerwana, bez alarmów\n";
+}
 
 if ($firstRun) {
     echo date('Y-m-d H:i:s') . " crash-watch: pierwszy przebieg, zapamiętano " . count($servers) . " serwerów\n";
