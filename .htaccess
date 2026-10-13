@@ -173,6 +173,8 @@ AddDefaultCharset UTF-8
     RewriteRule ^demo/?$         auth/demo.php              [L]
     RewriteRule ^callback/?$     auth/callback.php          [L]
     RewriteRule ^avatar/([A-Za-z0-9_.+-]{3,150})/?$ avatar.php?u=$1 [L,QSA]
+    # /llms.txt generowany z bazy przy każdym wejściu (llms.php, backend/lib/llms.php)
+    RewriteRule ^llms\.txt$ llms.php [L]
 
     # --- (a2) reszta: /cokolwiek -> /cokolwiek.php, jeśli taki plik istnieje -
     # Dzięki temu każda nowa podstrona dostaje czysty adres bez dopisywania

@@ -36,7 +36,8 @@ ob_start();
 
       <h1>Regulamin świadczenia usług - DNCT</h1>
       <p><strong>Data wejścia w życie:</strong> 7 lutego 2026<br>
-      <strong>Aktualizacja:</strong> 4 października 2026 - zasady rozpoczęcia usługi, prawo odstąpienia i dobrowolna Gwarancja Zwrotu 24 h. Dla nowych zamówień wersja obowiązuje od chwili zawarcia umowy. Wobec dotychczasowych Klientów zmiany wymagające powiadomienia obowiązują po doręczeniu informacji na trwałym nośniku i po upływie wskazanego w pkt 14 terminu.</p>
+      <strong>Aktualizacja:</strong> 13 października 2026 - tabele cen w pkt 3 i 4 zastąpione odesłaniem do cennika (ceny się nie zmieniają).<br>
+      <strong>Wcześniej:</strong> 4 października 2026 - zasady rozpoczęcia usługi, prawo odstąpienia i dobrowolna Gwarancja Zwrotu 24 h. Dla nowych zamówień wersja obowiązuje od chwili zawarcia umowy. Wobec dotychczasowych Klientów zmiany wymagające powiadomienia obowiązują po doręczeniu informacji na trwałym nośniku i po upływie wskazanego w pkt 14 terminu.</p>
       <p>Ten dokument określa zasady świadczenia usług przez DNCT (dalej: „DNCT”, „Dostawca”). Korzystając z usług, Klient akceptuje poniższe postanowienia.</p>
 
       <section>
@@ -65,69 +66,27 @@ ob_start();
         </ol>
       </section>
 
+    <?php /* Do 13.10.2026 tu stały tabele cen wpisane ręcznie - rozjechały
+             się z bazą (inne parametry progów Zomboida i Vintage Story, inna
+             cena tygodnia). Dokument prawny z ceną inną niż w kasie to ryzyko
+             przy reklamacji, więc zamiast kopii jest odesłanie do źródła.
+             Numeracja punktów 3 i 4 zostaje - powołują się na nią inne punkty. */ ?>
     <section>
-        <h2>3. Cennik Minecraft</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Plan</th>
-                <th>RAM</th>
-                <th>CPU</th>
-                <th>SSD</th>
-                <th>Backupy</th>
-                <th>Tydzień</th>
-                <th>Miesiąc</th>
-                <th>Rok</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>DEVeloperski</td><td>1.5GB</td><td>1 vCore</td><td>2.5GB</td><td>4</td><td class="price-3">3.99</td><td class="price-cell">6.99</td><td>76.89</td></tr>
-              <tr><td>Budżetowy</td><td>3GB</td><td>2 vCore</td><td>5GB</td><td>1</td><td class="price-3">4.99</td><td class="price-cell">9.99</td><td>109.89</td></tr>
-              <tr><td>Podstawowy</td><td>4GB</td><td>2 vCore</td><td>15GB</td><td>1</td><td class="price-3">7.99</td><td class="price-cell">15.99</td><td>175.89</td></tr>
-              <tr><td>Standardowy</td><td>8GB</td><td>3 vCore</td><td>45GB</td><td>2</td><td class="price-3">18.99</td><td class="price-cell">36.99</td><td>406.89</td></tr>
-              <tr><td>Zaawansowany</td><td>10GB</td><td>4 vCore</td><td>60GB</td><td>2</td><td class="price-3">21.99</td><td class="price-cell">43.99</td><td>483.89</td></tr>
-              <tr><td>Mistrzowski</td><td>14GB</td><td>4 vCore</td><td>80GB</td><td>4</td><td class="price-3">32.99</td><td class="price-cell">64.99</td><td>714.89</td></tr>
-              <tr><td>Elitarny</td><td>18GB</td><td>5 vCore</td><td>100GB</td><td>4</td><td class="price-3">39.99</td><td class="price-cell">79.99</td><td>879.89</td></tr>
-              <tr><td>LEGENDARNY</td><td>24GB</td><td>6 vCore</td><td>150GB</td><td>4</td><td class="price-3">59.99</td><td class="price-cell">119.99</td><td>1319.89</td></tr>
-              <tr><td>LEGENDARNY +</td><td>32GB</td><td>8 vCore</td><td>200GB</td><td>4</td><td class="price-3">84.99</td><td class="price-cell">169.99</td><td>1869.89</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <h2>3. Ceny</h2>
+        <ol>
+          <li>Aktualne ceny wszystkich usług są podane w <a href="https://game.dnct.pl/cennik">cenniku</a> oraz na stronach poszczególnych gier: <a href="https://game.dnct.pl/hosting-minecraft">Minecraft</a>, <a href="https://game.dnct.pl/hosting-project-zomboid">Project Zomboid</a> i <a href="https://game.dnct.pl/hosting-vintage-story">Vintage Story</a>.</li>
+          <li>Ceny są cenami brutto w złotych polskich (PLN), za wybrany okres rozliczeniowy (tydzień, miesiąc albo rok).</li>
+          <li>Wiążąca jest cena pokazana Klientowi przed płatnością i w potwierdzeniu zamówienia (pkt 2). Zmiana cennika nie zmienia ceny już opłaconego okresu.</li>
+        </ol>
       </section>
 
       <section>
-        <h2>4. Cennik Project Zomboid & Vintage Story</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Sloty</th>
-                <th>RAM</th>
-                <th>CPU</th>
-                <th>SSD</th>
-                <th>Backupy</th>
-                <th>Tydzień</th>
-                <th>Miesiąc</th>
-                <th>Rok</th>
-              </tr>
-            </thead>
-    			<tbody>
-    					  <tr><td>5 slotów</td><td>4GB</td><td>2.0 vCore</td><td>20GB</td><td>1</td><td>9.99</td><td class="price-cell">19.00</td><td>209.00</td></tr>
-    					  <tr><td>10 slotów</td><td>6GB</td><td>2.5 vCore</td><td>20GB</td><td>1</td><td>17.99</td><td class="price-cell">35.00</td><td>385.00</td></tr>
-    					  <tr><td>15 slotów</td><td>8GB</td><td>3.0 vCore</td><td>20GB</td><td>1</td><td>24.99</td><td class="price-cell">49.00</td><td>539.00</td></tr>
-    					  <tr><td>20 slotów</td><td>10GB</td><td>3.5 vCore</td><td>20GB</td><td>1</td><td>32.99</td><td class="price-cell">65.00</td><td>715.00</td></tr>
-    					  <tr><td>25 slotów</td><td>11GB</td><td>4.0 vCore</td><td>25GB</td><td>2</td><td>39.99</td><td class="price-cell">79.00</td><td>869.00</td></tr>
-    					  <tr><td>30 slotów</td><td>12GB</td><td>4.5 vCore</td><td>25GB</td><td>2</td><td>45.99</td><td class="price-cell">90.00</td><td>990.00</td></tr>
-    					  <tr><td>35 slotów</td><td>13GB</td><td>5.0 vCore</td><td>25GB</td><td>2</td><td>52.99</td><td class="price-cell">105.00</td><td>1155.00</td></tr>
-    					  <tr><td>40 slotów</td><td>14GB</td><td>5.5 vCore</td><td>25GB</td><td>2</td><td>59.99</td><td class="price-cell">119.00</td><td>1309.00</td></tr>
-    					  <tr><td>45 slotów</td><td>15GB</td><td>6.0 vCore</td><td>30GB</td><td>2</td><td>64.99</td><td class="price-cell">129.00</td><td>1419.00</td></tr>
-    					  <tr><td>50 slotów</td><td>16GB</td><td>6.5 vCore</td><td>35GB</td><td>2</td><td>69.99</td><td class="price-cell">139.00</td><td>1529.00</td></tr>
-    					  <tr><td>100 slotów</td><td>18GB</td><td>7.0 vCore</td><td>40GB</td><td>4</td><td>75.99</td><td class="price-cell">150.00</td><td>1650.00</td></tr>
-    			</tbody>
-          </table>
-          <p class="small">*W tabeli powyżej przedstawiono wybrane pakiety. Pełna oferta dostępna w panelu.</p>
-        </div>
+        <h2>4. Pakiety i parametry</h2>
+        <ol>
+          <li>Serwery Minecraft są sprzedawane w gotowych pakietach o stałych parametrach.</li>
+          <li>Serwery Project Zomboid i Vintage Story są dobierane według liczby graczy (slotów); od wybranego progu zależą przydzielone zasoby i cena.</li>
+          <li>Przydział RAM-u, procesora, przestrzeni dyskowej i liczba kopii zapasowych są podane przy każdym pakiecie lub progu w cenniku.</li>
+        </ol>
       </section>
 
       <section>
