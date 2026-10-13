@@ -249,9 +249,17 @@ ob_start();
                 <label class="ord-check ord-check-start">
                     <input type="checkbox" data-role="immediateStart">
                     <span class="ord-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
-                    <span class="ord-check-text">Żądam rozpoczęcia usługi niezwłocznie po potwierdzeniu płatności. Przyjmuję do wiadomości, że po pełnym wykonaniu usługi mogę utracić prawo odstąpienia, jeżeli są spełnione warunki ustawowe.</span>
+                    <span class="ord-check-text">
+                        <strong class="ord-check-title">Uruchom serwer od razu po płatności</strong>
+                        <span class="ord-check-legal">Żądam rozpoczęcia usługi niezwłocznie po potwierdzeniu płatności. Przyjmuję do wiadomości, że po pełnym wykonaniu usługi mogę utracić prawo odstąpienia, jeżeli są spełnione warunki ustawowe.</span>
+                    </span>
                 </label>
-                <p class="ord-consents-hint">Bez tego żądania zapłacisz teraz, a usługę uruchomimy po 14 dniach od zawarcia umowy.</p>
+                <?php /* Klient z TKT-8211 nie zaznaczył startu i czekał na serwer,
+                         za który już zapłacił. Dlatego skutek obu wyborów stoi
+                         tu wprost, z datą. Przełącza go CSS (:has na checkboxie),
+                         nie JS - oba teksty idą przez słownik i18n jak reszta. */ ?>
+                <p class="ord-start-hint ord-start-later">Bez zaznaczenia serwer wystartuje dopiero za 14 dni: <strong><?php echo date('d.m.Y', time() + 14 * 86400); ?></strong></p>
+                <p class="ord-start-hint ord-start-now">Serwer wystartuje kilka minut po płatności.</p>
             </fieldset>
             <button type="button" class="ord-cta" data-role="pay"
                     <?php echo stripe_sales_enabled() ? '' : 'disabled'; ?>>
