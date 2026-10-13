@@ -31,6 +31,7 @@ require_once __DIR__ . '/lib/panel_sso.php';
 require_once __DIR__ . '/lib/gsc.php';
 require_once __DIR__ . '/lib/odwiedziny.php';
 require_once __DIR__ . '/lib/ntfy.php';
+require_once __DIR__ . '/lib/siec.php';
 require_once __DIR__ . '/lib/i18n.php';
 
 // ------------------------------------------------------------
