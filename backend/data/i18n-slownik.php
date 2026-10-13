@@ -886,4 +886,6 @@ return [
     'Bardzo silne' => ['Very strong', 'Sehr stark'],
     'Złamanie: natychmiast' => ['Time to crack: instantly', 'Zeit zum Knacken: sofort'],
     'Złamanie: praktycznie nie do złamania' => ['Time to crack: practically uncrackable', 'Zeit zum Knacken: praktisch unknackbar'],
+    'Sloty' => ['Slots', 'Slots'],
+    'Ceny brutto w złotych. Przekreślone progi są chwilowo wyprzedane.' => ['Gross prices in Polish złoty. Crossed-out tiers are temporarily sold out.', 'Bruttopreise in polnischen Złoty. Durchgestrichene Stufen sind vorübergehend ausverkauft.'],
 ];

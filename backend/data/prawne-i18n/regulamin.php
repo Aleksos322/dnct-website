@@ -2,33 +2,10 @@
 /* Tłumaczenie /regulamin (backend/lib/i18n.php, i18n_dokument).
    Informacyjne - wiąże wersja polska w regulamin.php. Zmiana tamtej wersji
    (w tym tabel cen) = zmiana tego pliku. Ceny celowo w PLN, bez przeliczania
-   na euro - tyle pobiera Stripe. */
+   na euro - tyle pobiera Stripe. Od 13.10.2026 bez tabel cen (pkt 3-4
+   odsyłają do cennika, jak wersja polska). */
 declare(strict_types=1);
 
-$wierszeMc = <<<'HTML'
-              <tr><td>DEVeloper</td><td>1.5GB</td><td>1 vCore</td><td>2.5GB</td><td>4</td><td class="price-3">3.99</td><td class="price-cell">6.99</td><td>76.89</td></tr>
-              <tr><td>Budget</td><td>3GB</td><td>2 vCore</td><td>5GB</td><td>1</td><td class="price-3">4.99</td><td class="price-cell">9.99</td><td>109.89</td></tr>
-              <tr><td>Basic</td><td>4GB</td><td>2 vCore</td><td>15GB</td><td>1</td><td class="price-3">7.99</td><td class="price-cell">15.99</td><td>175.89</td></tr>
-              <tr><td>Standard</td><td>8GB</td><td>3 vCore</td><td>45GB</td><td>2</td><td class="price-3">18.99</td><td class="price-cell">36.99</td><td>406.89</td></tr>
-              <tr><td>Advanced</td><td>10GB</td><td>4 vCore</td><td>60GB</td><td>2</td><td class="price-3">21.99</td><td class="price-cell">43.99</td><td>483.89</td></tr>
-              <tr><td>Master</td><td>14GB</td><td>4 vCore</td><td>80GB</td><td>4</td><td class="price-3">32.99</td><td class="price-cell">64.99</td><td>714.89</td></tr>
-              <tr><td>Elite</td><td>18GB</td><td>5 vCore</td><td>100GB</td><td>4</td><td class="price-3">39.99</td><td class="price-cell">79.99</td><td>879.89</td></tr>
-              <tr><td>LEGENDARY</td><td>24GB</td><td>6 vCore</td><td>150GB</td><td>4</td><td class="price-3">59.99</td><td class="price-cell">119.99</td><td>1319.89</td></tr>
-              <tr><td>LEGENDARY +</td><td>32GB</td><td>8 vCore</td><td>200GB</td><td>4</td><td class="price-3">84.99</td><td class="price-cell">169.99</td><td>1869.89</td></tr>
-HTML;
-$wierszeSloty = <<<'HTML'
-              <tr><td>5</td><td>4GB</td><td>2.0 vCore</td><td>20GB</td><td>1</td><td>9.99</td><td class="price-cell">19.00</td><td>209.00</td></tr>
-              <tr><td>10</td><td>6GB</td><td>2.5 vCore</td><td>20GB</td><td>1</td><td>17.99</td><td class="price-cell">35.00</td><td>385.00</td></tr>
-              <tr><td>15</td><td>8GB</td><td>3.0 vCore</td><td>20GB</td><td>1</td><td>24.99</td><td class="price-cell">49.00</td><td>539.00</td></tr>
-              <tr><td>20</td><td>10GB</td><td>3.5 vCore</td><td>20GB</td><td>1</td><td>32.99</td><td class="price-cell">65.00</td><td>715.00</td></tr>
-              <tr><td>25</td><td>11GB</td><td>4.0 vCore</td><td>25GB</td><td>2</td><td>39.99</td><td class="price-cell">79.00</td><td>869.00</td></tr>
-              <tr><td>30</td><td>12GB</td><td>4.5 vCore</td><td>25GB</td><td>2</td><td>45.99</td><td class="price-cell">90.00</td><td>990.00</td></tr>
-              <tr><td>35</td><td>13GB</td><td>5.0 vCore</td><td>25GB</td><td>2</td><td>52.99</td><td class="price-cell">105.00</td><td>1155.00</td></tr>
-              <tr><td>40</td><td>14GB</td><td>5.5 vCore</td><td>25GB</td><td>2</td><td>59.99</td><td class="price-cell">119.00</td><td>1309.00</td></tr>
-              <tr><td>45</td><td>15GB</td><td>6.0 vCore</td><td>30GB</td><td>2</td><td>64.99</td><td class="price-cell">129.00</td><td>1419.00</td></tr>
-              <tr><td>50</td><td>16GB</td><td>6.5 vCore</td><td>35GB</td><td>2</td><td>69.99</td><td class="price-cell">139.00</td><td>1529.00</td></tr>
-              <tr><td>100</td><td>18GB</td><td>7.0 vCore</td><td>40GB</td><td>4</td><td>75.99</td><td class="price-cell">150.00</td><td>1650.00</td></tr>
-HTML;
 
 $en1 = <<<'HTML'
     <div class="ai-summary">
@@ -38,7 +15,8 @@ $en1 = <<<'HTML'
 
       <h1>Terms of Service - DNCT</h1>
       <p><strong>Effective date:</strong> 7 February 2026<br>
-      <strong>Updated:</strong> 4 October 2026 - rules for starting the service, the right of withdrawal and the voluntary 24 h Refund Guarantee. For new orders this version applies from the moment the contract is concluded. For existing Customers, changes that require notice apply after the information is delivered on a durable medium and after the period stated in section 14.</p>
+      <strong>Updated:</strong> 13 October 2026 - the price tables in sections 3 and 4 replaced with a reference to the price list (prices are unchanged).<br>
+      <strong>Previously:</strong> 4 October 2026 - rules for starting the service, the right of withdrawal and the voluntary 24 h Refund Guarantee. For new orders this version applies from the moment the contract is concluded. For existing Customers, changes that require notice apply after the information is delivered on a durable medium and after the period stated in section 14.</p>
       <p>This document sets out the rules under which DNCT (hereinafter: "DNCT", "the Provider") provides its services. By using the services, the Customer accepts the provisions below.</p>
 
       <section>
@@ -67,36 +45,24 @@ $en1 = <<<'HTML'
       </section>
 
     <section>
-        <h2>3. Minecraft price list (PLN)</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Plan</th><th>RAM</th><th>CPU</th><th>SSD</th><th>Backups</th><th>Week</th><th>Month</th><th>Year</th></tr>
-            </thead>
-            <tbody>
-HTML;
-$en2 = <<<'HTML'
-            </tbody>
-          </table>
-        </div>
+        <h2>3. Prices</h2>
+        <ol>
+          <li>Current prices for all services are given in the <a href="https://game.dnct.pl/cennik">price list</a> and on the pages of the individual games: <a href="https://game.dnct.pl/hosting-minecraft">Minecraft</a>, <a href="https://game.dnct.pl/hosting-project-zomboid">Project Zomboid</a> and <a href="https://game.dnct.pl/hosting-vintage-story">Vintage Story</a>.</li>
+          <li>Prices are gross prices in Polish złoty (PLN) for the chosen billing period (week, month or year).</li>
+          <li>The price shown to the Customer before payment and in the order confirmation is binding (section 2). A change to the price list does not change the price of a period already paid for.</li>
+        </ol>
       </section>
 
       <section>
-        <h2>4. Project Zomboid &amp; Vintage Story price list (PLN)</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Slots</th><th>RAM</th><th>CPU</th><th>SSD</th><th>Backups</th><th>Week</th><th>Month</th><th>Year</th></tr>
-            </thead>
-            <tbody>
+        <h2>4. Plans and parameters</h2>
+        <ol>
+          <li>Minecraft servers are sold as ready-made plans with fixed parameters.</li>
+          <li>Project Zomboid and Vintage Story servers are chosen by the number of players (slots); the allocated resources and the price depend on the chosen tier.</li>
+          <li>The allocated RAM, CPU, disk space and number of backups are shown for each plan or tier in the price list.</li>
+        </ol>
+      </section>
 HTML;
 $en3 = <<<'HTML'
-            </tbody>
-          </table>
-          <p class="small">*The table above shows selected plans. The full offer is available in the panel.</p>
-        </div>
-      </section>
-
       <section>
         <h2>5. Contract, registration and demo account</h2>
         <ol>
@@ -245,7 +211,8 @@ $de1 = <<<'HTML'
 
       <h1>Allgemeine Geschäftsbedingungen - DNCT</h1>
       <p><strong>Inkrafttreten:</strong> 7. Februar 2026<br>
-      <strong>Aktualisiert:</strong> 4. Oktober 2026 - Regeln zum Start des Dienstes, Widerrufsrecht und freiwillige 24-h-Geld-zurück-Garantie. Für neue Bestellungen gilt diese Fassung ab Vertragsschluss. Für bestehende Kunden gelten mitteilungspflichtige Änderungen nach Zustellung der Information auf einem dauerhaften Datenträger und nach Ablauf der in Punkt 14 genannten Frist.</p>
+      <strong>Aktualisiert:</strong> 13. Oktober 2026 - die Preistabellen in Punkt 3 und 4 durch einen Verweis auf die Preisliste ersetzt (Preise unverändert).<br>
+      <strong>Zuvor:</strong> 4. Oktober 2026 - Regeln zum Start des Dienstes, Widerrufsrecht und freiwillige 24-h-Geld-zurück-Garantie. Für neue Bestellungen gilt diese Fassung ab Vertragsschluss. Für bestehende Kunden gelten mitteilungspflichtige Änderungen nach Zustellung der Information auf einem dauerhaften Datenträger und nach Ablauf der in Punkt 14 genannten Frist.</p>
       <p>Dieses Dokument regelt die Bedingungen, unter denen DNCT (im Folgenden: „DNCT“, „Anbieter“) seine Dienste erbringt. Mit der Nutzung der Dienste akzeptiert der Kunde die folgenden Bestimmungen.</p>
 
       <section>
@@ -274,36 +241,24 @@ $de1 = <<<'HTML'
       </section>
 
     <section>
-        <h2>3. Preisliste Minecraft (PLN)</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Paket</th><th>RAM</th><th>CPU</th><th>SSD</th><th>Backups</th><th>Woche</th><th>Monat</th><th>Jahr</th></tr>
-            </thead>
-            <tbody>
-HTML;
-$de2 = <<<'HTML'
-            </tbody>
-          </table>
-        </div>
+        <h2>3. Preise</h2>
+        <ol>
+          <li>Die aktuellen Preise aller Dienste stehen in der <a href="https://game.dnct.pl/cennik">Preisliste</a> und auf den Seiten der einzelnen Spiele: <a href="https://game.dnct.pl/hosting-minecraft">Minecraft</a>, <a href="https://game.dnct.pl/hosting-project-zomboid">Project Zomboid</a> und <a href="https://game.dnct.pl/hosting-vintage-story">Vintage Story</a>.</li>
+          <li>Die Preise sind Bruttopreise in polnischen Złoty (PLN) für den gewählten Abrechnungszeitraum (Woche, Monat oder Jahr).</li>
+          <li>Verbindlich ist der Preis, der dem Kunden vor der Zahlung und in der Bestellbestätigung angezeigt wird (Punkt 2). Eine Änderung der Preisliste ändert nicht den Preis eines bereits bezahlten Zeitraums.</li>
+        </ol>
       </section>
 
       <section>
-        <h2>4. Preisliste Project Zomboid &amp; Vintage Story (PLN)</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Slots</th><th>RAM</th><th>CPU</th><th>SSD</th><th>Backups</th><th>Woche</th><th>Monat</th><th>Jahr</th></tr>
-            </thead>
-            <tbody>
+        <h2>4. Pakete und Parameter</h2>
+        <ol>
+          <li>Minecraft-Server werden als fertige Pakete mit festen Parametern verkauft.</li>
+          <li>Project-Zomboid- und Vintage-Story-Server werden nach Spielerzahl (Slots) gewählt; von der gewählten Stufe hängen die zugewiesenen Ressourcen und der Preis ab.</li>
+          <li>Zugewiesener RAM, CPU, Speicherplatz und Anzahl der Backups stehen bei jedem Paket bzw. jeder Stufe in der Preisliste.</li>
+        </ol>
+      </section>
 HTML;
 $de3 = <<<'HTML'
-            </tbody>
-          </table>
-          <p class="small">*Die Tabelle oben zeigt ausgewählte Pakete. Das volle Angebot ist im Panel verfügbar.</p>
-        </div>
-      </section>
-
       <section>
         <h2>5. Vertrag, Registrierung und Demo-Konto</h2>
         <ol>
@@ -448,11 +403,11 @@ return [
 'en' => [
     'title' => 'Terms of Service - DNCT Hosting',
     'opis'  => 'DNCT Hosting Terms of Service: payments, withdrawal, refund guarantee, complaints, data protection and web hosting rules.',
-    'tresc' => $en1 . $wierszeMc . $en2 . $wierszeSloty . $en3,
+    'tresc' => $en1 . $en3,
 ],
 'de' => [
     'title' => 'AGB - DNCT Hosting',
     'opis'  => 'AGB von DNCT Hosting: Zahlungen, Widerruf, Geld-zurück-Garantie, Reklamationen, Datenschutz und Regeln für Webhosting.',
-    'tresc' => $de1 . strtr($wierszeMc, ['>DEVeloper<' => '>DEVeloper<', '>Basic<' => '>Basis<', '>Advanced<' => '>Fortgeschritten<', '>Master<' => '>Meister<', '>LEGENDARY<' => '>LEGENDÄR<', '>LEGENDARY +<' => '>LEGENDÄR +<']) . $de2 . $wierszeSloty . $de3,
+    'tresc' => $de1 . $de3,
 ],
 ];

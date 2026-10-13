@@ -261,6 +261,39 @@ function render_slot_configurator(
                 </div>
             </div>
         </div>
+
+        <?php /* Pełna tabela progów w zwykłym HTML (13.10.2026). Suwak liczy
+                 ceny w JS, a boty wyszukiwarek i czatów AI zwykle JS nie
+                 uruchamiają - bez tej tabeli widziały tylko "od X zł".
+                 Te same ceny co suwak i kasa: pricing_apply_period(). */ ?>
+        <details class="cfg-table">
+            <summary>Wszystkie progi i ceny<?php if ($gameName !== ''): ?> - <?php echo htmlspecialchars($gameName, ENT_QUOTES, 'UTF-8'); ?><?php endif; ?></summary>
+            <div class="cfg-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sloty</th><th>RAM</th><th>Procesor</th><th>Dysk SSD</th><th>Backupy</th>
+                            <?php foreach ($periods as $p): ?><th><?php echo htmlspecialchars((string)$p['label']); ?></th><?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($tiers as $t): ?>
+                            <tr<?php echo !empty($t['sold_out']) ? ' class="is-out"' : ''; ?>>
+                                <td><strong><?php echo (int)$t['slots']; ?></strong></td>
+                                <td><?php echo rtrim(rtrim(number_format((float)$t['ram_gb'], 1, '.', ''), '0'), '.'); ?> GB</td>
+                                <td><?php echo rtrim(rtrim(number_format((float)$t['cpu_cores'], 1, '.', ''), '0'), '.'); ?> vCore</td>
+                                <td><?php echo (int)round((int)$t['ssd_mb'] / 1024); ?> GB</td>
+                                <td><?php echo (int)$t['backups_limit']; ?></td>
+                                <?php foreach ($periods as $p): ?>
+                                    <td><?php echo number_format(pricing_apply_period((float)$t['price'], $p), 2, ',', ''); ?> zł</td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="cfg-table-note">Ceny brutto w złotych. Przekreślone progi są chwilowo wyprzedane.</p>
+        </details>
     </div>
     <?php
 }
