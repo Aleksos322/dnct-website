@@ -9,6 +9,14 @@
  * Ta strona jest w pełni samodzielna, żeby zawsze się wyświetliła.
  */
 http_response_code(500);
+/* Wersja EN/DE (backend/lib/i18n.php): sam filtr tłumaczeń, bez bootstrapu -
+   strona błędu ma się wyświetlić także przy awarii bazy czy sesji. */
+foreach (['assets', 'i18n'] as $lib) {
+    @include_once dirname(__DIR__) . '/backend/lib/' . $lib . '.php';
+}
+if (function_exists('i18n_lang') && i18n_lang() !== 'pl') {
+    ob_start('i18n_filtr');
+}
 ?>
 <!DOCTYPE html>
 <html lang="pl">

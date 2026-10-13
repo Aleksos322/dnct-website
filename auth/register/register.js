@@ -20,6 +20,11 @@
 (function () {
     'use strict';
 
+    // Wersja EN/DE (assets/js/i18n.js): tekstów sklejanych w JS i atrybutów
+    // MutationObserver nie złapie, więc tłumaczymy je tu. Leniwie, bo i18n.js
+    // dochodzi na końcu strony, już po tym skrypcie.
+    function T(t) { return window.DNCT_T ? window.DNCT_T(t) : t; }
+
     // ============================================================
     // KONFIGURACJA
     // ============================================================
@@ -162,19 +167,19 @@
             var checks = passwordChecks(value);
             var missing = [];
             if (!checks.length) {
-                missing.push('min. 8 znaków');
+                missing.push(T('min. 8 znaków'));
             }
             if (!checks.upper) {
-                missing.push('wielką literę');
+                missing.push(T('wielką literę'));
             }
             if (!checks.digit) {
-                missing.push('cyfrę');
+                missing.push(T('cyfrę'));
             }
             if (!checks.special) {
-                missing.push('znak specjalny');
+                missing.push(T('znak specjalny'));
             }
             if (missing.length) {
-                return fail('Hasło musi zawierać: ' + missing.join(', ') + '.');
+                return fail(T('Hasło musi zawierać:') + ' ' + missing.join(', ') + '.');
             }
             return ok();
         }
@@ -622,7 +627,7 @@
                 return;
             }
             els.progress.setAttribute('data-active-step', String(step));
-            els.progress.setAttribute('aria-label', 'Postęp rejestracji: krok ' + step + ' z 3');
+            els.progress.setAttribute('aria-label', T('Postęp rejestracji: krok ' + step + ' z 3'));
 
             Array.prototype.forEach.call(els.progress.querySelectorAll('[data-indicator]'), function (node) {
                 var index = Number(node.getAttribute('data-indicator'));

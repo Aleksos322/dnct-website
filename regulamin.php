@@ -270,5 +270,5 @@ ob_start();
       </section>
 </div>
 <?php
-$content = ob_get_clean();
+$content = i18n_dokument('regulamin', (string)ob_get_clean(), $pageTitle, $metaDescription);
 require __DIR__ . '/assets/clear/clear.php';
