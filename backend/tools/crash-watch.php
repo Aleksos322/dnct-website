@@ -94,6 +94,12 @@ foreach ($servers as $s) {
         continue;
     }
 
+    // Areny Survival Games plugin sam włącza i wyłącza między meczami - ich
+    // "offline" to norma, nie crash. Do licznika błędów API wyżej dalej wchodzą.
+    if (preg_match('/\bSG\s*\|\s*ARENA\s*\d+/i', (string)$s['name'])) {
+        continue;
+    }
+
     $stopped = $state === 'offline';
     $restarted = in_array($state, ['running', 'starting'], true)
         && $uptime + 5000 < (int)$was['uptime'];
