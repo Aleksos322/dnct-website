@@ -301,8 +301,22 @@
     transition: background 0.2s ease, color 0.2s ease;
 }
 .cennik-page .ord-check:has(input:checked) .ord-req { background: rgba(34, 197, 94, 0.14); color: #4ade80; }
-.cennik-page .ord-check-start { color: #94a3b8; font-size: 0.7rem; }
-.cennik-page .ord-consents-hint { margin: 0.5rem 0 0 0.25rem; color: #64748b; font-size: 0.68rem; line-height: 1.5; }
+.cennik-page .ord-check-start .ord-check-text { display: grid; gap: 0.25rem; }
+.cennik-page .ord-check-title { color: #e2e8f0; font-size: 0.8rem; font-weight: 800; }
+.cennik-page .ord-check-legal { color: #94a3b8; font-size: 0.68rem; }
+.cennik-page .ord-start-hint {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.5;
+}
+.cennik-page .ord-start-later { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+.cennik-page .ord-start-later strong { font-weight: 900; }
+.cennik-page .ord-start-now { display: none; background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.cennik-page .ord-consents:has([data-role="immediateStart"]:checked) .ord-start-later { display: none; }
+.cennik-page .ord-consents:has([data-role="immediateStart"]:checked) .ord-start-now { display: block; }
 
 /* "Co dalej" - dół lewej karty (margin-top:auto), trzy kroki poziomo
    połączone linią, jak pasek postępu */
