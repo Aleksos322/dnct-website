@@ -130,6 +130,25 @@ function i18n_wzorce(): array
         ['^Hosting (Minecraft|Project Zomboid|Vintage Story) - serwer od (.+)/mies\. \| DNCT$', '$1 server hosting from $2/mo | DNCT', '$1 Server-Hosting ab $2/Monat | DNCT'],
         ['^\+(\d+) więcej$', '+$1 more', '+$1 weitere'],
         ['^Pomoc: (Minecraft|Project Zomboid|Vintage Story)$', 'Help: $1', 'Hilfe: $1'],
+        // Poradniki (components/poradnik.php, poradniki/index.php)
+        ['^Aktualizacja: ([\d.]+) · (.+)$', 'Updated: $1 · $2', 'Aktualisiert: $1 · $2'],
+        ['^Hosting (Minecraft|Project Zomboid|Vintage Story) od (.+)/mies\.$', '$1 hosting from $2/mies.', '$1-Hosting ab $2/mies.'],
+        // Twoje serwery (twoje-serwery.php, servers.js)
+        ['^Zamówienie #(\d+) · kupione ([\d.]+)( ·)?$', 'Order #$1 · bought $2$3', 'Bestellung #$1 · gekauft am $2$3'],
+        ['^Dodany bezpośrednio w panelu · utworzony ([\d.]+)( ·)?$', 'Added directly in the panel · created $1$2', 'Direkt im Panel angelegt · erstellt am $1$2'],
+        ['^(\d+) dni po terminie$', '$1 days overdue', '$1 Tage überfällig'],
+        ['^(\d+) dni$', '$1 days', '$1 Tage'],
+        ['^\+(\d+) dni$', '+$1 days', '+$1 Tage'],
+        ['^bez dopłaty · \+(\d+) dni$', 'no extra cost · +$1 days', 'ohne Aufpreis · +$1 Tage'],
+        ['^dopłata (.+)$', 'top-up $1', 'Aufpreis $1'],
+        ['^(.+) zł/mies\. dalej$', '$1 zł/mies. afterwards', '$1 zł/mies. danach'],
+        ['^(\d\d\.\d\d\.\d{4}) o (\d\d:\d\d)$', '$1 at $2', '$1 um $2'],
+        ['^do (.+), potem odnawia się sam$', 'until $1, then renews automatically', 'bis $1, danach verlängert er sich selbst'],
+        ['^serwer będzie działał do (.+)$', 'the server will run until $1', 'der Server läuft bis $1'],
+        ['^ostatnia: (.+)$', 'last: $1', 'letztes: $1'],
+        ['^Nie udało się pobrać opłaty\. Serwer działa do (.+) - popraw dane karty albo przedłuż jednorazowo\.$', 'We couldn\'t charge your card. The server runs until $1 - update your card details or renew with a one-off payment.', 'Die Abbuchung ist fehlgeschlagen. Der Server läuft bis $1 - aktualisiere deine Kartendaten oder verlängere einmalig.'],
+        ['^(\d+)% mniej$', '$1% less', '$1% weniger'],
+        ['^Poleciłeś: (\d+) · zdobyte dni: (\d+)$', 'Referred: $1 · days earned: $2', 'Eingeladen: $1 · erhaltene Tage: $2'],
     ];
 }
 

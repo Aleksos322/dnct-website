@@ -943,6 +943,17 @@
     text-align: center;
 }
 
+/* LEGENDARNY / LEGENDARNY + (plan-card-cennik.php): odręczny bursztyn jak
+   dopiski ze strzałkami (.pnl-hand), lekko przekrzywiony. */
+.cennik-page .pcard-name.is-legend,
+.home-p3d-index .is-legend {
+    font-family: 'Segoe Script', 'Bradley Hand', 'Ink Free', 'Brush Script MT', 'Comic Sans MS', cursive;
+    color: #fbbf24;
+    letter-spacing: 0;
+    text-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+}
+.cennik-page .pcard-name.is-legend { rotate: -3deg; }
+
 /* Parametry jako siatka 2x2, nie lista czterech wierszy. Cztery kafelki czytają
    się jak tabliczka znamionowa i pozwalają porównać dwa plany rzutem oka -
    lista wymagała czytania linia po linii. */

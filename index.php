@@ -271,7 +271,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 <ol class="home-p3d-index">
                     <?php foreach ($showcasePlans as $k => $row): ?>
                         <li><button type="button" data-p3d-go="<?php echo $k; ?>"<?php echo !empty($row['sold_out']) ? ' class="is-out"' : ''; ?>>
-                            <span><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></span>
+                            <span<?php echo str_starts_with(mb_strtoupper((string)($row['name'] ?? '')), 'LEGENDARN') ? ' class="is-legend"' : ''; ?>><?php echo htmlspecialchars((string)($row['name'] ?? '')); ?></span>
                             <em><?php echo number_format((float)($row['price'] ?? 0), 2, ',', ''); ?> zł</em>
                         </button></li>
                     <?php endforeach; ?>
@@ -340,14 +340,14 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 od 3,99 zł za tydzień - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
             </p>
             <p>
-                Serwery stoją na naszym własnym sprzęcie (Proxmox), nie na odsprzedanych
+                Serwery stoją na naszym własnym sprzęcie, nie na odsprzedanych
                 zasobach - stąd realna dostępność, nie tylko deklaracja. Do tego polska
                 infrastruktura, ochrona DDoS, kopie zapasowe w panelu i wsparcie przez Discord.
             </p>
         </div>
 
         <div class="home-bento-hw glass home-reveal" style="--d:1">
-            <p class="home-hw-big">Własny sprzęt.<small>Proxmox w Polsce, nie odsprzedane zasoby - dlatego „Wyprzedane” w cenniku znaczy naprawdę wyprzedane.</small></p>
+            <p class="home-hw-big">Własny sprzęt.<small>Serwery w Polsce, nie odsprzedane zasoby - dlatego „Wyprzedane” w cenniku znaczy naprawdę wyprzedane.</small></p>
             <?php /* Miniaturowa szafa serwerowa (13.10.2026). Po wejściu w kadr
                      serwery wsuwają się po kolei i "bootują" (diody zasilania),
                      potem migają dyski i zmienia się obciążenie (home.js), a po
