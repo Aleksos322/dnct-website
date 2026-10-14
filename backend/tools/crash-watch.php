@@ -58,6 +58,11 @@ $apiErrors = 0;
 // dwa fałszywe "Brak łącza". Po pierwszym 429 dalsze zapytania i tak dostaną
 // 429, więc kończymy rundę i zostawiamy stary stan.
 $limitPanelu = false;
+// Diagnoza łącza robiona PRZY PIERWSZYM błędzie, nie po rundzie: przerwy u
+// dostawcy trwają kilkadziesiąt sekund, a runda z timeoutami ponad minutę -
+// sprawdzone na końcu łącze już działało i alarm mówił "Panel nie odpowiada"
+// (2026-10-14 16:19, status.dnct.pl w tej samej chwili: internet=0).
+$siec = null;
 
 foreach ($servers as $s) {
     $uuid = (string)$s['uuid'];
@@ -98,6 +103,7 @@ foreach ($servers as $s) {
     }
     if ($res['code'] !== 200 || !is_array($attr)) {
         $apiErrors++;
+        $siec ??= siec_diagnoza();
         // Zostawiamy stary stan - chwilowy błąd API nie może wyglądać jak crash.
         if ($was !== null) {
             $next[$uuid] = $was;
@@ -139,7 +145,7 @@ foreach ($servers as $s) {
 // API panelu idzie przez Cloudflare, więc najpierw ustalamy, czy padł węzeł,
 // czy łącze (lib/siec.php) - inaczej przerwa u dostawcy wygląda jak awaria Wingsa.
 if ($apiErrors >= 5 && ($prev['_api_errors'] ?? 0) < 5) {
-    $siec = siec_diagnoza();
+    $siec ??= siec_diagnoza();
     $alerts[] = $siec['wezly'] === true && (!$siec['internet'] || !$siec['cloudflare'])
         ? ['Brak łącza z internetem', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 4, 'globe_with_meridians', 'https://status.dnct.pl', null, 'lacze']
         : [$siec['wezly'] === true ? 'Panel nie odpowiada' : 'Panel/Wings nie odpowiada', $apiErrors . ' serwerów bez odpowiedzi z API panelu. ' . $siec['werdykt'], 5, 'skull', 'https://panel.dnct.pl/admin/nodes', null, 'wezel'];
