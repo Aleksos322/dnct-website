@@ -1,9 +1,36 @@
-/* Katalog planów: widok 3D jak na głównej, bez przypinania użytkownika
-   na kilku ekranach przewijania. Zakup i wycena pozostają w cennik.js. */
+/* Katalog planów: przewijanie przypiętej sekcji steruje kartami, jak na głównej.
+   Zakup i wycena pozostają w cennik.js. Na telefonie: przyciski i gest w bok. */
 (function () {
     'use strict';
     var catalogue = document.querySelector('.cnk-catalogue');
     if (!catalogue) return;
+    var scrollArea = catalogue.parentElement;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var backTop = document.querySelector('[data-catalogue-top]');
+    if (backTop) {
+        // Poza kontekstem warstw main: stopka nie może zasłaniać przycisku.
+        document.body.appendChild(backTop);
+        var selection = document.getElementById('pick-bar');
+        if (selection) {
+            var updateSelectionOffset = function () {
+                backTop.classList.toggle('is-above-selection', selection.classList.contains('is-visible'));
+            };
+            new MutationObserver(updateSelectionOffset).observe(selection, { attributes: true, attributeFilter: ['class'] });
+            updateSelectionOffset();
+        }
+        function updateBackTop() { backTop.hidden = window.scrollY < 240; }
+        backTop.addEventListener('click', function () {
+            if (window.dnctLenis && !reduce.matches) window.dnctLenis.scrollTo(0, { duration: 0.9 });
+            else window.scrollTo({ top: 0, behavior: reduce.matches ? 'instant' : 'smooth' });
+            var heading = catalogue.querySelector('h1');
+            if (heading) {
+                heading.tabIndex = -1;
+                heading.focus({ preventScroll: true });
+            }
+        });
+        window.addEventListener('scroll', updateBackTop, { passive: true });
+        updateBackTop();
+    }
 
     catalogue.querySelectorAll('[data-catalogue-carousel]').forEach(function (root) {
         var stage = root.querySelector('.cnk-plan-stage');
@@ -12,28 +39,58 @@
         var count = root.querySelector('[data-catalogue-count]');
         var prev = root.querySelector('[data-catalogue-prev]');
         var next = root.querySelector('[data-catalogue-next]');
-        var active = 0, queued = false, lastSwipe = 0, start = null;
+        var skip = root.querySelector('[data-catalogue-skip]');
+        var hint = root.querySelector('.cnk-plan-navigation p');
+        var active = 0, position = 0, queued = false, lastSwipe = 0, start = null;
+        var pinned = false, scrollDistance = 0;
+        var pinTop = 88;
         if (!stage || !cards.length) return;
 
+        function scrollTo(top, immediate) {
+            if (window.dnctLenis) window.dnctLenis.scrollTo(top, { immediate: !!immediate, duration: 0.65 });
+            else window.scrollTo({ top: top, behavior: immediate || reduce.matches ? 'instant' : 'smooth' });
+        }
+        function scrollStart() {
+            return scrollArea.getBoundingClientRect().top + window.scrollY - pinTop;
+        }
+        function syncLayout() {
+            var height = catalogue.offsetHeight;
+            var wasPinned = pinned;
+            var startY = scrollStart();
+            var wasVisible = catalogue.getBoundingClientRect().bottom > pinTop && scrollArea.getBoundingClientRect().top <= pinTop;
+            pinned = root.closest('.cennik-panel').classList.contains('is-active') &&
+                window.innerWidth > 860 && !reduce.matches && cards.length > 1 && height <= window.innerHeight - pinTop;
+            scrollDistance = (cards.length - 1) * window.innerHeight * 0.36;
+            scrollArea.classList.toggle('is-scroll-driven', pinned);
+            scrollArea.style.height = pinned ? (height + scrollDistance) + 'px' : '';
+            hint.firstChild.nodeValue = pinned ? 'Przewiń, aby zmienić plan' : 'Wybierz plan strzałkami';
+            hint.querySelector('span').textContent = pinned ? 'lub wybierz go z listy' : 'lub przesuń karty';
+            if (wasPinned && !pinned && wasVisible) scrollTo(Math.max(0, startY), true);
+            queueRender();
+        }
         function render() {
             queued = false;
             if (!stage.clientWidth) return;
+            if (pinned) {
+                position = Math.max(0, Math.min(cards.length - 1, (window.scrollY - scrollStart()) / scrollDistance * (cards.length - 1)));
+                active = Math.round(position);
+            }
             var width = cards[active].offsetWidth;
             var height = cards[active].offsetHeight;
             var scale = Math.min(1, (stage.clientHeight - 32) / Math.max(1, height));
             var compact = window.innerWidth <= 860;
             cards.forEach(function (card, index) {
-                var distance = index - active;
+                var distance = index - position;
                 var spread = Math.min(3, Math.abs(distance));
                 var direction = Math.sign(distance);
-                var visible = Math.abs(distance) <= 2;
+                var visible = Math.abs(distance) <= 2.6;
                 var x = direction * spread * width * (compact ? 0.66 : 0.78);
                 var z = -spread * (compact ? 170 : 230);
                 var rotation = -direction * Math.min(spread, 2.2) * 28;
                 card.style.transform = 'translate(-50%, -50%) translate3d(' + x + 'px, 0, ' + z + 'px) rotateY(' + rotation + 'deg) scale(' + (scale * (1 - spread * 0.04)) + ')';
                 card.style.opacity = visible ? '1' : '0';
                 card.style.visibility = visible ? 'visible' : 'hidden';
-                card.style.zIndex = String(10 - spread);
+                card.style.zIndex = String(100 - Math.round(spread * 10));
                 card.classList.toggle('is-front', index === active);
                 card.setAttribute('aria-hidden', index === active ? 'false' : 'true');
                 var pick = card.querySelector('.plan-pick');
@@ -53,7 +110,12 @@
             requestAnimationFrame(render);
         }
         function show(index) {
-            active = Math.max(0, Math.min(cards.length - 1, index));
+            index = Math.max(0, Math.min(cards.length - 1, index));
+            if (pinned) {
+                scrollTo(scrollStart() + scrollDistance * index / (cards.length - 1));
+                return;
+            }
+            active = position = index;
             queueRender();
         }
         root.classList.add('is-enhanced');
@@ -62,6 +124,9 @@
         });
         prev.addEventListener('click', function () { show(active - 1); });
         next.addEventListener('click', function () { show(active + 1); });
+        skip.addEventListener('click', function () {
+            if (pinned) scrollTo(scrollStart() + scrollArea.offsetHeight);
+        });
         cards.forEach(function (card, index) {
             card.addEventListener('click', function (event) {
                 if (index !== active || Date.now() - lastSwipe < 400) {
@@ -91,12 +156,17 @@
         }, { passive: true });
         stage.addEventListener('pointercancel', function () { start = null; });
         var wheelAmount = 0, lastWheel = 0;
-        stage.addEventListener('wheel', function (event) {
-            if (event.ctrlKey || event.metaKey || window.innerWidth <= 860) return;
-            var delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        // Niski ekran nie mieści całej sekcji sticky. Wtedy kółko nad CAŁYM
+        // katalogiem nadal wybiera plany, a na krańcach oddaje scroll stronie.
+        catalogue.addEventListener('wheel', function (event) {
+            if (pinned || event.ctrlKey || event.metaKey || window.innerWidth <= 860 ||
+                !root.closest('.cennik-panel').classList.contains('is-active')) return;
+            var delta = (Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY) *
+                (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
             var direction = Math.sign(delta);
             if (!direction || (direction < 0 && active === 0) || (direction > 0 && active === cards.length - 1)) return;
             event.preventDefault();
+            event.stopPropagation();
             if (Date.now() - lastWheel < 350) return;
             if (Math.sign(wheelAmount) !== direction) wheelAmount = 0;
             wheelAmount += delta;
@@ -104,16 +174,19 @@
             wheelAmount = 0;
             lastWheel = Date.now();
             show(active + direction);
-        }, { passive: false });
+        }, { passive: false, capture: true });
         if ('ResizeObserver' in window) {
-            var observer = new ResizeObserver(queueRender);
+            var observer = new ResizeObserver(syncLayout);
             observer.observe(stage);
+            observer.observe(catalogue);
             cards.forEach(function (card) { observer.observe(card); });
         }
-        window.addEventListener('resize', queueRender);
-        catalogue.querySelectorAll('.cennik-tab').forEach(function (tab) { tab.addEventListener('click', queueRender); });
-        if (document.fonts) document.fonts.ready.then(queueRender);
-        queueRender();
+        window.addEventListener('scroll', function () { if (pinned) queueRender(); }, { passive: true });
+        window.addEventListener('resize', syncLayout);
+        reduce.addEventListener('change', syncLayout);
+        catalogue.querySelectorAll('.cennik-tab').forEach(function (tab) { tab.addEventListener('click', syncLayout); });
+        if (document.fonts) document.fonts.ready.then(syncLayout);
+        syncLayout();
     });
 
     // Dostępne z klawiatury zakładki oraz powroty po logowaniu (#cfg-...).

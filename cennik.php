@@ -417,6 +417,7 @@ ob_start();
 
 <div class="cnk-wrap">
 
+<div class="cnk-catalogue-scroll">
 <section class="cnk-catalogue" aria-label="Wybierz grę i serwer">
 <!-- ============ HERO ============ -->
 <section class="cnk-hero">
@@ -525,11 +526,12 @@ ob_start();
                             <p>Wybierz plan z listy<br><span>lub przesuń karty</span></p>
                             <button type="button" data-catalogue-next aria-label="Następny plan">→</button>
                         </div>
+                        <button type="button" class="cnk-plan-skip" data-catalogue-skip>Pomiń plany <span aria-hidden="true">↓</span></button>
                     </div>
                     <?php /* Gotowe plany. Gdy sprzedaż jest wyłączona, karta daje
                              się zaznaczyć i trafia do paska podsumowania. Gdy jest
                              włączona, jedynym celem klawiatury jest link „Zamawiam”. */ ?>
-                    <div class="cnk-plan-stage" tabindex="0" role="region" aria-label="Karty planów — użyj strzałek w lewo i w prawo" data-lenis-prevent>
+                    <div class="cnk-plan-stage" tabindex="0" role="region" aria-label="Karty planów — użyj strzałek w lewo i w prawo">
                         <?php foreach ($game['plans'] as $k => $plan): ?>
                             <?php
                             // Pozycja planu na skali mocy w obrebie gry.
@@ -608,6 +610,7 @@ ob_start();
         </div>
     <?php endif; ?>
 </section>
+</div><!-- /.cnk-catalogue-scroll -->
 
     <?php /* Pasmo wspólne ze stroną główną - patrz components/panel-band.php. */ ?>
     <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => CENNIK_PANEL_URL]); ?>
@@ -770,6 +773,10 @@ ob_start();
         <button type="button" class="pick-bar-clear" data-role="pickClear" aria-label="Wyczyść wybór">✕</button>
     </div>
 </div>
+
+<button type="button" class="cnk-back-top" data-catalogue-top aria-label="Wróć na górę strony" title="Wróć na górę strony" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-showcase.js'); ?>" defer></script>
