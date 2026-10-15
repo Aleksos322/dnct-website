@@ -106,6 +106,10 @@ function render_slot_configurator(
                             <div class="cfg-slots">
                                 <span class="cfg-slots-num" data-role="slots"><?php echo (int)$defaultTier['slots']; ?></span>
                                 <span class="cfg-slots-unit">slotów</span>
+                                <span class="cfg-stepper">
+                                    <button type="button" data-role="minus" aria-label="Mniej slotów">&minus;</button>
+                                    <button type="button" data-role="plus" aria-label="Więcej slotów">+</button>
+                                </span>
                             </div>
                         </div>
                         <?php /* Podpowiedź i ostrzeżenie o miejscu na węźle dzielą
@@ -118,9 +122,9 @@ function render_slot_configurator(
                         </div>
                     </div>
 
-                    <?php /* Natywny <input type="range"> zostaje (klawiatura,
-                             czytniki ekranu) - wypełnienie ścieżki rysuje CSS
-                             z --p, dymek i znaczniki progów to dekoracja + skróty. */ ?>
+                    <?php /* Natywny <input type="range"> leży nad ścieżką z odcinków progów
+                             (.cfg-tick), które pokazują wybór i dostępność. Klik w podpis
+                             progu albo -/+ też zmienia wybór (cennik.js). */ ?>
                     <div class="cfg-slider" data-role="slider" style="--n: <?php echo count($tiers) - 1; ?>">
                         <span class="cfg-bubble" data-role="bubble" aria-hidden="true"><?php echo (int)$defaultTier['slots']; ?></span>
                         <input type="range" class="cfg-range" data-role="range"
@@ -133,6 +137,11 @@ function render_slot_configurator(
                                     echo !empty($t['sold_out']) ? ' is-out' : (isset($t['fits']) && $t['fits'] !== null && (int)$t['fits'] <= 4 ? ' is-low' : '');
                                 ?>" data-index="<?php echo $i; ?>" style="--i: <?php echo $i; ?>"><i></i><span><?php echo (int)$t['slots']; ?></span></button>
                             <?php endforeach; ?>
+                        </div>
+                        <div class="cfg-legend" aria-hidden="true">
+                            <span class="is-free">wolne</span>
+                            <span class="is-low">ostatnie miejsca</span>
+                            <span class="is-out">wyprzedane</span>
                         </div>
                     </div>
                 </div>
@@ -218,6 +227,15 @@ function render_slot_configurator(
                             <span class="cfg-meter" aria-hidden="true"><i data-role="backupyMeter"></i></span>
                             <span class="pcard-spec-lbl">Backupy</span>
                         </li>
+                    </ul>
+
+                    <?php /* Co jest w cenie - te same obietnice co na stronie głównej
+                             (index.php, jak-to-dziala.php), żadnych nowych. */ ?>
+                    <ul class="cfg-included">
+                        <li>Serwer zakłada się sam, zaraz po płatności</li>
+                        <li>Ochrona DDoS, serwery w Polsce na własnym sprzęcie</li>
+                        <li>Konsola, pliki i kopie zapasowe w panelu</li>
+                        <li>Wsparcie na Discordzie</li>
                     </ul>
 
                     <div class="cfg-price-wrap">

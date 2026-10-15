@@ -429,8 +429,9 @@ ob_start();
 ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-vs.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-showcase.css'); ?>">
 
-<div class="cennik-page">
+<div class="cennik-page cnk-catalogue-page">
 
 <?php /* Warstwa dekoracji w marginesach bocznych. Wszystkie zestawy są w HTML-u
          od razu, a zakładka tylko przełącza widoczny - dzięki temu zmiana gry
@@ -449,6 +450,8 @@ ob_start();
 
 <div class="cnk-wrap">
 
+<div class="cnk-catalogue-scroll">
+<section class="cnk-catalogue" aria-label="Wybierz grę i serwer">
 <!-- ============ HERO ============ -->
 <section class="cnk-hero">
     <div class="cnk-hero-glow" aria-hidden="true"></div>
@@ -456,20 +459,16 @@ ob_start();
     <div class="cnk-hero-inner">
         <div class="cnk-hero-text">
             <span class="cnk-eyebrow">Cennik</span>
-            <?php /* data-type-text: cennik.js (initHeroTypewriter) czysci te
-                     spany i przepisuje je znak po znaku z migajacym "|" -
-                     tekst tutaj to jednoczesnie tresc SEO/dla czytnikow
-                     ekranu (bez JS zostaje widoczny od razu, normalnie) I
-                     zrodlo dla animacji, wiec nie ma dwoch kopii tego samego
-                     napisu do rozjechania przy edycji. */ ?>
+            <?php /* Stały nagłówek zostawia miejsce na widoczne od razu gry,
+                     karty i opinie. Strony konkretnych gier zachowują swoje SEO. */ ?>
 <?php if ($focus !== null): ?>
             <h1 class="cnk-h1"><span class="cnk-h1-accent"><?php echo htmlspecialchars($focus['h1_accent']); ?></span><br>
                 <span><?php echo htmlspecialchars($focus['h1_rest']); ?></span>
             </h1>
             <p class="cnk-focus-lead"><?php echo htmlspecialchars($focus['lead']); ?></p>
             <?php else: ?>
-            <h1 class="cnk-h1"><span class="cnk-h1-accent" data-type-text>Serwer</span><span data-type-text>, który</span><br>
-                <span data-type-text data-type-pause="220">nie zwalnia</span>
+            <h1 class="cnk-h1">Wybierz plan<br>
+                <span>hostingu gier</span>
             </h1>
             <?php endif; ?>
         </div>
@@ -512,11 +511,14 @@ ob_start();
                  jedna - to jedyny sposób, żeby klient w ogóle zauważył, że
                  hostujemy coś poza Minecraftem. */ ?>
         <?php if (count($gamesWithPlans) > 1): ?>
-            <div class="cennik-tabs" id="plans" role="tablist">
+            <div class="cennik-tabs" id="plans" role="tablist" aria-label="Wybierz grę">
                 <?php foreach ($gamesWithPlans as $i => $game): ?>
                     <button type="button"
                             class="cennik-tab<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                             role="tab"
+                            id="tab-<?php echo htmlspecialchars($game['type']); ?>"
+                            aria-controls="game-<?php echo htmlspecialchars($game['type']); ?>"
+                            tabindex="<?php echo $i === $activeIdx ? '0' : '-1'; ?>"
                             aria-selected="<?php echo $i === $activeIdx ? 'true' : 'false'; ?>"
                             data-target="game-<?php echo htmlspecialchars($game['type']); ?>">
                         <?php if (!empty($game['icon_img'])): ?>
@@ -525,7 +527,7 @@ ob_start();
                         <?php endif; ?>
                         <span><?php echo htmlspecialchars($game['name']); ?></span>
                         <span class="cennik-tab-count">
-                            <?php echo $game['plans'] ? count($game['plans']) : 'suwak'; ?>
+                            <?php echo $game['plans'] ? count($game['plans']) . ' planów' : 'Dobierz sloty'; ?>
                         </span>
                     </button>
                 <?php endforeach; ?>
@@ -535,19 +537,35 @@ ob_start();
         <?php foreach ($gamesWithPlans as $i => $game): ?>
             <div class="cennik-panel<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                  id="game-<?php echo htmlspecialchars($game['type']); ?>"
-                 role="tabpanel">
+                 role="tabpanel" aria-labelledby="tab-<?php echo htmlspecialchars($game['type']); ?>">
 
                 <?php if ($game['plans']): ?>
-                    <div class="cnk-panel">
-                    <div class="cnk-panel-head">
-                        <h2>Gotowe plany</h2>
-                        <p>Wybierz rozmiar - resztę mamy taką samą w każdym.</p>
+                    <div class="cnk-plan-showcase" data-catalogue-carousel>
+                    <div class="cnk-plan-copy">
+                        <h2><?php echo htmlspecialchars($game['name']); ?> <span>· gotowe plany</span></h2>
+                        <div class="cnk-plan-count" aria-live="polite" aria-atomic="true">
+                            <b data-catalogue-count>01</b><span>/ <?php echo str_pad((string)count($game['plans']), 2, '0', STR_PAD_LEFT); ?></span>
+                        </div>
+                        <ol class="cnk-plan-index" aria-label="Wybierz plan">
+                            <?php foreach ($game['plans'] as $k => $row): ?>
+                                <li><button type="button" data-catalogue-go="<?php echo $k; ?>" class="<?php echo $k === 0 ? 'is-active ' : ''; ?><?php echo !empty($row['sold_out']) ? 'is-out' : ''; ?>" aria-pressed="<?php echo $k === 0 ? 'true' : 'false'; ?>">
+                                    <span<?php echo str_ends_with(trim((string)$row['name']), '+') ? ' class="is-legend"' : ''; ?>><?php echo htmlspecialchars($row['name']); ?></span>
+                                    <em><?php echo htmlspecialchars(cennik_price_label($row['price'])); ?> zł</em>
+                                </button></li>
+                            <?php endforeach; ?>
+                        </ol>
+                        <div class="cnk-plan-navigation">
+                            <button type="button" data-catalogue-prev aria-label="Poprzedni plan" disabled>←</button>
+                            <p>Wybierz plan z listy<br><span>lub przesuń karty</span></p>
+                            <button type="button" data-catalogue-next aria-label="Następny plan">→</button>
+                        </div>
+                        <button type="button" class="cnk-plan-skip" data-catalogue-skip>Pomiń plany <span aria-hidden="true">↓</span></button>
                     </div>
                     <?php /* Gotowe plany. Gdy sprzedaż jest wyłączona, karta daje
                              się zaznaczyć i trafia do paska podsumowania. Gdy jest
                              włączona, jedynym celem klawiatury jest link „Zamawiam”. */ ?>
-                    <div class="plans-grid gap-8 items-stretch">
-                        <?php foreach ($game['plans'] as $plan): ?>
+                    <div class="cnk-plan-stage" tabindex="0" role="region" aria-label="Karty planów — użyj strzałek w lewo i w prawo">
+                        <?php foreach ($game['plans'] as $k => $plan): ?>
                             <?php
                             // Pozycja planu na skali mocy w obrebie gry.
                             // Skala PIERWIASTKOWA, nie liniowa. Rozpiętość planów to
@@ -559,6 +577,7 @@ ob_start();
                             $ramPos  = sqrt(((int)$plan['ram_mb'] - $game['ram_min']) / $ramSpan);
                             $isSelectable = !$salesOn && empty($plan['sold_out']);
                             ?>
+                            <div class="cnk-plan-slide<?php echo $k === 0 ? ' is-front' : ''; ?>" data-catalogue-card="<?php echo $k; ?>">
                             <div class="plan-pick<?php echo $isSelectable ? ' is-selectable' : ''; ?>"
                                  data-plan-id="<?php echo (int)$plan['id']; ?>"
                                  data-plan-name="<?php echo htmlspecialchars((string)$plan['name']); ?>"
@@ -597,6 +616,7 @@ ob_start();
                                 ]);
                                 ?>
                             </div>
+                            </div>
                         <?php endforeach; ?>
                     </div>
                     </div>
@@ -604,10 +624,10 @@ ob_start();
                 <?php else: ?>
                     <?php /* Gry rozliczane za sloty: zamiast gotowych planów klient
                              sam ustawia liczbę graczy suwakiem. */ ?>
-                    <div class="cnk-panel cnk-panel-cfg">
+                    <div class="cnk-panel cnk-panel-cfg" style="--cnk-game-icon: url('/assets/media/icons/gry/<?php echo htmlspecialchars($game['type']); ?>.webp')">
                     <div class="cfg-intro">
-                        <h2>Zbuduj serwer pod swoją ekipę</h2>
-                        <p>Przesuń suwak i ustaw liczbę graczy - resztę dobierzemy automatycznie.</p>
+                        <h2><?php echo htmlspecialchars($game['name']); ?> <span>· serwer dla Twojej ekipy</span></h2>
+                        <p>Wybierz liczbę graczy. RAM, procesor i cenę dobierzemy do wielkości serwera.</p>
                     </div>
                     <?php render_slot_configurator($game['type'], $game['tiers'], $periods, (string)$game['name'], $isLoggedIn, $salesOn); ?>
                     </div>
@@ -616,6 +636,14 @@ ob_start();
         <?php endforeach; ?>
 
     <?php endif; ?>
+
+    <?php if (!$dbError && $gamesWithPlans): ?>
+        <div class="cnk-catalogue-reviews">
+            <?php $opinieWariant = 'pasek'; require __DIR__ . '/components/opinie-google.php'; unset($opinieWariant); ?>
+        </div>
+    <?php endif; ?>
+</section>
+</div><!-- /.cnk-catalogue-scroll -->
 
     <?php /* Pasmo wspólne ze stroną główną - patrz components/panel-band.php. */ ?>
     <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => CENNIK_PANEL_URL]); ?>
@@ -805,7 +833,12 @@ ob_start();
     </div>
 </div>
 
+<button type="button" class="cnk-back-top" data-catalogue-top aria-label="Wróć na górę strony" title="Wróć na górę strony" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/cennik-showcase.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-split.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-vs.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
