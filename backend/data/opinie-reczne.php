@@ -8,6 +8,10 @@
  */
 
 return [
+    // Dopisane 16.10.2026 ze zrzutu od właściciela; oryginalna treść niemiecka.
+    // W Google zamiast zdjęcia jest inicjał — komponent pokaże literę M.
+    ['autor' => 'Maria', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Sehr hilfsbereite & kompetente Mitarbeiter! Ausgezeichnetes Erlebnis!'],
     // Dopisane 13.10.2026 z wizytówki (zrzuty od właściciela). Adam Oryszczuk
     // bez zdjęcia w Google (sama litera) - komponent pokaże inicjały.
     ['autor' => 'antoxpl', 'zdjecie' => '/assets/media/opinie/antoxpl.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
