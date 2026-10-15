@@ -1,6 +1,6 @@
 /* Cennik jak na stronie głównej. Zakres ograniczony do nowego katalogu:
    wspólne karty, ceny i konfigurator nadal mają jedno źródło danych. */
-.cennik-page.cnk-catalogue-page { margin-top: -28px; }
+.cennik-page.cnk-catalogue-page { margin-top: -28px; overflow-x: clip; }
 .cnk-catalogue-page .cnk-decor-layer { display: none; }
 .cnk-catalogue-page .cnk-wrap { max-width: 1600px; }
 .cnk-back-top {
@@ -17,7 +17,7 @@
 .cnk-back-top:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
 .cnk-back-top.is-above-selection { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 .cnk-catalogue-scroll.is-scroll-driven > .cnk-catalogue { position: sticky; top: 88px; }
-.cnk-catalogue-scroll.is-scroll-driven .cnk-plan-showcase .cnk-plan-slide { transition: opacity 0.15s ease, filter 0.15s ease; }
+.cnk-catalogue-scroll.is-scroll-driven .cnk-plan-showcase .cnk-plan-slide { transition: filter 0.4s ease; }
 .cnk-catalogue {
     display: grid;
     grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
@@ -100,14 +100,14 @@
 .cnk-plan-slide { flex: 0 0 min(350px, 82vw); min-width: 0; scroll-snap-align: center; }
 .cnk-plan-showcase.is-enhanced .cnk-plan-stage {
     display: block; position: relative; height: clamp(440px, calc(100svh - 480px), 760px);
-    padding: 0; overflow: clip; perspective: 1600px; touch-action: pan-y;
+    padding: 0; overflow: visible; perspective: 1700px; touch-action: pan-y;
 }
 .cnk-plan-showcase.is-enhanced .cnk-plan-slide {
     position: absolute; left: 50%; top: 50%; width: min(350px, 80vw);
     transform: translate(-50%, -50%);
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease, filter 0.4s ease;
 }
-.cnk-plan-showcase.is-enhanced .cnk-plan-slide:not(.is-front) { filter: saturate(0.65) brightness(0.65); cursor: pointer; }
+.cnk-plan-showcase.is-enhanced .cnk-plan-slide:not(.is-front) { filter: saturate(0.7) brightness(0.75); cursor: pointer; }
 .cnk-catalogue .cnk-plan-stage .plan-pick,
 .cnk-catalogue .cnk-plan-stage .pcard { transform: none; }
 .cnk-catalogue .cnk-plan-stage .pcard {

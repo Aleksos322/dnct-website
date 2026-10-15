@@ -80,20 +80,22 @@
             }
             var width = cards[active].offsetWidth;
             var height = cards[active].offsetHeight;
-            var scale = Math.min(1, (stage.clientHeight - 32) / Math.max(1, height));
-            var compact = window.innerWidth <= 860;
+            // Ten sam układ, obrót i zanikanie co renderP3d w home.js.
+            var scale = Math.min(1, stage.clientHeight / Math.max(1, height));
+            var narrow = window.innerWidth < 960;
+            var step = width * (narrow ? 0.86 : 0.8);
             cards.forEach(function (card, index) {
                 var distance = index - position;
-                var spread = Math.min(3, Math.abs(distance));
-                var direction = Math.sign(distance);
-                var visible = Math.abs(distance) <= 2.6;
-                var x = direction * spread * width * (compact ? 0.66 : 0.78);
-                var z = -spread * (compact ? 170 : 230);
-                var rotation = -direction * Math.min(spread, 2.2) * 28;
-                card.style.transform = 'translate(-50%, -50%) translate3d(' + x + 'px, 0, ' + z + 'px) rotateY(' + rotation + 'deg) scale(' + (scale * (1 - spread * 0.04)) + ')';
-                card.style.opacity = visible ? '1' : '0';
-                card.style.visibility = visible ? 'visible' : 'hidden';
-                card.style.zIndex = String(100 - Math.round(spread * 10));
+                var absolute = Math.abs(distance);
+                var clamped = Math.max(-2.2, Math.min(2.2, distance));
+                var x = clamped * step + (absolute > 2.2 ? Math.sign(distance) * (absolute - 2.2) * step * 0.25 : 0);
+                var z = -Math.min(absolute, 3) * (narrow ? 200 : 260);
+                var rotation = -clamped * (narrow ? 30 : 34);
+                var cardScale = scale * (1 - Math.min(absolute, 3) * 0.04);
+                card.style.transform = 'translate(-50%, -50%) translate3d(' + x.toFixed(1) + 'px, 0, ' + z.toFixed(1) + 'px) rotateY(' + rotation.toFixed(2) + 'deg) scale(' + cardScale.toFixed(3) + ')';
+                card.style.opacity = absolute > 2.6 ? '0' : (1 - Math.max(0, absolute - 1.2) * 0.65).toFixed(3);
+                card.style.visibility = absolute > 2.6 ? 'hidden' : 'visible';
+                card.style.zIndex = String(100 - Math.round(absolute * 10));
                 card.classList.toggle('is-front', index === active);
                 card.setAttribute('aria-hidden', index === active ? 'false' : 'true');
                 var pick = card.querySelector('.plan-pick');
