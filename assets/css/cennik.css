@@ -946,7 +946,8 @@
 /* LEGENDARNY + (plan-card-cennik.php, nazwa kończy się na "+"): odręczny bursztyn jak
    dopiski ze strzałkami (.pnl-hand), lekko przekrzywiony. */
 .cennik-page .pcard-name.is-legend,
-.home-p3d-index .is-legend {
+.home-p3d-index .is-legend,
+.cnk-plan-index .is-legend {
     font-family: 'Segoe Script', 'Bradley Hand', 'Ink Free', 'Brush Script MT', 'Comic Sans MS', cursive;
     color: #fbbf24;
     letter-spacing: 0;

@@ -72,16 +72,18 @@
 .cnk-plan-count > span { color: #64748b; font-size: 0.85rem; font-weight: 700; }
 .cnk-plan-index { display: grid; gap: 3px; max-width: 360px; padding: 0; margin: 16px 0 0; list-style: none; }
 .cnk-plan-index button {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
-    padding: 7px 12px; border: 1px solid transparent; border-radius: 10px;
-    background: transparent; color: #94a3b8; font: inherit; font-size: 0.83rem; line-height: 1.25; text-align: left; cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; width: 100%;
+    padding: 0.42rem 0.75rem; border: 0; border-radius: 10px;
+    background: transparent; color: #64748b; font: inherit; font-size: 0.82rem; font-weight: 600; line-height: 1.25; text-align: left; cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
 }
-.cnk-plan-index button:hover { color: #f8fafc; background: rgba(255, 255, 255, 0.035); }
-.cnk-plan-index button.is-active { color: #fff; background: rgba(139, 92, 246, 0.18); border-color: rgba(139, 92, 246, 0.18); }
-.cnk-plan-index button em { flex-shrink: 0; font-size: 0.76rem; font-style: normal; font-variant-numeric: tabular-nums; }
-.cnk-plan-index .is-out > span { text-decoration: line-through; text-decoration-color: rgba(248, 113, 113, 0.65); }
-.cnk-plan-index .is-legend { color: #fbbf24; font-style: italic; }
+/* Wygląd 1:1 z listą planów na stronie głównej (.home-p3d-index w home.css). */
+.cnk-plan-index button span { transition: translate 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.cnk-plan-index button.is-active span { translate: 0.25rem 0; }
+.cnk-plan-index button:hover { color: #cbd5e1; }
+.cnk-plan-index button.is-active { color: #fff; background: rgba(139, 92, 246, 0.16); }
+.cnk-plan-index button em { flex-shrink: 0; font-size: 0.8rem; font-style: normal; font-variant-numeric: tabular-nums; }
+.cnk-plan-index .is-out > span { text-decoration: line-through; text-decoration-color: rgba(239, 68, 68, 0.6); }
 .cnk-plan-navigation { display: flex; align-items: center; gap: 14px; max-width: 360px; margin-top: 20px; }
 .cnk-plan-navigation button {
     display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px;
@@ -244,7 +246,7 @@
     .cnk-plan-count { margin-top: 12px; }
     .cnk-plan-count b { font-size: 2.6rem; }
     .cnk-plan-index { gap: 1px; margin-top: 12px; }
-    .cnk-plan-index button { padding: 6px 10px; font-size: 0.78rem; }
+    .cnk-plan-index button { padding: 6px 10px; }
     .cnk-plan-navigation { margin-top: 12px; }
     .cnk-plan-skip { margin-top: 8px; }
     .cnk-catalogue .op-pasek-karta { height: 128px; }

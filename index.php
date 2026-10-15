@@ -308,7 +308,13 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
             </div>
 
             <div class="home-p3d-stage">
-                <?php foreach ($showcasePlans as $k => $row):
+                <?php
+                /* Pasek mocy liczony tak samo jak w cenniku (pierwiastek z pozycji RAM),
+                   żeby karta wyglądała na obu stronach identycznie. */
+                $rams    = array_map(static fn($r) => (int)($r['ram_mb'] ?? 0), $showcasePlans);
+                $ramMin  = $rams ? min($rams) : 0;
+                $ramSpan = max(1, ($rams ? max($rams) : 0) - $ramMin);
+                foreach ($showcasePlans as $k => $row):
                     $ramMb = (int)($row['ram_mb'] ?? 0);
                     $ssdMb = (int)($row['ssd_mb'] ?? 0);
                 ?>
@@ -318,7 +324,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'name'       => $row['name'] ?? '',
                                 'price'      => $row['price'] ?? '',
                                 'old_price'  => $row['old_price'] ?? 0,
-                                'is_on_sale' => !empty($row['is_on_sale']),
+                                'is_on_sale' => pricing_effective_on_sale($row),
                                 'popular'    => !empty($row['popular']),
                                 // Stan liczony z pojemności węzła (backend/lib/capacity.php).
                                 'sold_out'   => !empty($row['sold_out']),
@@ -329,6 +335,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'backups'    => $row['backups_limit'] ?? 0,
                                 'bg'         => $row['background_img'] ?? '',
                                 'icon'       => $row['icon_img'] ?? '',
+                                'power'      => sqrt(($ramMb - $ramMin) / $ramSpan),
                                 // Karta na stronie głównej prowadzi do pełnego cennika.
                                 'href'       => '/cennik',
                                 'cta'        => 'Zobacz szczegóły',
