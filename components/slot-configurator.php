@@ -229,6 +229,15 @@ function render_slot_configurator(
                         </li>
                     </ul>
 
+                    <?php /* Co jest w cenie - te same obietnice co na stronie głównej
+                             (index.php, jak-to-dziala.php), żadnych nowych. */ ?>
+                    <ul class="cfg-included">
+                        <li>Serwer zakłada się sam, zaraz po płatności</li>
+                        <li>Ochrona DDoS, serwery w Polsce na własnym sprzęcie</li>
+                        <li>Konsola, pliki i kopie zapasowe w panelu</li>
+                        <li>Wsparcie na Discordzie</li>
+                    </ul>
+
                     <div class="cfg-price-wrap">
                         <?php /* Cena przekreślona pokazuje się tylko wtedy, gdy okres
                                  faktycznie jest tańszy niż ta sama liczba miesięcy
