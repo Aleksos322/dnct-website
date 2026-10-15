@@ -10,24 +10,24 @@
 return [
     // Dopisane 16.10.2026 z kolejnych zrzutów od właściciela.
     // Maria i Adam Oryszczuk byli już na liście — nie dodajemy ich ponownie.
-    // Brak osobnych plików avatarów: komponent wyświetli inicjały autorów.
-    ['autor' => 'Urszula Grabczak-Osińska', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    // Zdjęcia wycięte z tych samych zrzutów; Viczku ma w Google sam inicjał.
+    ['autor' => 'Urszula Grabczak-Osińska', 'zdjecie' => '/assets/media/opinie/urszula.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Bardzo polecam hosting stron internetowych. Trzymam na nim stronę swojego salonu fryzjerskiego. Niesamowicie szybka obsługa żadnych problemów. Bardzo polecam!'],
-    ['autor' => 'Napierak', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Napierak', 'zdjecie' => '/assets/media/opinie/napierak.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Klasa sama w sobie'],
-    ['autor' => 'Aleksander Drobnicki', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Aleksander Drobnicki', 'zdjecie' => '/assets/media/opinie/aleksander.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Trzyma poziom i dobry tech guy za kulisami szkoda że na zawsze tego nie mam'],
-    ['autor' => 'Piotr Staszak', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Piotr Staszak', 'zdjecie' => '/assets/media/opinie/piotr.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Świetna obsługa, miła pomoc techniczna i tanie ceny w stosunku do świetnej jakości'],
-    ['autor' => 'fidzio', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'fidzio', 'zdjecie' => '/assets/media/opinie/fidzio.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Bardzo dobry hosting, dobra cena oraz mili właściciele! Polecam'],
-    ['autor' => 'Mateusz Szeląg', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Mateusz Szeląg', 'zdjecie' => '/assets/media/opinie/mateusz.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Korzystam z DNCT Hosting do serwera Minecraft i jestem zadowolony z tego wyboru. Serwer działa płynnie, wydajność jest w porządku, a sama konfiguracja i zarządzanie nie sprawiają większych problemów. Panel jest przejrzysty i łatwo znaleźć w nim potrzebne opcje. Na plus jest też to, że można bez większych komplikacji przygotować serwer pod własne potrzeby. Całość działa tak, jak powinna, bez niepotrzebnego kombinowania. Jeśli ktoś szuka hostingu Minecraft do gry ze znajomymi lub prowadzenia większego projektu, to DNCT Hosting jest opcją wartą rozważenia. Jak na moje doświadczenia, zdecydowanie zasługuje na pozytywną opinię.'],
-    ['autor' => 'Prospero', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Prospero', 'zdjecie' => '/assets/media/opinie/prospero.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'Miałem okazję korzystać z serwisu parę miesięcy temu jako hosting dla severa Vintage Story. Administracja bardzo profesjonalna, wsparcie techniczne odpowiadało praktycznie od ręki. Panel użytkownika przejrzysty i z wieloma opcjami konfiguracji. Dzięki wielkie za super wspomnienia z gry multiplayer z ekipą 💗 Gorąco polecam wszystkim i na pewno będę korzystał w przyszłości'],
     ['autor' => 'Viczku', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => 'bardzo polecam, wszystko elegancko <3'],
-    ['autor' => 'Wiktor Wisniewski', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+    ['autor' => 'Wiktor Wisniewski', 'zdjecie' => '/assets/media/opinie/wiktor.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
      'tekst' => "Uwielbiam ten hosting!!\nKorzystam z ich usług od roku i nigdy nie miałem z nimi żadnych problemów.\nUwielbiam ich interfejs, który jest nowoczesny, przejrzysty i banalnie prosty. Kontakt z suportem jest o ligę lepszy niż z innymi hostingami. Nawet w najprostszych problemach można napisać, a oni zawsze pomogą i nawet wytłumaczą co i jak!!!\n\nNie mam żadnych zarzutów, 10/10 najlepszy hosting jaki widziałem!!"],
     // Dopisane 16.10.2026 ze zrzutu od właściciela; oryginalna treść niemiecka.
     // W Google zamiast zdjęcia jest inicjał — komponent pokaże literę M.
