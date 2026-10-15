@@ -399,13 +399,13 @@
                 range.focus({ preventScroll: true });
             });
         });
-        // Przeciąganie po słupkach jak po suwaku - indeks z pozycji kursora.
+        // Przeciąganie po podpisach progów pod suwakiem - indeks z pozycji kursora.
         var tickBox = root.querySelector('.cfg-ticks');
         if (tickBox && window.PointerEvent) {
             var dragging = false;
             var fromPointer = function (e) {
-                var r = tickBox.getBoundingClientRect();
-                pickTier(Math.floor((e.clientX - r.left) / r.width * tiers.length));
+                var r = tickBox.getBoundingClientRect(), thumb = 26;
+                pickTier(Math.round((e.clientX - r.left - thumb / 2) / (r.width - thumb) * (tiers.length - 1)));
             };
             tickBox.addEventListener('pointerdown', function (e) {
                 if (e.button !== 0) return;

@@ -122,10 +122,9 @@ function render_slot_configurator(
                         </div>
                     </div>
 
-                    <?php /* Słupki progów (od 16.10.2026): każdy próg to słupek rosnący
-                             z liczbą graczy, klik albo przeciągnięcie po słupkach
-                             wybiera próg (cennik.js). Natywny <input type="range">
-                             zostaje ukryty dla klawiatury i czytników ekranu. */ ?>
+                    <?php /* Natywny <input type="range"> leży nad ścieżką z odcinków progów
+                             (.cfg-tick), które pokazują wybór i dostępność. Klik w podpis
+                             progu albo -/+ też zmienia wybór (cennik.js). */ ?>
                     <div class="cfg-slider" data-role="slider" style="--n: <?php echo count($tiers) - 1; ?>">
                         <span class="cfg-bubble" data-role="bubble" aria-hidden="true"><?php echo (int)$defaultTier['slots']; ?></span>
                         <input type="range" class="cfg-range" data-role="range"
