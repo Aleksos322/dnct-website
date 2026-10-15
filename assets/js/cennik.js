@@ -226,6 +226,9 @@
                 t.classList.toggle('is-current', i === index);
                 t.classList.toggle('is-past', i < index);
             });
+            var minus = root.querySelector('[data-role="minus"]'), plus = root.querySelector('[data-role="plus"]');
+            if (minus) minus.disabled = index <= 0;
+            if (plus) plus.disabled = index >= tiers.length - 1;
         }
 
         // Ten sam wzór co backend/lib/pricing.php: zaokrąglamy w dół TYLKO gdy
@@ -384,13 +387,41 @@
         }
 
         range.addEventListener('input', render);
+        function pickTier(index) {
+            index = Math.max(0, Math.min(tiers.length - 1, index));
+            if (String(index) === range.value) return;
+            range.value = index;
+            render();
+        }
         ticks.forEach(function (t) {
             t.addEventListener('click', function () {
-                range.value = t.getAttribute('data-index');
-                render();
+                pickTier(parseInt(t.getAttribute('data-index'), 10));
                 range.focus({ preventScroll: true });
             });
         });
+        // Przeciąganie po słupkach jak po suwaku - indeks z pozycji kursora.
+        var tickBox = root.querySelector('.cfg-ticks');
+        if (tickBox && window.PointerEvent) {
+            var dragging = false;
+            var fromPointer = function (e) {
+                var r = tickBox.getBoundingClientRect();
+                pickTier(Math.floor((e.clientX - r.left) / r.width * tiers.length));
+            };
+            tickBox.addEventListener('pointerdown', function (e) {
+                if (e.button !== 0) return;
+                dragging = true;
+                tickBox.setPointerCapture(e.pointerId);
+                fromPointer(e);
+            });
+            tickBox.addEventListener('pointermove', function (e) { if (dragging) fromPointer(e); });
+            ['pointerup', 'pointercancel'].forEach(function (ev) {
+                tickBox.addEventListener(ev, function () { dragging = false; });
+            });
+        }
+        var btnMinus = root.querySelector('[data-role="minus"]');
+        var btnPlus  = root.querySelector('[data-role="plus"]');
+        if (btnMinus) btnMinus.addEventListener('click', function () { pickTier((parseInt(range.value, 10) || 0) - 1); });
+        if (btnPlus)  btnPlus.addEventListener('click', function () { pickTier((parseInt(range.value, 10) || 0) + 1); });
         // Dymek liczy pozycję w px - przeliczamy przy każdej zmianie szerokości,
         // także gdy ukryta zakładka gry (szerokość 0) staje się widoczna.
         var rerenderSlider = function () {

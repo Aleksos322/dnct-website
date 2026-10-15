@@ -145,51 +145,79 @@
 .cnk-catalogue .cfg-period,
 .cnk-catalogue .cfg-mode { padding: 12px 30px 12px 12px; border-radius: 14px; }
 .cnk-catalogue .cfg-mode-note { font-size: 0.7rem; }
-/* Suwak slotów (Zomboid, Vintage Story): gruba ścieżka z fioletowym
-   wypełnieniem, świecący kciuk jak przyciski strony, progi jako kropki.
-   Bursztyn i czerwień mówią o dostępności tylko kropką - podpisy zostają
-   spokojne, inaczej rząd liczb pod suwakiem zlewał się w żółtą plamę. */
-.cnk-catalogue .cfg-slider { --thumb: 24px; margin-top: 18px; padding-top: 0; }
-.cnk-catalogue .cfg-range { height: 36px; }
-.cnk-catalogue .cfg-range::-webkit-slider-runnable-track {
-    height: 8px; border-radius: 999px;
-    background:
-        linear-gradient(90deg, #6d28d9, #8b5cf6 55%, #a78bfa) 0 0 / calc(var(--thumb) / 2 + var(--p) * (100% - var(--thumb))) 100% no-repeat,
-        rgba(255, 255, 255, 0.06);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+/* Liczba graczy jako słupki (Zomboid, Vintage Story, od 16.10.2026).
+   Każdy próg to słupek rosnący z liczbą slotów - wybór widać jak poziom
+   sygnału, a wolne / ostatnie / wyprzedane progi czyta się z samego
+   słupka. Natywny suwak zostaje niewidoczny dla klawiatury; mysz i palec
+   klikają albo przeciągają po słupkach (cennik.js). */
+.cnk-catalogue .cfg-slots { align-items: center; }
+.cnk-catalogue .cfg-stepper { display: inline-flex; gap: 6px; margin-left: 10px; }
+.cnk-catalogue .cfg-stepper button {
+    display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
+    border-radius: 10px; border: 1px solid rgba(167, 139, 250, 0.28); background: rgba(139, 92, 246, 0.1);
+    color: #ddd6fe; font: 700 1.05rem/1 inherit; cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-.cnk-catalogue .cfg-range::-moz-range-track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
-.cnk-catalogue .cfg-range::-moz-range-progress { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #6d28d9, #8b5cf6 55%, #a78bfa); }
-.cnk-catalogue .cfg-range::-webkit-slider-thumb {
-    width: var(--thumb); height: var(--thumb); margin-top: -8px;
-    background: #f5f3ff; border: 6px solid #8b5cf6;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18), 0 4px 16px rgba(139, 92, 246, 0.65);
-    transition: box-shadow 0.2s ease, scale 0.15s ease;
+.cnk-catalogue .cfg-stepper button:hover:not(:disabled) { background: rgba(139, 92, 246, 0.28); border-color: rgba(196, 181, 253, 0.6); color: #fff; }
+.cnk-catalogue .cfg-stepper button:disabled { opacity: 0.3; cursor: default; }
+
+.cnk-catalogue .cfg-slider { position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 150px; margin-top: 18px; padding: 0; }
+.cnk-catalogue .cfg-range { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.cnk-catalogue .cfg-bubble { display: none; }
+.cnk-catalogue .cfg-ticks {
+    position: relative; flex: 1; display: flex; align-items: stretch; gap: 4px;
+    height: auto; min-height: 120px; margin: 0; padding: 0 2px;
+    touch-action: none; user-select: none; cursor: pointer; border-radius: 12px;
 }
-.cnk-catalogue .cfg-range::-moz-range-thumb {
-    box-sizing: border-box; width: var(--thumb); height: var(--thumb);
-    background: #f5f3ff; border: 6px solid #8b5cf6;
-    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18), 0 4px 16px rgba(139, 92, 246, 0.65);
+.cnk-catalogue .cfg-slider:has(.cfg-range:focus-visible) .cfg-ticks { outline: 2px solid #a78bfa; outline-offset: 6px; }
+.cnk-catalogue .cfg-tick {
+    position: static; left: auto; translate: none; flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; gap: 7px;
+    padding: 0; color: #64748b; font-family: inherit; font-size: 0.66rem; font-weight: 700;
+    font-variant-numeric: tabular-nums; text-align: center;
 }
-.cnk-catalogue .cfg-range:hover::-webkit-slider-thumb { scale: 1.06; box-shadow: 0 0 0 7px rgba(139, 92, 246, 0.2), 0 4px 18px rgba(139, 92, 246, 0.75); }
-.cnk-catalogue .cfg-range:active::-webkit-slider-thumb { scale: 1.12; box-shadow: 0 0 0 9px rgba(139, 92, 246, 0.22), 0 4px 22px rgba(139, 92, 246, 0.85); }
-.cnk-catalogue .cfg-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px #c4b5fd, 0 4px 16px rgba(139, 92, 246, 0.65); }
-.cnk-catalogue .cfg-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px #c4b5fd, 0 4px 16px rgba(139, 92, 246, 0.65); }
-.cnk-catalogue .cfg-bubble { top: -18px; opacity: 0; transition: opacity 0.2s ease; }
-.cnk-catalogue .cfg-slider:focus-within .cfg-bubble { opacity: 1; }
-.cnk-catalogue .cfg-ticks { margin-top: 2px; height: 30px; }
-.cnk-catalogue .cfg-tick { gap: 6px; color: #64748b; font-family: inherit; font-size: 0.66rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.cnk-catalogue .cfg-tick i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+.cnk-catalogue .cfg-tick i {
+    position: relative; width: auto; height: calc((100% - 22px) * (0.16 + 0.84 * var(--i) / var(--n)));
+    border-radius: 6px 6px 3px 3px; scale: 1;
+    background: rgba(255, 255, 255, 0.055);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    transition: background 0.3s ease calc(var(--i) * 14ms), box-shadow 0.3s ease, filter 0.2s ease;
+}
+.cnk-catalogue .cfg-tick.is-low i { background: rgba(255, 255, 255, 0.055); }
+.cnk-catalogue .cfg-tick span { height: 15px; line-height: 15px; border-radius: 6px; transition: color 0.2s ease, background 0.2s ease; }
+.cnk-catalogue .cfg-tick:hover i { background: rgba(167, 139, 250, 0.22); }
 .cnk-catalogue .cfg-tick:hover { color: #c4b5fd; }
-.cnk-catalogue .cfg-tick.is-past i { background: #a78bfa; }
-.cnk-catalogue .cfg-tick.is-current { color: #fff; }
-.cnk-catalogue .cfg-tick.is-current i { background: #c4b5fd; scale: 1.6; box-shadow: 0 0 8px rgba(196, 181, 253, 0.8); }
-.cnk-catalogue .cfg-tick.is-low i { background: #fbbf24; }
+.cnk-catalogue .cfg-tick.is-past i { background: linear-gradient(180deg, #8b5cf6, #5b21b6); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+.cnk-catalogue .cfg-tick.is-past:hover i { filter: brightness(1.2); }
+.cnk-catalogue .cfg-tick.is-current i {
+    background: linear-gradient(180deg, #f5f3ff, #c4b5fd 18%, #8b5cf6 60%, #6d28d9);
+    box-shadow: 0 0 22px rgba(167, 139, 250, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    scale: 1;
+}
+.cnk-catalogue .cfg-tick.is-current span { color: #fff; background: rgba(139, 92, 246, 0.35); }
+/* Ostatnie miejsca: bursztynowa czapka na słupku. */
+.cnk-catalogue .cfg-tick.is-low i::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 6px 6px 0 0;
+    background: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.7);
+}
 .cnk-catalogue .cfg-tick.is-low span { color: #64748b; }
 .cnk-catalogue .cfg-tick.is-low.is-current span { color: #fff; }
-.cnk-catalogue .cfg-tick.is-out i { background: #f87171; }
-.cnk-catalogue .cfg-tick.is-out span { color: rgba(248, 113, 113, 0.7); }
+/* Wyprzedane: przekreślone ukośnymi paskami. */
+.cnk-catalogue .cfg-tick.is-out i,
+.cnk-catalogue .cfg-tick.is-out:hover i {
+    background: repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.32) 0 3px, rgba(248, 113, 113, 0.06) 3px 7px);
+    box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.25); filter: none;
+}
+.cnk-catalogue .cfg-tick.is-out span { color: rgba(248, 113, 113, 0.65); text-decoration: line-through; }
 .cnk-catalogue .cfg-tick:not(:first-child):not(:last-child):not(:nth-child(4n + 1)):not(.is-current) span { visibility: hidden; }
+
+.cnk-catalogue .cfg-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: #64748b; font-size: 0.66rem; font-weight: 600; }
+.cnk-catalogue .cfg-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cnk-catalogue .cfg-legend span::before { content: ''; width: 10px; height: 10px; border-radius: 3px; }
+.cnk-catalogue .cfg-legend .is-free::before { background: linear-gradient(180deg, #8b5cf6, #5b21b6); }
+.cnk-catalogue .cfg-legend .is-low::before { background: rgba(255, 255, 255, 0.08); box-shadow: inset 0 3px 0 #fbbf24; }
+.cnk-catalogue .cfg-legend .is-out::before { background: repeating-linear-gradient(135deg, rgba(248, 113, 113, 0.5) 0 2px, transparent 2px 4px); }
+@media (prefers-reduced-motion: reduce) { .cnk-catalogue .cfg-tick i { transition: none; } }
 .cnk-catalogue .cfg-select { background: linear-gradient(135deg, #8b5cf6, #6366f1); margin-top: 12px; padding: 13px; }
 .cnk-catalogue .cfg-select:disabled { background: rgba(255, 255, 255, 0.04); }
 .cnk-catalogue .cfg-table { max-width: none; margin: 14px 0 0; border-radius: 12px; }
@@ -273,6 +301,9 @@
        (--cfg-tail liczy cennik-showcase.js). Karty konfiguratora wypełniają
        resztę, a ich wnętrze już rozkłada się flexem (space-between). */
     .cnk-catalogue.has-slot-configurator { min-height: calc(100svh - 116px + var(--cfg-tail, 0px)); grid-template-rows: auto minmax(0, 1fr) auto auto; }
+    .cnk-catalogue.has-slot-configurator .cfg-controls { justify-content: flex-start; }
+    .cnk-catalogue.has-slot-configurator .cfg-block-slots { flex: 1; display: flex; flex-direction: column; }
+    .cnk-catalogue.has-slot-configurator .cfg-slider { flex: 1; max-height: 240px; }
     .cnk-catalogue .cfg-intro { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
     .cnk-plan-count { margin-top: 12px; }
     .cnk-plan-count b { font-size: 2.6rem; }
@@ -377,7 +408,7 @@
     .cnk-catalogue .cfg-mode-label { font-size: 0.8rem; }
     .cnk-catalogue .cfg-intro h2 span { display: block; margin-top: 4px; }
     .cnk-catalogue .cfg-summary .pcard-specs { grid-template-columns: 1fr 1fr; }
-    .cnk-catalogue .cfg-tick:not(:first-child):not(:last-child):not(.is-current) span { display: none; }
+    .cnk-catalogue .cfg-tick:not(:first-child):not(:last-child):not(.is-current) span { visibility: hidden; }
     .cnk-catalogue .op-pasek-wynik { gap: 8px; padding: 8px; }
     .cnk-catalogue .op-pasek-wynik small { font-size: 0.6rem; }
     .cnk-catalogue .op-pasek-gw { font-size: 0.68rem; }
