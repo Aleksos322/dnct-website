@@ -30,7 +30,7 @@
 .cnk-catalogue .cnk-eyebrow { margin-bottom: 12px; }
 .cnk-catalogue .cnk-h1 { font-size: clamp(2rem, 3.3vw, 3.3rem); line-height: 1.08; letter-spacing: -0.035em; margin: 0; }
 .cnk-catalogue .cnk-focus-lead { max-width: 44ch; font-size: 0.83rem; line-height: 1.6; margin: 12px 0 0; }
-.cnk-catalogue .cennik-tabs { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: center; margin: 0; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.cnk-catalogue .cennik-tabs { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: start; margin: 0; gap: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 .cnk-catalogue .cennik-tab {
     position: relative;
     display: grid;
@@ -231,7 +231,7 @@
     .cnk-catalogue.has-plan-cards > .cennik-panel.is-active,
     .cnk-catalogue.has-plan-cards .cnk-plan-showcase { display: contents; }
     .cnk-catalogue.has-plan-cards .cnk-plan-copy { grid-column: 1; grid-row: 2; padding: 0; }
-    .cnk-catalogue.has-plan-cards .cennik-tabs { align-self: start; z-index: 2; }
+    .cnk-catalogue.has-plan-cards .cennik-tabs { z-index: 2; }
     .cnk-catalogue.has-plan-cards .cnk-plan-stage { grid-column: 2; grid-row: 1 / 3; align-self: end; height: calc(100% - 96px); min-height: 320px; }
     .cnk-catalogue.has-plan-cards .cnk-catalogue-reviews { grid-row: 3; }
     .cnk-catalogue.has-slot-configurator > .cennik-panel.is-active,
