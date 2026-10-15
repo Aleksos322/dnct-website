@@ -1,0 +1,247 @@
+/* Cennik jak na stronie głównej. Zakres ograniczony do nowego katalogu:
+   wspólne karty, ceny i konfigurator nadal mają jedno źródło danych. */
+.cennik-page.cnk-catalogue-page { margin-top: -28px; }
+.cnk-catalogue-page .cnk-decor-layer { display: none; }
+.cnk-catalogue-page .cnk-wrap { max-width: 1600px; }
+.cnk-catalogue {
+    display: grid;
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    gap: 24px clamp(24px, 4vw, 64px);
+    padding: 0 0 24px;
+}
+.cnk-catalogue .cnk-hero { grid-column: 1; grid-row: 1; min-height: 0; margin: 0; padding: 0; }
+.cnk-catalogue .cnk-hero-inner { display: block; min-height: 0; padding: 0; }
+.cnk-catalogue .cnk-hero-glow { display: none; }
+.cnk-catalogue .cnk-eyebrow { margin-bottom: 12px; }
+.cnk-catalogue .cnk-h1 { font-size: clamp(2rem, 3.3vw, 3.3rem); line-height: 1.08; letter-spacing: -0.035em; margin: 0; }
+.cnk-catalogue .cnk-focus-lead { max-width: 44ch; font-size: 0.83rem; line-height: 1.6; margin: 12px 0 0; }
+.cnk-catalogue .cennik-tabs { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-self: center; margin: 0; gap: 10px; }
+.cnk-catalogue .cennik-tab {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: center;
+    gap: 4px 10px;
+    min-height: 78px;
+    padding: 13px;
+    border-radius: 18px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.025);
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.cnk-catalogue .cennik-tab img { grid-column: 1; grid-row: 1 / span 2; width: 32px; height: 32px; border-radius: 8px; }
+.cnk-catalogue .cennik-tab > span { grid-column: 2; font-size: 0.82rem; line-height: 1.3; }
+.cnk-catalogue .cennik-tab .cennik-tab-count { justify-self: start; padding: 0; background: none; font-size: 0.58rem; letter-spacing: 0.08em; }
+.cnk-catalogue .cennik-tab.is-active { background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.07)); border-color: rgba(167, 139, 250, 0.65); }
+.cnk-catalogue > .cennik-panel,
+.cnk-catalogue > .cennik-info,
+.cnk-catalogue > .cnk-admin-notice,
+.cnk-catalogue-reviews { grid-column: 1 / -1; min-width: 0; }
+.cnk-catalogue .cnk-admin-notice { margin: 0; }
+.cnk-catalogue .cnk-panel { margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
+.cnk-plan-showcase { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); align-items: center; gap: clamp(24px, 4vw, 64px); }
+.cnk-plan-copy { min-width: 0; padding: 6px 0; }
+.cnk-plan-copy h2,
+.cnk-catalogue .cfg-intro h2 { margin: 0; color: #f1f5f9; font-size: 0.95rem; font-weight: 800; }
+.cnk-plan-copy h2 span,
+.cnk-catalogue .cfg-intro h2 span { color: #94a3b8; font-size: 0.8rem; font-weight: 500; }
+.cnk-plan-count { display: flex; align-items: baseline; gap: 9px; margin-top: 20px; font-variant-numeric: tabular-nums; }
+.cnk-plan-count b { color: #f8fafc; font-size: 3.2rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.cnk-plan-count > span { color: #64748b; font-size: 0.85rem; font-weight: 700; }
+.cnk-plan-index { display: grid; gap: 3px; max-width: 360px; padding: 0; margin: 16px 0 0; list-style: none; }
+.cnk-plan-index button {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+    padding: 7px 12px; border: 1px solid transparent; border-radius: 10px;
+    background: transparent; color: #94a3b8; font: inherit; font-size: 0.83rem; line-height: 1.25; text-align: left; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.cnk-plan-index button:hover { color: #f8fafc; background: rgba(255, 255, 255, 0.035); }
+.cnk-plan-index button.is-active { color: #fff; background: rgba(139, 92, 246, 0.18); border-color: rgba(139, 92, 246, 0.18); }
+.cnk-plan-index button em { flex-shrink: 0; font-size: 0.76rem; font-style: normal; font-variant-numeric: tabular-nums; }
+.cnk-plan-index .is-out > span { text-decoration: line-through; text-decoration-color: rgba(248, 113, 113, 0.65); }
+.cnk-plan-index .is-legend { color: #fbbf24; font-style: italic; }
+.cnk-plan-navigation { display: flex; align-items: center; gap: 14px; max-width: 360px; margin-top: 20px; }
+.cnk-plan-navigation button {
+    display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(167, 139, 250, 0.3); background: rgba(139, 92, 246, 0.08);
+    color: #c4b5fd; font-size: 1.3rem; cursor: pointer; transition: background 0.2s ease, border-color 0.2s ease;
+}
+.cnk-plan-navigation button:hover:not(:disabled) { background: rgba(139, 92, 246, 0.2); border-color: #8b5cf6; }
+.cnk-plan-navigation button:disabled { opacity: 0.35; cursor: default; }
+.cnk-plan-navigation p { flex: 1; margin: 0; color: #94a3b8; font-size: 0.74rem; line-height: 1.5; }
+.cnk-plan-navigation p span { color: #64748b; }
+.cnk-plan-navigation p span::before { content: ' '; }
+.cnk-plan-stage { display: flex; gap: 20px; min-width: 0; padding: 24px 0; overflow-x: auto; scroll-snap-type: x mandatory; }
+.cnk-plan-slide { flex: 0 0 min(350px, 82vw); min-width: 0; scroll-snap-align: center; }
+.cnk-plan-showcase.is-enhanced .cnk-plan-stage {
+    display: block; position: relative; height: clamp(440px, calc(100svh - 480px), 760px);
+    padding: 0; overflow: clip; perspective: 1600px; touch-action: pan-y;
+}
+.cnk-plan-showcase.is-enhanced .cnk-plan-slide {
+    position: absolute; left: 50%; top: 50%; width: min(350px, 80vw);
+    transform: translate(-50%, -50%);
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease, filter 0.4s ease;
+}
+.cnk-plan-showcase.is-enhanced .cnk-plan-slide:not(.is-front) { filter: saturate(0.65) brightness(0.65); cursor: pointer; }
+.cnk-catalogue .cnk-plan-stage .plan-pick,
+.cnk-catalogue .cnk-plan-stage .pcard { transform: none; }
+.cnk-catalogue .cnk-plan-stage .pcard {
+    min-height: 31rem; background: linear-gradient(180deg, #17132a, #0d0b16);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.cnk-catalogue .cnk-plan-stage .is-front .pcard { border-color: rgba(167, 139, 250, 0.3); box-shadow: 0 34px 70px -35px rgba(139, 92, 246, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.cnk-catalogue .cnk-plan-stage .pcard.is-soldout { opacity: 1; }
+
+/* Ten sam konfigurator i mechanizm wyceny; wyłącznie układ i materiał. */
+.cnk-catalogue .cfg-intro { text-align: left; margin: 0 0 12px; }
+.cnk-catalogue .cfg-intro p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.cnk-catalogue .cfg { padding: 0; }
+.cnk-catalogue .cfg-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 24px; max-width: 1120px; margin: auto; }
+.cnk-catalogue .cfg-controls,
+.cnk-catalogue .cfg-summary { min-width: 0; padding: 20px; border-radius: 26px; background: linear-gradient(160deg, rgba(28, 23, 45, 0.85), rgba(10, 10, 18, 0.9)); }
+.cnk-catalogue .cfg-controls { gap: 20px; }
+.cnk-catalogue .cfg-summary { transform: none; }
+.cnk-catalogue .cfg-summary-head { position: relative; min-height: 40px; padding-right: 54px; margin-bottom: 12px; }
+.cnk-catalogue .cfg-summary-head::after { content: ''; position: absolute; top: 0; right: 0; width: 40px; height: 40px; background: var(--cnk-game-icon) center / contain no-repeat; }
+.cnk-catalogue .cfg-summary .pcard-specs { gap: 8px; margin-bottom: 12px; }
+.cnk-catalogue .cfg-summary .pcard-specs li { min-width: 0; min-height: 68px; padding: 12px 10px 16px 36px; }
+.cnk-catalogue .cfg-summary .pcard-specs svg { position: absolute; top: 13px; left: 12px; width: 14px; height: 14px; margin: 0; }
+.cnk-catalogue .cfg-summary .pcard-spec-val { font-size: 0.9rem; }
+.cnk-catalogue .cfg-summary .pcard-spec-lbl { font-size: 0.56rem; }
+.cnk-catalogue .cfg-meter i { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.cnk-catalogue .cfg-price span:first-child { font-size: 2.5rem; }
+.cnk-catalogue .cfg-methods-hint { margin-top: 8px; line-height: 1.35; }
+.cnk-catalogue .cfg-legal { margin-top: 10px; font-size: 0.62rem; line-height: 1.4; }
+.cnk-catalogue .cfg-slots-num { font-size: 2.8rem; }
+.cnk-catalogue .cfg-label { color: #94a3b8; font-size: 0.64rem; }
+.cnk-catalogue .cfg-period,
+.cnk-catalogue .cfg-mode { padding: 12px 30px 12px 12px; border-radius: 14px; }
+.cnk-catalogue .cfg-mode-note { font-size: 0.7rem; }
+.cnk-catalogue .cfg-range::-webkit-slider-runnable-track {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1) 0 0 / calc(var(--thumb) / 2 + var(--p) * (100% - var(--thumb))) 100% no-repeat, rgba(255, 255, 255, 0.07);
+}
+.cnk-catalogue .cfg-range::-moz-range-progress { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+.cnk-catalogue .cfg-range::-webkit-slider-thumb { background: #c4b5fd; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.16), 0 4px 12px rgba(0, 0, 0, 0.35); }
+.cnk-catalogue .cfg-range::-moz-range-thumb { background: #c4b5fd; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.16), 0 4px 12px rgba(0, 0, 0, 0.35); }
+.cnk-catalogue .cfg-select { background: linear-gradient(135deg, #8b5cf6, #6366f1); margin-top: 12px; padding: 13px; }
+.cnk-catalogue .cfg-select:disabled { background: rgba(255, 255, 255, 0.04); }
+.cnk-catalogue .cfg-table { max-width: 1120px; margin: 14px auto 0; }
+.cnk-catalogue .cfg-table summary { padding: 9px 16px; font-size: 0.76rem; }
+
+/* Ten sam niski pasek prawdziwych opinii co na stronie głównej. */
+.cnk-catalogue .op-pasek { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 20px; align-items: center; }
+.cnk-catalogue .op-pasek-ocena { display: grid; gap: 8px; }
+.cnk-catalogue .op-pasek-wynik { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.09); background: rgba(255, 255, 255, 0.04); color: #fff; text-decoration: none; }
+.cnk-catalogue .op-pasek-wynik strong { font-size: 2rem; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+.cnk-catalogue .op-pasek-wynik > span { display: grid; gap: 2px; }
+.cnk-catalogue .op-pasek-gw { color: #fbbf24; letter-spacing: 0.08em; font-size: 0.85rem; }
+.cnk-catalogue .op-pasek-wynik small { color: #94a3b8; font-size: 0.74rem; white-space: nowrap; }
+.cnk-catalogue .op-pasek-wystaw { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; font-size: 0.7rem; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+.cnk-catalogue .op-pasek-wystaw svg { width: 14px; height: 14px; color: #fde68a; }
+.cnk-catalogue .op-pasek-tasma { min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.cnk-catalogue .op-pasek-tor { display: flex; gap: 13px; width: max-content; list-style: none; padding: 4px 0; margin: 0; animation: cnkReviews 70s linear infinite; }
+.cnk-catalogue .op-pasek-tasma:hover .op-pasek-tor,
+.cnk-catalogue .op-pasek-tasma:focus-within .op-pasek-tor { animation-play-state: paused; }
+.cnk-catalogue .op-pasek-karta { display: grid; grid-template-rows: auto 1fr; gap: 8px; flex-shrink: 0; width: 300px; height: 128px; padding: 13px 15px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.07); background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)); }
+.cnk-catalogue .op-pasek-autor { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.cnk-catalogue .op-pasek-autor img,
+.cnk-catalogue .op-pasek-autor > span { display: grid; place-items: center; width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; object-fit: cover; background: #7c3aed; color: #fff; font-size: 0.66rem; font-weight: 800; }
+.cnk-catalogue .op-pasek-autor b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 0.86rem; color: #f1f5f9; }
+.cnk-catalogue .op-pasek-autor i { margin-left: auto; flex-shrink: 0; font-style: normal; color: #fbbf24; font-size: 0.7rem; letter-spacing: 0.05em; }
+.cnk-catalogue .op-pasek-autor i span { color: #475569; }
+.cnk-catalogue .op-pasek-autor i span.is-pelna { color: #fbbf24; }
+.cnk-catalogue .op-pasek-karta p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: #a3aec2; font-size: 0.8rem; line-height: 1.5; }
+@keyframes cnkReviews { to { transform: translateX(calc(-50% - 6.5px)); } }
+.cnk-catalogue button:focus-visible,
+.cnk-catalogue a:focus-visible,
+.cnk-plan-stage:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
+
+@media (min-width: 961px) and (max-height: 850px) {
+    .cnk-catalogue { gap: 16px 32px; }
+    .cnk-catalogue .cnk-h1 { font-size: 2.2rem; }
+    .cnk-plan-index button { padding: 6px 12px; }
+    .cnk-plan-count { margin-top: 12px; }
+    .cnk-plan-count b { font-size: 2.6rem; }
+    .cnk-plan-showcase.is-enhanced .cnk-plan-stage { height: 440px; }
+    .cnk-catalogue .op-pasek-karta { height: 110px; }
+}
+@media (max-width: 1100px) {
+    .cnk-catalogue { gap: 20px 24px; }
+    .cnk-catalogue .cennik-tab { grid-template-columns: 24px minmax(0, 1fr); gap: 4px 7px; padding: 10px; }
+    .cnk-catalogue .cennik-tab img { width: 24px; height: 24px; }
+    .cnk-catalogue .cennik-tab > span { font-size: 0.73rem; }
+    .cnk-catalogue .cennik-tab .cennik-tab-count { font-size: 0.52rem; }
+    .cnk-catalogue .cfg-grid { gap: 16px; }
+    .cnk-catalogue .cfg-controls,
+    .cnk-catalogue .cfg-summary { padding: 20px; }
+}
+@media (max-width: 860px) {
+    .cnk-catalogue { grid-template-columns: minmax(0, 1fr); }
+    .cnk-catalogue .cnk-hero { grid-column: 1; grid-row: auto; }
+    .cnk-catalogue .cennik-tabs { grid-column: 1; grid-row: auto; }
+    .cnk-catalogue .cnk-hero { order: 0; }
+    .cnk-catalogue .cennik-tabs { order: 1; }
+    .cnk-catalogue > .cennik-panel,
+    .cnk-catalogue > .cennik-info { order: 3; }
+    .cnk-catalogue-reviews,
+    .cnk-catalogue .op-pasek { display: contents; }
+    .cnk-catalogue .op-pasek-ocena { order: 2; grid-column: 1; }
+    .cnk-catalogue .op-pasek-tasma { order: 4; grid-column: 1; }
+    .cnk-catalogue .cnk-h1 br { display: none; }
+    .cnk-catalogue .cnk-h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); }
+    .cnk-catalogue .cfg-grid { grid-template-columns: 1fr 1fr; }
+    .cnk-catalogue .cfg-periods { grid-template-columns: 1fr; gap: 10px; }
+    .cnk-catalogue .cfg-slots-head { flex-direction: column; align-items: start; }
+    .cnk-catalogue .cfg-status { max-width: 100%; text-align: left; justify-items: start; }
+    .cnk-plan-showcase { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .cnk-plan-copy { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+    .cnk-plan-count { margin: 0; justify-self: end; }
+    .cnk-plan-count b { font-size: 2.2rem; }
+    .cnk-plan-index { display: none; }
+    .cnk-plan-navigation { grid-column: 1 / -1; max-width: none; justify-content: space-between; margin: 4px 0 0; }
+    .cnk-plan-navigation p { text-align: center; }
+    .cnk-plan-navigation br { display: none; }
+    .cnk-plan-showcase.is-enhanced .cnk-plan-stage { height: 520px; }
+    .cnk-catalogue .op-pasek { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .cnk-catalogue .op-pasek-ocena { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .cnk-catalogue .op-pasek-wynik { padding: 9px 12px; }
+    .cnk-catalogue .op-pasek-wynik strong { font-size: 1.5rem; }
+    .cnk-catalogue .op-pasek-wystaw { font-size: 0.63rem; padding: 12px; }
+    .cnk-catalogue .op-pasek-karta { width: 265px; height: 110px; }
+    .cnk-catalogue .op-pasek-karta p { -webkit-line-clamp: 2; }
+}
+@media (max-width: 600px) {
+    .cennik-page.cnk-catalogue-page { margin-top: -34px; }
+    .cnk-catalogue-page .cnk-wrap { padding: 0 16px; }
+    .cnk-catalogue { gap: 18px; }
+    .cnk-catalogue .cennik-tabs { gap: 8px; }
+    .cnk-catalogue .cennik-tab { display: flex; flex-direction: column; justify-content: center; min-height: 86px; gap: 8px; padding: 10px 4px; text-align: center; border-radius: 16px; }
+    .cnk-catalogue .cennik-tab > span { font-size: 0.68rem; }
+    .cnk-catalogue .cennik-tab .cennik-tab-count { display: none; }
+    .cnk-plan-copy h2 { font-size: 0.84rem; }
+    .cnk-plan-copy h2 span { display: block; margin-top: 3px; font-size: 0.7rem; }
+    .cnk-plan-showcase.is-enhanced .cnk-plan-stage { height: 500px; }
+    .cnk-plan-showcase.is-enhanced .cnk-plan-slide { width: min(330px, calc(100vw - 56px)); }
+    .cnk-catalogue .cnk-plan-stage .pcard { min-height: 30rem; padding: 20px; }
+    .cnk-catalogue .cfg-grid { grid-template-columns: minmax(0, 1fr); }
+    .cnk-catalogue .cfg-periods { grid-template-columns: repeat(3, minmax(0, 1fr)); padding-top: 6px; }
+    .cnk-catalogue .cfg-period { padding: 12px 8px; text-align: center; }
+    .cnk-catalogue .cfg-period::after { display: none; }
+    .cnk-catalogue .cfg-period-label { font-size: 0.76rem; }
+    .cnk-catalogue .cfg-period-badge { left: 50%; translate: -50% -50%; white-space: nowrap; font-size: 0.49rem; }
+    .cnk-catalogue .cfg-period-badge { position: absolute; top: 0; }
+    .cnk-catalogue .cfg-modes { grid-template-columns: 1fr 1fr; }
+    .cnk-catalogue .cfg-mode-label { font-size: 0.8rem; }
+    .cnk-catalogue .cfg-intro h2 span { display: block; margin-top: 4px; }
+    .cnk-catalogue .cfg-summary .pcard-specs { grid-template-columns: 1fr 1fr; }
+    .cnk-catalogue .cfg-tick:not(:first-child):not(:last-child):not(.is-current) span { display: none; }
+    .cnk-catalogue .op-pasek-wynik { gap: 8px; padding: 8px; }
+    .cnk-catalogue .op-pasek-wynik small { font-size: 0.6rem; }
+    .cnk-catalogue .op-pasek-gw { font-size: 0.68rem; }
+    .cnk-catalogue .op-pasek-wystaw { font-size: 0.57rem; gap: 5px; padding: 12px 10px; letter-spacing: 0.08em; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cnk-catalogue *, .cnk-catalogue *::before, .cnk-catalogue *::after { animation: none !important; transition: none !important; }
+    .cnk-catalogue .op-pasek-tasma { overflow-x: auto; }
+    .cnk-catalogue .cnk-plan-stage { scroll-behavior: auto; }
+}
