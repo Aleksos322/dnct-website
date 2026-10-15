@@ -189,7 +189,7 @@
 .cnk-catalogue .op-pasek-autor i { margin-left: auto; flex-shrink: 0; font-style: normal; color: #fbbf24; font-size: 0.7rem; letter-spacing: 0.05em; }
 .cnk-catalogue .op-pasek-autor i span { color: #475569; }
 .cnk-catalogue .op-pasek-autor i span.is-pelna { color: #fbbf24; }
-.cnk-catalogue .op-pasek-karta p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 0; color: #a3aec2; font-size: 0.8rem; line-height: 1.5; }
+.cnk-catalogue .op-pasek-karta p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; align-self: start; max-height: 4.5em; overflow: hidden; margin: 0; color: #a3aec2; font-size: 0.8rem; line-height: 1.5; }
 @keyframes cnkReviews { to { transform: translateX(calc(-50% - 6.5px)); } }
 .cnk-catalogue button:focus-visible,
 .cnk-catalogue a:focus-visible,
@@ -232,7 +232,7 @@
     .cnk-plan-index button { padding: 6px 10px; font-size: 0.78rem; }
     .cnk-plan-navigation { margin-top: 12px; }
     .cnk-plan-skip { margin-top: 8px; }
-    .cnk-catalogue .op-pasek-karta { height: 120px; }
+    .cnk-catalogue .op-pasek-karta { height: 128px; }
 }
 @media (min-width: 861px) and (max-height: 950px) {
     .cnk-catalogue { gap: 12px 28px; padding-bottom: 16px; }
@@ -256,7 +256,7 @@
     .cnk-catalogue .cfg-period,
     .cnk-catalogue .cfg-mode { padding-top: 10px; padding-bottom: 10px; }
     .cnk-catalogue .op-pasek-karta { height: 110px; }
-    .cnk-catalogue .op-pasek-karta p { -webkit-line-clamp: 2; }
+    .cnk-catalogue .op-pasek-karta p { -webkit-line-clamp: 2; max-height: 3em; }
 }
 @media (max-width: 1100px) {
     .cnk-catalogue { gap: 20px 24px; }
@@ -302,7 +302,7 @@
     .cnk-catalogue .op-pasek-wynik strong { font-size: 1.5rem; }
     .cnk-catalogue .op-pasek-wystaw { font-size: 0.63rem; padding: 12px; }
     .cnk-catalogue .op-pasek-karta { width: 265px; height: 110px; }
-    .cnk-catalogue .op-pasek-karta p { -webkit-line-clamp: 2; }
+    .cnk-catalogue .op-pasek-karta p { -webkit-line-clamp: 2; max-height: 3em; }
 }
 @media (max-width: 600px) {
     .cennik-page.cnk-catalogue-page { margin-top: -34px; }
