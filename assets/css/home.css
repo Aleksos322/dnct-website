@@ -416,7 +416,7 @@
     mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.op-pasek-tor { display: flex; gap: 0.8rem; width: max-content; margin: 0; padding: 0.3rem 0; list-style: none; animation: opPasek 70s linear infinite; }
+.op-pasek-tor { display: flex; gap: 0.8rem; width: max-content; margin: 0; padding: 0.3rem 0; list-style: none; animation: opPasek 140s linear infinite; }
 .op-pasek-tasma:hover .op-pasek-tor, .op-pasek-tasma:focus-within .op-pasek-tor { animation-play-state: paused; }
 @keyframes opPasek { to { transform: translateX(calc(-50% - 0.4rem)); } }
 .op-pasek-karta {
