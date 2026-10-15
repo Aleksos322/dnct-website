@@ -145,24 +145,50 @@
 .cnk-catalogue .cfg-period,
 .cnk-catalogue .cfg-mode { padding: 12px 30px 12px 12px; border-radius: 14px; }
 .cnk-catalogue .cfg-mode-note { font-size: 0.7rem; }
-.cnk-catalogue .cfg-slider { margin-top: 16px; padding-top: 0; }
+/* Suwak slotów (Zomboid, Vintage Story): gruba ścieżka z fioletowym
+   wypełnieniem, świecący kciuk jak przyciski strony, progi jako kropki.
+   Bursztyn i czerwień mówią o dostępności tylko kropką - podpisy zostają
+   spokojne, inaczej rząd liczb pod suwakiem zlewał się w żółtą plamę. */
+.cnk-catalogue .cfg-slider { --thumb: 24px; margin-top: 18px; padding-top: 0; }
 .cnk-catalogue .cfg-range { height: 36px; }
 .cnk-catalogue .cfg-range::-webkit-slider-runnable-track {
-    height: 6px;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1) 0 0 / calc(var(--thumb) / 2 + var(--p) * (100% - var(--thumb))) 100% no-repeat, rgba(255, 255, 255, 0.07);
+    height: 8px; border-radius: 999px;
+    background:
+        linear-gradient(90deg, #6d28d9, #8b5cf6 55%, #a78bfa) 0 0 / calc(var(--thumb) / 2 + var(--p) * (100% - var(--thumb))) 100% no-repeat,
+        rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 3px rgba(0, 0, 0, 0.5);
 }
-.cnk-catalogue .cfg-range::-moz-range-track { height: 6px; }
-.cnk-catalogue .cfg-range::-moz-range-progress { height: 6px; background: linear-gradient(135deg, #8b5cf6, #6366f1); }
-.cnk-catalogue .cfg-range::-webkit-slider-thumb { margin-top: -10px; background: #c4b5fd; border: 5px solid #181323; box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5); }
-.cnk-catalogue .cfg-range::-moz-range-thumb { box-sizing: border-box; width: var(--thumb); height: var(--thumb); background: #c4b5fd; border: 5px solid #181323; box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5); }
-.cnk-catalogue .cfg-range:active::-webkit-slider-thumb { scale: 1; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
-.cnk-catalogue .cfg-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.65); }
-.cnk-catalogue .cfg-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.65); }
+.cnk-catalogue .cfg-range::-moz-range-track { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
+.cnk-catalogue .cfg-range::-moz-range-progress { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #6d28d9, #8b5cf6 55%, #a78bfa); }
+.cnk-catalogue .cfg-range::-webkit-slider-thumb {
+    width: var(--thumb); height: var(--thumb); margin-top: -8px;
+    background: #f5f3ff; border: 6px solid #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18), 0 4px 16px rgba(139, 92, 246, 0.65);
+    transition: box-shadow 0.2s ease, scale 0.15s ease;
+}
+.cnk-catalogue .cfg-range::-moz-range-thumb {
+    box-sizing: border-box; width: var(--thumb); height: var(--thumb);
+    background: #f5f3ff; border: 6px solid #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.18), 0 4px 16px rgba(139, 92, 246, 0.65);
+}
+.cnk-catalogue .cfg-range:hover::-webkit-slider-thumb { scale: 1.06; box-shadow: 0 0 0 7px rgba(139, 92, 246, 0.2), 0 4px 18px rgba(139, 92, 246, 0.75); }
+.cnk-catalogue .cfg-range:active::-webkit-slider-thumb { scale: 1.12; box-shadow: 0 0 0 9px rgba(139, 92, 246, 0.22), 0 4px 22px rgba(139, 92, 246, 0.85); }
+.cnk-catalogue .cfg-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px #c4b5fd, 0 4px 16px rgba(139, 92, 246, 0.65); }
+.cnk-catalogue .cfg-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px #c4b5fd, 0 4px 16px rgba(139, 92, 246, 0.65); }
 .cnk-catalogue .cfg-bubble { top: -18px; opacity: 0; transition: opacity 0.2s ease; }
 .cnk-catalogue .cfg-slider:focus-within .cfg-bubble { opacity: 1; }
-.cnk-catalogue .cfg-ticks { margin-top: 0; height: 28px; }
-.cnk-catalogue .cfg-tick { font-family: inherit; font-size: 0.6rem; }
-.cnk-catalogue .cfg-tick i { height: 4px; }
+.cnk-catalogue .cfg-ticks { margin-top: 2px; height: 30px; }
+.cnk-catalogue .cfg-tick { gap: 6px; color: #64748b; font-family: inherit; font-size: 0.66rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cnk-catalogue .cfg-tick i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); }
+.cnk-catalogue .cfg-tick:hover { color: #c4b5fd; }
+.cnk-catalogue .cfg-tick.is-past i { background: #a78bfa; }
+.cnk-catalogue .cfg-tick.is-current { color: #fff; }
+.cnk-catalogue .cfg-tick.is-current i { background: #c4b5fd; scale: 1.6; box-shadow: 0 0 8px rgba(196, 181, 253, 0.8); }
+.cnk-catalogue .cfg-tick.is-low i { background: #fbbf24; }
+.cnk-catalogue .cfg-tick.is-low span { color: #64748b; }
+.cnk-catalogue .cfg-tick.is-low.is-current span { color: #fff; }
+.cnk-catalogue .cfg-tick.is-out i { background: #f87171; }
+.cnk-catalogue .cfg-tick.is-out span { color: rgba(248, 113, 113, 0.7); }
 .cnk-catalogue .cfg-tick:not(:first-child):not(:last-child):not(:nth-child(4n + 1)):not(.is-current) span { visibility: hidden; }
 .cnk-catalogue .cfg-select { background: linear-gradient(135deg, #8b5cf6, #6366f1); margin-top: 12px; padding: 13px; }
 .cnk-catalogue .cfg-select:disabled { background: rgba(255, 255, 255, 0.04); }
@@ -242,6 +268,11 @@
     .cnk-catalogue .cennik-panel.is-active .cfg-grid { grid-column: 1 / -1; grid-row: 2; }
     .cnk-catalogue .cennik-panel.is-active .cfg-table { grid-column: 1 / -1; grid-row: 4; margin: 0; }
     .cnk-catalogue.has-slot-configurator .cnk-catalogue-reviews { grid-row: 3; }
+    /* Opinie na tej samej wysokości co przy kartach Minecrafta: ta sama
+       minimalna wysokość sekcji plus zwinięta tabela progów pod opiniami
+       (--cfg-tail liczy cennik-showcase.js). Karty konfiguratora wypełniają
+       resztę, a ich wnętrze już rozkłada się flexem (space-between). */
+    .cnk-catalogue.has-slot-configurator { min-height: calc(100svh - 116px + var(--cfg-tail, 0px)); grid-template-rows: auto minmax(0, 1fr) auto auto; }
     .cnk-catalogue .cfg-intro { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); margin: 0; }
     .cnk-plan-count { margin-top: 12px; }
     .cnk-plan-count b { font-size: 2.6rem; }

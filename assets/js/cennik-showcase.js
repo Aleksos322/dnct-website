@@ -57,6 +57,10 @@
             var selectedPanel = catalogue.querySelector('.cennik-panel.is-active');
             catalogue.classList.toggle('has-plan-cards', !!(selectedPanel && selectedPanel.querySelector('[data-catalogue-carousel]')));
             catalogue.classList.toggle('has-slot-configurator', !!(selectedPanel && selectedPanel.querySelector('.cfg')));
+            var tableHead = selectedPanel && selectedPanel.querySelector('.cfg-table > summary');
+            catalogue.style.setProperty('--cfg-tail', tableHead
+                ? (tableHead.offsetHeight + 2 + (parseFloat(getComputedStyle(catalogue).rowGap) || 0)) + 'px'
+                : '0px');
             var height = catalogue.offsetHeight;
             var wasPinned = pinned;
             var startY = scrollStart();
