@@ -194,6 +194,68 @@
         syncLayout();
     });
 
+    // Pełna opinia nad paskiem, jak na głównej (home.js). Okienko jest
+    // poza maskowaną taśmą, więc długi tekst nie zostaje przez nią ucięty.
+    var reviewBox = catalogue.querySelector('.cnk-catalogue-reviews');
+    var reviewTape = reviewBox && reviewBox.querySelector('.op-pasek-tasma');
+    if (reviewTape) {
+        var reviewDesktop = window.matchMedia('(min-width: 861px) and (hover: hover) and (pointer: fine)');
+        var reviewPopup = null, reviewClose = null;
+        function hideReview(immediate) {
+            clearTimeout(reviewClose);
+            if (!reviewPopup) return;
+            var old = reviewPopup;
+            reviewPopup = null;
+            reviewTape.classList.remove('is-paused');
+            if (immediate || reduce.matches) { old.remove(); return; }
+            old.classList.add('is-zamyka');
+            old.style.height = old.getAttribute('data-h0') + 'px';
+            setTimeout(function () { old.remove(); }, 320);
+        }
+        function scheduleReviewClose() { reviewClose = setTimeout(function () { hideReview(false); }, 80); }
+        function showReview(card) {
+            if (!reviewDesktop.matches) return;
+            hideReview(true);
+            var r = card.getBoundingClientRect(), b = reviewBox.getBoundingClientRect();
+            var pop = document.createElement('div');
+            pop.className = 'op-pasek-pop';
+            pop.setAttribute('aria-hidden', 'true'); // Pełny tekst pozostaje też w oryginalnej karcie.
+            pop.appendChild(card.querySelector('.op-pasek-autor').cloneNode(true));
+            var text = document.createElement('p');
+            text.textContent = card.querySelector('p').textContent;
+            pop.appendChild(text);
+            pop.style.left = Math.max(0, Math.min(r.left - b.left, b.width - r.width)) + 'px';
+            pop.style.bottom = (b.bottom - r.bottom) + 'px';
+            pop.style.width = r.width + 'px';
+            pop.style.height = r.height + 'px';
+            pop.setAttribute('data-h0', String(r.height));
+            reviewBox.appendChild(pop);
+            reviewPopup = pop;
+            reviewTape.classList.add('is-paused');
+            var fullHeight = Math.max(r.height, pop.scrollHeight);
+            requestAnimationFrame(function () { if (reviewPopup === pop) pop.style.height = fullHeight + 'px'; });
+            pop.addEventListener('mouseleave', scheduleReviewClose);
+            pop.addEventListener('mouseenter', function () { clearTimeout(reviewClose); });
+        }
+        reviewTape.querySelectorAll('.op-pasek-karta').forEach(function (card) {
+            card.addEventListener('mouseenter', function () { showReview(card); });
+            card.addEventListener('mouseleave', scheduleReviewClose);
+            if (!card.hasAttribute('aria-hidden')) {
+                card.tabIndex = 0;
+                card.addEventListener('focus', function () { showReview(card); });
+                card.addEventListener('blur', function () { hideReview(false); });
+                card.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') { event.preventDefault(); hideReview(false); }
+                });
+            }
+        });
+        window.addEventListener('resize', function () { hideReview(true); });
+        window.addEventListener('scroll', function () { hideReview(true); }, { passive: true });
+        catalogue.querySelectorAll('.cennik-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () { hideReview(true); });
+        });
+    }
+
     // Dostępne z klawiatury zakładki oraz powroty po logowaniu (#cfg-...).
     var tabs = Array.from(catalogue.querySelectorAll('.cennik-tab'));
     tabs.forEach(function (tab, index) {

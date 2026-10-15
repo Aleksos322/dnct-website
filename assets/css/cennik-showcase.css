@@ -180,6 +180,7 @@
 .cnk-catalogue .op-pasek-tasma { min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
 .cnk-catalogue .op-pasek-tor { display: flex; gap: 13px; width: max-content; list-style: none; padding: 4px 0; margin: 0; animation: cnkReviews 70s linear infinite; }
 .cnk-catalogue .op-pasek-tasma:hover .op-pasek-tor,
+.cnk-catalogue .op-pasek-tasma.is-paused .op-pasek-tor,
 .cnk-catalogue .op-pasek-tasma:focus-within .op-pasek-tor { animation-play-state: paused; }
 .cnk-catalogue .op-pasek-karta { display: grid; grid-template-rows: auto 1fr; gap: 8px; flex-shrink: 0; width: 300px; height: 128px; padding: 13px 15px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.07); background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)); }
 .cnk-catalogue .op-pasek-autor { display: flex; align-items: center; gap: 9px; min-width: 0; }
@@ -190,6 +191,20 @@
 .cnk-catalogue .op-pasek-autor i span { color: #475569; }
 .cnk-catalogue .op-pasek-autor i span.is-pelna { color: #fbbf24; }
 .cnk-catalogue .op-pasek-karta p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; align-self: start; max-height: 4.5em; overflow: hidden; margin: 0; color: #a3aec2; font-size: 0.8rem; line-height: 1.5; }
+.cnk-catalogue-reviews { position: relative; z-index: 30; }
+.cnk-catalogue .op-pasek-pop {
+    position: absolute; z-index: 30; display: grid; gap: 0.6rem; align-content: start;
+    padding: 0.8rem 0.95rem 1rem; border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    background: linear-gradient(180deg, #1c1631, #110e1d);
+    box-shadow: 0 -24px 60px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(139, 92, 246, 0.15), 0 20px 50px -20px rgba(139, 92, 246, 0.5);
+    transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.cnk-catalogue .op-pasek-pop.is-zamyka { opacity: 0; }
+.cnk-catalogue .op-pasek-pop p { margin: 0; color: #cbd5e1; font-size: 0.84rem; line-height: 1.6; }
+.cnk-catalogue .op-pasek-pop .op-pasek-autor i span { color: #fbbf24; }
+.cnk-catalogue .op-pasek-pop .op-pasek-autor i span:not(.is-pelna) { color: #3f3a4d; }
+.cnk-catalogue .op-pasek-karta:focus-visible { outline: 2px solid #a78bfa; outline-offset: -2px; }
 @keyframes cnkReviews { to { transform: translateX(calc(-50% - 6.5px)); } }
 .cnk-catalogue button:focus-visible,
 .cnk-catalogue a:focus-visible,
