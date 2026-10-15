@@ -54,6 +54,9 @@
             return scrollArea.getBoundingClientRect().top + window.scrollY - pinTop;
         }
         function syncLayout() {
+            var selectedPanel = catalogue.querySelector('.cennik-panel.is-active');
+            catalogue.classList.toggle('has-plan-cards', !!(selectedPanel && selectedPanel.querySelector('[data-catalogue-carousel]')));
+            catalogue.classList.toggle('has-slot-configurator', !!(selectedPanel && selectedPanel.querySelector('.cfg')));
             var height = catalogue.offsetHeight;
             var wasPinned = pinned;
             var startY = scrollStart();
