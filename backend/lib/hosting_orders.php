@@ -28,14 +28,8 @@ require_once __DIR__ . '/provisioning.php';
 require_once __DIR__ . '/hosting.php';
 require_once __DIR__ . '/../mail/mail.php';
 
-/** Cennik - jedyne źródło kwot. Kwoty brutto w groszach za 30 dni. */
-const HOSTING_PLANS = [
-    'dnct-start'  => ['name' => 'Start',  'price' => 900,  'sites' => 1,  'disk_gb' => 5,  'mailboxes' => 5,   'databases' => 2],
-    'dnct-pro'    => ['name' => 'Pro',    'price' => 1900, 'sites' => 5,  'disk_gb' => 20, 'mailboxes' => 25,  'databases' => 10],
-    'dnct-biznes' => ['name' => 'Biznes', 'price' => 3900, 'sites' => 20, 'disk_gb' => 50, 'mailboxes' => 100, 'databases' => 50],
-];
-
-const HOSTING_PERIOD_DAYS = 30;
+require_once __DIR__ . '/hosting_catalog.php';
+require_once __DIR__ . '/hosting_trials.php';
 
 /** Po tylu dniach zawieszenia admin dostaje "do decyzji" (i anulujemy abonament). */
 const HOSTING_STALE_DAYS = 14;
@@ -67,7 +61,7 @@ function hosting_order_create(
                      IF(?, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY)))'
         );
         $stmt->execute([
-            $email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, $plan['price'], $extendsId,
+            $email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, hosting_price($package, $billingMode), $extendsId,
             DNCT_TERMS_VERSION, (int)$immediateServiceStart, (int)$immediateServiceStart,
         ]);
     } else {
@@ -75,7 +69,7 @@ function hosting_order_create(
             'INSERT INTO hosting_orders (user_email, user_name, package, period_days, billing_mode, amount_gross, extends_order_id)
              VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, $plan['price'], $extendsId]);
+        $stmt->execute([$email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, hosting_price($package, $billingMode), $extendsId]);
     }
     return (int)$dnct->lastInsertId();
 }
@@ -233,14 +227,28 @@ function hosting_webhook_checkout_completed(PDO $dnct, $session): bool
             return true;
         }
 
+        // Trial jest przyznawany wyłącznie po podpisanym zdarzeniu Stripe.
+        // Datę bierzemy z subskrypcji; nie z przeglądarki i nie z czasu powrotu.
+        $trialUntil = null;
+        $trialClaim = hosting_trial_by_order($dnct, $id);
+        if ($trialClaim !== null) {
+            if ($subscription === null) { return false; }
+            stripe_init();
+            $sub = \Stripe\Subscription::retrieve($subscription);
+            $end = (int)($sub->trial_end ?? 0);
+            if ($end <= 0) { return false; }
+            $trialUntil = gmdate('Y-m-d H:i:s', $end);
+            $dnct->prepare('UPDATE hosting_trial_claims SET started_at = COALESCE(started_at, NOW()), ends_at = ? WHERE order_id = ?')->execute([$trialUntil, $id]);
+        }
+
         // --- Nowy zakup: płatny pakiet na koncie DNCT ------------------------
         $dnct->prepare(
             'UPDATE hosting_orders
                 SET status = "paid", stripe_customer_id = COALESCE(?, stripe_customer_id),
                     stripe_subscription_id = COALESCE(?, stripe_subscription_id),
-                    expires_at = DATE_ADD(GREATEST(NOW(), COALESCE(service_start_at, NOW())), INTERVAL period_days DAY), grace_until = NULL, failure_reason = NULL
+                    expires_at = IF(? IS NOT NULL, ?, DATE_ADD(GREATEST(NOW(), COALESCE(service_start_at, NOW())), INTERVAL period_days DAY)), grace_until = NULL, failure_reason = NULL
               WHERE id = ?'
-        )->execute([$customer, $subscription, $id]);
+        )->execute([$customer, $subscription, $trialUntil, $trialUntil, $id]);
 
         $order = hosting_order_by($dnct, 'id', $id);
         if ($order === null) {
@@ -302,7 +310,7 @@ function hosting_webhook_invoice_paid(PDO $dnct, array $order, $invoice): bool
     if (($invoice->billing_reason ?? '') === 'subscription_create') {
         return true; // pierwszy okres zaliczył już checkout.session.completed
     }
-    $end = isset($invoice->period_end) ? (int)$invoice->period_end : 0;
+    $end = hosting_invoice_period_end($invoice);
     $end > 0
         ? hosting_order_extend($dnct, (int)$order['id'], null, gmdate('Y-m-d H:i:s', $end))
         : hosting_order_extend($dnct, (int)$order['id'], (int)$order['period_days']);
@@ -362,9 +370,16 @@ function hosting_announce_paid(PDO $dnct, ?array $order): void
         return;
     }
     $plan    = HOSTING_PLANS[$order['package']] ?? ['name' => $order['package']];
+    $trial = hosting_trial_by_order($dnct, (int)$order['id']);
     $expires = hosting_fmt_date((string)$order['expires_at']);
+    if ($trial !== null) {
+        $text = '7-dniowy test działa do ' . $expires . '. Po nim pobierzemy ' . pricing_format((int)$order['amount_gross']) . ' zł co 30 dni. Wyłącz odnawianie przed końcem testu, jeśli nie chcesz płacić: ' . hosting_account_url();
+        notify_user($dnct, (string)$order['user_name'], 'success', 'Test hostingu ' . $plan['name'] . ' jest gotowy', $text);
+        hosting_mail($order, 'Twój test hostingu — termin i cena abonamentu', $text . "\nPanel: " . hosting_public_url());
+        return;
+    }
     $renew   = $order['billing_mode'] === 'subscription'
-        ? 'Abonament odnawia się sam co miesiąc.'
+        ? 'Abonament odnawia się sam co 30 dni.'
         : 'To płatność jednorazowa - przedłużysz ją na stronie hostingu.';
 
     notify_user($dnct, (string)$order['user_name'], 'success', 'Hosting ' . $plan['name'] . ' jest gotowy',
@@ -385,8 +400,10 @@ function hosting_send_contract_confirmation(array $order): void
     if ($legal === '') {
         return;
     }
+    $trial = hosting_trial_by_order(dnct_db(), (int)$order['id']);
+    if ($trial !== null) { $legal .= "\n\nTest: 7 dni za 0 zł. Koniec testu: " . hosting_fmt_date($trial['ends_at']) . '. Następnie ' . pricing_format((int)$order['amount_gross']) . ' zł co 30 dni z karty. Wyłącz odnawianie przed końcem testu: ' . hosting_account_url(); }
     hosting_mail($order, 'Potwierdzenie umowy - zamówienie #' . (int)$order['id'],
-        "Potwierdzamy zawarcie umowy i przyjęcie płatności za hosting.\n\n" . $legal);
+        "Potwierdzamy zawarcie umowy i przyjęcie zamówienia hostingu.\n\n" . $legal);
 }
 
 /** Prosta wiadomość z info@ - błąd poczty nie wywraca webhooka. */
@@ -413,6 +430,7 @@ function hosting_lifecycle_run(PDO $dnct, bool $apply): void
 {
     echo "\n-- hosting WWW --\n";
     $done = 0;
+    hosting_trial_reminders($dnct, $apply);
 
     // 1. Ostrzeżenia - tylko płatność jednorazowa (abonament odnawia się sam).
     foreach ([['warn_7d_at', '7 DAY', 'za tydzień'], ['warn_24h_at', '24 HOUR', 'jutro']] as [$col, $interval, $opis]) {

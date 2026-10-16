@@ -40,12 +40,17 @@ if ($email === '' || $name === '') {
     json_error('Musisz być zalogowany, żeby złożyć zamówienie.', 401, [], ['reason' => 'unauthorized']);
 }
 
-$billing = request_string('billing_mode', 'payment') === 'subscription' ? 'subscription' : 'payment';
+$billing = request_string('billing_mode', 'subscription') === 'subscription' ? 'subscription' : 'payment';
 $dnct    = dnct_db();
 $current = hosting_current_order($dnct, $email);
 $extends = null;
+$trial = request_bool('trial');
+if ($trial && ($billing !== 'subscription' || !request_bool('trial_accepted') || !request_bool('immediate_service_start'))) {
+    json_error('Test wymaga abonamentu, natychmiastowego startu i zgody na cenę po 7 dniach.', 422);
+}
 
 if (request_string('extend') === '1') {
+    if ($trial) { json_error('Test nie jest dostępny przy przedłużeniu.', 422); }
     // Przedłużenie dotyczy WYŁĄCZNIE bieżącego hostingu tego klienta -
     // identyfikatora zamówienia nie bierzemy z żądania.
     if ($current === null) {
@@ -64,7 +69,7 @@ if (request_string('extend') === '1') {
     }
     $immediateServiceStart = request_bool('immediate_service_start');
     $package = request_string('package');
-    if (!isset(HOSTING_PLANS[$package])) {
+    if (!in_array($package, HOSTING_OFFER_KEYS, true)) {
         json_error('Wybierz pakiet hostingu.', 422, [], ['reason' => 'invalid_selection']);
     }
     // Drugi pakiet równolegle = podwójna opłata za to samo konto. Zmiana
@@ -97,10 +102,19 @@ $orderId = hosting_order_create(
     $extends === null ? ($immediateServiceStart ?? false) : null
 );
 $isSub   = $billing === 'subscription';
+$spec = hosting_checkout_spec($package, $billing, $trial);
+if ($trial) {
+    $sub = (string)($_SESSION['authentik_sub'] ?? '');
+    if ($sub === '') { json_error('Zaloguj się ponownie, aby rozpocząć test.', 401); }
+    if (!hosting_trial_claim($dnct, $sub, $email, $orderId)) {
+        $dnct->prepare('UPDATE hosting_orders SET status = "cancelled" WHERE id = ?')->execute([$orderId]);
+        json_error('Test na tym koncie został już wykorzystany lub trwa rezerwacja zamówienia. Wróć do rozpoczętego Stripe Checkout albo spróbuj po 31 minutach.', 409);
+    }
+}
 
 $priceData = [
     'currency'     => 'pln',
-    'unit_amount'  => $plan['price'],
+    'unit_amount'  => $spec['amount'],
     'product_data' => [
         'name'        => sprintf('DNCT Hosting WWW - pakiet %s%s', $plan['name'], $extends ? ' (przedłużenie)' : ''),
         'description' => sprintf('%d %s · %d GB SSD · %d skrzynek pocztowych · %d dni',
@@ -111,7 +125,7 @@ if ($isSub) {
     $priceData['recurring'] = stripe_interval_for_days(HOSTING_PERIOD_DAYS);
 }
 
-$meta = ['order_id' => (string)$orderId, 'product' => 'hosting'];
+$meta = ['order_id' => (string)$orderId, 'product' => 'hosting', 'trial_days' => $trial ? '7' : '0'];
 if ($extends === null) {
     $meta['terms_version'] = DNCT_TERMS_VERSION;
     $meta['immediate_service_start'] = !empty($immediateServiceStart) ? 'yes' : 'no';
@@ -132,8 +146,16 @@ try {
     ];
     if ($isSub) {
         $params['subscription_data'] = ['metadata' => $meta];
+        if ($trial) {
+            $params['payment_method_types'] = $spec['payment_method_types'];
+            $params['payment_method_collection'] = $spec['payment_method_collection'];
+            $params['expires_at'] = time() + 1800;
+            $params['subscription_data']['trial_period_days'] = $spec['trial_period_days'];
+            $params['subscription_data']['trial_settings'] = ['end_behavior'=>['missing_payment_method'=>'cancel']];
+            $params['custom_text']['submit']['message'] = '7 dni bez opłat. Następnie ' . pricing_format($spec['amount']) . ' zł co 30 dni. Wyłącz odnawianie przed końcem testu na web.dnct.pl, jeśli nie chcesz płacić.';
+        }
     }
-    $session = \Stripe\Checkout\Session::create($params);
+    $session = \Stripe\Checkout\Session::create($params, ['idempotency_key'=>'hosting-order-' . $orderId]);
 } catch (Throwable $e) {
     error_log('Checkout hostingu: sesja dla zamówienia #' . $orderId . ' nieudana - ' . $e->getMessage());
     json_error('Nie udało się rozpocząć płatności. Spróbuj ponownie za chwilę.', 503, [], ['reason' => 'stripe_error']);
