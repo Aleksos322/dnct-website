@@ -37,6 +37,9 @@ AddDefaultCharset UTF-8
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Shared messaging UI and authenticated gateway.
+    RewriteRule ^messaging/(.+)$ api/messaging.php?bridge_path=$1 [END,QSA]
     RewriteBase /
 
     # Sklep serwerów gier działa pod game.dnct.pl. Stary host zachowuje tylko

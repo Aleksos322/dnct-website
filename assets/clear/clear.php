@@ -177,12 +177,13 @@ if ($centerContent) {
     </header>
 
 
+    <?php $nativeMessaging = require __DIR__ . '/messaging-native.php'; ?>
     <!-- POWIADOMIENIA -->
-    <?php require_once __DIR__ . '/notifications.php'; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . '/notifications.php'; ?>
 
     <!-- CZAT SUPPORTU -->
-    <?php require_once __DIR__ . '/support-chat.php'; ?>
-    <?php require_once __DIR__ . '/support-ticket-panel.php'; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . '/support-chat.php'; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . '/support-ticket-panel.php'; ?>
 
     <!-- TREŚĆ STRONY (wstrzykiwana przez podstrony) -->
     <main class="<?php echo $mainClasses; ?>">
