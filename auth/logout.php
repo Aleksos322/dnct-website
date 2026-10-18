@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
+require_once dirname(__DIR__) . '/backend/lib/messaging_site.php';
+messaging_site_revoke();
+
 $wasLoggedIn = isset($_SESSION['authentik_username']);
 
 // Zapamiętujemy PRZED wyczyszczeniem sesji - Authentik potrzebuje id_tokenu,
