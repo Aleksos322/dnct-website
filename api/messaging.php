@@ -19,7 +19,7 @@ foreach($_FILES as $field=>$file){
  }
 }
 $payload=json_encode(['v'=>1,'time'=>time(),'nonce'=>bin2hex(random_bytes(24)),
- 'session'=>hash('sha256','site:'.session_id()),'email'=>$_SESSION['authentik_email'],
+ 'site'=>'game','session'=>hash('sha256','site:'.session_id()),'email'=>$_SESSION['authentik_email'],
  'csrf'=>csrf_token(),'ip'=>client_ip(),'method'=>$method,'path'=>$path,'query'=>$query,
  'params'=>$params,'files'=>$files,'range'=>$_SERVER['HTTP_RANGE']??''],JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);
 $key=@file_get_contents('/home/jakub/dnct-private-media/site-messaging.key');
