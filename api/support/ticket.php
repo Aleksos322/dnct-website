@@ -47,6 +47,16 @@ function support_audit(PDO $db,int $ticketId,?string $actor,string $action,strin
 if(($_SERVER['REQUEST_METHOD']??'')==='GET') support_payload($db,support_active_ticket($db,$username,$access));
 require_method('POST');csrf_guard();$action=request_string('action');
 
+// Compatibility for the production endpoint used by existing game tickets.
+if($action==='close_user'&&!function_exists('support_chat_mutate')){
+    require_once dirname(__DIR__,2).'/backend/lib/support_customer_close.php';
+    rate_limit_guard('support_message',RATE_LIMIT_SUPPORT_MESSAGE,'Wysyłasz żądania zbyt szybko.');
+    try{$closed=support_close_customer_ticket($db,(int)request_string('ticket_id'),$username,$access,request_string('reason'));}
+    catch(InvalidArgumentException $e){json_error($e->getMessage(),422);}
+    catch(DomainException $e){json_error($e->getMessage(),409);}
+    support_payload($db,$closed);
+}
+
 if($action==='create'){
     if(!$isAdmin) rate_limit_guard('support_ticket',RATE_LIMIT_SUPPORT_TICKET,'Za dużo zgłoszeń z tego adresu. Spróbuj później.');
     if(request_string('website')!=='')json_error('Nie udało się wysłać formularza.',422);
