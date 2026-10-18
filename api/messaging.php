@@ -39,6 +39,6 @@ rewind($stream);
 if(str_contains($type,'application/json')){
  $raw=stream_get_contents($stream);$data=json_decode($raw,true);
  if(is_array($data)){$rewrite=static function(&$node)use(&$rewrite){foreach($node as $key=>&$value){if(is_array($value))$rewrite($value);elseif(is_string($value)&&in_array($key,['url','media_url','download_url','group_avatar_url'],true)&&str_starts_with($value,'/api/'))$value='/messaging'.$value;elseif($key==='ws_path'&&$value==='/ws/support')$value='wss://panel.dnct.pl/ws/messaging';elseif($key==='ws_url'&&is_string($value))$value='wss://panel.dnct.pl/ws/messaging';}};$rewrite($data);echo json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);}else echo $raw;
-}elseif(preg_match('~text/html|javascript|text/css~',$type))echo str_replace(['/assets/','/api/'],['/messaging/assets/','/messaging/api/'],stream_get_contents($stream));
+}elseif(preg_match('~text/html|javascript|text/css~',$type))echo preg_replace('~(?<!/messaging)/(assets|api)/~', '/messaging/$1/',stream_get_contents($stream));
 else fpassthru($stream);
 fclose($stream);
