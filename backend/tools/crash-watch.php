@@ -178,22 +178,37 @@ if (!$dryRun) {
 /** Czy od $since ktoś wyłączył/zrestartował serwer z panelu albo komendą w konsoli. */
 function crash_watch_manual_power(string $short, int $since): bool
 {
-    $res = ptero_client_request('GET', '/api/client/servers/' . $short . '/activity?per_page=25', null, 10);
-    if ($res['code'] !== 200) {
+    // Panel zwraca wpisy od NAJSTARSZYCH - bez tego sprawdzano 25 pierwszych
+    // wpisów z ostatnich miesięcy i kliknięcie stop dziś nigdy nie było widać.
+    // Idziemy od ostatniej strony wstecz, aż strona zacznie się przed $since.
+    $url = '/api/client/servers/' . $short . '/activity?per_page=25';
+    $first = ptero_client_request('GET', $url, null, 10);
+    if ($first['code'] !== 200) {
         return true;   // nie wiemy - lepiej przemilczeć niż budzić fałszywym alarmem
     }
-    foreach ($res['json']['data'] ?? [] as $row) {
-        $a = $row['attributes'] ?? [];
-        if (strtotime((string)($a['timestamp'] ?? '')) < $since) {
-            continue;
-        }
-        $event = (string)($a['event'] ?? '');
-        if (in_array($event, ['server:power.stop', 'server:power.restart', 'server:power.kill', 'server:reinstall'], true)) {
+    $pages = max(1, (int)($first['json']['meta']['pagination']['total_pages'] ?? 1));
+    for ($page = $pages; $page >= 1; $page--) {
+        $res = $page === 1 ? $first : ptero_client_request('GET', $url . '&page=' . $page, null, 10);
+        if ($res['code'] !== 200) {
             return true;
         }
-        if ($event === 'server:console.command'
-            && preg_match('/^\/?(stop|restart|end|shutdown|quit)\b/i', trim((string)($a['properties']['command'] ?? '')))) {
-            return true;
+        $rows = $res['json']['data'] ?? [];
+        foreach ($rows as $row) {
+            $a = $row['attributes'] ?? [];
+            if (strtotime((string)($a['timestamp'] ?? '')) < $since) {
+                continue;
+            }
+            $event = (string)($a['event'] ?? '');
+            if (in_array($event, ['server:power.stop', 'server:power.restart', 'server:power.kill', 'server:reinstall'], true)) {
+                return true;
+            }
+            if ($event === 'server:console.command'
+                && preg_match('/^\/?(stop|restart|end|shutdown|quit)\b/i', trim((string)($a['properties']['command'] ?? '')))) {
+                return true;
+            }
+        }
+        if ($rows && strtotime((string)($rows[0]['attributes']['timestamp'] ?? '')) < $since) {
+            break;
         }
     }
     return false;
