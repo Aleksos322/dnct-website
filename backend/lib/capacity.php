@@ -27,12 +27,14 @@ declare(strict_types=1);
 /**
  * Ile wolnych miejsc danego planu musi zostać, żeby dało się go jeszcze kupić.
  *
+ * Od 2026-10-20 wartość 1: sprzedajemy także ostatnie wolne miejsce (decyzja
+ * właściciela - przy obecnym ruchu wyścig dwóch zamówień jest mało realny).
  * Przy wartości 2 plan znika z oferty, gdy zmieści się już tylko jeden - zostaje
  * zapas na jedno wdrożenie awaryjne albo na klienta, który właśnie klika zakup.
  * Sprzedawanie ostatniego wolnego miejsca kończy się wyścigiem dwóch zamówień
  * o ten sam kawałek węzła.
  */
-const CAPACITY_MIN_FREE_SLOTS = 2;
+const CAPACITY_MIN_FREE_SLOTS = 1;
 
 /** Domyślny węzeł, na którym lądują serwery klientów. */
 const CAPACITY_DEFAULT_NODE = 'User node';
