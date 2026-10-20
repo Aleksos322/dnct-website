@@ -16,8 +16,10 @@ function support_messages_page(PDO $db, int $ticketId, int $beforeId = 0, int $l
     $limit = max(1, min(SUPPORT_REALTIME_PAGE_SIZE, $limit));
     $sql = 'SELECT m.id, m.author_role, m.author_name, m.body, m.client_message_key,
             m.reply_to_message_id, m.created_at,
+            CASE WHEN m.author_role = \'admin\' THEN m.author_name ELSE COALESCE(t.customer_username, \'\') END AS username,
             parent.author_name AS reply_author_name, parent.body AS reply_body
         FROM support_messages m
+        JOIN support_tickets t ON t.id = m.ticket_id
         LEFT JOIN support_messages parent ON parent.id = m.reply_to_message_id
         WHERE m.ticket_id = :ticket';
     if ($beforeId > 0) {
@@ -48,8 +50,10 @@ function support_messages_page(PDO $db, int $ticketId, int $beforeId = 0, int $l
 /** @return list<array{participant_role:string,participant_key:string,last_message_id:int,read_at:string}> */
 function support_message_receipts(PDO $db, int $ticketId): array
 {
-    $statement = $db->prepare('SELECT participant_role, participant_key, last_message_id, read_at
-        FROM support_message_receipts WHERE ticket_id = :ticket');
+    $statement = $db->prepare("SELECT r.participant_role, r.participant_key, r.last_message_id, r.read_at,
+        CASE WHEN r.participant_role = 'admin' THEN r.participant_key ELSE COALESCE(t.customer_username, '') END AS username,
+        CASE WHEN r.participant_role = 'admin' THEN r.participant_key ELSE t.customer_name END AS display_name
+        FROM support_message_receipts r JOIN support_tickets t ON t.id = r.ticket_id WHERE r.ticket_id = :ticket");
     $statement->execute([':ticket' => $ticketId]);
     return $statement->fetchAll(PDO::FETCH_ASSOC);
 }
