@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/messaging_security.php';
 
 /**
  * Wspólne prymitywy realtime dla ticketów. PHP pozostaje źródłem prawdy
@@ -60,6 +61,8 @@ function support_message_receipts(PDO $db, int $ticketId): array
 
 function support_realtime_emit(PDO $db, int $ticketId, string $type, array $payload = []): void
 {
+    if($type==='ticket_closed'&&function_exists('notify_user')){$q=$db->prepare('SELECT customer_username,public_id,status,closed_by_user,closed_at FROM support_tickets WHERE id=?');$q->execute([$ticketId]);$t=$q->fetch(PDO::FETCH_ASSOC);if($t&&$t['status']==='closed'&&!$t['closed_by_user']&&!empty($t['customer_username'])){require_once __DIR__.'/notification_events.php';notification_event($db,$t['customer_username'],'support.closed',$ticketId.':'.$t['closed_at'],'Zgłoszenie #'.$t['public_id'].' zostało zamknięte','Zespół wsparcia oznaczył Twoje zgłoszenie jako rozwiązane.','/?wsparcie=1');}}
+
     $statement = $db->prepare('INSERT INTO support_realtime_events(ticket_id, event_type, payload)
         VALUES(:ticket, :type, :payload)');
     $statement->execute([
@@ -75,6 +78,7 @@ function support_realtime_issue_token(PDO $db, int $ticketId, string $role, stri
     if (!in_array($role, ['customer', 'admin'], true) || $participantKey === '') {
         throw new InvalidArgumentException('Nieprawidłowy uczestnik rozmowy.');
     }
+    if (!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta') return ['token'=>msg_ws_token($db,'support','',$ticketId,$role,$participantKey),'expires_at'=>date('Y-m-d H:i:s',time()+300)];
     $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
     $expiresAt = (new DateTimeImmutable('+'.SUPPORT_REALTIME_TOKEN_TTL.' seconds'))->format('Y-m-d H:i:s');
     $db->prepare('DELETE FROM support_realtime_tokens WHERE expires_at < NOW()')->execute();

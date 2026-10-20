@@ -1,0 +1,6 @@
+# DNCT beta: reference-checked notification media retention and expired security metadata.
+# Run as www-data, never root or jakub. Access is revoked immediately by the media endpoint.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+17 * * * * www-data /usr/bin/flock -n /home/jakub/dnct-private-media/beta/.maintenance.lock /usr/bin/php /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/backend/lib/messaging-maintenance.php --apply >> /home/jakub/dnct-private-media/beta/maintenance.log 2>&1
+

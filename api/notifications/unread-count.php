@@ -15,6 +15,9 @@ if (!isset($_SESSION['authentik_username'])) {
     json_error('Musisz być zalogowany.', 401, [], ['reason' => 'unauthorized']);
 }
 
+require_once dirname(__DIR__,2).'/backend/lib/messaging_security.php';
+msg_security_session(dnct_db());
+
 $userId  = (string) $_SESSION['authentik_username'];
 $isAdmin = dnct_is_admin();
 

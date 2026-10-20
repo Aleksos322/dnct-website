@@ -75,4 +75,24 @@ function dnct_notif_type_meta(string $type): array
     </div>
     <?php endforeach; ?>
 </div>
+<?php /* Toast startuje z opacity-0, a notifications.js (który go odsłania) ładuje się
+         dopiero z mostu /messaging/ i tylko zalogowanym. Bez własnego odsłonięcia
+         komunikat z sesji ("Zalogowano jako ...", "Wylogowano") był niewidoczny
+         dla gości i przy każdej awarii mostu. */ ?>
+<script>
+(function () {
+    document.querySelectorAll('#dnct-notifications .dnct-toast').forEach(function (toast) {
+        if (toast.dataset.flashInit) return;
+        toast.dataset.flashInit = '1';
+        var hide = function () {
+            toast.classList.add('opacity-0', 'translate-x-4');
+            setTimeout(function () { toast.remove(); }, 300);
+        };
+        requestAnimationFrame(function () { toast.classList.remove('opacity-0', 'translate-x-4'); });
+        var timer = setTimeout(hide, 5000);
+        var close = toast.querySelector('.dnct-toast-close');
+        if (close) close.addEventListener('click', function () { clearTimeout(timer); hide(); });
+    });
+})();
+</script>
 <?php endif; ?>

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
+require_once dirname(__DIR__).'/backend/lib/messaging_security.php';
+try { msg_security_revoke(dnct_db()); } catch(Throwable $e) { error_log('messaging_security: logout_revoke_failed'); }
 require_once dirname(__DIR__) . '/backend/lib/messaging_site.php';
 messaging_site_revoke();
 

@@ -1,0 +1,56 @@
+--- /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-realtime.php
++++ /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-realtime.php
+@@ -22,7 +22,10 @@
+ if (!$ticket || $ticket['status'] !== 'open' || $ticket['assigned_admin'] !== $admin) json_error('Nie masz dostępu do aktywnej rozmowy.', 403);
+ 
+ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? '')) === 'GET') {
+-    $token = support_realtime_issue_token($db, $id, 'admin', $admin);
++    if (WSPARCIE_ZRODLO === 'beta') {
++        require_once dirname(__DIR__,2).'/beta.dnct.pl/backend/lib/messaging_security.php';
++        $token=['token'=>msg_ws_token($db,'support','',$id,'admin',$admin),'expires_at'=>date('Y-m-d H:i:s',time()+300)];
++    } else $token = support_realtime_issue_token($db, $id, 'admin', $admin);
+     json_ok(['ticket_id' => $id, 'token' => $token['token'], 'expires_at' => $token['expires_at'], 'ws_url' => wsparcie_ws_url()]);
+ }
+ 
+--- /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/api/notifications/hide.php
++++ /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/api/notifications/hide.php
+@@ -23,6 +23,9 @@
+     json_error('Nieprawidłowe ID powiadomienia.', 400, [], ['reason' => 'invalid_id']);
+ }
+ 
++require_once dirname(__DIR__,2).'/backend/lib/messaging_security.php';
++msg_security_session(dnct_db());
++
+ $userId  = (string) $_SESSION['authentik_username'];
+ $isAdmin = dnct_is_admin();
+ 
+--- /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-chat.php
++++ /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-chat.php
+@@ -7,6 +7,7 @@
+ 
+ admin_guard();
+ $db = wsparcie_db();
++if(WSPARCIE_ZRODLO==='beta')msg_security_session($db);
+ $admin = trim((string)($_SESSION['authentik_username'] ?? ''));
+ $viewerKey = support_message_viewer_key_admin($admin);
+ $ticketId = (int)($_GET['ticket'] ?? request_string('ticket_id'));
+--- /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/api/support/media.php
++++ /var/www/dnct.pl/public_html/WEB/beta.dnct.pl/api/support/media.php
+@@ -11,6 +11,7 @@
+ $access = support_access_hash();
+ $username = trim((string) ($_SESSION['authentik_username'] ?? ''));
+ $db = dnct_db();
++msg_security_session($db);
+ $statement = $db->prepare('SELECT t.id FROM support_message_attachments a
+     JOIN support_messages m ON m.id = a.message_id
+     JOIN support_tickets t ON t.id = m.ticket_id
+--- /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-media.php
++++ /var/www/dnct.pl/public_html/WEB/admin.dnct.pl/api/wsparcie-media.php
+@@ -11,6 +11,7 @@
+ $attachmentId = (int) ($_GET['attachment_id'] ?? 0);
+ if ($attachmentId < 1) { http_response_code(404); exit; }
+ $db = wsparcie_db();
++if(WSPARCIE_ZRODLO==='beta')msg_security_session($db);
+ $statement = $db->prepare('SELECT a.id FROM support_message_attachments a
+     JOIN support_messages m ON m.id = a.message_id
+     JOIN support_tickets t ON t.id = m.ticket_id WHERE a.id = ? AND m.withdrawn_at IS NULL LIMIT 1');

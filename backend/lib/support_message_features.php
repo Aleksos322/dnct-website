@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/messaging_security.php';
 
 /**
  * Niezależne prymitywy cyklu życia wiadomości supportu i prywatnych mediów.
@@ -140,7 +141,7 @@ function support_messages_for_viewer(
     $sql = 'SELECT
             m.id, m.ticket_id, m.author_role, m.author_name, m.body,
             m.client_message_key, m.reply_to_message_id, m.edited_at,
-            m.withdrawn_at, m.withdrawn_by_role, m.created_at,
+            m.withdrawn_at, m.withdrawn_by_role, m.created_at, UNIX_TIMESTAMP(m.created_at)+300 AS edit_expires_at,
             parent.id AS reply_id,
             parent.author_role AS reply_author_role,
             parent.author_name AS reply_author_name,
@@ -150,14 +151,14 @@ function support_messages_for_viewer(
         FROM support_messages AS m
         LEFT JOIN support_message_hides AS own_hide
             ON own_hide.message_id = m.id
-           AND own_hide.participant_role = :viewer_role
-           AND own_hide.participant_key = :viewer_key
+           AND own_hide.participant_role = :own_viewer_role
+           AND own_hide.participant_key = :own_viewer_key
         LEFT JOIN support_messages AS parent
             ON parent.id = m.reply_to_message_id
         LEFT JOIN support_message_hides AS parent_hide
             ON parent_hide.message_id = parent.id
-           AND parent_hide.participant_role = :viewer_role
-           AND parent_hide.participant_key = :viewer_key
+           AND parent_hide.participant_role = :parent_viewer_role
+           AND parent_hide.participant_key = :parent_viewer_key
         WHERE m.ticket_id = :ticket
           AND own_hide.message_id IS NULL';
 
@@ -169,8 +170,10 @@ function support_messages_for_viewer(
     $sql .= ' ORDER BY m.id DESC LIMIT ' . ($limit + 1);
 
     $statement = $db->prepare($sql);
-    $statement->bindValue(':viewer_role', $viewerRole, PDO::PARAM_STR);
-    $statement->bindValue(':viewer_key', $viewerKey, PDO::PARAM_STR);
+    $statement->bindValue(':own_viewer_role', $viewerRole, PDO::PARAM_STR);
+    $statement->bindValue(':own_viewer_key', $viewerKey, PDO::PARAM_STR);
+    $statement->bindValue(':parent_viewer_role', $viewerRole, PDO::PARAM_STR);
+    $statement->bindValue(':parent_viewer_key', $viewerKey, PDO::PARAM_STR);
     $statement->bindValue(':ticket', $ticketId, PDO::PARAM_INT);
     if ($beforeId > 0) {
         $statement->bindValue(':before_id', $beforeId, PDO::PARAM_INT);
@@ -215,6 +218,7 @@ function support_messages_for_viewer(
                 ? (int) $row['reply_to_message_id']
                 : null,
             'reply' => support_message_reply_metadata($row),
+            'edit_expires_at' => (int)$row['edit_expires_at'],
             'edited_at' => $row['edited_at'] !== null ? (string) $row['edited_at'] : null,
             'withdrawn_at' => $row['withdrawn_at'] !== null ? (string) $row['withdrawn_at'] : null,
             'withdrawn_by_role' => $row['withdrawn_by_role'] !== null
@@ -285,6 +289,7 @@ function support_store_message_attachments(
             throw new InvalidArgumentException('Do jednej wiadomości można dodać maksymalnie 4 pliki.');
         }
 
+        msg_upload_charge($db,$files,'support');
         $root = support_message_media_storage_root();
         support_message_ensure_media_directory($root);
 
@@ -319,6 +324,7 @@ function support_store_message_attachments(
                 ':size' => $file['byte_size'],
             ]);
             $attachmentIds[] = (int) $db->lastInsertId();
+            msg_media_register($db,'support',$storageKey,$file['byte_size']);
         }
 
         if ($ownsTransaction) {
@@ -361,6 +367,7 @@ function support_store_message_attachments(
  */
 function support_attachment_stream_path(PDO $db, int $attachmentId): ?array
 {
+    msg_security_bind($db);
     if ($attachmentId < 1) {
         return null;
     }
@@ -441,6 +448,9 @@ function support_message_validate_uploaded_media(array $uploadedFiles): array
             throw new InvalidArgumentException('Dozwolone są wyłącznie obrazy JPEG, PNG, WEBP, GIF oraz filmy MP4, WEBM i MOV.');
         }
 
+        if (!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta') {
+            msg_validate_media_file($tmpName, (string)$file['name'], $byteSize);
+        }
         $definition = $allowed[$mimeType];
         if ($byteSize > $definition['max_bytes']) {
             $kindLabel = $definition['kind'] === 'image' ? 'Obraz' : 'Film';
@@ -486,6 +496,7 @@ function support_message_allowed_media_types(): array
         'image/png' => ['kind' => 'image', 'max_bytes' => SUPPORT_MESSAGE_IMAGE_MAX_BYTES],
         'image/webp' => ['kind' => 'image', 'max_bytes' => SUPPORT_MESSAGE_IMAGE_MAX_BYTES],
         'image/gif' => ['kind' => 'image', 'max_bytes' => SUPPORT_MESSAGE_IMAGE_MAX_BYTES],
+        'image/avif' => ['kind' => 'image', 'max_bytes' => SUPPORT_MESSAGE_IMAGE_MAX_BYTES],
         'video/mp4' => ['kind' => 'video', 'max_bytes' => SUPPORT_MESSAGE_VIDEO_MAX_BYTES],
         'video/webm' => ['kind' => 'video', 'max_bytes' => SUPPORT_MESSAGE_VIDEO_MAX_BYTES],
         'video/quicktime' => ['kind' => 'video', 'max_bytes' => SUPPORT_MESSAGE_VIDEO_MAX_BYTES],
@@ -679,6 +690,10 @@ function support_message_attachment_public_payload(array $row, string $mediaUrlB
 /** Zwraca katalog storage prywatnych mediów pod chronionym backend/. */
 function support_message_media_storage_root(): string
 {
+    if ((!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta') && (!defined('SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT') || str_contains(SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT,'/WEB/beta.dnct.pl/backend/storage/'))) return msg_media_root('support');
+    if (defined('SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT')) {
+        return rtrim((string) SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT, DIRECTORY_SEPARATOR);
+    }
     $backendPath = defined('DNCT_BACKEND_PATH') ? DNCT_BACKEND_PATH : dirname(__DIR__);
     return rtrim($backendPath, DIRECTORY_SEPARATOR) . '/storage/support-message-media';
 }
@@ -704,8 +719,10 @@ function support_message_attachment_disk_path(string $storageKey): ?string
 /** @throws RuntimeException */
 function support_message_ensure_media_directory(string $directory): void
 {
-    if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-        throw new RuntimeException('Nie udało się utworzyć prywatnego katalogu mediów.');
+    if (!is_dir($directory)) {
+        if (!mkdir($directory, 02770, true) && !is_dir($directory)) throw new RuntimeException('Nie udało się utworzyć prywatnego katalogu mediów.');
+        // Web requests and maintenance jobs share the www-data group.
+        chmod($directory, 02770);
     }
     if (!is_writable($directory)) {
         throw new RuntimeException('Prywatny katalog mediów nie jest zapisywalny.');

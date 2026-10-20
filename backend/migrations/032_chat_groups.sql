@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS chat_groups (
+ conversation_id BIGINT UNSIGNED NOT NULL PRIMARY KEY,
+ name VARCHAR(100) NOT NULL,
+ created_by VARCHAR(191) NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT chat_group_conversation FOREIGN KEY(conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

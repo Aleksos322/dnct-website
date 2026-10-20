@@ -140,6 +140,7 @@ if ($centerContent) {
     <?php /* asset() dokleja czas modyfikacji pliku - bez tego przeglądarki
              trzymają stary arkusz po wgraniu poprawki. Patrz backend/lib/assets.php. */ ?>
     <link rel="stylesheet" href="<?php echo asset('/assets/navibar/navbar.css'); ?>">
+    <link rel="stylesheet" href="<?php echo asset('/assets/css/notification-bell.css'); ?>">
     <link rel="stylesheet" href="<?php echo asset('/assets/css/layout.css'); ?>">
     <?php /* System dzwiekow - syntezowany Web Audio API, zaladowany site-wide
              (nie tylko dla zalogowanych/dzwonka), zeby toasty gosci (np. po
@@ -179,11 +180,12 @@ if ($centerContent) {
 
     <?php $nativeMessaging = require __DIR__ . '/messaging-native.php'; ?>
     <!-- POWIADOMIENIA -->
-    <?php if (!$nativeMessaging) require_once __DIR__ . '/notifications.php'; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . "/notifications.php"; ?>
 
     <!-- CZAT SUPPORTU -->
     <?php if (!$nativeMessaging) require_once __DIR__ . '/support-chat.php'; ?>
-    <?php if (!$nativeMessaging) require_once __DIR__ . '/support-ticket-panel.php'; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . "/support-ticket-panel.php"; ?>
+    <?php if (!$nativeMessaging) require_once __DIR__ . '/direct-chat.php'; ?>
 
     <!-- TREŚĆ STRONY (wstrzykiwana przez podstrony) -->
     <main class="<?php echo $mainClasses; ?>">

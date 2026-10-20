@@ -419,7 +419,7 @@
     border-left: 3px solid transparent;
     transition: background 0.15s ease, border-color 0.6s ease, color 0.6s ease, opacity 0.7s ease, transform 0.15s ease;
 }
-.dnct-notif-item:hover { background: rgba(139, 92, 246, 0.1) !important; transform: translateX(2px); }
+.dnct-notif-item:hover { filter: brightness(1.16) saturate(1.18); }
 
 /* Tylko rzeczywiście nowy wpis wpada od górnej części panelu. */
 .dnct-notif-item--new { animation: dnctItemIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both; }

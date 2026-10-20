@@ -52,6 +52,16 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
             }
             return $ok;
 
+        case 'checkout.session.async_payment_failed':
+            $session=$event->data->object;$order=order_by_session($dnct,(string)$session->id);
+            if($order)notification_event($dnct,(string)$order['user_name'],'payment.failed',(string)$session->id,'Płatność nie powiodła się','Płatność za serwer '.$order['game_type'].' nie została zrealizowana. Spróbuj ponownie, korzystając z innej metody.','/twoje-serwery');
+            return true;
+        case 'invoice.finalized':
+            $invoice=$event->data->object;$subscription=(string)($invoice->subscription??'');
+            $order=$subscription!==''?order_by_subscription($dnct,$subscription):null;
+            if(!$order&&$subscription!=='')$order=webhook_hosting_by_subscription($dnct,$subscription);
+            if($order&&!empty($invoice->number)&&!empty($invoice->hosted_invoice_url)&&preg_match('~^https://invoice\.stripe\.com/~',(string)$invoice->hosted_invoice_url))notification_event($dnct,(string)$order['user_name'],'invoice.ready',(string)$invoice->id,'Nowy dokument płatności: '.$invoice->number,'Dokument nr '.$invoice->number.' jest dostępny w bezpiecznym widoku płatności Stripe.',(string)$invoice->hosted_invoice_url);
+            return true;
         case 'invoice.paid':
             if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
                 return hosting_webhook_invoice_paid($dnct, $h, $event->data->object);
@@ -170,6 +180,8 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
             return true;   // już obsłużone
         }
 
+        if(isset($session->amount_total))notification_event($dnct,(string)$order['user_name'],'payment.paid',(string)$session->id,'Płatność została zaksięgowana','Otrzymaliśmy '.pricing_format((int)$session->amount_total).' '.strtoupper((string)($session->currency??'pln')).' za usługę '.$order['game_type'].'. Dziękujemy!','/twoje-serwery');
+
         /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje - dokładamy dni do
            zamówienia-rodzica i, jeśli trzeba, zdejmujemy zawieszenie. Tworzenie
            serwera tutaj dałoby klientowi drugi serwer zamiast dłuższego czasu na
@@ -227,6 +239,7 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
 function webhook_provision_paid_order(PDO $dnct, array $order): bool
 {
     $orderId = (int)$order['id'];
+    notification_event($dnct,(string)$order['user_name'],'server.installing',(string)$orderId,'Przygotowujemy Twój serwer','Instalujemy serwer '.(string)$order['game_type'].'. Status zamówienia znajdziesz w swoich usługach.','/twoje-serwery');
     $result = provision_server($order);
 
     if (!$result['ok']) {
@@ -294,6 +307,7 @@ function order_announce_paid(PDO $dnct, ?array $order, ?string $gameAdminUser = 
     }
 
     $d = order_deadlines($order);
+
 
     // Dane logowania administratora w grze (gdy ta gra je ma - patrz
     // provision_server()) - JEDYNY moment, w którym to hasło gdziekolwiek
@@ -594,7 +608,7 @@ function webhook_invoice_paid(PDO $dnct, $invoice): bool
             (string)$order['user_name'],
             'success',
             'Abonament przedłużony',
-            'Płatność się powiodła - serwer działa dalej przez kolejny okres.'
+            'Wpłata '.pricing_format((int)($invoice->amount_paid??0)).' '.strtoupper((string)($invoice->currency??'pln')).' została zaksięgowana. Opłacony okres usługi: do '.($periodEnd>0?gmdate('d.m.Y',$periodEnd):'końca kolejnego okresu').'.', ['event_key'=>'invoice-paid:'.(string)$invoice->id,'category'=>'finance','action_label'=>'Zobacz usługę','link'=>'/twoje-serwery']
         );
         ntfy_send(
             'sprzedaz',

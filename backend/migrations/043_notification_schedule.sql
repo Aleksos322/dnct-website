@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS notification_campaigns (
+ id CHAR(32) PRIMARY KEY,
+ environment VARCHAR(8) NOT NULL,
+ title VARCHAR(150) NOT NULL,
+ message TEXT NOT NULL,
+ type VARCHAR(16) NOT NULL,
+ recipients MEDIUMTEXT NOT NULL,
+ author VARCHAR(255) NOT NULL,
+ send_at DATETIME NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ deleted_at DATETIME NULL,
+ revision INT NOT NULL DEFAULT 1,
+ INDEX(send_at), INDEX(deleted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS notification_campaign_items (
+ notification_id BIGINT UNSIGNED PRIMARY KEY,
+ campaign_id CHAR(32) NOT NULL,
+ INDEX(campaign_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,0 +1,7 @@
+/* Własny dymek: akcje po lewej, treść pozostaje przy prawej krawędzi. */
+#dnct-messenger .dm-message.mine .dm-message-line{flex-direction:row-reverse}
+#dnct-messenger .dm-message.mine .dm-message-actions{flex-direction:row-reverse}
+
+/* Przycisk zgłoszenia jest dostępny także w mobilnym widoku rozmowy. */
+.dm-support-mobile{margin-left:auto;border:1px solid #a78bfa4d;border-radius:.55rem;padding:.42rem .55rem;color:#ddd6fe;background:#8b5cf61a;font:700 .64rem/1 Montserrat,system-ui,sans-serif;cursor:pointer}.dm-support-mobile:hover{background:#8b5cf633}
+@media(min-width:641px){.dm-support-mobile{display:none}}

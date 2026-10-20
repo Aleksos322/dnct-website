@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {sessionValid,configureIdentity} from './messaging-security.mjs';
+const user={username:'test-admin',is_active:true,is_superuser:true,groups:['a']};
+let current={...user}, revoked=0;
+const session={session_hash:'x',username:user.username,sid_hash:'',sub_hash:'',identity_fingerprint:crypto.createHash('sha256').update(JSON.stringify([true,true,['a']])).digest('hex')};
+const db={execute:async sql=>{if(sql.startsWith('UPDATE')){revoked++;return [];}return [[session]];}};
+configureIdentity({AUTHENTIK_URL:'https://identity.test.invalid',AUTHENTIK_API_TOKEN:'test-token'});
+globalThis.fetch=async()=>({ok:true,json:async()=>({results:[current]})});
+assert.equal(await sessionValid(db,{}),true);
+console.log('PASS valid identity terminates and is authorized');
+const now=Date.now;Date.now=()=>now()+61000;current={...user,is_superuser:false};
+assert.equal(await sessionValid(db,{}),false);assert.equal(revoked,1);
+console.log('PASS changed privileges are denied and revoked');
+Date.now=()=>now()+122000;current={...user,is_active:false};
+assert.equal(await sessionValid(db,{}),false);
+console.log('PASS inactive account denied');
+Date.now=()=>now()+183000;globalThis.fetch=async()=>{throw Error('offline');};
+assert.equal(await sessionValid(db,{}),false);
+console.log('PASS identity outage fails closed');
+Date.now=now;
+

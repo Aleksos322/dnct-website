@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS notification_login_devices(username VARCHAR(191) NOT NULL,fingerprint CHAR(64) NOT NULL,first_seen DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(username,fingerprint)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

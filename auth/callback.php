@@ -109,6 +109,7 @@ $_SESSION['authentik_email']        = $email !== '' ? $email : null;
 $_SESSION['authentik_is_superuser'] = (bool)($user['is_superuser'] ?? false);
 $_SESSION['authentik_sub']          = (string)($user['sub'] ?? '');
 $_SESSION['logged_in_at']           = time();
+try{require_once __DIR__.'/../backend/lib/notifications.php';notification_login(dnct_db(),$username,client_ip(),(string)($_SERVER['HTTP_USER_AGENT']??''));}catch(Throwable $e){error_log('notification login: '.$e->getMessage());}
 
 // Potrzebny przy wylogowaniu jako id_token_hint - bez niego Authentik nie
 // odeśle użytkownika z powrotem na stronę, tylko zostawi go na swoim ekranie.

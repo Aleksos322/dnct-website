@@ -20,3 +20,9 @@ backend/mail/vendor/
 
 # Blokady i logi cronów (deferred-provision, stripe-recovery) - stan maszyny, nie kod
 backend/dane/
+
+# Dane uzytkownikow (zalaczniki czatu i powiadomien) - nie kod
+backend/storage/
+
+# Kopie przed zmiana - od tego jest git
+*.bak-*

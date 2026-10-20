@@ -186,6 +186,10 @@ function lifecycle_reconcile_deleted(PDO $dnct, bool $apply): void
 
 function lifecycle_warn(PDO $dnct, bool $apply): void
 {
+    notification_admin_ticket_waits($dnct,$apply);
+    $extra=$dnct->query("SELECT * FROM orders WHERE status='provisioned' AND billing_mode='payment' AND ptero_server_id IS NOT NULL AND deleted_at IS NULL AND expires_at BETWEEN DATE_SUB(NOW(),INTERVAL 1 DAY) AND DATE_ADD(NOW(),INTERVAL 3 DAY)")->fetchAll(PDO::FETCH_ASSOC);
+    foreach($extra as $o){$remaining=strtotime($o['expires_at'].' UTC')-time();if($remaining>86400){if($apply)notification_event($dnct,$o['user_name'],'service.expiring',$o['id'].':'.$o['expires_at'].':3d','Usługa wygasa w ciągu 3 dni','Serwer '.$o['game_type'].' wygasa '.lifecycle_when($o['expires_at']).'. Odnów usługę, aby uniknąć przerwy w działaniu.','/twoje-serwery');}elseif($remaining<=0){if($apply)notification_event($dnct,$o['user_name'],'service.expired',$o['id'].':'.$o['expires_at'],'Upłynął opłacony okres usługi','Opłacony okres serwera '.$o['game_type'].' zakończył się '.lifecycle_when($o['expires_at']).'. Odnów usługę. Termin ochrony danych i zawieszenia sprawdzisz przy usłudze.','/twoje-serwery');}}
+
     echo "\n-- ostrzeżenia --\n";
 
     /* Dwa progi w jednym zapytaniu, bo warunek jest ten sam poza odstępem

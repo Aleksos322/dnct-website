@@ -1,0 +1,8 @@
+Options -Indexes
+# Public, generated Unicode catalogue. All other JSON files remain denied.
+<Files "emoji-pl.json">
+    Require all granted
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=604800"
+    </IfModule>
+</Files>

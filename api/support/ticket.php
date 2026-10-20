@@ -6,11 +6,14 @@ require_once dirname(__DIR__,2).'/backend/lib/support.php';
 require_once dirname(__DIR__,2).'/backend/lib/support_realtime.php';
 require_once dirname(__DIR__,2).'/backend/mail/support_mail.php';
 require_once dirname(__DIR__,2).'/backend/lib/notifications.php';
+require_once dirname(__DIR__,2).'/backend/lib/support_chat_service.php';
 
 $db=dnct_db();
+msg_security_session($db);
 $username=trim((string)($_SESSION['authentik_username']??''));
 $isAdmin=(bool)($_SESSION['authentik_is_superuser']??false);
 $access=support_access_hash();
+$viewerKey=support_message_viewer_key_customer($username!==''?'account:'.$username:'guest:'.$access);
 
 function support_owner_key(string $username,string $email): string { return hash('sha256',$username!==''?'account:'.$username:'email:'.strtolower($email)); }
 function support_active_ticket(PDO $db,string $username,string $access): ?array {
@@ -18,34 +21,56 @@ function support_active_ticket(PDO $db,string $username,string $access): ?array 
     $q->execute([':access'=>$access,':has_user'=>$username!==''?1:0,':username'=>$username]);
     $ticket=$q->fetch(PDO::FETCH_ASSOC); return is_array($ticket)?$ticket:null;
 }
+function support_customer_ticket(PDO $db,string $username,string $access): ?array {
+    $id=(int)($_GET['ticket_id']??request_string('ticket_id'));
+    if($id>0){$q=$db->prepare('SELECT * FROM support_tickets WHERE id=? AND (access_token_hash=? OR (?<>"" AND customer_username=?))');$q->execute([$id,$access,$username,$username]);return $q->fetch(PDO::FETCH_ASSOC)?:null;}
+    $q=$db->prepare('SELECT * FROM support_tickets WHERE status IN ("new","open","closed") AND (access_token_hash=:access OR (:has_user=1 AND customer_username=:username)) ORDER BY FIELD(status,"open","new","closed"), updated_at DESC LIMIT 1');
+    $q->execute([':access'=>$access,':has_user'=>$username!==''?1:0,':username'=>$username]);$ticket=$q->fetch(PDO::FETCH_ASSOC);return is_array($ticket)?$ticket:null;
+}
+function support_public_ticket(?array $ticket): ?array {
+    if(!$ticket)return null;
+    return ['id'=>(int)$ticket['id'],'public_id'=>(string)$ticket['public_id'],'request_key'=>(string)($ticket['request_key']??''),'customer_name'=>(string)$ticket['customer_name'],'preview_remaining_seconds'=>$ticket['preview_remaining_seconds']??null,'closed_by_name'=>$ticket['closed_by_name']??null,'category_label'=>(string)$ticket['category_label'],'status'=>(string)$ticket['status'],'assigned_admin'=>$ticket['assigned_admin']?:null,'closed_at'=>$ticket['closed_at']!==null?(string)$ticket['closed_at']:null,'closed_by_user'=>(bool)($ticket['closed_by_user']??false),'close_reason'=>$ticket['close_reason']!==null?(string)$ticket['close_reason']:null];
+}
 function support_payload(PDO $db,?array $ticket,array $extra=[]): never {
-    $messages=[];$hasMore=false;$nextBeforeId=null;$receipts=[];
-    if($ticket){$page=support_messages_page($db,(int)$ticket['id'],(int)($_GET['before_id']??0),(int)($_GET['limit']??SUPPORT_REALTIME_PAGE_SIZE));$messages=$page['messages'];$hasMore=$page['has_more'];$nextBeforeId=$page['next_before_id'];$receipts=support_message_receipts($db,(int)$ticket['id']);}
-    json_ok(['customer_unread'=>$ticket?support_customer_unread($db,(int)$ticket['id']):0,'ticket'=>$ticket,'messages'=>$messages,'has_more'=>$hasMore,'next_before_id'=>$nextBeforeId,'receipts'=>$receipts]+$extra);
+    global $viewerKey;
+    if ($ticket && !in_array($ticket['status'], ['new','open'], true)) {
+        $q=$db->prepare('SELECT GREATEST(0,300-TIMESTAMPDIFF(SECOND,closed_at,NOW())) FROM support_tickets WHERE id=?');
+        $q->execute([$ticket['id']]);
+        $remaining=(int)$q->fetchColumn();
+        if ($remaining <= 0) $ticket=null;
+        else {
+            $ticket['preview_remaining_seconds']=$remaining;
+            $q=$db->prepare('SELECT actor_username FROM support_ticket_audit WHERE ticket_id=? AND action IN ("closed","closed_by_user") ORDER BY id DESC LIMIT 1');
+            $q->execute([$ticket['id']]);
+            $ticket['closed_by_name']=$q->fetchColumn() ?: (!empty($ticket['closed_by_user']) ? $ticket['customer_name'] : 'Administrator');
+        }
+    }
+    $page=$ticket?support_chat_page($db,$ticket,'customer',$viewerKey,'/api/support/media.php',(string)$ticket['customer_name'],(int)($_GET['before_id']??0)):['messages'=>[],'has_more'=>false,'next_before_id'=>null];
+    json_ok(['customer_unread'=>$ticket?support_customer_unread($db,(int)$ticket['id']):0,'ticket'=>support_public_ticket($ticket),'receipts'=>$ticket?support_message_receipts($db,(int)$ticket['id']):[]]+$page+$extra);
 }
 function support_payload_after_create(PDO $db,array $ticket): never {
     $q=$db->prepare("SELECT id,author_role,author_name,body,client_message_key,reply_to_message_id,created_at FROM support_messages WHERE ticket_id=:id ORDER BY id");
     $q->execute([":id"=>$ticket["id"]]);
     $messages=$q->fetchAll(PDO::FETCH_ASSOC);
-    if(!headers_sent()){http_response_code(200);header("Content-Type: application/json; charset=utf-8");header("Cache-Control: no-store, no-cache, must-revalidate");header("Pragma: no-cache");header("X-Content-Type-Options: nosniff");}
-    echo json_encode(["ok"=>true,"ticket"=>$ticket,"messages"=>$messages],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    try {
     if(function_exists("exec")){
         $base=dirname(__DIR__,2);
-        $worker="require ".var_export($base."/backend/bootstrap.php",true).";require ".var_export($base."/backend/mail/support_mail.php",true).";$q=dnct_db()->prepare(\"SELECT * FROM support_tickets WHERE id=:id\");$q->execute([\":id\"=>(int)getenv(\"SUPPORT_TICKET_ID\")]);$t=$q->fetch(PDO::FETCH_ASSOC);if($t){send_support_received_mail($t);}";
+        $worker='require '.var_export($base.'/backend/bootstrap.php',true).';require '.var_export($base.'/backend/mail/support_mail.php',true).';$q=dnct_db()->prepare("SELECT * FROM support_tickets WHERE id=:id");$q->execute([":id"=>(int)getenv("SUPPORT_TICKET_ID")]);$t=$q->fetch(PDO::FETCH_ASSOC);if($t){send_support_received_mail($t);}';
         // Ta sama konfiguracja co bieżące żądanie: beta ma DNCT_ENV_FILE z vhosta, produkcja nie ma
         // żadnego (domyślny .env). Dawniej na sztywno beta.env - produkcja wysyłałaby z bazy bety.
         $envFile=(string)($_SERVER['DNCT_ENV_FILE']??getenv('DNCT_ENV_FILE')?:'');
         $command="SUPPORT_TICKET_ID=".(int)$ticket["id"].($envFile!==''?" DNCT_ENV_FILE=".escapeshellarg($envFile):"")." /usr/bin/php -r ".escapeshellarg($worker)." >/dev/null 2>&1 &";
         @exec($command);
     }else{error_log("support receipt: exec unavailable");}
-    exit;
+    } catch (Throwable $e) { error_log('support receipt dispatch: '.get_class($e)); }
+    json_ok(['ticket'=>support_public_ticket($ticket),'messages'=>$messages,'has_more'=>false,'next_before_id'=>null]);
 }
 function support_audit(PDO $db,int $ticketId,?string $actor,string $action,string $details=''): void {
     $q=$db->prepare('INSERT INTO support_ticket_audit(ticket_id,actor_username,action,details) VALUES(:ticket,:actor,:action,:details)');
     $q->execute([':ticket'=>$ticketId,':actor'=>$actor,':action'=>$action,':details'=>$details?:null]);
 }
 
-if(($_SERVER['REQUEST_METHOD']??'')==='GET') support_payload($db,support_active_ticket($db,$username,$access));
+if(($_SERVER['REQUEST_METHOD']??'')==='GET') support_payload($db,support_customer_ticket($db,$username,$access));
 require_method('POST');csrf_guard();$action=request_string('action');
 
 // Compatibility for the production endpoint used by existing game tickets.
@@ -72,33 +97,20 @@ if($action==='create'){
     $requestKey=request_string('request_key');if(!preg_match('/^[a-f0-9]{64}$/',$requestKey))$requestKey=hash('sha256',bin2hex(random_bytes(32)));
     $existing=support_active_ticket($db,$username,$access);
     if($existing) support_payload($db,$existing,['already_exists'=>true]);
-    try{
-        $db->beginTransaction();
-        // Unikalny numer: 9000 możliwości i UNIQUE na public_id - powtórka losowania kończyła się
-        // wyjątkiem 23000 i zgłoszenie nie powstawało. Losujemy do skutku (zwykle 1 próba).
-        $free=$db->prepare('SELECT 1 FROM support_tickets WHERE public_id=:n');
-        for($try=0;$try<20;$try++){$number='TKT-'.random_int(1000,9999);$free->execute([':n'=>$number]);if(!$free->fetchColumn())break;}
-        $q=$db->prepare('INSERT INTO support_tickets(public_id,access_token_hash,owner_key,active_owner_key,request_key,customer_username,customer_name,customer_email,category_key,category_label,ip_hash,status) VALUES(:number,:access,:owner,:active_owner,:request,:username,:name,:email,:category,:label,:ip,"new")');
-        $q->execute([':number'=>$number,':access'=>$access,':owner'=>$owner,':active_owner'=>$owner,':request'=>$requestKey,':username'=>$username?:null,':name'=>$name,':email'=>$email,':category'=>$category,':label'=>support_categories()[$category],':ip'=>hash('sha256',client_ip())]);
-        $id=(int)$db->lastInsertId();
-        $db->prepare('INSERT INTO support_messages(ticket_id,author_role,author_name,body) VALUES(:id,"customer",:name,:body)')->execute([':id'=>$id,':name'=>$name,':body'=>$body]);
-        support_audit($db,$id,$username?:null,'created');
-        $db->commit();
-        // Dzwonek adminów na stronie; licznik w panelu admina odświeża się sam (api/wsparcie-licznik.php).
-        try{notify_admins($db,'info','Nowe zgłoszenie '.$number,$name.' - '.support_categories()[$category],['link'=>'http://admin.lan.dnct.pl/wsparcie','event_key'=>'support-new-'.$id,'ntfy'=>['awarie',4,'ticket']]);}catch(Throwable $e){error_log('support notify: '.$e->getMessage());}
-    }catch(PDOException $e){if($db->inTransaction())$db->rollBack();if($e->getCode()!=='23000')throw $e;$q=$db->prepare('SELECT * FROM support_tickets WHERE request_key=:request OR active_owner_key=:owner ORDER BY id DESC LIMIT 1');$q->execute([':request'=>$requestKey,':owner'=>$owner]);$ticket=$q->fetch(PDO::FETCH_ASSOC);if($ticket)support_payload($db,$ticket,['already_exists'=>true]);throw $e;}
-    $ticket=support_active_ticket($db,$username,$access);if($ticket) support_payload_after_create($db,$ticket);support_payload($db,$ticket);
+    $result=support_chat_create($db,['owner'=>$owner,'access'=>$access,'request'=>$requestKey,'username'=>$username,'name'=>$name,'email'=>$email,'category'=>$category,'label'=>support_categories()[$category],'ip'=>hash('sha256',client_ip()),'body'=>$body]);
+    $ticket=$result['ticket'];
+    if(!$result['created'])support_payload($db,$ticket,['already_exists'=>true]);
+    try{notification_admin_event($db,'support.new',(string)$ticket['id'],'Nowe zgłoszenie '.$ticket['public_id'],$name.' — '.support_categories()[$category],'http://admin.lan.dnct.pl/wsparcie?source=beta&ticket='.$ticket['id']);}catch(Throwable $e){error_log('support notify: '.$e->getMessage());}
+    support_payload_after_create($db,$ticket);
 }
-if($action==='message'){
-    rate_limit_guard('support_message',RATE_LIMIT_SUPPORT_MESSAGE,'Wysyłasz wiadomości zbyt szybko.');
-    $id=(int)request_string('ticket_id');$body=support_clean_body(request_string('message'));$key=request_string('message_key');
-    if($id<1||mb_strlen($body)<1||mb_strlen($body)>SUPPORT_MESSAGE_MAX)json_error('Wiadomość musi mieć od 1 do 2000 znaków.',422,['message'=>'Sprawdź wiadomość.']);
-    if(!preg_match('/^[a-f0-9]{64}$/',$key))$key=hash('sha256',bin2hex(random_bytes(32)));
-    $ticket=support_active_ticket($db,$username,$access);
-    if(!$ticket||(int)$ticket['id']!==$id)json_error('Nie znaleziono aktywnego zgłoszenia.',404);
-    if($ticket['status']!=='open'||empty($ticket['assigned_admin']))json_error('Poczekaj, aż administrator przypisze zgłoszenie do siebie.',409);
-    $replyId=(int)request_string('reply_to_id');if($replyId>0){$reply=$db->prepare('SELECT id FROM support_messages WHERE id=:reply AND ticket_id=:ticket');$reply->execute([':reply'=>$replyId,':ticket'=>$id]);if(!$reply->fetchColumn())$replyId=0;}
-    try{$db->prepare('INSERT INTO support_messages(ticket_id,author_role,author_name,body,client_message_key,reply_to_message_id) VALUES(:id,"customer",:name,:body,:key,:reply)')->execute([':id'=>$id,':name'=>$ticket['customer_name'],':body'=>$body,':key'=>$key,':reply'=>$replyId?:null]);$db->prepare('UPDATE support_tickets SET updated_at=NOW() WHERE id=:id')->execute([':id'=>$id]);}catch(PDOException $e){if($e->getCode()!=='23000')throw $e;}
-    support_payload($db,support_active_ticket($db,$username,$access));
+if(in_array($action,['message','edit_message','withdraw_message','react','close_user'],true)){
+    if ($action !== 'message') rate_limit_guard('support_message',RATE_LIMIT_SUPPORT_MESSAGE,'Wysyłasz wiadomości zbyt szybko.');
+    $ticket=support_customer_ticket($db,$username,$access);
+    if(!$ticket||(int)$ticket['id']!==(int)request_string('ticket_id'))json_error('Nie znaleziono zgłoszenia.',404);
+    $input=[];foreach(['message','message_key','message_id','reply_to_id','scope','emoji','reason'] as $field)$input[$field]=request_string($field);
+    try{support_chat_mutate($db,(int)$ticket['id'],'customer',$viewerKey,(string)$ticket['customer_name'],$action,$input,$_FILES['attachments']??[]);}
+    catch(InvalidArgumentException $e){json_error($e->getMessage(),422);}
+    catch(DomainException $e){json_error($e->getMessage(),409);}
+    support_payload($db,support_customer_ticket($db,$username,$access));
 }
 json_error('Nieznana akcja.',400);

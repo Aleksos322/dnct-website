@@ -178,6 +178,7 @@ function navbar_class_mobile(bool $active): string
 
         </div>
 
+        <?php require_once __DIR__ . '/../clear/notification-bell.php'; ?>
     <?php else: ?>
         <a href="/login" class="bg-gradient-main px-4 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-sm md:text-base text-white hover:scale-105 transition-transform shadow-lg shadow-purple-500/20 no-underline">
             Zaloguj
