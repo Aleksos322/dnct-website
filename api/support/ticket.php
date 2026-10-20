@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__,2).'/backend/lib/support_unread.php';
 require_once dirname(__DIR__,2).'/backend/bootstrap.php';
 require_once dirname(__DIR__,2).'/backend/lib/support.php';
 require_once dirname(__DIR__,2).'/backend/lib/support_realtime.php';
@@ -20,7 +21,7 @@ function support_active_ticket(PDO $db,string $username,string $access): ?array 
 function support_payload(PDO $db,?array $ticket,array $extra=[]): never {
     $messages=[];$hasMore=false;$nextBeforeId=null;$receipts=[];
     if($ticket){$page=support_messages_page($db,(int)$ticket['id'],(int)($_GET['before_id']??0),(int)($_GET['limit']??SUPPORT_REALTIME_PAGE_SIZE));$messages=$page['messages'];$hasMore=$page['has_more'];$nextBeforeId=$page['next_before_id'];$receipts=support_message_receipts($db,(int)$ticket['id']);}
-    json_ok(['ticket'=>$ticket,'messages'=>$messages,'has_more'=>$hasMore,'next_before_id'=>$nextBeforeId,'receipts'=>$receipts]+$extra);
+    json_ok(['customer_unread'=>$ticket?support_customer_unread($db,(int)$ticket['id']):0,'ticket'=>$ticket,'messages'=>$messages,'has_more'=>$hasMore,'next_before_id'=>$nextBeforeId,'receipts'=>$receipts]+$extra);
 }
 function support_payload_after_create(PDO $db,array $ticket): never {
     $q=$db->prepare("SELECT id,author_role,author_name,body,client_message_key,reply_to_message_id,created_at FROM support_messages WHERE ticket_id=:id ORDER BY id");
