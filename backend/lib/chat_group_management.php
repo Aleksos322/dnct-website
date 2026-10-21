@@ -34,6 +34,10 @@ function chat_group_manage(PDO $db,int $id,array $actor,string $op,string $targe
  $people=chat_group_people($db,$id);$person=null;foreach($people as $p)if($p['username']===$target)$person=$p;
  $own='';$other='';
  if($op==='leave'){
+   $snapshot=null;foreach(chat_inbox($db,$actor)['conversations'] as $row)if((int)$row['id']===$id){$snapshot=$row;break;}
+   $max=$db->prepare('SELECT COALESCE(MAX(id),0) FROM chat_messages WHERE conversation_id=?');$max->execute([$id]);
+   $db->prepare('INSERT INTO chat_group_exit_snapshots(conversation_id,user_id,last_message_id,inbox_json) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE last_message_id=VALUES(last_message_id),inbox_json=VALUES(inbox_json),exited_at=NOW()')->execute([$id,$actor['id'],(int)$max->fetchColumn(),$snapshot?json_encode($snapshot,JSON_THROW_ON_ERROR):null]);
+
    if($access['role']==='founder'){foreach($people as $p)if($p['user_id']!==$actor['id']&&$p['state']==='active'){$db->prepare('UPDATE chat_groups SET created_by=? WHERE conversation_id=?')->execute([$p['user_id'],$id]);break;}}
    $db->prepare("INSERT INTO chat_group_membership(conversation_id,user_id,state) VALUES(?,?,'left') ON DUPLICATE KEY UPDATE state='left',muted_until=NULL")->execute([$id,$actor['id']]);$own='Opuściłeś(aś) grupę.';$other='opuścił(a) grupę.';
  }elseif($op==='invite'){

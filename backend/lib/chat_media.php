@@ -48,7 +48,7 @@ function chat_media_file(PDO $db,int $attachmentId,string $actorId): ?array
         JOIN chat_messages m ON m.id=a.message_id
         JOIN chat_members member ON member.conversation_id=m.conversation_id AND member.user_id=?
         LEFT JOIN chat_message_hides hidden ON hidden.message_id=m.id AND hidden.user_id=?
-        WHERE NOT EXISTS(SELECT 1 FROM chat_group_membership gm WHERE gm.conversation_id=m.conversation_id AND gm.user_id=member.user_id AND gm.state IN ("invited","ignored")) AND a.id=? AND m.withdrawn_at IS NULL AND hidden.message_id IS NULL LIMIT 1');
+        WHERE NOT EXISTS(SELECT 1 FROM chat_group_membership gm WHERE gm.conversation_id=m.conversation_id AND gm.user_id=member.user_id AND gm.state IN ("invited","ignored")) AND NOT EXISTS(SELECT 1 FROM chat_group_membership exited WHERE exited.conversation_id=m.conversation_id AND exited.user_id=member.user_id AND exited.state IN ("left","removed") AND m.id>COALESCE((SELECT last_message_id FROM chat_group_exit_snapshots frozen WHERE frozen.conversation_id=m.conversation_id AND frozen.user_id=member.user_id),0)) AND a.id=? AND m.withdrawn_at IS NULL AND hidden.message_id IS NULL LIMIT 1');
     $q->execute([$actorId,$actorId,$attachmentId]);$file=$q->fetch(PDO::FETCH_ASSOC);
     if (!$file || !($path=chat_media_path($file['storage_key']))) return null;
     if (!is_file($path)) $path=dirname(__DIR__).'/storage/chat-media/'.substr($file['storage_key'],0,2).'/'.$file['storage_key'].'.blob';

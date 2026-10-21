@@ -84,7 +84,7 @@ function chat_start(PDO $db,array $actor,array $peer): int
 }
 function chat_inbox(PDO $db,array $actor): array
 {
-    $s=$db->prepare('SELECT c.id,c.updated_at,g.name AS group_name,req.state AS request_state,(req.state="pending" AND req.requester_id<>a.user_id) AS incoming_request,COALESCE(pref.archived,0) AS archived,COALESCE(pref.blocked,0) AS blocked,EXISTS(SELECT 1 FROM chat_preferences bp WHERE bp.conversation_id=c.id AND bp.blocked=1) AS communication_blocked,EXISTS(SELECT 1 FROM chat_preferences bp WHERE bp.conversation_id=c.id AND bp.user_id<>a.user_id AND bp.blocked=1) AS blocked_by_peer,COALESCE(pref.marked_unread,0) AS marked_unread,(COALESCE(pref.mute_forever,0)=1 OR pref.muted_until>NOW()) AS muted,UNIX_TIMESTAMP(pref.muted_until) AS muted_until, p.user_id AS peer_id,p.username,p.display_name,p.is_admin,p.last_read_id AS peer_read_id,
+    $s=$db->prepare('SELECT c.id,COALESCE(exit_snapshot.exited_at,c.updated_at) AS updated_at,g.name AS group_name,req.state AS request_state,(req.state="pending" AND req.requester_id<>a.user_id) AS incoming_request,COALESCE(pref.archived,0) AS archived,COALESCE(pref.blocked,0) AS blocked,EXISTS(SELECT 1 FROM chat_preferences bp WHERE bp.conversation_id=c.id AND bp.blocked=1) AS communication_blocked,EXISTS(SELECT 1 FROM chat_preferences bp WHERE bp.conversation_id=c.id AND bp.user_id<>a.user_id AND bp.blocked=1) AS blocked_by_peer,COALESCE(pref.marked_unread,0) AS marked_unread,(COALESCE(pref.mute_forever,0)=1 OR pref.muted_until>NOW()) AS muted,UNIX_TIMESTAMP(pref.muted_until) AS muted_until, p.user_id AS peer_id,p.username,p.display_name,p.is_admin,p.last_read_id AS peer_read_id,
         (SELECT CASE WHEN m.withdrawn_at IS NOT NULL THEN "Wiadomość została cofnięta." ELSE m.body END FROM chat_messages m WHERE m.conversation_id=c.id AND NOT EXISTS (SELECT 1 FROM chat_message_hides h WHERE h.message_id=m.id AND h.user_id=a.user_id) ORDER BY m.id DESC LIMIT 1) AS preview,
         (SELECT MAX(m.id) FROM chat_messages m WHERE m.conversation_id=c.id AND m.author_id<>a.user_id AND m.withdrawn_at IS NULL AND NOT EXISTS (SELECT 1 FROM chat_message_hides h WHERE h.message_id=m.id AND h.user_id=a.user_id)) AS incoming_message_id,
         (SELECT m.author_id=a.user_id FROM chat_messages m WHERE m.conversation_id=c.id AND NOT EXISTS(SELECT 1 FROM chat_message_hides h WHERE h.message_id=m.id AND h.user_id=a.user_id) ORDER BY m.id DESC LIMIT 1) AS last_mine,
@@ -96,7 +96,9 @@ function chat_inbox(PDO $db,array $actor): array
         LEFT JOIN chat_groups g ON g.conversation_id=c.id
         LEFT JOIN chat_requests req ON req.conversation_id=c.id
         LEFT JOIN chat_preferences pref ON pref.conversation_id=c.id AND pref.user_id=a.user_id
-        WHERE a.user_id=? AND COALESCE(pref.hidden,0)=0 AND (req.state IS NULL OR req.state<>"rejected") AND (req.state IS NULL OR req.state<>"draft" OR req.requester_id=a.user_id) ORDER BY c.updated_at DESC,c.id DESC LIMIT 100');
+        LEFT JOIN chat_group_membership membership ON membership.conversation_id=c.id AND membership.user_id=a.user_id
+        LEFT JOIN chat_group_exit_snapshots exit_snapshot ON exit_snapshot.conversation_id=c.id AND exit_snapshot.user_id=a.user_id AND membership.state IN ("left","removed")
+        WHERE a.user_id=? AND COALESCE(pref.hidden,0)=0 AND (req.state IS NULL OR req.state<>"rejected") AND (req.state IS NULL OR req.state<>"draft" OR req.requester_id=a.user_id) ORDER BY COALESCE(exit_snapshot.exited_at,c.updated_at) DESC,c.id DESC LIMIT 100');
     $s->execute([$actor['id']]);$rows=$s->fetchAll(PDO::FETCH_ASSOC);
     foreach($rows as &$row){$row['id']=(int)$row['id'];$row['unread']=(int)$row['unread'];$row['is_admin']=(bool)$row['is_admin'];foreach(['archived','blocked','marked_unread','muted','last_mine','incoming_request','communication_blocked','blocked_by_peer'] as $flag)$row[$flag]=(bool)$row[$flag];}
     $total=$db->prepare('SELECT COUNT(*) FROM chat_messages m JOIN chat_members a ON a.conversation_id=m.conversation_id WHERE a.user_id=? AND m.author_id<>a.user_id AND m.id>a.last_read_id');
@@ -107,6 +109,13 @@ function chat_inbox(PDO $db,array $actor): array
     unset($row);
     foreach($rows as &$row)if($row['communication_blocked']){$row['archived']=true;$row['incoming_request']=false;}unset($row);
     chat_group_inbox($db,$rows,$actor);chat_customize_inbox($db,$rows,$actor);foreach($rows as &$r)if(!empty($r['group_invitation'])){$r['preview']='Zaproszenie do grupy';$r['preview_formatted']=true;$r['last_mine']=false;$r['incoming_message_id']=0;}unset($r);
+    foreach($rows as &$row){if(!in_array($row['group_access']['state']??'', ['left','removed'],true))continue;
+      $q=$db->prepare('SELECT inbox_json,exited_at FROM chat_group_exit_snapshots WHERE conversation_id=? AND user_id=?');$q->execute([$row['id'],$actor['id']]);$exit=$q->fetch(PDO::FETCH_ASSOC);
+      $snapshot=$exit?json_decode($exit['inbox_json']??'',true):null;
+      if(is_array($snapshot)){foreach(['preview','preview_formatted','last_mine','last_timestamp','last_at','updated_at','group_avatar_url','avatar_members','display_name','group_name'] as $field)if(array_key_exists($field,$snapshot))$row[$field]=$snapshot[$field];}
+      else {$row['preview']='Opuściłeś grupę';$row['last_at']=$exit['exited_at']??null;}
+      $row['unread']=0;$row['marked_unread']=false;$row['incoming_message_id']=0;$row['presence']='offline';
+    }unset($row);
     $selfPresence=chat_presence_map($db,[$actor['id']]);
     return ['self_presence'=>$selfPresence[$actor['id']]??'offline','conversations'=>$rows,'unread'=>array_sum(array_map(fn($r)=>$r['muted']?0:max($r['unread'],$r['marked_unread']?1:0),$rows)),'me'=>$actor];
 }
@@ -114,6 +123,9 @@ function chat_messages(PDO $db,int $id,array $actor,int $before=0): array
 {
     chat_member($db,$id,$actor['id']);
     $access=chat_group_access($db,$id,$actor['id']);if($access&&in_array($access['state'],['invited','ignored'],true))return ['group_access'=>$access,'blocked'=>false,'blocked_by_peer'=>false,'can_write'=>false,'messages'=>[],'has_more'=>false,'before_id'=>null];
+    $historyLimit='';if($access&&in_array($access['state'],['left','removed'],true)){
+      $q=$db->prepare('SELECT last_message_id FROM chat_group_exit_snapshots WHERE conversation_id=? AND user_id=?');$q->execute([$id,$actor['id']]);$historyLimit=' AND m.id<='.(int)$q->fetchColumn();
+    }
     $s=$db->prepare('SELECT m.id,m.author_id,m.body,m.created_at,m.edited_at,m.withdrawn_at,m.reply_to_message_id,
         a.display_name,a.username, UNIX_TIMESTAMP(m.created_at)+300 AS edit_expires_at,
         parent.author_id AS reply_author_id,parent.body AS reply_body,parent.withdrawn_at AS reply_withdrawn_at,parent_author.display_name AS reply_author_name, parent_hide.message_id AS reply_hidden
@@ -123,7 +135,7 @@ function chat_messages(PDO $db,int $id,array $actor,int $before=0): array
       LEFT JOIN chat_messages parent ON parent.id=m.reply_to_message_id AND parent.conversation_id=m.conversation_id
       LEFT JOIN chat_members parent_author ON parent_author.conversation_id=m.conversation_id AND parent_author.user_id=parent.author_id
       LEFT JOIN chat_message_hides parent_hide ON parent_hide.message_id=parent.id AND parent_hide.user_id=?
-      WHERE m.conversation_id=? AND hidden.message_id IS NULL'.($before>0?' AND m.id<?':'').' ORDER BY m.id DESC LIMIT 51');
+      WHERE m.conversation_id=? AND hidden.message_id IS NULL'.$historyLimit.($before>0?' AND m.id<?':'').' ORDER BY m.id DESC LIMIT 51');
     $s->execute($before>0?[$actor['id'],$actor['id'],$id,$before]:[$actor['id'],$actor['id'],$id]);$rows=$s->fetchAll(PDO::FETCH_ASSOC);
     $more=count($rows)>50;if($more)array_pop($rows);$rows=array_reverse($rows);
     $ids=array_map(static fn(array $row): int=>(int)$row['id'],$rows);$reactions=[];
@@ -190,6 +202,7 @@ function chat_edit(PDO $db,int $id,int $messageId,array $actor,string $body): vo
     $db->beginTransaction();
     try{
         $message=chat_own_message($db,$id,$messageId,$actor);if($message['withdrawn_at']!==null)throw new InvalidArgumentException('Cofniętej wiadomości nie można edytować.');
+        $image=$db->prepare("SELECT 1 FROM chat_message_attachments WHERE message_id=? AND media_type='image' LIMIT 1");$image->execute([$messageId]);if($image->fetchColumn())throw new DomainException('Wiadomości ze zdjęciami nie można edytować.');
         if (!$message['edit_allowed']) throw new DomainException('Wiadomość można edytować tylko przez 5 minut od wysłania.');
         $db->prepare('UPDATE chat_messages SET body=?,edited_at=NOW() WHERE id=?')->execute([$body,$messageId]);
         $db->prepare('UPDATE chat_conversations SET updated_at=NOW() WHERE id=?')->execute([$id]);chat_emit($db,$id);$db->commit();

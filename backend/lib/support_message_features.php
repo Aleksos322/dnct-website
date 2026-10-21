@@ -383,11 +383,16 @@ function support_attachment_stream_path(PDO $db, int $attachmentId): ?array
     }
 
     $path = support_message_attachment_disk_path((string) $attachment['storage_key']);
-    if ($path === null || !is_file($path)) {
-        return null;
+    $storageRoot=support_message_media_storage_root();
+    if ($path !== null && !is_file($path) && $storageRoot==='/home/jakub/dnct-private-media/production/support') {
+        // Read older uploads from both previous production upload locations.
+        foreach(['/home/jakub/dnct-private-media/beta/support',dirname(__DIR__,3).'/-dnct.pl/backend/storage/support-message-media'] as $legacyRoot){
+            $candidate=$legacyRoot.'/'.substr($attachment['storage_key'],0,2).'/'.$attachment['storage_key'].'.blob';
+            if(is_file($candidate)){$path=$candidate;$storageRoot=$legacyRoot;break;}
+        }
     }
-
-    $root = realpath(support_message_media_storage_root());
+    if ($path === null || !is_file($path)) return null;
+    $root = realpath($storageRoot);
     $realPath = realpath($path);
     if ($root === false || $realPath === false || !str_starts_with($realPath, $root . DIRECTORY_SEPARATOR)) {
         return null;
@@ -690,6 +695,7 @@ function support_message_attachment_public_payload(array $row, string $mediaUrlB
 /** Zwraca katalog storage prywatnych mediów pod chronionym backend/. */
 function support_message_media_storage_root(): string
 {
+    if (defined('DNCT_GAME_SUPPORT_BRIDGE') || (defined('WSPARCIE_ZRODLO') && WSPARCIE_ZRODLO==='produkcja')) return '/home/jakub/dnct-private-media/production/support';
     if ((!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta') && (!defined('SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT') || str_contains(SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT,'/WEB/beta.dnct.pl/backend/storage/'))) return msg_media_root('support');
     if (defined('SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT')) {
         return rtrim((string) SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT, DIRECTORY_SEPARATOR);

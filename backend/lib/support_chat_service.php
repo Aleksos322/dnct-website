@@ -88,6 +88,7 @@ function support_chat_mutate(PDO $db, int $ticketId, string $role, string $viewe
             if (!$message || $message['withdrawn_at'] !== null) throw new InvalidArgumentException('Ta wiadomość nie jest już dostępna.');
             if ($action !== 'react' && ($message['author_role'] !== $role || ($role === 'admin' && strcasecmp($message['author_name'],$name) !== 0))) throw new DomainException('Możesz zmieniać tylko własne wiadomości.');
             if ($action === 'edit_message') {
+                $image=$db->prepare("SELECT 1 FROM support_message_attachments WHERE message_id=? AND media_type='image' LIMIT 1");$image->execute([$messageId]);if($image->fetchColumn())throw new DomainException('Wiadomości ze zdjęciami nie można edytować.');
                 if (!$message['edit_allowed']) throw new DomainException('Wiadomość można edytować tylko przez 5 minut od wysłania.');
                 $body = trim((string)($input['message'] ?? ''));
                 if ($body === '' || mb_strlen($body) > 2000) throw new InvalidArgumentException('Wiadomość musi mieć od 1 do 2000 znaków.');
