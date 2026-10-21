@@ -403,10 +403,12 @@
     if (!username) return;
     target.dataset.avatarUser = username;
     let entry = avatarImages.get(username);
+    // Brak awatara (404) pamietamy 10 minut, zeby kazde odrysowanie wiadomosci nie pytalo od nowa.
+    if (entry?.failedAt && Date.now() - entry.failedAt > 600000) { avatarImages.delete(username); entry = undefined; }
     if (!entry) {
       const img = new Image(); img.referrerPolicy = 'no-referrer'; img.alt = '';
       entry = {img,ready:false};
-      entry.promise = new Promise(resolve => { img.onload = async () => { try { await img.decode(); } catch {} entry.ready=true;resolve(true); }; img.onerror = () => { avatarImages.delete(username);resolve(false); }; });
+      entry.promise = new Promise(resolve => { img.onload = async () => { try { await img.decode(); } catch {} entry.ready=true;resolve(true); }; img.onerror = () => { entry.failedAt = Date.now();resolve(false); }; });
       avatarImages.set(username,entry); img.src='https://account.dnct.pl/avatar/'+encodeURIComponent(username);
     }
     const attach = () => {

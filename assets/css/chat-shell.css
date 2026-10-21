@@ -11,6 +11,8 @@
 #dnct-admin-chat-button svg{width:24px;height:24px}
 .dm-unread-dot{position:absolute;right:-1px;top:0;width:11px;height:11px;border-radius:50%;background:#fb526b;box-shadow:0 0 0 3px #15101d}
 .dm-unread-dot[hidden]{display:none}
+.dm-unread-dot.dnct-unread-counter{display:none;top:-7px;right:-7px;box-sizing:border-box;width:auto;min-width:22px;height:22px;padding:0 6px;border-radius:999px;color:#fff;font:700 11px/22px Inter,system-ui,sans-serif;text-align:center;font-variant-numeric:tabular-nums;pointer-events:none}
+.dm-unread-dot.dnct-unread-counter.is-visible{display:block}
 .dm-panel,#dnct-support-chat-panel{--dm-text:#f4f2fb;--dm-muted:#aaa6bc;--dm-line:#ffffff12;position:fixed;top:auto;right:calc(1rem + env(safe-area-inset-right));bottom:calc(4.8rem + env(safe-area-inset-bottom));display:flex;flex-direction:column;width:min(860px,calc(100vw - 2rem));height:min(660px,calc(100dvh - 130px));max-height:calc(100dvh - 130px);margin:0;padding:0;overflow:hidden;border:1px solid #a78bfa44;border-radius:24px;background:#111018;color:var(--dm-text);box-shadow:0 24px 80px #0009;z-index:75;text-align:left;font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;transform-origin:bottom right}
 .dm-panel[hidden],.dm-panel [hidden]{display:none!important}
 .dm-panel *{box-sizing:border-box}
