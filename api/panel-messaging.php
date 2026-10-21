@@ -5,7 +5,11 @@ function bridge_deny(int $status=403): never { http_response_code($status);heade
 if (($_SERVER['REQUEST_METHOD']??'')!=='POST') bridge_deny();
 $raw=base64_decode((string)($_POST['bridge_payload']??''),true);
 $sig=base64_decode((string)($_POST['bridge_signature']??''),true);
-$key=@file_get_contents(__DIR__.'/../backend/lib/panel-messaging-public.key');
+// Kazda strona podpisuje wlasnym kluczem: pole "kid" wskazuje plik backend/lib/panel-messaging-keys/<kid>.pub.
+// Brak "kid" = dawny wspolny klucz (panel gier i game.dnct.pl). Zly "kid" i tak nie przejdzie weryfikacji podpisu.
+$kid='';
+if(is_string($raw)){$peek=json_decode($raw,true);if(is_array($peek)&&is_string($peek['kid']??null)&&preg_match('/^[a-z0-9-]{3,32}$/D',$peek['kid']))$kid=$peek['kid'];}
+$key=@file_get_contents($kid!==''?__DIR__.'/../backend/lib/panel-messaging-keys/'.$kid.'.pub':__DIR__.'/../backend/lib/panel-messaging-public.key');
 if(!is_string($raw)||strlen($raw)>1048576||!is_string($sig)||strlen($sig)!==64||!is_string($key)||strlen($key)!==32||!sodium_crypto_sign_verify_detached($sig,$raw,$key))bridge_deny();
 $p=json_decode($raw,true);
 if(!is_array($p)||($p['v']??0)!==1||abs(time()-(int)($p['time']??0))>60||!preg_match('/^[a-f0-9]{48}$/D',$p['nonce']??'')||!preg_match('/^[a-f0-9]{64}$/D',$p['session']??'')||!filter_var($p['email']??'',FILTER_VALIDATE_EMAIL))bridge_deny();
