@@ -26,6 +26,11 @@ foreach($_FILES as $field=>$file){
     }
 }
 $expected=$p['files']??[];ksort($actual);ksort($expected);if($actual!==$expected)bridge_deny();
+// Only the verified server signature may select production support storage.
+if (($p['site'] ?? '') === 'game' && str_starts_with($path, 'api/support/')) {
+    define('DNCT_GAME_SUPPORT_BRIDGE', true);
+    $_SERVER['DNCT_ENV_FILE'] = dirname(__DIR__, 3) . '/.env';
+}
 // Distinct PHP session, no browser cookies, stable only for this panel session.
 ini_set('session.use_cookies','0');ini_set('session.use_strict_mode','0');
 session_name('DNCT_PANEL_BRIDGE');session_id(hash('sha256','panel-messaging:'.$p['session']));

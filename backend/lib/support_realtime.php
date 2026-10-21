@@ -78,7 +78,7 @@ function support_realtime_issue_token(PDO $db, int $ticketId, string $role, stri
     if (!in_array($role, ['customer', 'admin'], true) || $participantKey === '') {
         throw new InvalidArgumentException('Nieprawidłowy uczestnik rozmowy.');
     }
-    if (!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta') return ['token'=>msg_ws_token($db,'support','',$ticketId,$role,$participantKey),'expires_at'=>date('Y-m-d H:i:s',time()+300)];
+    if (!defined('DNCT_GAME_SUPPORT_BRIDGE') && (!defined('WSPARCIE_ZRODLO') || WSPARCIE_ZRODLO === 'beta')) return ['token'=>msg_ws_token($db,'support','',$ticketId,$role,$participantKey),'expires_at'=>date('Y-m-d H:i:s',time()+300)];
     $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
     $expiresAt = (new DateTimeImmutable('+'.SUPPORT_REALTIME_TOKEN_TTL.' seconds'))->format('Y-m-d H:i:s');
     $db->prepare('DELETE FROM support_realtime_tokens WHERE expires_at < NOW()')->execute();
