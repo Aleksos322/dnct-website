@@ -947,3 +947,7 @@ html {
 .dnct-support-chat-foot span { width: 6px; height: 6px; border-radius: 50%; background: #a78bfa; box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12); }
 @media (max-width: 420px) { .dnct-support-chat-btn span { display: none; } .dnct-support-chat-btn { width: 44px; padding: 0; justify-content: center; } .dnct-support-chat-panel { height: min(30rem, calc(100vh - 5.75rem)); } }
 @media (prefers-reduced-motion: reduce) { .dnct-support-chat-btn, .dnct-support-chat-panel, .dnct-support-chat-close, .dnct-support-chat-login { transition: none; } }
+
+/* Keep the page viewport fixed; galleries retain their own horizontal scrolling. */
+html,body{max-width:100%;overflow-x:hidden}
+@supports(overflow:clip){html,body{overflow-x:clip}}
