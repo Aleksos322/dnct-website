@@ -257,3 +257,17 @@ AddDefaultCharset UTF-8
 ErrorDocument 403 /errors/404.php
 ErrorDocument 404 /errors/404.php
 ErrorDocument 500 /errors/500.php
+
+# Załączniki czatu supportu — obowiązuje tylko, gdy Apache ładuje mod_php.
+<IfModule mod_php.c>
+    php_value upload_max_filesize 50M
+    php_value post_max_size 210M
+    php_value max_file_uploads 4
+    php_value max_execution_time 90
+</IfModule>
+<IfModule php_module>
+    php_value upload_max_filesize 50M
+    php_value post_max_size 210M
+    php_value max_file_uploads 4
+    php_value max_execution_time 90
+</IfModule>
