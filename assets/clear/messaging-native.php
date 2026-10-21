@@ -14,5 +14,20 @@ if($nativeMessaging): ?>
 </script>
 <script src="/messaging/assets/js/messaging-native.js" defer></script>
 <?php endif;
+?>
+<?php if ($nativeSite && !$nativeMessaging): ?>
+<style>
+.dnct-guest-chat{position:fixed;right:calc(1rem + env(safe-area-inset-right));bottom:calc(1rem + env(safe-area-inset-bottom));z-index:75;font:14px/1.5 system-ui;color:#f5f3ff;max-width:calc(100vw - 2rem)}.dnct-guest-actions{display:flex;gap:8px;justify-content:flex-end}.dnct-guest-chat button,.dnct-guest-chat a{border:1px solid #a78bfa55;border-radius:14px;padding:12px 16px;background:#21182fee;color:#ede9fe;cursor:pointer;text-decoration:none}.dnct-guest-gate{width:320px;max-width:100%;padding:20px;margin-bottom:12px;border:1px solid #a78bfa55;border-radius:20px;background:#171222f5;box-shadow:0 16px 48px #0008;backdrop-filter:blur(18px);box-sizing:border-box}.dnct-guest-gate[hidden]{display:none}.dnct-guest-gate p{margin:0 0 18px}.dnct-guest-gate a{display:inline-block;background:#7c3aed;margin:0 6px 4px 0;padding:9px 12px}.dnct-guest-close{float:right;padding:0 6px!important;background:transparent!important;border:0!important}.dnct-guest-chat button:focus-visible,.dnct-guest-chat a:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}
+</style>
+<aside class="dnct-guest-chat" aria-label="Czat i zgłoszenia">
+ <section class="dnct-guest-gate" id="dnct-guest-gate" hidden aria-live="polite"><button class="dnct-guest-close" type="button" aria-label="Zamknij">×</button><p>Musisz być zalogowany, aby zgłosić problem i czatować</p><a href="/login">Zaloguj się</a><a href="/register">Zarejestruj się</a></section>
+ <div class="dnct-guest-actions"><button type="button" aria-controls="dnct-guest-gate" aria-expanded="false">Czat</button><button type="button" aria-controls="dnct-guest-gate" aria-expanded="false">Zgłoś problem</button></div>
+</aside>
+<script>
+(()=>{const root=document.querySelector('.dnct-guest-chat'),gate=root.querySelector('.dnct-guest-gate'),buttons=[...root.querySelectorAll('[aria-controls]')];const show=()=>{if(!gate.hidden)return;gate.hidden=false;buttons.forEach(b=>b.setAttribute('aria-expanded','true'));if(!matchMedia('(prefers-reduced-motion: reduce)').matches)gate.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:220});};const hide=()=>{gate.hidden=true;buttons.forEach(b=>b.setAttribute('aria-expanded','false'));};buttons.forEach(b=>{b.addEventListener('click',show);b.addEventListener('pointerenter',show);b.addEventListener('focus',show);});root.querySelector('.dnct-guest-close').onclick=hide;root.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});})();
+</script>
+<?php endif; ?>
+
+<?php
 // Own the game layout for guests too: never fall back to the legacy anonymous chat.
 return $nativeSite;
