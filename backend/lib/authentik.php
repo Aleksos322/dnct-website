@@ -82,6 +82,42 @@ function authentik_api_request(string $method, string $path, ?array $body = null
 }
 
 /**
+ * Czy ta przeglądarka ma jeszcze sesję w Authentiku?
+ *
+ * Wylogowanie w innym miejscu (panel hostingu, wygaśnięcie sesji) kończy sesję
+ * Authentika, a nasza sesja PHP żyje dalej. Gdy wtedy odeślemy przeglądarkę na
+ * end-session, Authentik (2026.5) odpowiada gołym "Logout successful" i NIE
+ * odsyła na post_logout_redirect_uri - klient utyka na białej stronie.
+ *
+ * Sesji przeglądarki nie da się powiązać z naszą po identyfikatorze (API nie
+ * wystawia klucza sesji), więc porównujemy User-Agent: Authentik zapisuje go
+ * przy każdej sesji, a to ta sama przeglądarka woła nas i jego.
+ *
+ * @return bool|null true = jest, false = na pewno nie ma, null = nie wiadomo
+ *                   (błąd API) - wtedy wołający zachowuje się jak dotąd.
+ */
+function authentik_browser_session_alive(string $username, string $userAgent): ?bool
+{
+    if ($username === '' || $userAgent === '') {
+        return null;
+    }
+    $res = authentik_api_request('GET', '/api/v3/core/authenticated_sessions/?page_size=100&user__username=' . rawurlencode($username));
+    if ($res['http_code'] !== 200 || !is_array($res['body']['results'] ?? null)) {
+        return null;
+    }
+    foreach ($res['body']['results'] as $s) {
+        $known = [
+            (string)($s['user_agent']['string'] ?? ''),
+            (string)($s['last_user_agent']['string'] ?? ''),
+        ];
+        if (in_array($userAgent, $known, true)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * Czy w Authentiku istnieje już użytkownik o podanym loginie / e-mailu?
  *
  * Porównanie jest CASE-INSENSITIVE (jeśli istnieje "Aleks", to "aleks" jest

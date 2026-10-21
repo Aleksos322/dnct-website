@@ -19,6 +19,7 @@ require_once dirname(__DIR__) . '/backend/lib/messaging_site.php';
 messaging_site_revoke();
 
 $wasLoggedIn = isset($_SESSION['authentik_username']);
+$username    = (string)($_SESSION['authentik_username'] ?? '');
 
 // Zapamiętujemy PRZED wyczyszczeniem sesji - Authentik potrzebuje id_tokenu,
 // żeby wiedzieć, czyją sesję kończy i czy wolno odesłać nas z powrotem.
@@ -54,6 +55,14 @@ session_destroy();
 // lepiej po prostu wrócić na stronę główną z już wyczyszczoną sesją.
 if (!$wasLoggedIn || $idToken === '') {
     header('Location: /');
+    exit();
+}
+
+// Sesja Authentika w tej przeglądarce już nie żyje (wylogowanie w panelu
+// hostingu, wygaśnięcie) - end-session pokazałby wtedy gołe "Logout successful"
+// bez powrotu. Nie ma czego kończyć, więc wracamy prosto na stronę główną.
+if (authentik_browser_session_alive($username, (string)($_SERVER['HTTP_USER_AGENT'] ?? '')) === false) {
+    header('Location: ' . $homeUrl);
     exit();
 }
 
