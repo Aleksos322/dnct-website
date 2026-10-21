@@ -5,7 +5,7 @@
   const get = s => panel.querySelector(s), api = panel.dataset.api, csrf = panel.dataset.csrf;
   const search = get('[data-dm-search]'), directory = get('[data-dm-directory]'), conversations = get('[data-dm-conversations]'), status = get('[data-dm-status]'), connection = get('.dm-connection');
   const {el, button, key} = DNCTChat;
-  const selfDot=el('span','dm-self-presence');selfDot.setAttribute('role','img');connection.replaceChildren(document.createTextNode('Status: '),selfDot);
+  const selfDot=el('span','dm-self-presence');selfDot.setAttribute('role','img');connection.replaceChildren(selfDot);connection.hidden=true;
   function setSelfPresence(state){const labels={online:'Aktywny',away:'Zaraz wracam',offline:'Nieaktywny'};state=labels[state]?state:'offline';selfDot.dataset.state=state;selfDot.title=labels[state];selfDot.setAttribute('aria-label',labels[state]);}
   setSelfPresence('offline');
 
