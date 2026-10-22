@@ -31,6 +31,13 @@ $centerContent   = false;
 $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
 $salesOn    = stripe_sales_enabled();
 
+/* Widok admina "Wszyscy klienci" (?widok=wszyscy): te same karty dla zamówień
+   wszystkich kont, tylko do odczytu - bez przedłużania, zmiany pakietu
+   i rezygnacji (te endpointy i tak sprawdzają właściciela), z adresem
+   e-mail klienta na karcie. Uprawnienie bierzemy z sesji Authentika. */
+$isAdmin     = $isLoggedIn && !empty($_SESSION['authentik_is_superuser']);
+$adminWidok  = $isAdmin && ($_GET['widok'] ?? '') === 'wszyscy';
+
 $cards = [];
 
 if ($isLoggedIn) {
@@ -41,15 +48,25 @@ if ($isLoggedIn) {
        byłyby wyłącznie zamieszaniem - nikt nie chce oglądać „zamówienia",
        którego nie dokończył. Przedłużenia i zmiany pakietu też pomijamy: to
        zdarzenia w historii usługi, nie osobne usługi. */
-    $stmt = $dnct->prepare(
-        'SELECT * FROM orders
-          WHERE user_email = ?
-            AND kind = "new"
-            AND status IN ("provisioned", "failed", "cancelled", "paid")
-          ORDER BY id DESC'
-    );
-    $stmt->execute([(string)$_SESSION['authentik_email']]);
-    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($adminWidok) {
+        $orders = $dnct->query(
+            'SELECT * FROM orders
+              WHERE kind = "new"
+                AND status IN ("provisioned", "failed", "cancelled", "paid")
+              ORDER BY id DESC
+              LIMIT 300'
+        )->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $stmt = $dnct->prepare(
+            'SELECT * FROM orders
+              WHERE user_email = ?
+                AND kind = "new"
+                AND status IN ("provisioned", "failed", "cancelled", "paid")
+              ORDER BY id DESC'
+        );
+        $stmt->execute([(string)$_SESSION['authentik_email']]);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     $panel = null;
     try {
@@ -65,7 +82,7 @@ if ($isLoggedIn) {
 
     // Kod "Poleć znajomemu" - powstaje przy pierwszym wejściu klienta z opłaconym zakupem.
     $polecenie = null;
-    try {
+    if (!$adminWidok) try {
         require_once __DIR__ . '/backend/lib/polecenia.php';
         if ($kodPolecenia = polecenie_kod($dnct, (string)$_SESSION['authentik_email'], (string)$_SESSION['authentik_username'])) {
             $polecenie = ['kod' => (string)$kodPolecenia['code']] + polecenie_statystyki($dnct, (string)$_SESSION['authentik_email']);
@@ -75,7 +92,13 @@ if ($isLoggedIn) {
     }
 
     foreach ($orders as $order) {
-        $card = srv_build_card($order, $panel, $salesOn);
+        // Zamówienie, z którego klient zrezygnował ("Rezygnuję"), znika z jego
+        // listy. Zostaje w $orders, żeby jego serwer z panelu nie wrócił niżej
+        // jako "dodany ręcznie". Admin w widoku wszystkich widzi je dalej.
+        if (!empty($order['hidden_at']) && !$adminWidok) {
+            continue;
+        }
+        $card = srv_build_card($order, $panel, $salesOn && !$adminWidok);
         if ($card !== null) {
             $cards[] = $card;
         }
@@ -84,7 +107,7 @@ if ($isLoggedIn) {
     /* Serwer może należeć do konta w panelu, choć nie powstał przez obecny
        checkout (np. został dodany ręcznie). Nie chowamy go wtedy przed jego
        właścicielem, ale nie wymyślamy mu płatności ani terminu ważności. */
-    if ($panel !== null) {
+    if ($panel !== null && !$adminWidok) {
         $knownServerIds = [];
         foreach ($orders as $order) {
             if (!empty($order['ptero_server_id'])) {
@@ -231,10 +254,14 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
         $card['plan_name'] = $q->fetchColumn() ?: null;
     }
 
-    $q = $panel->prepare('SELECT icon_img FROM hosting_games WHERE type = ?');
+    // Nazwa gry z hosting_games ("Project Zomboid"), nie surowy typ ("zomboid").
+    $q = $panel->prepare('SELECT icon_img, name FROM hosting_games WHERE type = ?');
     $q->execute([(string)$order['game_type']]);
-    if ($icon = $q->fetchColumn()) {
-        $card['game_icon'] = '/assets/media/Server_card/icons/' . basename((string)$icon);
+    if ($gra = $q->fetch(PDO::FETCH_ASSOC)) {
+        if (!empty($gra['icon_img'])) {
+            $card['game_icon'] = '/assets/media/Server_card/icons/' . basename((string)$gra['icon_img']);
+        }
+        $card['game_title'] = $gra['name'] ?: null;
     }
 
     if (!$salesOn || $order['status'] === 'failed') {
@@ -333,19 +360,57 @@ ob_start();
 <link rel="stylesheet" href="<?php echo asset('/assets/css/order.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/servers.css'); ?>">
 
-<div class="cennik-page">
+<div class="cennik-page srv-strona">
 <div class="cnk-wrap">
 
-<section class="ord-head">
-    <span class="cnk-eyebrow">Twoje konto</span>
-    <h1 class="cnk-h1">Twoje serwery</h1>
+<?php
+/* Podział listy (22.10.2026): działające serwery na górze w pełnych kartach,
+   wygasłe niżej w zwartych wierszach. Wcześniej każdy wygasły serwer zajmował
+   tyle miejsca co działający i przy kilku zamówieniach lista ciągnęła się
+   ekranami. Zamówienie "failed" zostaje u góry - wymaga reakcji. */
+$aktywne = $wygasle = [];
+foreach ($cards as $c) {
+    $poTerminie = empty($c['panel_only']) && ($c['days_left'] ?? null) !== null && $c['days_left'] < 0
+        && ($c['order']['status'] ?? '') !== 'failed';
+    if ($poTerminie) { $wygasle[] = $c; } else { $aktywne[] = $c; }
+}
+$najblizszy = null;
+foreach ($aktywne as $c) {
+    if (empty($c['panel_only']) && !empty($c['order']['expires_at']) && ($najblizszy === null || $c['order']['expires_at'] < $najblizszy)) {
+        $najblizszy = (string)$c['order']['expires_at'];
+    }
+}
+?>
+<section class="ord-head srv-top">
+    <div>
+        <span class="cnk-eyebrow"><?php echo $adminWidok ? 'Panel administratora' : 'Twoje konto'; ?></span>
+        <h1 class="cnk-h1"><?php echo $adminWidok ? 'Serwery klientów' : 'Twoje serwery'; ?></h1>
+        <?php if ($adminWidok): ?><p class="srv-admin-info">Widok administratora, tylko do odczytu. Ostatnie 300 zamówień, także te ukryte przez klientów.</p><?php endif; ?>
+    </div>
     <?php /* Historia opłat to osobna strona, bo odpowiada na inne pytanie:
              ta lista mówi "co mam", tamta "za co zapłaciłem". Odnośnik stoi
              tutaj, bo właśnie tu klient przychodzi ze sprawami rozliczeń. */ ?>
     <?php if ($isLoggedIn): ?>
-        <p class="srv-lead-link"><a href="/oplaty">Historia opłat →</a></p>
+        <div class="srv-top-akcje">
+            <?php if ($isAdmin): ?>
+                <nav class="srv-widok" aria-label="Widok listy">
+                    <a href="/twoje-serwery"<?php echo !$adminWidok ? ' class="is-on" aria-current="page"' : ''; ?>>Moje</a>
+                    <a href="/twoje-serwery?widok=wszyscy"<?php echo $adminWidok ? ' class="is-on" aria-current="page"' : ''; ?>>Wszyscy klienci</a>
+                </nav>
+            <?php endif; ?>
+            <a class="srv-btn is-link" href="/oplaty">Historia opłat</a>
+            <a class="srv-btn is-primary" href="/cennik">Zamów nowy serwer</a>
+        </div>
     <?php endif; ?>
 </section>
+
+<?php if ($isLoggedIn && $cards): ?>
+<ul class="srv-podsumowanie glass" aria-label="Podsumowanie">
+    <li><strong><?php echo count($aktywne); ?></strong><span>działające</span></li>
+    <li><strong><?php echo count($wygasle); ?></strong><span>po terminie</span></li>
+    <li><strong><?php echo $najblizszy !== null ? htmlspecialchars(czas_fmt($najblizszy, 'd.m.Y')) : '-'; ?></strong><span>najbliższy termin</span></li>
+</ul>
+<?php endif; ?>
 
 <?php if (!$isLoggedIn): ?>
     <div class="cennik-info glass">
@@ -362,8 +427,11 @@ ob_start();
     </div>
 
 <?php else: ?>
-    <div class="srv-list">
-        <?php foreach ($cards as $c): $isPanelOnly = !empty($c['panel_only']); $o = $c['order'] ?? null; ?>
+    <?php foreach ([['aktywne', $aktywne, 'Działające serwery'], ['wygasle', $wygasle, 'Po terminie']] as [$grupa, $lista, $tytulGrupy]):
+        if (!$lista) { continue; } ?>
+    <h2 class="srv-grupa"><?php echo $tytulGrupy; ?> <span><?php echo count($lista); ?></span></h2>
+    <div class="srv-list srv-list-<?php echo $grupa; ?>">
+        <?php foreach ($lista as $c): $isPanelOnly = !empty($c['panel_only']); $o = $c['order'] ?? null; ?>
             <article class="srv glass is-<?php echo $c['tone']; ?>"
                      <?php if (!$isPanelOnly): ?>data-order="<?php echo (int)$o['id']; ?>"<?php endif; ?>
                      data-periods="<?php echo htmlspecialchars(json_encode($c['periods'], JSON_UNESCAPED_UNICODE), ENT_QUOTES); ?>"
@@ -377,7 +445,7 @@ ob_start();
                         <?php endif; ?>
                         <div>
                             <h2 class="srv-name">
-                                <?php echo htmlspecialchars($isPanelOnly ? $c['server_name'] : ucfirst((string)$o['game_type'])); ?>
+                                <?php echo htmlspecialchars($isPanelOnly ? $c['server_name'] : ($c['game_title'] ?? ucfirst((string)$o['game_type']))); ?>
                                 <span class="srv-spec">
                                     <?php echo htmlspecialchars($isPanelOnly ? $c['game_name'] :
                                         $c['plan_name'] ?? ($o['slots'] !== null ? (int)$o['slots'] . ' slotów' : 'pakiet własny')
@@ -391,6 +459,10 @@ ob_start();
                                 <?php else: ?>
                                     Zamówienie #<?php echo (int)$o['id']; ?>
                                     · kupione <?php echo htmlspecialchars(czas_fmt((string)$o['created_at'], 'd.m.Y')); ?>
+                                    <?php if ($adminWidok): ?>
+                                        · <strong class="srv-wlasciciel"><?php echo htmlspecialchars((string)$o['user_email']); ?></strong>
+                                        <?php if (!empty($o['hidden_at'])): ?>· <span class="srv-flag">ukryte przez klienta</span><?php endif; ?>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                                 <?php if ($c['suspended']): ?>
                                     · <strong class="srv-flag">serwer zawieszony</strong>
@@ -412,7 +484,7 @@ ob_start();
                     </div>
                 <?php endif; ?>
 
-                <?php if (!$isPanelOnly && !empty($o['ptero_server_id']) && $o['status'] === 'provisioned'): ?>
+                <?php if (!$adminWidok && !$isPanelOnly && !empty($o['ptero_server_id']) && $o['status'] === 'provisioned'): ?>
                     <section class="srv-live" data-role="live" aria-live="polite" aria-busy="true">
                         <div class="srv-live-head">
                             <div><span>Stan serwera</span><strong>Ładuję aktualne dane…</strong></div>
@@ -447,9 +519,7 @@ ob_start();
                 <div class="srv-facts">
                     <div>
                         <span>Opłacone do</span>
-                        <strong><?php echo $o['expires_at'] !== null
-                            ? htmlspecialchars(czas_fmt((string)$o['expires_at'], 'd.m.Y, H:i'))
-                            : '-'; ?></strong>
+                        <strong><?php if ($o['expires_at'] !== null): ?><?php echo htmlspecialchars(czas_fmt((string)$o['expires_at'], 'd.m.Y')); ?> <small class="srv-godz"><?php echo htmlspecialchars(czas_fmt((string)$o['expires_at'], 'H:i')); ?></small><?php else: ?>-<?php endif; ?></strong>
                     </div>
                     <div>
                         <span>Pozostało</span>
@@ -461,10 +531,15 @@ ob_start();
                             else               { echo $d, ' dni'; }
                         ?></strong>
                     </div>
+                    <?php /* Przy płatności jednorazowej zawieszenie wypada dokładnie w chwili
+                             wygaśnięcia - druga kolumna z tą samą datą tylko myliła.
+                             Pokazujemy ją przy abonamencie, gdzie dochodzi doba na kartę. */ ?>
+                    <?php if ($c['deadlines']['suspends_raw'] !== $c['deadlines']['expires_raw']): ?>
                     <div>
                         <span>Zawieszenie</span>
                         <strong class="srv-suspend"><?php echo htmlspecialchars($c['deadlines']['suspends']); ?></strong>
                     </div>
+                    <?php endif; ?>
                     <div>
                         <span>Rozliczenie</span>
                         <strong><?php
@@ -505,8 +580,12 @@ ob_start();
                         <button type="button" class="srv-btn" data-role="togglePlans">Zmień pakiet</button>
                     <?php endif; ?>
 
-                    <?php if ($c['renews']): ?>
+                    <?php if ($c['renews'] && !$adminWidok): ?>
                         <button type="button" class="srv-btn is-quiet" data-role="cancelSub">Zrezygnuj z odnawiania</button>
+                    <?php endif; ?>
+
+                    <?php if ($grupa === 'wygasle' && !$adminWidok && !$isPanelOnly): ?>
+                        <button type="button" class="srv-btn is-quiet" data-role="dismiss">Rezygnuję</button>
                     <?php endif; ?>
 
                     <a class="srv-btn is-link" href="https://panel.dnct.pl" target="_blank" rel="noopener">Otwórz w panelu</a>
@@ -599,10 +678,12 @@ ob_start();
             </article>
         <?php endforeach; ?>
     </div>
+    <?php endforeach; ?>
 
     <?php if ($polecenie !== null): $linkPolecenia = 'https://game.dnct.pl/?kod=' . rawurlencode($polecenie['kod']); ?>
         <section class="srv-polec glass" aria-labelledby="srv-polec-h">
-            <div>
+            <span class="srv-polec-ikona" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span>
+            <div class="srv-polec-tekst">
                 <h2 id="srv-polec-h">Poleć znajomemu</h2>
                 <p>Znajomy płaci <strong><?php echo POLECENIE_RABAT; ?>% mniej</strong> za pierwszy serwer, a Ty dostajesz <strong>+<?php echo POLECENIE_DNI; ?> dni</strong> do swojego, gdy zapłaci.</p>
                 <?php if ($polecenie['ile'] > 0): ?>
