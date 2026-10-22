@@ -128,6 +128,15 @@ try {
     error_log('index: komunikat ze statusu - ' . $e->getMessage());
 }
 
+// Ocena z Google do hero (ta sama funkcja i cache 6 h co pasek opinii pod planami).
+$heroOpinie = null;
+try {
+    require_once __DIR__ . '/backend/lib/google_reviews.php';
+    $heroOpinie = google_reviews();
+} catch (Throwable $e) {
+    error_log('index: ocena Google - ' . $e->getMessage());
+}
+
 require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/components/jak-to-dziala.php';
@@ -167,6 +176,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                     </span>
                 </a>
             <?php endif; ?>
+            <?php if ($komunikat === null): ?><span class="home-badge home-in" style="--d:0"><i aria-hidden="true"></i>Hosting serwerów gier na własnym sprzęcie w Polsce</span><?php endif; ?>
             <h1 class="home-h1">
                 <?php if ($isLoggedIn): ?>
                     <span class="home-line"><span style="--d:1">Cześć, <?php echo htmlspecialchars((string)$username); ?>!</span></span>
@@ -211,27 +221,17 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="m7 9 3 2-3 2M12 13h4M8 21h8"/></svg>
                         Demo panelu
                     </a>
-                    <a href="https://panel.dnct.pl" class="home-btn glass">Panel</a>
                 <?php endif; ?>
             </div>
 
-            <?php if ($heroGames): ?>
-            <div class="home-chips home-in" style="--d:6">
-                <?php foreach ($heroGames as $g):
-                    $type = (string)$g['type'];
-                    $icon = $heroGameIcon[$type] ?? null;
-                ?>
-                    <a class="home-chip" data-g="<?php echo htmlspecialchars($type); ?>" href="<?php echo htmlspecialchars($heroGameUrl[$type] ?? '/cennik'); ?>">
-                        <?php if ($icon): ?>
-                            <img src="<?php echo asset($icon); ?>" alt="" width="40" height="40" decoding="async">
-                        <?php else: ?>
-                            <b><?php echo htmlspecialchars(mb_strtoupper(mb_substr((string)$g['name'], 0, 2))); ?></b>
-                        <?php endif; ?>
-                        <?php echo htmlspecialchars((string)$g['name']); ?> · od <?php echo number_format((float)$g['price_from'], 2, ',', ''); ?> zł
-                    </a>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+            <ul class="home-trust home-in" style="--d:6">
+                <?php if ($heroOpinie !== null): ?>
+                <li><a href="#pricing"><b class="home-trust-gw" aria-hidden="true">★★★★★</b><strong><?php echo number_format((float)$heroOpinie['rating'], 1, ',', ''); ?></strong> <?php echo (int)$heroOpinie['count']; ?> opinii w Google</a></li>
+                <?php endif; ?>
+                <li>Ochrona DDoS</li>
+                <li>Serwery w Polsce</li>
+                <li>Start zaraz po płatności</li>
+            </ul>
         </div>
 
         <?php /* Karta serwera: poglądowa (te same dane co scenka "Grasz"
@@ -252,6 +252,27 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
             <div class="home-card-input"><b>›</b> wpisz komendę...</div>
         </div>
     </div>
+    <?php if ($heroGames):
+        $heroGameLine = ['minecraft' => 'Serwer dla Twojej ekipy', 'zomboid' => 'Przetrwajcie apokalipsę razem', 'vintagestory' => 'Wspólny survival bez pośpiechu'];
+    ?>
+    <nav class="home-wrap home-gry" aria-label="Wybierz grę">
+        <?php foreach ($heroGames as $i => $g):
+            $type = (string)$g['type'];
+            $icon = $heroGameIcon[$type] ?? null;
+        ?>
+        <a class="home-gra glass home-in" style="--d:<?php echo 7 + $i; ?>" data-g="<?php echo htmlspecialchars($type); ?>" href="<?php echo htmlspecialchars($heroGameUrl[$type] ?? '/cennik'); ?>">
+            <?php if ($icon): ?><img class="home-gra-tlo" src="<?php echo asset($icon); ?>" alt="" aria-hidden="true" width="96" height="96" decoding="async"><?php endif; ?>
+            <span class="home-gra-ikona"><?php if ($icon): ?><img src="<?php echo asset($icon); ?>" alt="" width="56" height="56" decoding="async"><?php else: ?><b><?php echo htmlspecialchars(mb_strtoupper(mb_substr((string)$g['name'], 0, 2))); ?></b><?php endif; ?></span>
+            <span class="home-gra-tekst">
+                <strong><?php echo htmlspecialchars((string)$g['name']); ?></strong>
+                <small><?php echo htmlspecialchars($heroGameLine[$type] ?? 'Hosting serwera gry'); ?></small>
+            </span>
+            <span class="home-gra-cena">od <?php echo number_format((float)$g['price_from'], 2, ',', ''); ?> zł</span>
+            <span class="home-gra-strzalka" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <?php endforeach; ?>
+    </nav>
+    <?php endif; ?>
 </section>
 
 <!-- ============ ZOBACZ, ZANIM ZAPŁACISZ ============ -->

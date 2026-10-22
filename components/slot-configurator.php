@@ -146,6 +146,17 @@ function render_slot_configurator(
                     </div>
                 </div>
 
+                <?php /* "Twoja ekipa" (22.10.2026): tyle postaci, ile slotów ma najwyższy
+                         próg; zapalają się falą razem z suwakiem (assets/js/cennik-ekipa.js).
+                         W Zomboidzie wolne miejsca stoją jako zombie, zajęte - ocalali.
+                         Czysta ozdoba: aria-hidden, liczba jest już wyżej w .cfg-slots. */
+                      $ekipaMax = (int)max(array_map(static fn(array $t): int => (int)$t['slots'], $tiers));
+                      $ekipaKto = ['zomboid' => 'ocalałych na jednej mapie', 'vintagestory' => 'osadników w jednym świecie'][$type] ?? 'graczy naraz'; ?>
+                <div class="cfg-block cfg-ekipa" data-role="ekipa" aria-hidden="true">
+                    <div class="cfg-ekipa-head"><span class="cfg-label">Twoja ekipa</span><span class="cfg-ekipa-ile"><b data-role="ekipaIle"><?php echo (int)$defaultTier['slots']; ?></b> <span><?php echo $ekipaKto; ?></span></span></div>
+                    <div class="cfg-ekipa-ludzie"><?php for ($k = 0; $k < $ekipaMax; $k++): ?><i<?php echo $k < (int)$defaultTier['slots'] ? ' class="on"' : ''; ?>></i><?php endfor; ?></div>
+                </div>
+
                 <div class="cfg-block">
                     <div class="cfg-label">Okres rozliczeniowy</div>
                     <div class="cfg-periods" data-role="periods">
@@ -186,6 +197,20 @@ function render_slot_configurator(
             <div class="cfg-summary glass">
                 <div class="glass-content">
                     <div class="cfg-summary-head">
+                        <?php if ($type === 'vintagestory'):
+                            /* Przekładnia przy ikonie gry: duże koło obraca się o 6° na slot,
+                               małe w przeciwną stronę, w proporcji zębów (cennik-ekipa.js).
+                               Te same koła co w components/vs-world.php - własny gradient,
+                               bo tamta warstwa bywa ukryta, a gradient z ukrytego SVG
+                               przeglądarka pomija. */
+                            require_once __DIR__ . '/vs-world.php';
+                            $kolo = static fn(int $z): string => str_replace('url(#vsRust)', 'url(#vsRustCfg)', vs_gear_svg($z)); ?>
+                            <span class="cfg-tryby" data-role="tryby" aria-hidden="true">
+                                <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="vsRustCfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2783f"/><stop offset="0.55" stop-color="#8f4b22"/><stop offset="1" stop-color="#5c2e14"/></linearGradient></defs></svg>
+                                <span class="cfg-tryb-duze"><?php echo $kolo(14); ?></span>
+                                <span class="cfg-tryb-male"><?php echo $kolo(8); ?></span>
+                            </span>
+                        <?php endif; ?>
                         <span class="cfg-summary-label">Podsumowanie</span>
                         <span class="cfg-summary-sub">
                             <?php if ($gameName !== ''): ?><?php echo htmlspecialchars($gameName, ENT_QUOTES, 'UTF-8'); ?> · <?php endif; ?><strong data-role="pakiet"></strong>

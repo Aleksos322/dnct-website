@@ -124,6 +124,8 @@ function i18n_wzorce(): array
         ['^(Minecraft|Project Zomboid|Vintage Story) · od (.+)$', '$1 · from $2', '$1 · ab $2'],
         ['^Najczęstsze pytania o (.+)$', 'FAQ: $1', 'Häufige Fragen zu $1'],
         ['^(\d+) opinii w Google →$', '$1 reviews on Google →', '$1 Bewertungen auf Google →'],
+        ['^(\d+) opinii w Google$', '$1 reviews on Google', '$1 Bewertungen auf Google'],
+        ['^od (\d+,\d{2} zł)$', 'from $1', 'ab $1'],
         ['^(\d+) opinie w Google →$', '$1 reviews on Google →', '$1 Bewertungen auf Google →'],
         ['^Dziś o (.+)$', 'Today at $1', 'Heute um $1'],
         ['^Cześć, (.+)!$', 'Hi, $1!', 'Hallo, $1!'],

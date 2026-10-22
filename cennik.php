@@ -397,6 +397,7 @@ ob_start();
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-vs.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-showcase.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-ekipa.css'); ?>">
 
 <div class="cennik-page cnk-catalogue-page">
 
@@ -782,6 +783,7 @@ ob_start();
 <script src="<?php echo asset('/assets/js/cennik-showcase.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-split.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-vs.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/cennik-ekipa.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/panel-band.js'); ?>" defer></script>
 
 </div><!-- /.cennik-page -->

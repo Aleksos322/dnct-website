@@ -1,0 +1,59 @@
+/* Konfigurator slotów (Project Zomboid, Vintage Story): akcent gry, pasek
+   "Twoja ekipa" i przekładnia przy podsumowaniu Vintage Story.
+   Akcent jest wyłącznie ozdobą - przyciski i suwak zostają ametystowe
+   (DESIGN.md, Reguła Jednego Głosu). Ruch: assets/js/cennik-ekipa.js. */
+
+.cfg { --gra: 167, 139, 250; }
+.cfg[data-type="zomboid"] { --gra: 232, 112, 64; }
+.cfg[data-type="vintagestory"] { --gra: 214, 160, 74; }
+
+/* Lekka poświata w kolorze gry na obu kartach */
+.cnk-catalogue .cfg-controls,
+.cnk-catalogue .cfg-summary { box-shadow: 0 0 0 1px rgba(var(--gra), 0.14), 0 30px 80px -40px rgba(var(--gra), 0.45); }
+.cnk-catalogue .cfg-controls { background-image: radial-gradient(ellipse at 0% 0%, rgba(var(--gra), 0.12), transparent 55%); }
+.cfg .cfg-slots-num { background: linear-gradient(135deg, #fff 30%, rgb(var(--gra))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- Twoja ekipa ---------- */
+.cfg-ekipa { margin-top: 1.4rem; }
+.cfg-ekipa-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.7rem; }
+.cfg-ekipa-head .cfg-label { margin: 0; }
+.cfg-ekipa-ile { font-size: 0.82rem; color: #94a3b8; }
+.cfg-ekipa-ile b { font-size: 1.05rem; color: rgb(var(--gra)); font-variant-numeric: tabular-nums; }
+.cfg-ekipa-ludzie { display: grid; grid-template-columns: repeat(50, minmax(0, 1fr)); gap: 4px 2px; }
+.cfg-ekipa-ludzie i {
+    display: block; aspect-ratio: 9 / 16; color: rgba(255, 255, 255, 0.1);
+    background: currentColor;
+    -webkit-mask: var(--ludzik) center / contain no-repeat; mask: var(--ludzik) center / contain no-repeat;
+    --ludzik: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Ccircle cx='4.5' cy='2.4' r='2.2'/%3E%3Cpath d='M2 5.6h5a1.6 1.6 0 0 1 1.6 1.6v3.6H7.2V16H5.1v-4.6H3.9V16H1.8v-5.2H.4V7.2A1.6 1.6 0 0 1 2 5.6z'/%3E%3C/svg%3E");
+    transform-origin: 50% 100%;
+    transition: color 0.35s ease, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--w, 0ms);
+}
+.cfg-ekipa-ludzie i.on { color: rgb(var(--gra)); transform: translateY(-2px); filter: drop-shadow(0 0 4px rgba(var(--gra), 0.55)); }
+
+/* Zomboid: wolne miejsca to zombie (ręce przed siebie, chwiejny krok) */
+.cfg[data-type="zomboid"] .cfg-ekipa-ludzie i:not(.on) {
+    color: rgba(132, 160, 112, 0.28);
+    --ludzik: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 16'%3E%3Ccircle cx='5.2' cy='2.6' r='2.2'/%3E%3Cpath d='M2.6 5.8h3.6l2.8 1.1V8.5L6.4 7.6v3.4L7.6 16H5.4l-.9-4.2L3.4 16H1.4l1.1-5.4V8.2L.2 9.4V7.6z'/%3E%3C/svg%3E");
+    animation: cfgChwiej 2.6s ease-in-out infinite; animation-delay: calc(var(--k, 0) * -0.37s);
+}
+@keyframes cfgChwiej { 0%, 100% { rotate: -4deg; } 50% { rotate: 4deg; } }
+.cfg-ekipa-ludzie i.is-out { color: rgba(239, 68, 68, 0.45); }
+
+/* ---------- Vintage Story: przekładnia przy ikonie gry ---------- */
+.cnk-catalogue .cfg-summary-head { position: relative; }
+.cfg-tryby { position: absolute; top: -6px; right: 48px; width: 86px; height: 52px; pointer-events: none; }
+.cfg-tryby > span { position: absolute; display: block; }
+.cfg-tryby svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45)); }
+.cfg-tryb-duze { width: 50px; height: 50px; right: 0; top: 0; rotate: var(--obrot, 0deg); }
+.cfg-tryb-male { width: 30px; height: 30px; right: 43px; top: 16px; rotate: calc(var(--obrot, 0deg) * -14 / 8 + 11deg); }
+.cfg-tryby > span { transition: rotate 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+
+@media (max-width: 640px) {
+    .cfg-ekipa-ludzie { grid-template-columns: repeat(25, minmax(0, 1fr)); }
+    .cfg-tryby { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .cfg-ekipa-ludzie i, .cfg-tryby > span { transition: none; }
+    .cfg[data-type="zomboid"] .cfg-ekipa-ludzie i:not(.on) { animation: none; }
+}
