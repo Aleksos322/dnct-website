@@ -194,7 +194,7 @@ $sekcje[] = sekcja('Pieniądze', function () use ($start, $koniec, $od, $do, $dz
 
     // Zamówienia z naszej bazy - rozbicie, którego Stripe nie zna.
     $st = $dnct->prepare(
-        'SELECT kind, COUNT(*) AS ile, COALESCE(SUM(amount_gross), 0) AS kwota FROM orders
+        'SELECT kind, COUNT(*) AS ile, COALESCE(SUM(COALESCE(amount_paid, amount_gross)), 0) AS kwota FROM orders
           WHERE status IN ("paid", "provisioned") AND created_at >= ? AND created_at < ? GROUP BY kind'
     );
     $st->execute([$od, $do]);

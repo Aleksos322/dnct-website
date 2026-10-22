@@ -83,7 +83,7 @@ function send_order_paid_mail(array $order, ?string $adminUser = null, ?string $
         'ramMb'       => (int)$order['ram_mb'],
         'cpuCores'    => rtrim(rtrim(number_format((float)$order['cpu_cores'], 1, '.', ''), '0'), '.'),
         'ssdMb'       => (int)$order['ssd_mb'],
-        'amount'      => pricing_format((int)$order['amount_gross']),
+        'amount'      => pricing_format(order_paid_amount($order)),
         'isSub'       => $order['billing_mode'] === 'subscription',
         'expires'     => $d['expires'],
         'suspends'    => $d['suspends'],
@@ -144,7 +144,7 @@ function send_payment_failed_mail(array $order): array
         'userName'   => (string)$order['user_name'],
         'orderId'    => (int)$order['id'],
         'gameName'   => ucfirst((string)$order['game_type']),
-        'amount'     => pricing_format((int)$order['amount_gross']),
+        'amount'     => pricing_format(order_paid_amount($order)),
         'suspends'   => $order['grace_until'] !== null
             ? czas_fmt((string)$order['grace_until'], 'd.m.Y \o H:i')
             : $d['suspends'],

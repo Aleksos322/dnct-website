@@ -148,6 +148,53 @@ function order_attach_session(PDO $dnct, int $orderId, string $sessionId): void
     $stmt->execute([$sessionId, $orderId]);
 }
 
+/**
+ * Ile klient naprawdę zapłacił (grosze): amount_paid z sesji Stripe, czyli po
+ * kodzie rabatowym, a gdy go brak - cena z cennika (amount_gross).
+ */
+function order_paid_amount(array $order): int
+{
+    return isset($order['amount_paid']) && $order['amount_paid'] !== null
+        ? (int)$order['amount_paid']
+        : (int)$order['amount_gross'];
+}
+
+/**
+ * Uzupełnia amount_paid z sesji Stripe dla zamówienia z kodem rabatowym.
+ *
+ * Tylko tam kwoty się różnią, więc zapytań do Stripe jest tyle, ile zamówień
+ * z kodem, i każde raz - potem wartość leży w bazie. Webhook (stripe_events.php)
+ * tego nie zapisuje; to uzupełnienie przy pierwszym wyświetleniu. Błąd albo
+ * brak Stripe = zostaje cena z cennika, strona działa dalej.
+ */
+function order_fill_paid_amount(PDO $dnct, array &$order): void
+{
+    if (empty($order['promo_code']) || empty($order['stripe_session_id'])
+        || !array_key_exists('amount_paid', $order) || $order['amount_paid'] !== null
+        || !in_array($order['status'], ['paid', 'provisioned', 'cancelled'], true)) {
+        return;
+    }
+    try {
+        require_once __DIR__ . '/stripe.php';
+        stripe_init();
+        \Stripe\HttpClient\CurlClient::instance()->setTimeout(5);
+        $session = \Stripe\Checkout\Session::retrieve((string)$order['stripe_session_id']);
+        if (($session->payment_status ?? '') === 'paid' && isset($session->amount_total)) {
+            $dnct->prepare('UPDATE orders SET amount_paid = ? WHERE id = ? AND amount_paid IS NULL')
+                 ->execute([(int)$session->amount_total, (int)$order['id']]);
+            $order['amount_paid'] = (int)$session->amount_total;
+        }
+    } catch (Throwable $e) {
+        error_log('order_fill_paid_amount #' . (int)$order['id'] . ' - ' . $e->getMessage());
+    }
+}
+
+/** Rabat w groszach (0, gdy klient zapłacił pełną cenę). */
+function order_discount_amount(array $order): int
+{
+    return max(0, (int)$order['amount_gross'] - order_paid_amount($order));
+}
+
 function order_by_id(PDO $dnct, int $id): ?array
 {
     $stmt = $dnct->prepare('SELECT * FROM orders WHERE id = ?');
