@@ -4,15 +4,17 @@
    Zwykły CSS zamiast klas Tailwinda - nic tu nie wymaga przebudowy
    tailwind.css. */
 
+/* Szerokość pod monitor 16:9 (jak web.dnct.pl): treść do 1680 px, boki płynne.
+   .home-wrap i .home-wide mają te same krawędzie, a navbar na stronie głównej
+   jest wyrównany do treści (na podstronach zostaje max-w-7xl). */
 .home-wrap {
     width: 100%;
-    max-width: 95rem;              /* = .home-wide pasm niżej */
+    max-width: 1680px;
     margin: 0 auto;
-    padding: 0 clamp(1.25rem, 3vw, 2.5rem);
+    padding: 0 clamp(20px, 4vw, 64px);
 }
-/* Szersze pasma strony głównej (panel, "Jak to działa", plany, Discord) -
-   przy max-w-7xl (80rem) strona na dużym ekranie wyglądała na ściśniętą. */
-.home-wide { width: 100%; max-width: 95rem; }
+.home-wide { width: 100%; max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
+.glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
 
 .home-eyebrow {
     display: inline-flex;
@@ -30,7 +32,7 @@
 /* Podciągnięcie pod navbar jak w cenniku: .page-main ma pt-32 dla całego
    serwisu, tu oddajemy część tego odstępu. */
 /* Hero na prawie cały ekran: treść pionowo na środku zamiast przyklejonej do navbara. */
-.home-hero { position: relative; display: grid; align-items: center; min-height: calc(100svh - 60px); margin-top: -90px; padding: 3rem 0 4.5rem; overflow: hidden; }
+.home-hero { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: calc(100svh - 60px); margin-top: -90px; padding: 3rem 0 3.5rem; overflow: hidden; }
 @media (max-width: 700px) { .home-hero { margin-top: -50px; } }
 .home-hero-glow {
     position: absolute; z-index: -1; top: -10%; left: -10%;
@@ -46,8 +48,8 @@
 }
 
 .home-h1 {
-    margin: 1rem 0 0;
-    font-size: clamp(2.9rem, 5.2vw, 5.6rem);
+    margin: 1.6rem 0 0;
+    font-size: clamp(2.7rem, 4.4vw, 5rem);
     font-weight: 800;   /* navbar.css ładuje Montserrat 500/700/800 - 900 byłoby podrabiane */
     line-height: 0.98;
     letter-spacing: -0.045em;
@@ -86,29 +88,45 @@
 .home-btn-main { border-color: transparent; box-shadow: 0 10px 30px -12px rgba(139, 92, 246, 0.9); }
 .home-btn-main:hover { box-shadow: 0 0 30px rgba(139, 92, 246, 0.5); }
 
-.home-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2.6rem; }
-.home-chip {
-    display: inline-flex; align-items: center; gap: 0.55rem;
-    padding: 0.4rem 1.05rem 0.4rem 0.4rem; border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.03);
-    font-size: 0.92rem; font-weight: 600; color: #cbd5e1; text-decoration: none;
-    transition: border-color 0.2s ease, color 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+/* Plakietka nad nagłówkiem i pasek zaufania pod przyciskami. */
+.home-badge { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1rem; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; background: rgba(255, 255, 255, 0.03); font-size: 0.82rem; font-weight: 600; color: #94a3b8; }
+.home-badge i { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: homePulse 1.8s ease-out infinite; }
+.home-trust { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.6rem; margin: 2rem 0 0; padding: 0; font-size: 0.92rem; color: #94a3b8; }
+.home-trust li { display: inline-flex; align-items: center; gap: 0.5rem; }
+.home-trust li:not(:first-child)::before { content: ""; width: 16px; height: 16px; background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234ade80' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12 5 5 9-10'/%3E%3C/svg%3E"); }
+.home-trust a { display: inline-flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none; }
+.home-trust a:hover { color: #e2e8f0; }
+.home-trust strong { color: #fff; font-size: 1rem; }
+.home-trust-gw { color: #fbbf24; letter-spacing: 0.1em; font-size: 0.85rem; }
+
+/* Trzy gry: duże kafle pod całym hero, każdy w kolorze swojej gry. */
+.home-gry { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.9rem, 1.2vw, 1.4rem); margin-top: clamp(2.5rem, 5vh, 4rem); }
+.home-gra {
+    --g: 139, 92, 246;
+    position: relative; overflow: hidden; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.6rem 1.2rem;
+    padding: 1.5rem 1.6rem; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); color: #e2e8f0; text-decoration: none;
+    background: linear-gradient(120deg, rgba(var(--g), 0.2), rgba(var(--g), 0.03) 55%), rgba(255, 255, 255, 0.02);
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.35s ease;
 }
-.home-chip:hover { color: #fff; border-color: #8b5cf6; transform: translateY(-2px); }
-.home-chip b {
-    display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%;
-    font-size: 0.62rem; letter-spacing: 0.03em; color: #fff; background: #6d28d9;
-}
-.home-chip img {
-    width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-    background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 4px 14px rgba(0, 0, 0, 0.35);
-    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-}
-.home-chip:hover img { transform: rotate(-8deg) scale(1.08); }
-.home-chip[data-g="minecraft"]:hover { border-color: #5fa64a; }
-.home-chip[data-g="zomboid"]:hover { border-color: #e08a3c; }
-.home-chip[data-g="vintagestory"]:hover { border-color: #8fae4a; }
+.home-gra[data-g="minecraft"] { --g: 95, 166, 74; }
+.home-gra[data-g="zomboid"] { --g: 224, 108, 60; }
+.home-gra[data-g="vintagestory"] { --g: 196, 158, 72; }
+.home-gra:hover { transform: translateY(-4px); border-color: rgba(var(--g), 0.6); box-shadow: 0 20px 50px -20px rgba(var(--g), 0.6); }
+.home-gra-tlo { position: absolute; right: -24px; bottom: -34px; width: 170px; height: 170px; object-fit: cover; border-radius: 50%; opacity: 0.12; filter: blur(2px) saturate(1.2); pointer-events: none; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; }
+.home-gra:hover .home-gra-tlo { transform: rotate(-10deg) scale(1.1); opacity: 0.2; }
+.home-gra-ikona { grid-row: span 2; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: rgba(var(--g), 0.16); box-shadow: inset 0 0 0 1px rgba(var(--g), 0.35); }
+.home-gra-ikona img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+.home-gra:hover .home-gra-ikona img { transform: rotate(-8deg) scale(1.08); }
+.home-gra-ikona b { font-size: 1rem; color: #fff; }
+.home-gra-tekst { display: grid; gap: 0.25rem; min-width: 0; }
+.home-gra-tekst strong { font-size: clamp(1.15rem, 1.3vw, 1.4rem); font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+.home-gra-tekst small { font-size: 0.86rem; color: #94a3b8; }
+.home-gra-cena { grid-column: 2; font-size: 1rem; font-weight: 800; color: #fff; }
+.home-gra-strzalka { grid-column: 3; grid-row: 1 / span 2; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.12); color: #fff; position: relative; transition: background 0.3s ease, border-color 0.3s ease; }
+.home-gra-strzalka svg { width: 18px; height: 18px; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.home-gra:hover .home-gra-strzalka { background: rgba(var(--g), 0.85); border-color: transparent; }
+.home-gra:hover .home-gra-strzalka svg { transform: translateX(2px); }
+@media (max-width: 960px) { .home-gry { grid-template-columns: 1fr; } }
 
 /* Karta serwera */
 .home-card {
@@ -651,3 +669,7 @@
 .home-notice-dot { flex: none; width: .6rem; height: .6rem; margin-top: .45rem; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, .2); }
 .home-notice-link { display: block; margin-top: .35rem; color: #fcd34d; text-decoration: underline; text-underline-offset: 3px; }
 .home-notice:hover .home-notice-link, .home-notice:focus-visible .home-notice-link { color: #fff; }
+
+/* "Jak to działa" na stronie głównej: nagłówek w tej samej skali co
+   "Wybierz plan hostingu gier", nie mniejszy jak w cenniku. */
+.jtd-wrap #jtd-title { font-size: clamp(2rem, 3.6vw, 3.2rem); line-height: 1.05; letter-spacing: -0.03em; }

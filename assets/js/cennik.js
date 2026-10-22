@@ -136,7 +136,8 @@
 
     function money(v) {
         // Ceny z bazy bywają całkowite; grosze pokazujemy tylko gdy są.
-        return (Math.round(v * 100) / 100).toFixed(2).replace(/\.00$/, '');
+        // Przecinek jak w reszcie serwisu ("6,99 zł"); i18n.js czyta oba zapisy.
+        return (Math.round(v * 100) / 100).toFixed(2).replace(/\.00$/, '').replace('.', ',');
     }
 
     function initConfigurator(root) {
@@ -301,6 +302,8 @@
             }
 
             renderAvailability(tier);
+            // Dla dodatków wizualnych (assets/js/cennik-ekipa.js): ten sam próg co wyżej.
+            root.dispatchEvent(new CustomEvent('cfg:render', { detail: { index: index, tier: tier } }));
         }
 
         /* Płatność startuje wprost stąd - fetch do tego samego endpointu, co
@@ -338,7 +341,9 @@
                 if (soldOut) {
                     elScarce.textContent = 'Ta liczba slotów jest chwilowo niedostępna - wybierz inną.';
                 } else if (low) {
-                    elScarce.textContent = 'Zostały ' + tier.fits + ' wolne miejsca na węźle dla tej liczby slotów.';
+                    elScarce.textContent = tier.fits === 1
+                        ? 'Zostało 1 wolne miejsce na węźle dla tej liczby slotów.'
+                        : 'Zostały ' + tier.fits + ' wolne miejsca na węźle dla tej liczby slotów.';
                 }
                 elScarce.classList.toggle('is-out', soldOut);
                 if (elStatus) elStatus.classList.toggle('is-warn', soldOut || low);
