@@ -424,7 +424,7 @@
 /* Shared message indicators and delivery effects. No private content is persisted. */
 (() => {
  'use strict';
- if(window.DNCTAlerts || !['game.dnct.pl','dnct.pl','beta.dnct.pl','panel.dnct.pl','beta.lan.panel-dnct.pl','web.dnct.pl','web.panel-dnct.pl'].includes(location.hostname))return;
+ if(window.DNCTAlerts || !['game.dnct.pl','dnct.pl','beta.dnct.pl','panel.dnct.pl','beta.lan.panel-dnct.pl','web.dnct.pl','web.panel-dnct.pl','czat.dnct.pl'].includes(location.hostname))return;
  let config={};try{config=JSON.parse(document.getElementById('dnct-support-config')?.textContent||'{}');}catch{}
  const scope='dnct:alerts:'+String(config.name||'guest');
  const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(scope+key))??fallback;}catch{return fallback;}};
