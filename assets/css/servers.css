@@ -543,3 +543,5 @@
     .srv-top-akcje { width: 100%; }
     .srv-top-akcje .srv-btn { flex: 1 1 auto; text-align: center; }
 }
+.srv-cena-stara { color: #64748b; font-weight: 600; font-size: 0.85em; text-decoration-color: rgba(248, 113, 113, 0.8); margin-right: 0.3rem; }
+.srv-rabat { display: block; margin-top: 0.25rem; font-size: 0.76rem; font-weight: 700; color: #4ade80; }

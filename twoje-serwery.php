@@ -160,6 +160,7 @@ if ($isLoggedIn) {
  */
 function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
 {
+    order_fill_paid_amount(dnct_db(), $order);   // kwota po kodzie rabatowym
     $card = ['order' => $order];
 
     // --- stan czasu -------------------------------------------------------
@@ -548,7 +549,10 @@ foreach ($aktywne as $c) {
                     </div>
                     <div>
                         <span>Ostatnia płatność</span>
-                        <strong><?php echo pricing_format((int)$o['amount_gross']); ?> zł</strong>
+                        <?php /* Przy kodzie rabatowym cena z cennika przekreślona, obok
+                                 to, co Stripe naprawdę pobrał (order_paid_amount). */ ?>
+                        <strong><?php if (order_discount_amount($o) > 0): ?><s class="srv-cena-stara"><?php echo pricing_format((int)$o['amount_gross']); ?> zł</s> <?php endif; ?><?php echo pricing_format(order_paid_amount($o)); ?> zł</strong>
+                        <?php if (order_discount_amount($o) > 0): ?><small class="srv-rabat">kod <?php echo htmlspecialchars((string)$o['promo_code']); ?> · -<?php echo pricing_format(order_discount_amount($o)); ?> zł</small><?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
