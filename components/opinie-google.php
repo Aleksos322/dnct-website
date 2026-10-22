@@ -52,6 +52,15 @@ $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repea
 if (($opinieWariant ?? '') === 'pasek') {
     $opinieKarty = $opinieGoogle['reviews'];
     shuffle($opinieKarty);
+    /* Napierak (decyzja właściciela): jedna z jego dwóch kart zawsze jako
+       5. na taśmie, druga zostaje tam, gdzie wylosowało. */
+    foreach ($opinieKarty as $idx => $o) {
+        if ($o['autor'] === 'Napierak') {
+            array_splice($opinieKarty, $idx, 1);
+            array_splice($opinieKarty, 4, 0, [$o]);
+            break;
+        }
+    }
     /* Prędkość taśmy stała mimo dopisywania opinii: 140 s przy 22 kartach
        (karty mają stałą szerokość), więc czas rośnie razem z liczbą kart. */
     $opinieCzas = (int)round(140 * count($opinieKarty) / 22);
