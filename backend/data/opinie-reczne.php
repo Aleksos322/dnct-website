@@ -8,6 +8,18 @@
  */
 
 return [
+    // Dopisane 22.10.2026 ze zrzutów od właściciela. Mateusz (5 opinii) i maja
+    // opolska mają w Google same inicjały - komponent pokaże litery.
+    // Napierak jest na liście DWA razy celowo (decyzja właściciela) - jego
+    // karta ma wypadać na taśmie 2x częściej. Nie "naprawiaj" duplikatu.
+    ['autor' => 'Mateusz', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Benger pomoc w chwile, zajebiscie zrobiony panel z zadnym hostingiem mi sie tak dobrze nie wspolpracowalo'],
+    ['autor' => 'maja opolska', 'zdjecie' => '', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Slayyyy'],
+    ['autor' => 'Napierak', 'zdjecie' => '/assets/media/opinie/napierak.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Klasa sama w sobie'],
+    ['autor' => 'Napierak', 'zdjecie' => '/assets/media/opinie/napierak.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
+     'tekst' => 'Klasa sama w sobie'],
     // Dopisane 13.10.2026 z wizytówki (zrzuty od właściciela). Adam Oryszczuk
     // bez zdjęcia w Google (sama litera) - komponent pokaże inicjały.
     ['autor' => 'antoxpl', 'zdjecie' => '/assets/media/opinie/antoxpl.webp', 'gwiazdki' => 5, 'kiedy' => 'październik 2026',
