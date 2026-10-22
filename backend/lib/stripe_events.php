@@ -180,6 +180,21 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
             return true;   // już obsłużone
         }
 
+        /* Kwota faktycznie pobrana (po kodzie rabatowym). amount_gross to cena
+           z cennika; przy kodzie Stripe pobiera mniej i to amount_total trafia
+           do historii opłat, panelu admina, raportu i maila (order_paid_amount).
+           Błąd zapisu nie zatrzymuje płatności - zostaje cena z cennika,
+           a /twoje-serwery dociągnie kwotę później (order_fill_paid_amount). */
+        if (isset($session->amount_total) && ($session->payment_status ?? '') === 'paid') {
+            try {
+                $dnct->prepare('UPDATE orders SET amount_paid = ? WHERE id = ?')
+                     ->execute([(int)$session->amount_total, $orderId]);
+                $order['amount_paid'] = (int)$session->amount_total;
+            } catch (Throwable $e) {
+                error_log('Stripe webhook: amount_paid #' . $orderId . ' - ' . $e->getMessage());
+            }
+        }
+
         if(isset($session->amount_total))notification_event($dnct,(string)$order['user_name'],'payment.paid',(string)$session->id,'Płatność została zaksięgowana','Otrzymaliśmy '.pricing_format((int)$session->amount_total).' '.strtoupper((string)($session->currency??'pln')).' za usługę '.$order['game_type'].'. Dziękujemy!','/twoje-serwery');
 
         /* PRZEDŁUŻENIE, nie nowy zakup. Serwer już istnieje - dokładamy dni do
