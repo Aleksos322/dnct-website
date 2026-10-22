@@ -398,3 +398,148 @@
 .srv-polec-kod { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .srv-polec-kod code { padding: 0.5rem 0.8rem; border-radius: 0.6rem; border: 1px dashed rgba(196, 181, 253, 0.5); color: #f1f5f9; font-size: 0.95rem; letter-spacing: 0.06em; }
 .srv-polec .srv-polec-btn { width: auto; margin: 0; padding: 0.6rem 1.1rem; }
+
+/* ==========================================================================
+   UKŁAD STRONY (22.10.2026)
+   Szerokość pod monitor 16:9 jak strona główna, nagłówek z akcjami,
+   pasek podsumowania, działające serwery w siatce, wygasłe w zwartych
+   wierszach. Markup kart bez zmian (servers.js szuka [data-role] w .srv).
+   ========================================================================== */
+.srv-strona .cnk-wrap { max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
+/* Navbar na tej stronie wyrównany do treści - przy zalogowanym (awatar, dzwonek)
+   w max-w-7xl logo wchodziło na pozycje menu. */
+.glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
+
+.cennik-page .srv-top { align-items: flex-end; }
+.cennik-page .srv-top .cnk-h1 { text-align: left; font-size: clamp(2.2rem, 3.4vw, 3.4rem); letter-spacing: -0.03em; }
+.srv-top-akcje { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+.srv-podsumowanie { list-style: none; margin: 0 0 2rem; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.07); overflow: hidden; }
+.srv-podsumowanie li { padding: 1.2rem 1.5rem; display: grid; gap: 0.25rem; }
+.srv-podsumowanie li + li { border-left: 1px solid rgba(255, 255, 255, 0.07); }
+.srv-podsumowanie strong { font-size: 1.6rem; font-weight: 900; color: #f8fafc; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.srv-podsumowanie span { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #64748b; }
+.srv-podsumowanie li:first-child strong { color: #4ade80; }
+
+.cennik-page .srv-grupa { display: flex; align-items: center; gap: 0.6rem; margin: 2.2rem 0 1rem; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; color: #a78bfa; }
+.cennik-page .srv-grupa span { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; padding: 0 0.4rem; border-radius: 999px; background: rgba(139, 92, 246, 0.14); color: #c4b5fd; font-size: 0.72rem; letter-spacing: 0; }
+.cennik-page .srv-podsumowanie + .srv-grupa { margin-top: 0; }
+
+/* Działające: dwie kolumny na szerokim ekranie */
+.cennik-page .srv-list-aktywne { grid-template-columns: repeat(auto-fit, minmax(min(100%, 720px), 1fr)); gap: 1.25rem; align-items: start; }
+
+/* Działająca karta na szerokim ekranie: dane i akcje po lewej, stan maszyny po prawej. */
+@media (min-width: 1280px) {
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); column-gap: 1.6rem; align-items: start; }
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) > * { grid-column: 1; }
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) > .srv-head { grid-column: 1 / -1; }
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) > .srv-live { grid-column: 2; grid-row: 2 / span 6; margin: 0; }
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) > .srv-panel { grid-column: 1 / -1; }
+    .cennik-page .srv-list-aktywne .srv:has(> .srv-live) .srv-live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Po terminie: jeden wiersz na serwer - nazwa, termin, akcje. Panel
+   przedłużenia (gdy otwarty) schodzi pod spód na całą szerokość. */
+.cennik-page .srv-list-wygasle { gap: 0.6rem; }
+.cennik-page .srv-list-wygasle .srv {
+    display: grid; grid-template-columns: minmax(260px, 1.1fr) minmax(0, 1.4fr) auto; align-items: center; gap: 0.6rem 1.6rem;
+    padding: 1rem 1.4rem 1rem 1.6rem; border-radius: 18px;
+}
+.cennik-page .srv-list-wygasle .srv-head { margin: 0; flex-wrap: nowrap; }
+.cennik-page .srv-list-wygasle .srv-head .srv-state { display: none; }
+.cennik-page .srv-list-wygasle .srv-icon { width: 36px; height: 36px; padding: 4px; }
+.cennik-page .srv-list-wygasle .srv-name { font-size: 1rem; }
+.cennik-page .srv-list-wygasle .srv-specs,
+.cennik-page .srv-list-wygasle .srv-address,
+.cennik-page .srv-list-wygasle .srv-note { display: none; }
+.cennik-page .srv-list-wygasle .srv-facts { margin: 0; padding: 0; border: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Termin zawieszenia to ta sama data co "opłacone do" - w wierszu wystarczy raz. */
+.cennik-page .srv-list-wygasle .srv-facts > div:nth-child(n+3) { display: none; }
+.cennik-page .srv-list-wygasle .srv-facts > div:nth-child(2) strong { color: #f87171; }
+/* Dziewięć jaskrawych przycisków jeden pod drugim to szum - w wierszach
+   przedłużenie jest obrysowane, pełny kolor zostaje dla działających. */
+.cennik-page .srv-list-wygasle .srv-actions .srv-btn.is-primary { background: rgba(139, 92, 246, 0.14); border-color: rgba(167, 139, 250, 0.45); box-shadow: none; color: #e9ddff; }
+.cennik-page .srv-list-wygasle .srv-actions .srv-btn.is-primary:hover { background: rgba(139, 92, 246, 0.3); }
+.cennik-page .srv-list-wygasle .srv-actions { margin: 0; padding: 0; border: 0; justify-content: flex-end; flex-wrap: nowrap; }
+.cennik-page .srv-list-wygasle .srv-btn { padding: 0.55rem 0.9rem; font-size: 0.68rem; }
+.cennik-page .srv-list-wygasle .srv-panel,
+.cennik-page .srv-list-wygasle .srv-error,
+.cennik-page .srv-list-wygasle .srv-alert { grid-column: 1 / -1; }
+
+.cennik-page .srv-polec { margin-top: 2.2rem; }
+
+@media (max-width: 1100px) {
+    .cennik-page .srv-list-wygasle .srv { grid-template-columns: 1fr; }
+    .cennik-page .srv-list-wygasle .srv-actions { justify-content: flex-start; flex-wrap: wrap; }
+}
+@media (max-width: 640px) {
+    .srv-podsumowanie { grid-template-columns: 1fr; }
+    .srv-podsumowanie li + li { border-left: 0; border-top: 1px solid rgba(255, 255, 255, 0.07); }
+    .cennik-page .srv-list-wygasle .srv-facts { grid-template-columns: 1fr 1fr; }
+}
+
+/* ==========================================================================
+   CZYTELNOŚĆ (22.10.2026): większe wartości, jaśniejsze etykiety, nagłówki
+   grup jak zwykłe tytuły, przełącznik admina, nowe "Poleć znajomemu".
+   ========================================================================== */
+.srv-strona .cnk-wrap { padding-bottom: clamp(3.5rem, 8vh, 6rem); }
+
+.cennik-page.srv-strona .srv-name { font-size: 1.35rem; letter-spacing: -0.01em; }
+.cennik-page.srv-strona .srv-sub { font-size: 0.88rem; color: #94a3b8; }
+.cennik-page.srv-strona .srv-specs span,
+.cennik-page.srv-strona .srv-facts span,
+.cennik-page.srv-strona .srv-live-grid span,
+.cennik-page.srv-strona .srv-address-label { font-size: 0.7rem; color: #94a3b8; letter-spacing: 0.12em; }
+.cennik-page.srv-strona .srv-specs strong,
+.cennik-page.srv-strona .srv-facts strong { font-size: 1.05rem; color: #f8fafc; }
+.cennik-page.srv-strona .srv-address code { font-size: 1.1rem; }
+.cennik-page.srv-strona .srv-btn { font-size: 0.74rem; }
+.cennik-page.srv-strona .srv-note,
+.cennik-page.srv-strona .srv-live-note { font-size: 0.85rem; color: #94a3b8; }
+
+.cennik-page.srv-strona .srv-grupa { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.01em; text-transform: none; color: #f8fafc; margin: 2.6rem 0 1.1rem; }
+.cennik-page.srv-strona .srv-grupa span { font-size: 0.8rem; }
+.srv-podsumowanie span { color: #94a3b8; }
+.srv-podsumowanie strong { font-size: 1.9rem; }
+
+.cennik-page.srv-strona .srv-list-wygasle .srv-name { font-size: 1.1rem; }
+.cennik-page.srv-strona .srv-list-wygasle .srv-facts strong { font-size: 1rem; }
+.cennik-page.srv-strona .srv-list-wygasle .srv-actions { gap: 0.5rem; }
+
+.srv-wlasciciel { color: #c4b5fd; font-weight: 700; }
+.srv-admin-info { margin: 0.6rem 0 0; font-size: 0.88rem; color: #fbbf24; }
+.srv-widok { display: inline-flex; padding: 4px; gap: 4px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.25); }
+.srv-widok a { padding: 0.55rem 0.9rem; border-radius: 10px; font-size: 0.74rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #94a3b8; text-decoration: none; }
+.srv-widok a:hover { color: #e2e8f0; }
+.srv-widok a.is-on { background: rgba(139, 92, 246, 0.25); color: #fff; }
+
+/* Poleć znajomemu: karta z ikoną, czytelny tekst, kod i przycisk obok siebie */
+.cennik-page.srv-strona .srv-polec {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1.2rem 1.6rem;
+    margin-top: 3rem; padding: 1.8rem 2rem; border-radius: 24px;
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    background: radial-gradient(ellipse at 0% 50%, rgba(139, 92, 246, 0.2), transparent 60%), rgba(255, 255, 255, 0.02);
+}
+.srv-polec-ikona { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #8b5cf6, #3b82f6); box-shadow: 0 12px 30px -10px rgba(139, 92, 246, 0.8); }
+.srv-polec-ikona svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cennik-page.srv-strona .srv-polec h2 { font-size: 1.45rem; font-weight: 900; margin-bottom: 0.4rem; }
+.cennik-page.srv-strona .srv-polec p { font-size: 1rem; line-height: 1.6; max-width: 44rem; }
+.cennik-page.srv-strona .srv-polec-kod code { padding: 0.75rem 1.1rem; font-size: 1.05rem; border-radius: 12px; background: rgba(0, 0, 0, 0.3); }
+.cennik-page.srv-strona .srv-polec .srv-polec-btn { padding: 0.85rem 1.4rem; }
+@media (max-width: 900px) {
+    .cennik-page.srv-strona .srv-polec { grid-template-columns: auto minmax(0, 1fr); }
+    .cennik-page.srv-strona .srv-polec-kod { grid-column: 1 / -1; }
+}
+.cennik-page.srv-strona .srv-facts strong { white-space: nowrap; }
+.srv-godz { font-size: 0.8em; font-weight: 600; color: #94a3b8; }
+.cennik-page.srv-strona .srv-list-wygasle .srv-facts > div:nth-child(2) strong { color: #f87171; }
+@media (max-width: 640px) {
+    .cennik-page.srv-strona .srv-facts strong { white-space: normal; }
+    .srv-podsumowanie { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .srv-podsumowanie li { padding: 0.9rem 0.8rem; }
+    .srv-podsumowanie li + li { border-top: 0; border-left: 1px solid rgba(255, 255, 255, 0.07); }
+    .srv-podsumowanie strong { font-size: 1.05rem; }
+    .srv-podsumowanie span { font-size: 0.6rem; letter-spacing: 0.08em; }
+    .srv-top-akcje { width: 100%; }
+    .srv-top-akcje .srv-btn { flex: 1 1 auto; text-align: center; }
+}

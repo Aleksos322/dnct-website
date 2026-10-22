@@ -159,15 +159,15 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                          ================================================ -->
                     <section class="step<?= $initialStep === 1 ? ' is-active' : '' ?>" data-step="1"
                              aria-labelledby="step-1-title">
-                        <h3 id="step-1-title" class="step-title">Zacznijmy od podstaw</h3>
-                        <p class="step-subtitle">Na podany adres wyślemy kod potwierdzający.</p>
+                        <h3 id="step-1-title" class="step-title">Załóż konto <span class="step-title-grad">DNCT</span></h3>
+                        <p class="step-subtitle">Jedno konto do strony, panelu gier i hostingu WWW. Na podany adres wyślemy kod potwierdzający.</p>
 
                         <div class="grid grid-cols-2 gap-4 mt-5">
                             <div class="space-y-2">
                                 <label for="first-name" class="field-label">Imię</label>
                                 <div class="relative">
                                     <i data-lucide="user" class="field-icon"></i>
-                                    <input id="first-name" name="first_name" type="text" placeholder="Twoje imię"
+                                    <input id="first-name" name="first_name" type="text" placeholder="np. Jan"
                                            class="input-field w-full py-4 pl-12 pr-10 rounded-2xl text-sm text-white"
                                            autocomplete="given-name" maxlength="60" required
                                            value="<?= identity_value($identity, 'first_name') ?>">
@@ -180,7 +180,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                                 <label for="last-name" class="field-label">Nazwisko</label>
                                 <div class="relative">
                                     <i data-lucide="user" class="field-icon"></i>
-                                    <input id="last-name" name="last_name" type="text" placeholder="Twoje nazwisko"
+                                    <input id="last-name" name="last_name" type="text" placeholder="np. Kowalski"
                                            class="input-field w-full py-4 pl-12 pr-10 rounded-2xl text-sm text-white"
                                            autocomplete="family-name" maxlength="60" required
                                            value="<?= identity_value($identity, 'last_name') ?>">
@@ -234,7 +234,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                             <i data-lucide="mail-check" class="w-6 h-6"></i>
                         </div>
 
-                        <h3 id="step-2-title" class="step-title text-center">Sprawdź skrzynkę</h3>
+                        <h3 id="step-2-title" class="step-title text-center">Sprawdź <span class="step-title-grad">skrzynkę</span></h3>
                         <p class="step-subtitle text-center">
                             Kod weryfikacyjny wysłaliśmy na adres<br>
                             <strong class="otp-email" id="otp-email"><?= identity_value($identity, 'email') ?></strong>
@@ -281,7 +281,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                          ================================================ -->
                     <section class="step<?= $initialStep === 3 ? ' is-active' : '' ?>" data-step="3"
                              aria-labelledby="step-3-title">
-                        <h3 id="step-3-title" class="step-title">Ustaw hasło</h3>
+                        <h3 id="step-3-title" class="step-title">Ustaw <span class="step-title-grad">hasło</span></h3>
                         <p class="step-subtitle">Ostatni krok - zabezpiecz swoje konto.</p>
 
                         <div class="space-y-2 mt-5">

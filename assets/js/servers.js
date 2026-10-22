@@ -158,6 +158,19 @@
         }
 
         /* ---------------------------------------------------------------
+           Rezygnacja z wygasłego serwera - znika z listy (orders.hidden_at)
+           --------------------------------------------------------------- */
+        var btnDismiss = card.querySelector('[data-role="dismiss"]');
+        if (btnDismiss) {
+            btnDismiss.addEventListener('click', function () {
+                if (!window.confirm(T('Zrezygnować z tego serwera?') + '\n\n' + T('Zniknie z tej listy i nie przedłużysz go już stąd. Po terminie usuwamy go razem z danymi zgodnie z regulaminem.'))) {
+                    return;
+                }
+                post('/api/serwer/rezygnuj.php', { order_id: orderId }, btnDismiss, 'Rezygnuję');
+            });
+        }
+
+        /* ---------------------------------------------------------------
            Bieżący stan usługi
 
            To osobne, lekkie żądanie GET. Karta z terminem, adresem i

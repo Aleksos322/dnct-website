@@ -625,15 +625,27 @@ input:focus-visible {
 }
 
 .step-title {
-    font-size: 1.05rem;
-    font-weight: 800;
+    /* Ta sama skala co tytuł logowania w Authentiku: białe słowo + słowo
+       w gradiencie (<span class="step-title-grad">). Każda część to osobny
+       tekst w słowniku EN/DE. */
+    font-size: 1.875rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
     color: #ffffff;
+}
+.step-title-grad {
+    background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: 0.08em;
 }
 
 .step-subtitle {
-    margin-top: 0.3rem;
-    font-size: 0.78rem;
-    line-height: 1.5;
+    margin-top: 0.55rem;
+    font-size: 0.86rem;
+    line-height: 1.6;
     color: #9ca3af;
 }
 
