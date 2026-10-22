@@ -125,7 +125,10 @@ if ($isSub) {
     $priceData['recurring'] = stripe_interval_for_days(HOSTING_PERIOD_DAYS);
 }
 
-$meta = ['order_id' => (string)$orderId, 'product' => 'hosting', 'trial_days' => $trial ? '7' : '0'];
+// Numer zamówienia idzie pod OSOBNYM kluczem, nie "order_id": to konto Stripe obsługuje też webhook
+// sklepu SG, który po "order_id" szuka własnych zamówień i nie sprawdza produktu - numer hostingu
+// mógłby trafić w cudze, nieopłacone zamówienie. Czyta go hosting_session_order_id().
+$meta = ['hosting_order_id' => (string)$orderId, 'product' => 'hosting', 'trial_days' => $trial ? '7' : '0'];
 if ($extends === null) {
     $meta['terms_version'] = DNCT_TERMS_VERSION;
     $meta['immediate_service_start'] = !empty($immediateServiceStart) ? 'yes' : 'no';

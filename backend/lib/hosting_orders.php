@@ -169,6 +169,18 @@ function hosting_is_hosting_session($session): bool
     return (string)($session->metadata->product ?? '') === 'hosting';
 }
 
+/**
+ * Numer zamówienia hostingu z metadanych sesji Checkout (0 = brak).
+ *
+ * Nowe sesje niosą "hosting_order_id" (klucz "order_id" jest współdzielony z zamówieniami gier
+ * i odczytywany przez webhook sklepu SG - patrz api/checkout/hosting.php). Stary klucz czytamy
+ * wyłącznie dla sesji założonych przed zmianą i jeszcze otwartych.
+ */
+function hosting_session_order_id($session): int
+{
+    return (int)($session->metadata->hosting_order_id ?? $session->metadata->order_id ?? 0);
+}
+
 function hosting_webhook_checkout_completed(PDO $dnct, $session): bool
 {
     $paid = (string)($session->payment_status ?? '');
@@ -177,8 +189,8 @@ function hosting_webhook_checkout_completed(PDO $dnct, $session): bool
     }
 
     $order = hosting_order_by($dnct, 'stripe_session_id', (string)$session->id);
-    if ($order === null && !empty($session->metadata->order_id)) {
-        $order = hosting_order_by($dnct, 'id', (int)$session->metadata->order_id);
+    if ($order === null && hosting_session_order_id($session) > 0) {
+        $order = hosting_order_by($dnct, 'id', hosting_session_order_id($session));
     }
     if ($order === null) {
         error_log('Stripe webhook: brak zamówienia hostingu dla sesji ' . $session->id);
