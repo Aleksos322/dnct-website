@@ -52,6 +52,9 @@ $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repea
 if (($opinieWariant ?? '') === 'pasek') {
     $opinieKarty = $opinieGoogle['reviews'];
     shuffle($opinieKarty);
+    /* Prędkość taśmy stała mimo dopisywania opinii: 140 s przy 22 kartach
+       (karty mają stałą szerokość), więc czas rośnie razem z liczbą kart. */
+    $opinieCzas = (int)round(140 * count($opinieKarty) / 22);
     $inicjaly = static function (string $autor): string {
         $czesci = preg_split('/\s+/u', trim($autor)) ?: [];
         $i = mb_strtoupper(mb_substr($czesci[0] ?? '?', 0, 1));
@@ -76,7 +79,7 @@ if (($opinieWariant ?? '') === 'pasek') {
             </a>
         </div>
         <div class="op-pasek-tasma">
-            <ul class="op-pasek-tor">
+            <ul class="op-pasek-tor" style="--op-czas:<?php echo $opinieCzas; ?>s">
                 <?php foreach ([false, true] as $kopia): /* druga kopia domyka pętlę taśmy */ ?>
                     <?php foreach ($opinieKarty as $o): ?>
                         <li class="op-pasek-karta"<?php echo $kopia ? ' aria-hidden="true"' : ''; ?>>
