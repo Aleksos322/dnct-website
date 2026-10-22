@@ -114,17 +114,69 @@ function account_job_jellyfin(PDO $pdo, array $job): ?string
     if ($st->fetchColumn()) {
         return null;
     }
-    $konto = jellyfin_create_user(jellyfin_username_from_authentik($job['username']));
+    $ldap = jellyfin_ldap_enabled();
+    // LDAP szuka konta po loginie DNCT, więc nazwy nie wolno zmieniać ani dopisywać sufiksu.
+    $nazwa = $ldap ? $job['username'] : jellyfin_username_from_authentik($job['username']);
+    $konto = jellyfin_create_user($nazwa, '', $ldap);
     if ($konto === null) {
         return 'Jellyfin nie odpowiedział';
     }
+    if ($ldap && !jellyfin_use_ldap($konto['id'])) {
+        // Konto już istnieje - zapisujemy link, żeby ponowienie nie założyło drugiego, i prosimy o ponowną próbę przełączenia.
+        $pdo->prepare('UPDATE user_profiles SET jellyfin_user_id = ?, jellyfin_linked_at = NOW(), jellyfin_link_source = "created" WHERE authentik_sub = ?')
+            ->execute([$konto['id'], $job['authentik_sub']]);
+        notify_admins($pdo, 'error', 'Jellyfin: konto bez LDAP', $job['username'] . ' ma konto z losowym hasłem - przełącz providera ręcznie');
+        return null;
+    }
     $pdo->prepare('UPDATE user_profiles SET jellyfin_user_id = ?, jellyfin_linked_at = NOW(), jellyfin_link_source = "created" WHERE authentik_sub = ?')
         ->execute([$konto['id'], $job['authentik_sub']]);
-    $mail = send_jellyfin_credentials_mail($job['email'], $job['first_name'], $konto);
+    $mail = send_jellyfin_credentials_mail($job['email'], $job['first_name'], $konto + ['ldap' => $ldap]);
     if (empty($mail['ok'])) {
         error_log('Konta: mail z danymi Jellyfina nie dotarł do ' . $job['email'] . ': ' . ($mail['error'] ?? '?'));
     }
     return null;
+}
+
+/** Kod, który po opłaceniu zamówienia dokłada konto Jellyfin (porównanie po coupon_normalize_code). */
+const JELLYFIN_PROMO_CODE = 'TAJNY12';
+
+/**
+ * Po opłaconej sesji Checkout: zamówienie z kodem TAJNY12 dostaje konto Jellyfin.
+ * Błąd tu nie może cofnąć zamówienia - serwer gry już stoi - więc tylko log.
+ */
+function account_jellyfin_po_sesji(PDO $pdo, $session): void
+{
+    try {
+        $paid = (string)($session->payment_status ?? '');
+        if ($paid !== 'paid' && $paid !== 'no_payment_required') {
+            return;
+        }
+        $order = order_by_session($pdo, (string)$session->id);
+        if ($order === null && !empty($session->metadata->order_id)) {
+            $order = order_by_id($pdo, (int)$session->metadata->order_id);
+        }
+        if ($order === null || strtoupper(trim((string)($order['promo_code'] ?? ''))) !== JELLYFIN_PROMO_CODE) {
+            return;
+        }
+        $st = $pdo->prepare('SELECT authentik_sub, authentik_username, authentik_email FROM user_profiles WHERE authentik_username = ? LIMIT 1');
+        $st->execute([(string)$order['user_name']]);
+        $p = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$p || (string)$p['authentik_sub'] === '') {
+            error_log('Jellyfin: brak profilu dla ' . $order['user_name'] . ' (zamówienie #' . $order['id'] . ')');
+            return;
+        }
+        $pdo->prepare(
+            'INSERT IGNORE INTO provision_jobs (authentik_sub, username, email, first_name, last_name, service, next_try_at)
+             VALUES (?, ?, ?, "", "", "jellyfin", NOW())'
+        )->execute([$p['authentik_sub'], $p['authentik_username'], $p['authentik_email']]);
+        $q = $pdo->prepare('SELECT * FROM provision_jobs WHERE authentik_sub = ? AND service = "jellyfin" AND status = "pending"');
+        $q->execute([$p['authentik_sub']]);
+        foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $job) {
+            account_job_run($pdo, $job);
+        }
+    } catch (Throwable $e) {
+        error_log('Jellyfin po sesji ' . ($session->id ?? '?') . ': ' . $e->getMessage());
+    }
 }
 
 /** Etap `konta` cyklu życia - ponawia zadania, którym minął odstęp. */
