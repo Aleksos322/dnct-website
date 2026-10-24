@@ -45,7 +45,58 @@ if($nativeMessaging): ?>
  <button class="dnct-guest-launcher" type="button" aria-controls="dnct-guest-panel" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.5-5A9 9 0 1 1 21 11Z"/><path d="M8 10h8M8 14h5"/></svg><span>Czat</span></button>
 </aside>
 <script>
-(()=>{const root=document.querySelector('.dnct-guest-chat'),panel=root?.querySelector('.dnct-guest-panel'),backdrop=root?.querySelector('.dnct-guest-backdrop'),launcher=root?.querySelector('.dnct-guest-launcher'),closeButton=root?.querySelector('.dnct-guest-close');if(!root||!panel||!backdrop||!launcher||!closeButton)return;const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;const open=()=>{panel.hidden=false;backdrop.hidden=false;launcher.classList.add('is-open');launcher.setAttribute('aria-expanded','true');if(!reduced()){backdrop.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});panel.animate([{opacity:0,transform:'translateY(20px) scale(.94)'},{opacity:1,transform:'none'}],{duration:300,easing:'cubic-bezier(.22,1,.36,1)'});}panel.focus({preventScroll:true});};const close=()=>{launcher.classList.remove('is-open');launcher.setAttribute('aria-expanded','false');const finish=()=>{panel.hidden=true;backdrop.hidden=true;launcher.focus();};if(reduced())return finish();backdrop.animate([{opacity:1},{opacity:0}],{duration:170,easing:'ease-in'});const animation=panel.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(14px) scale(.96)'}],{duration:190,easing:'ease-in'});animation.onfinish=finish;};launcher.onclick=()=>panel.hidden?open():close();closeButton.onclick=close;root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)close();});})();
+(()=>{
+ const root=document.querySelector('.dnct-guest-chat');
+ const panel=root?.querySelector('.dnct-guest-panel');
+ const backdrop=root?.querySelector('.dnct-guest-backdrop');
+ const launcher=root?.querySelector('.dnct-guest-launcher');
+ const closeButton=root?.querySelector('.dnct-guest-close');
+ if(!root||!panel||!backdrop||!launcher||!closeButton)return;
+ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+ let panelMotion=null,backdropMotion=null,closing=false;
+ const stopMotion=()=>{
+  panelMotion?.cancel();
+  backdropMotion?.cancel();
+  panelMotion=null;
+  backdropMotion=null;
+ };
+ const open=()=>{
+  stopMotion();
+  closing=false;
+  panel.hidden=false;
+  backdrop.hidden=false;
+  launcher.classList.add('is-open');
+  launcher.setAttribute('aria-expanded','true');
+  if(!reduced()){
+   backdropMotion=backdrop.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-out'});
+   panelMotion=panel.animate([{opacity:0,transform:'translateY(20px) scale(.94)'},{opacity:1,transform:'none'}],{duration:300,easing:'cubic-bezier(.22,1,.36,1)'});
+   panelMotion.onfinish=stopMotion;
+  }
+  panel.focus({preventScroll:true});
+ };
+ const close=()=>{
+  if(closing)return;
+  closing=true;
+  stopMotion();
+  launcher.classList.remove('is-open');
+  launcher.setAttribute('aria-expanded','false');
+  const finish=()=>{
+   panel.hidden=true;
+   backdrop.hidden=true;
+   closing=false;
+   stopMotion();
+   launcher.focus();
+  };
+  if(reduced())return finish();
+  const timing={duration:190,easing:'ease-in',fill:'forwards'};
+  backdropMotion=backdrop.animate([{opacity:1},{opacity:0}],timing);
+  panelMotion=panel.animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateY(14px) scale(.96)'}],timing);
+  panelMotion.onfinish=finish;
+ };
+ launcher.onclick=()=>panel.hidden?open():close();
+ closeButton.onclick=close;
+ root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden)close();});
+})();
 </script>
 <?php endif; ?>
 
