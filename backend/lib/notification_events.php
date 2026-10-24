@@ -3,6 +3,7 @@ declare(strict_types=1);
 /** Presentation for historical notifications and the typed event producers. */
 function notification_presentation(array $n):array {
  $hadLink=!empty($n['link']);$hadAction=!empty($n['action_label']);
+ if(($n['link']??'')==='https://auth.dnct.pl/if/user/')$n['link']='https://account.dnct.pl/ustawienia';
  $text=mb_strtolower(($n['title']??'').' '.($n['event_key']??''));
  $category=$n['category']??'';
  if(!$category)$category=match(true){preg_match('/zgłoszen|support|ticket/u',$text)===1=>'support',preg_match('/płatno|opłat|abonament|wygas|faktur|przedłuż|subskrypc/u',$text)===1=>'finance',preg_match('/logowani|hasł|2fa|uwierzyteln|dostęp.*kont/u',$text)===1=>'security',preg_match('/przerw.*technic|konserwac|ddos|awari.*węz|infrastruktur/u',$text)===1=>'infrastructure',preg_match('/serwer|backup|kopi.*zapas|hosting/u',$text)===1=>'server',default=>'community'};
