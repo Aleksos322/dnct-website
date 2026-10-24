@@ -18,7 +18,6 @@
     panel.replaceChildren(top,body,footer); panel.setAttribute('aria-label','Wsparcie DNCT');
     window.DNCTSupport = {open,close,isOpen:() => panel.classList.contains('is-open')};
     if (!config.loggedIn) trigger?.addEventListener('click',() => panel.classList.contains('is-open') ? close() : open());
-    document.addEventListener('keydown',e => { if (e.key === 'Escape' && !e.defaultPrevented && !document.querySelector('.dc-dialog[open]') && panel.classList.contains('is-open')) close(); });
     document.addEventListener('dnct:close-chat',() => close());
     window.addEventListener('resize',fit); window.addEventListener('scroll',fit,{passive:true});
   }
