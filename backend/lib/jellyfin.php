@@ -123,13 +123,13 @@ function jellyfin_username_from_authentik(string $username): string
  *
  * @return array{id:string,name:string,password:string}|null
  */
-function jellyfin_create_user(string $username, string $password = '', bool $exactName = false): ?array
+function jellyfin_create_user(string $username, string $password = ''): ?array
 {
     if ($password === '') {
         $password = jellyfin_generate_password(16);
     }
 
-    for ($attempt = 0; $attempt < ($exactName ? 1 : 3); $attempt++) {
+    for ($attempt = 0; $attempt < 3; $attempt++) {
         $tryName = $attempt === 0 ? $username : $username . '_' . bin2hex(random_bytes(2));
 
         $result = jellyfin_api_request('POST', '/Users/New', [
@@ -194,34 +194,4 @@ function jellyfin_user_by_id(string $id): ?array
     }
 
     return $result['body'];
-}
-
-/**
- * Logowanie hasłem DNCT: Jellyfin ma plugin LDAP-Auth wskazujący na outpost LDAP
- * Authentika, więc o poprawności hasła rozstrzyga Authentik. Włączane zmienną
- * JELLYFIN_LDAP=1. Nazwa konta w Jellyfinie MUSI być równa loginowi DNCT -
- * po niej plugin szuka użytkownika w katalogu.
- */
-function jellyfin_ldap_enabled(): bool
-{
-    return (string)env('JELLYFIN_LDAP', '0') === '1';
-}
-
-/** Nazwa providera uwierzytelniania pluginu LDAP-Auth (widoczna w Policy użytkownika). */
-function jellyfin_ldap_provider(): string
-{
-    return (string)env('JELLYFIN_LDAP_PROVIDER', 'Jellyfin.Plugin.LDAP_Auth.LdapAuthenticationProviderPlugin');
-}
-
-/** Przestawia istniejące konto na uwierzytelnianie przez LDAP (POST /Users/{id}/Policy). */
-function jellyfin_use_ldap(string $userId): bool
-{
-    $user = jellyfin_user_by_id($userId);
-    if (!is_array($user) || !is_array($user['Policy'] ?? null)) {
-        return false;
-    }
-    $policy = $user['Policy'];
-    $policy['AuthenticationProviderId'] = jellyfin_ldap_provider();
-    $res = jellyfin_api_request('POST', '/Users/' . rawurlencode($userId) . '/Policy', $policy);
-    return in_array($res['http_code'], [200, 204], true);
 }

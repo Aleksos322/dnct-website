@@ -17,18 +17,6 @@ require_once __DIR__ . '/../mail/mail.php';
  */
 function send_jellyfin_credentials_mail(string $to, string $firstName, array $jellyfinAccount): array
 {
-    if (!empty($jellyfinAccount['ldap'])) {
-        $login = htmlspecialchars($jellyfinAccount['name'], ENT_QUOTES, 'UTF-8');
-        $hi    = trim($firstName) !== '' ? 'Cześć ' . htmlspecialchars(trim($firstName), ENT_QUOTES, 'UTF-8') . '!' : 'Cześć!';
-        $url   = (string)env('JELLYFIN_PUBLIC_URL', 'https://movie.dnct.pl');
-        $html  = '<p>' . $hi . '</p><p>Twoje konto Jellyfin jest gotowe: <a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">'
-               . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '</a></p><p>Zaloguj się <b>tym samym loginem i hasłem co na dnct.pl</b>. Login: <b>'
-               . $login . '</b></p><p>DNCT Hosting</p>';
-        $text  = ($hi === 'Cześć!' ? "Cześć!" : "Cześć " . trim($firstName) . "!") . "\n\nTwoje konto Jellyfin jest gotowe: {$url}\n"
-               . "Zaloguj się tym samym loginem i hasłem co na dnct.pl. Login: {$jellyfinAccount['name']}\n\n-- \nDNCT Hosting";
-        return send_mail($to, 'Twoje konto Jellyfin - DNCT Hosting', $html, $text);
-    }
-
     $html = render_mail_template('jellyfin-credentials', [
         'greetingName' => trim($firstName),
         'jfUsername'   => $jellyfinAccount['name'],

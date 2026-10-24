@@ -24,7 +24,6 @@ require_once __DIR__ . '/plan_change.php';
 require_once __DIR__ . '/hosting_orders.php';
 require_once __DIR__ . '/partnerzy.php';
 require_once __DIR__ . '/polecenia.php';
-require_once __DIR__ . '/accounts.php';
 require_once __DIR__ . '/ntfy.php';
 
 /**
@@ -50,7 +49,6 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
             if ($ok) {
                 partner_po_sesji($dnct, $event->data->object);
                 polecenie_po_sesji($dnct, $event->data->object);
-                account_jellyfin_po_sesji($dnct, $event->data->object);
             }
             return $ok;
 
