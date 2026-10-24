@@ -30,7 +30,7 @@ function notification_event(PDO $db,string $user,string $event,string $eventId,s
 function notification_login(PDO $db,string $user,string $ip,string $agent):void {
  if(!filter_var($ip,FILTER_VALIDATE_IP)||$user==='')return;
  $fingerprint=hash('sha256',$ip.'|'.mb_substr($agent,0,500));
- $db->beginTransaction();try{$q=$db->prepare('INSERT IGNORE INTO notification_login_devices(username,fingerprint) VALUES(?,?)');$q->execute([$user,$fingerprint]);if($q->rowCount())notification_event($db,$user,'security.login',$fingerprint,'Logowanie z nowego urządzenia lub IP','Zalogowano się do beta.dnct.pl z adresu IP '.$ip.'. Jeśli to nie Ty, zabezpiecz konto i zmień hasło.','https://auth.dnct.pl/if/user/');$db->commit();}catch(Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
+ $db->beginTransaction();try{$q=$db->prepare('INSERT IGNORE INTO notification_login_devices(username,fingerprint) VALUES(?,?)');$q->execute([$user,$fingerprint]);if($q->rowCount())notification_event($db,$user,'security.login',$fingerprint,'Logowanie z nowego urządzenia lub IP','Zalogowano się do beta.dnct.pl z adresu IP '.$ip.'. Jeśli to nie Ty, zabezpiecz konto i zmień hasło.','https://account.dnct.pl/ustawienia');$db->commit();}catch(Throwable $e){if($db->inTransaction())$db->rollBack();throw $e;}
 }
 
 /** Verified administrative source events, including push escalation through existing ntfy. */
