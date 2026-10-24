@@ -91,10 +91,14 @@ function render_cennik_plan_card(array $p): void
     $isOnSale  = !empty($p['is_on_sale']);
     $oldPrice  = (float)($p['old_price'] ?? 0);
 
+    /* Promocja i "najpopularniejszy" mogą dotyczyć tego samego planu. Obwódka
+       promocji ma wygrywać, bo to ona ma być widoczna z daleka. */
     $classes = 'pcard glass';
     if ($isSoldOut)      { $classes .= ' is-soldout'; }
-    elseif ($isPopular)  { $classes .= ' is-popular'; }
-    elseif ($isOnSale)   { $classes .= ' is-sale'; }
+    else {
+        if ($isPopular)  { $classes .= ' is-popular'; }
+        if ($isOnSale)   { $classes .= ' is-sale'; }
+    }
 
     $bgSrc   = cennik_card_media($p['bg'] ?? '', 'background');
     $iconSrc = cennik_card_media($p['icon'] ?? '', 'icons');
@@ -114,12 +118,18 @@ function render_cennik_plan_card(array $p): void
     ?>
     <article class="<?php echo $classes; ?>">
 
+        <?php /* Plakietki: promocja po prawej, "najpopularniejszy" po lewej, żeby
+                 plan i przeceniony, i popularny miał obie obok siebie, a nie
+                 jedną na drugiej. */ ?>
         <?php if ($isSoldOut): ?>
             <span class="pcard-badge pcard-badge-out">Wyprzedane</span>
-        <?php elseif ($isPopular): ?>
-            <span class="pcard-badge pcard-badge-hot">Najpopularniejszy</span>
-        <?php elseif ($isOnSale): ?>
-            <span class="pcard-badge pcard-badge-sale">Promocja</span>
+        <?php else: ?>
+            <?php if ($isOnSale): ?>
+                <span class="pcard-badge pcard-badge-sale">Promocja</span>
+            <?php endif; ?>
+            <?php if ($isPopular): ?>
+                <span class="pcard-badge pcard-badge-hot<?php echo $isOnSale ? ' is-left' : ''; ?>">Najpopularniejszy</span>
+            <?php endif; ?>
         <?php endif; ?>
 
         <div class="pcard-art">
@@ -193,12 +203,15 @@ function render_cennik_plan_card(array $p): void
         <?php endif; ?>
 
         <div class="pcard-price">
-            <?php if ($isOnSale && $oldPrice > 0 && !$isSoldOut): ?>
-                <span class="pcard-price-old"><?php echo htmlspecialchars(number_format($oldPrice, 2, ',', ' ')); ?> zł</span>
-            <?php endif; ?>
             <span class="pcard-price-now"><?php echo htmlspecialchars(cennik_price_label($p['price'] ?? '')); ?></span>
             <span class="pcard-price-cur">zł</span>
             <span class="pcard-price-per">/ mies.</span>
+            <?php if ($isOnSale && $oldPrice > 0 && !$isSoldOut): ?>
+                <span class="pcard-price-old"><?php echo htmlspecialchars(number_format($oldPrice, 2, ',', ' ')); ?> zł</span>
+            <?php endif; ?>
+            <?php if ($isOnSale && !$isSoldOut && is_array($p['lowest30'] ?? null)): ?>
+                <span class="pcard-omni">Najniższa cena z 30 dni przed obniżką: <strong><?php echo htmlspecialchars(number_format((float)$p['lowest30']['price'], 2, ',', ' ')); ?> zł</strong></span>
+            <?php endif; ?>
         </div>
 
         <?php /* Przycisk jest LINKIEM tylko wtedy, gdy sprzedaż działa i jest

@@ -48,6 +48,7 @@ try {
        dostępne. Dwie strony tego samego serwisu przeczyły sobie nawzajem. */
     $capacity      = node_capacity($pdo);
     $showcasePlans = annotate_plan_availability($showcasePlans, $capacity);
+    $showcasePlans = price_history_annotate_plans($showcasePlans);
 
     /* Chipy gier w hero: "od X zł" z najtańszego aktywnego planu albo progu
        slotów. Gra bez żadnej ceny (np. dodana do hosting_games, ale jeszcze
@@ -345,6 +346,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'name'       => $row['name'] ?? '',
                                 'price'      => $row['price'] ?? '',
                                 'old_price'  => $row['old_price'] ?? 0,
+                                'lowest30'   => $row['lowest30'] ?? null,
                                 'is_on_sale' => pricing_effective_on_sale($row),
                                 'popular'    => !empty($row['popular']),
                                 // Stan liczony z pojemności węzła (backend/lib/capacity.php).
