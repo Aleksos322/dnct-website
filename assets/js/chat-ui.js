@@ -182,11 +182,12 @@
     }
     message(m) {
       if(m.system){const notice=el('article','dc-message dc-system-event',m.body);notice.dataset.messageId=m.id;return notice;}
-      const node = el('article', 'dc-message' + (m.mine ? ' mine' : '')); node.dataset.messageId = m.id;
-      if (this.options.showAuthors !== false && !m.mine && (!m.reply || m.is_withdrawn)) node.append(el('div', 'dc-author', m.author_name || m.display_name || 'Użytkownik'));
+      const outgoing = Boolean(m.outgoing ?? m.mine);
+      const node = el('article', 'dc-message' + (outgoing ? ' mine' : '')); node.dataset.messageId = m.id;
+      if (this.options.showAuthors !== false && !outgoing && (!m.reply || m.is_withdrawn)) node.append(el('div', 'dc-author', m.author_name || m.display_name || 'Użytkownik'));
       const line = el('div', 'dc-line'), bubble = el('div', 'dc-bubble');
       const avatar = el('span','dc-avatar',Array.from(m.author_name || m.display_name || m.username || '?')[0]);
-      if (!m.mine && m.username) window.DNCTChat.avatar(avatar,m.username);
+      if (!outgoing && m.username) window.DNCTChat.avatar(avatar,m.username);
       if (m.edited_at && !m.is_withdrawn) bubble.append(el('small','dc-edited','Edytowano'));
 
       if (m.reply && !m.is_withdrawn) {
@@ -253,7 +254,7 @@
         }
         bubble.classList.add('dc-has-media');if(!content)bubble.classList.add('dc-media-only');bubble.append(media);
       }
-      if (!m.mine) line.append(avatar);
+      if (!outgoing) line.append(avatar);
       line.append(bubble);
       if (this.actions && !m.is_withdrawn) {
         const actions = el('div', 'dc-actions');
