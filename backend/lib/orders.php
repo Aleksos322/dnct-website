@@ -77,7 +77,7 @@ function order_create(
             (int)$immediateServiceStart,
         ]);
 
-        return (int)$dnct->lastInsertId();
+        return order_zapisz_region($dnct, (int)$dnct->lastInsertId());
     }
 
     $stmt = $dnct->prepare(
@@ -103,7 +103,24 @@ function order_create(
         $quote['currency'],
     ]);
 
-    return (int)$dnct->lastInsertId();
+    return order_zapisz_region($dnct, (int)$dnct->lastInsertId());
+}
+
+/**
+ * Dopisuje region kupującego (mapa Polski w adminie). Osobne zapytanie i
+ * try/catch: brak kolumny albo błąd nigdy nie może zablokować zamówienia.
+ */
+function order_zapisz_region(PDO $dnct, int $orderId): int
+{
+    try {
+        $region = odwiedziny_region();
+        if ($region !== null) {
+            $dnct->prepare('UPDATE orders SET region = ? WHERE id = ?')->execute([$region, $orderId]);
+        }
+    } catch (Throwable $e) {
+        error_log('orders region: ' . $e->getMessage());
+    }
+    return $orderId;
 }
 
 /**
