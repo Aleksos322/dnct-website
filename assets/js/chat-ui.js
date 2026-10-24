@@ -53,12 +53,12 @@
   }
   class Conversation {
     constructor(mount, options = {}) {
-      this.options = options; this.rows = []; this.nodes = new Map(); this.reply = null; this.files = []; this.writable = true; this.actions = true; this.sending = false; this.attempt = null; this.editing = null;
+      this.options = options; this.rows = []; this.nodes = new Map(); this.reply = null; this.files = []; this.writable = true; this.actions = true; this.sending = false; this.attempt = null; this.editing = null; this.editDraftBefore = '';
       this.root = el('div', 'dc-chat'); this.root.dataset.lenisPrevent = '';
       this.older = button('Wczytaj starsze wiadomości', () => this.run(() => options.older?.()), 'dc-older'); this.older.hidden = true;
       this.feed = el('div', 'dc-feed'); this.feed.setAttribute('role', 'log'); this.feed.setAttribute('aria-label', 'Wiadomości'); this.feed.setAttribute('aria-live', 'polite'); this.feed.dataset.lenisPrevent = '';
       this.system = el('div', 'dc-system'); this.system.setAttribute('role', 'status'); this.system.hidden = true;
-      this.bottom = el('div', 'dc-bottom'); this.preview = el('div', 'dc-reply-preview'); this.preview.hidden = true; this.previews = el('div', 'dc-previews'); this.previews.hidden = true;
+      this.bottom = el('div', 'dc-bottom'); this.preview = el('div', 'dc-reply-preview'); this.preview.hidden = true; this.editBar = el('div', 'dc-edit-composer'); this.editBar.hidden = true; const editCopy = el('span'); editCopy.append(el('b','','Edytuj wiadomość'),el('small','','Enter zapisuje · Shift+Enter dodaje nową linię')); const editCancel = button('×',()=>this.cancelEdit(),'dc-edit-cancel'); editCancel.setAttribute('aria-label','Anuluj edycję wiadomości'); this.editBar.append(editCopy,editCancel); this.previews = el('div', 'dc-previews'); this.previews.hidden = true;
       this.form = el('form', 'dc-composer'); this.text = el('textarea'); this.text.rows = 1; this.text.maxLength = options.maxLength || 4000; this.text.placeholder = 'Napisz wiadomość…'; this.text.setAttribute('aria-label', 'Wiadomość'); this.form.append(this.text);
       if (options.media) {
         this.fileInput = el('input'); this.fileInput.type = 'file'; this.fileInput.accept = 'image/jpeg,image/png,image/gif,image/webp,image/avif,video/mp4,video/webm,video/quicktime'; this.fileInput.multiple = true; this.fileInput.hidden = true;
@@ -70,12 +70,12 @@
       this.sendButton = icon('send', 'Wyślij wiadomość'); this.sendButton.type = 'submit'; this.sendButton.classList.add('dc-send'); if (options.composerReply !== false) this.form.append(this.replyButton); this.form.append(this.emojiButton, this.sendButton);
       this.progress = el('progress', 'dc-upload-progress'); this.progress.max = 1; this.progress.hidden = true;
       this.hint = el('p', 'dc-hint'); this.hint.hidden=true; this.error = el('p', 'dc-error'); this.error.setAttribute('role', 'status'); this.error.hidden = true;
-      this.bottom.append(this.preview, this.previews, this.form, this.progress, this.hint, this.error);
+      this.bottom.append(this.preview, this.editBar, this.previews, this.form, this.progress, this.hint, this.error);
       this.newButton = button('↓', () => this.scrollBottom(true), 'dc-new-message'); this.newButton.setAttribute('aria-label','Przejdź do najnowszych wiadomości'); this.newButton.hidden = true;this.newButton.tabIndex=-1;
       this.receiptTimer=setInterval(()=>this.updateReceipt(),15000); this.root.append(this.feed, this.bottom, this.newButton); mount.replaceChildren(this.root);
-      this.form.onsubmit = e => { e.preventDefault(); this.send(); };
-      this.text.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); this.form.requestSubmit(); } if (e.key === 'Escape' && this.reply) { e.stopPropagation(); this.setReply(null); } };
-      this.text.oninput = () => { this.text.style.height = 'auto'; this.text.style.height = Math.min(126, this.text.scrollHeight) + 'px'; options.draft?.(this.text.value); options.typing?.(); };
+      this.form.onsubmit = e => { e.preventDefault(); this.editing ? this.saveEdit() : this.send(); };
+      this.text.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); this.form.requestSubmit(); } if (e.key === 'Escape' && this.editing) { e.preventDefault(); e.stopPropagation(); this.cancelEdit(); } else if (e.key === 'Escape' && this.reply) { e.stopPropagation(); this.setReply(null); } };
+      this.text.oninput = () => { this.text.style.height = 'auto'; this.text.style.height = Math.min(126, this.text.scrollHeight) + 'px'; if (!this.editing) options.draft?.(this.text.value); options.typing?.(); };
       this.followBottom=true;this.feedResize=new ResizeObserver(()=>{if(this.followBottom&&!this.loadingOlder&&!this.scrollingLatest)this.scrollBottom();});this.feedResize.observe(this.feed);this.feed.addEventListener('load',()=>{if(this.followBottom)requestAnimationFrame(()=>{if(this.followBottom)this.scrollBottom();});},true);this.feed.addEventListener('loadedmetadata',()=>{if(this.followBottom)this.scrollBottom();},true);
       this.feed.addEventListener('scroll', () => { this.followBottom=this.nearBottom(); this.newButton.hidden=this.nearBottom();this.newButton.tabIndex=this.newButton.hidden?-1:0; if(this.feed.scrollTop<80)this.loadOlder(); if (this.nearBottom()) { this.newButton.hidden = true;this.newButton.tabIndex=-1; options.read?.(this.rows.at(-1)?.id); } }, {passive:true});
       if (options.media) {
@@ -136,11 +136,12 @@
         if(!label.hidden){const elapsed=age(latest.created_timestamp?Number(latest.created_timestamp):latest.created_at);label.textContent=latest.receipt==='Przeczytano'?'Przeczytano':'Wysłano'+(elapsed==='teraz'?'':' '+elapsed+' temu');label.title=time(latest.created_at);}}
     }
     setDraft(value) { this.text.value = value || ''; this.text.dispatchEvent(new Event('input')); }
-    reset() { this.feedResize?.disconnect();this.feedResize?.observe(this.feed);this.followBottom=true;this.newButton.hidden=true;this.newButton.tabIndex=-1;cancelAnimationFrame(this.scrollFrame);this.scrollingLatest=false;this.closePopover(); this.rows = []; this.readers=[]; this.nodes.clear(); this.feed.replaceChildren(); this.setReply(null); this.editing = null; this.setDraft(''); this.clearFiles(); this.attempt = null; this.say(); }
+    reset() { this.feedResize?.disconnect();this.feedResize?.observe(this.feed);this.followBottom=true;this.newButton.hidden=true;this.newButton.tabIndex=-1;cancelAnimationFrame(this.scrollFrame);this.scrollingLatest=false;this.closePopover(); this.rows = []; this.readers=[]; this.nodes.clear(); this.feed.replaceChildren(); this.setReply(null); this.editing = null; this.editDraftBefore = ''; this.editBar.hidden = true; this.root.classList.remove('is-editing'); this.setDraft(''); this.clearFiles(); this.attempt = null; this.say(); }
     update(rows, {composerNotice = '', readers = [], closed = false, closedBy = '', reason = '', writable = true, actions = writable, hasMore = false, prepend = false} = {}) {
       const stick = this.nearBottom() || !this.rows.length, height = this.feed.scrollHeight, top = this.feed.scrollTop;
       const newMessage = rows.some(m => !this.nodes.has(Number(m.id))); const oldActions = this.actions;
       this.writable = writable && !closed; this.actions = actions && !closed;
+      if (this.editing && (!this.writable || !this.actions)) this.cancelEdit();
       this.rows = rows.map(m => ({...m, id:Number(m.id)})); this.readers=readers;
       this.older.hidden = true; this.hasMore=hasMore;
       const ids = new Set(this.rows.map(m => m.id));
@@ -296,14 +297,19 @@
     canEdit(m) { if ((m.attachments||[]).some(a=>a.media_type==='image'||a.kind==='image'||String(a.mime_type||'').startsWith('image/'))) return false; return Date.now() < (Number(m.edit_expires_at)*1000 || date(m.created_at).getTime()+300000); }
     edit(m) {
       if (!this.canEdit(m)) { this.say("Minęło 5 minut — tej wiadomości nie można już edytować."); return; }
-      if (this.editing) this.cancelEdit(); this.editing = m.id;
-      const bubble = this.nodes.get(m.id)?.querySelector('.dc-bubble'); if (!bubble) return;
-      const editor = el('textarea', 'dc-editor'); editor.value = m.body; editor.maxLength = this.options.maxLength || 4000; editor.setAttribute('aria-label', 'Edytowana wiadomość');
-      const tools = el('div', 'dc-edit-tools'); const save = button('Zapisz', () => this.run(async () => { const value = editor.value.trim(); if (!this.canEdit(m)) { this.say('Minęło 5 minut — tej wiadomości nie można już edytować.'); this.cancelEdit(); return; } if (!value) { this.say('Wpisz treść wiadomości.'); return; } save.disabled = true; try { await this.options.action?.('edit', {message_id:m.id, message:value}); this.cancelEdit(); } finally { save.disabled = false; } }));
-      tools.append(button('Anuluj', () => this.cancelEdit()), save); bubble.replaceChildren(editor, tools); editor.focus(); editor.setSelectionRange(editor.value.length, editor.value.length);
-      editor.onkeydown = e => { if (e.key === 'Escape') { e.stopPropagation(); this.cancelEdit(); } if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save.click(); } };
+      if (this.editing) this.cancelEdit(); this.editDraftBefore = this.text.value; this.editing = m.id; this.setReply(null); this.setDraft(m.body || ''); this.editBar.hidden = false; this.root.classList.add('is-editing');
+      this.nodes.get(m.id)?.classList.add('is-being-edited'); this.text.focus(); this.text.setSelectionRange(this.text.value.length, this.text.value.length);
     }
-    cancelEdit() { const id = this.editing; this.editing = null; const m = this.rows.find(m => m.id === id), old = this.nodes.get(id); if (m && old) { const next = this.message(m); next.dataset.signature = JSON.stringify(m) + ':' + this.actions; old.replaceWith(next); this.nodes.set(id, next); } }
+    async saveEdit() {
+      const m = this.rows.find(row => row.id === this.editing), value = this.text.value.trim(); if (!m) return this.cancelEdit();
+      if (!this.canEdit(m)) { this.say('Minęło 5 minut — tej wiadomości nie można już edytować.'); this.cancelEdit(); return; }
+      if (!value) { this.say('Wpisz treść wiadomości.'); this.text.focus(); return; }
+      this.sending = true; this.say(); for (const control of this.form.querySelectorAll('textarea,button,input')) control.disabled = true;
+      try { await this.options.action?.('edit', {message_id:m.id, message:value}); this.cancelEdit(); }
+      catch(e) { this.say(e.message || 'Nie udało się zapisać zmian w wiadomości.'); this.options.failure?.(e); }
+      finally { this.sending = false; for (const control of this.form.querySelectorAll('textarea,button,input')) control.disabled = !this.writable; if (this.writable) this.text.focus(); }
+    }
+    cancelEdit() { const id = this.editing; if (!id) return; this.editing = null; this.editBar.hidden = true; this.root.classList.remove('is-editing'); this.setDraft(this.editDraftBefore); this.editDraftBefore = ''; const m = this.rows.find(m => m.id === id), old = this.nodes.get(id); if (m && old) { const next = this.message(m); next.dataset.signature = JSON.stringify(m) + ':' + this.actions; old.replaceWith(next); this.nodes.set(id, next); } }
     dialog(title) {
       const dialog = el('dialog', 'dc-dialog');
       const nativeClose = dialog.close.bind(dialog); let closing = false;
