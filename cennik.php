@@ -147,6 +147,9 @@ try {
     $capacity  = node_capacity($pdo);
     $planRows  = annotate_plan_availability($planRows, $capacity);
 
+    // Historia cen (Omnibus): zapis zmian i najniższa cena z 30 dni przed obniżką.
+    $planRows = price_history_annotate_plans($planRows);
+
     $plansByType = [];
     foreach ($planRows as $plan) {
         $plansByType[$plan['type']][] = $plan;
@@ -570,7 +573,8 @@ ob_start();
                                     // odznaczyć is_on_sale - patrz pricing_effective_on_sale().
                                     'is_on_sale' => pricing_effective_on_sale($plan),
                                     'old_price'  => $plan['old_price'] ?? 0,
-                                    'ram'        => cennik_size((int)($plan['ram_mb'] ?? 0)),
+                                    'lowest30'   => $plan['lowest30'] ?? null,
+                                    'ram'      => cennik_size((int)($plan['ram_mb'] ?? 0)),
                                     'cpu'        => ($plan['cpu_cores'] ?? 0) . ' vCore',
                                     'ssd'        => cennik_size((int)($plan['ssd_mb'] ?? 0)),
                                     'backups'    => (string)($plan['backups_limit'] ?? 0),

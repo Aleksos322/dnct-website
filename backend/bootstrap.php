@@ -26,6 +26,7 @@ require_once __DIR__ . '/lib/hosting.php';
 require_once __DIR__ . '/lib/capacity.php';
 require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/pricing.php';
+require_once __DIR__ . '/lib/price_history.php';
 require_once __DIR__ . '/lib/orders.php';
 require_once __DIR__ . '/lib/panel_sso.php';
 require_once __DIR__ . '/lib/gsc.php';

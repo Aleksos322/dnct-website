@@ -864,7 +864,13 @@
     border-color: rgba(139, 92, 246, 0.55);
     box-shadow: 0 0 34px rgba(139, 92, 246, 0.14);
 }
-.cennik-page .pcard.is-sale { border-color: rgba(59, 130, 246, 0.4); }
+/* Promocja: wyraźna zielona obwódka z poświatą, widoczna z daleka. Stoi po
+   .is-popular, więc przy planie i popularnym, i przecenionym wygrywa promocja.
+   Czerwień zostaje dla "wyprzedane". */
+.cennik-page .pcard.is-sale {
+    border-color: rgba(34, 197, 94, 0.75);
+    box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35), 0 0 34px rgba(34, 197, 94, 0.22);
+}
 .cennik-page .pcard.is-soldout { border-color: rgba(239, 68, 68, 0.28); opacity: 0.72; }
 
 /* Odznaka. Jedna, w prawym górnym rogu - plan bywa i popularny, i przeceniony,
@@ -884,9 +890,11 @@
     color: #fff;
 }
 .cennik-page .pcard-badge-hot  { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+/* Obok plakietki promocji - przy lewej krawędzi, lustrzanie. */
+.cennik-page .pcard-badge-hot.is-left { right: auto; left: 0; border-radius: 0 0 14px 0; }
 /* Cyjan (#06b6d4) i pomarańcz (#ea580c) byly spoza palety DESIGN.md - "zadnej
    jadowitej zieleni i cyjanu" w Don't. Ametyst->sygnalowy blekit i tokeny danger. */
-.cennik-page .pcard-badge-sale { background: linear-gradient(135deg, #8b5cf6, #3b82f6); }
+.cennik-page .pcard-badge-sale { background: linear-gradient(135deg, #16a34a, #22c55e); }
 .cennik-page .pcard-badge-out  { background: linear-gradient(135deg, #ef4444, #f87171); }
 
 /* Kadr z grafiką gry. Grafiki w bazie są ciemne i rozmyte, więc służą za
@@ -1029,11 +1037,21 @@
 }
 .cennik-page .pcard-price-old {
     width: 100%;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(248, 113, 113, 0.75);
+    margin-top: 0.3rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #f87171;
     text-decoration: line-through;
 }
+/* Omnibus: najniższa cena z 30 dni przed obniżką, pod ceną promocyjną. */
+.cennik-page .pcard-omni {
+    width: 100%;
+    margin-top: 0.45rem;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: #94a3b8;
+}
+.cennik-page .pcard-omni strong { color: #cbd5e1; font-weight: 800; }
 .cennik-page .pcard-price-now {
     font-size: 2.4rem;
     font-weight: 900;
