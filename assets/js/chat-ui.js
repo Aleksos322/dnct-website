@@ -183,7 +183,7 @@
     message(m) {
       if(m.system){const notice=el('article','dc-message dc-system-event',m.body);notice.dataset.messageId=m.id;return notice;}
       const outgoing = Boolean(m.outgoing ?? m.mine);
-      const node = el('article', 'dc-message' + (outgoing ? ' mine' : '')); node.dataset.messageId = m.id;
+      const node = el('article', 'dc-message' + (outgoing ? ' mine' : '')); node.dataset.messageId = m.id; node.dataset.direction = outgoing ? 'outgoing' : 'incoming';
       if (this.options.showAuthors !== false && !outgoing && (!m.reply || m.is_withdrawn)) node.append(el('div', 'dc-author', m.author_name || m.display_name || 'Użytkownik'));
       const line = el('div', 'dc-line'), bubble = el('div', 'dc-bubble');
       const avatar = el('span','dc-avatar',Array.from(m.author_name || m.display_name || m.username || '?')[0]);

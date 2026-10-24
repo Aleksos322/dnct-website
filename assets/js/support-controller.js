@@ -84,7 +84,7 @@
     ticket = data.ticket; freshForm = false; makeView();
     if (joined) { body.querySelector('.dc-admin-joined')?.remove(); const notice = el('div','dc-admin-joined',ticket.assigned_admin + ' dołącza do rozmowy. Możesz już napisać.'); notice.setAttribute('role','status'); body.prepend(notice); setTimeout(() => { notice.classList.add('is-leaving'); setTimeout(() => notice.remove(),250); },6500); }
 
-    const incoming = (data.messages || []).map(m => ({...m,id:Number(m.id),outgoing:admin ? m.author_role === 'admin' : m.author_role === 'customer',mine:m.mine ?? (admin ? m.author_role === 'admin' && m.author_name?.toLowerCase() === config.name.toLowerCase() : m.author_role === 'customer')}));
+    const incoming = (data.messages || []).map(m => { const customer=String(m.author_role||'').trim().toLowerCase()==='customer'; return {...m,id:Number(m.id),outgoing:admin?!customer:customer,mine:m.mine ?? (admin ? !customer && m.author_name?.toLowerCase() === config.name.toLowerCase() : customer)}; });
     if (older) { rows = [...new Map([...incoming,...rows].map(m => [m.id,m])).values()].sort((a,b) => a.id-b.id); before = data.next_before_id; hasMore = Boolean(data.has_more); }
     else { const min = incoming[0]?.id || 0; rows = [...(data.has_more ? rows.filter(m => m.id < min) : []),...incoming]; if (!before || !data.has_more) { before = data.next_before_id; hasMore = Boolean(data.has_more); } }
     receipts = data.receipts || receipts; render(older); connect();
