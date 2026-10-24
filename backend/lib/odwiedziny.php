@@ -45,7 +45,14 @@ function odwiedziny_gosc(string $ip, string $ua): string
     return substr(hash_hmac('sha256', $ip . '|' . $ua . '|' . gmdate('Y-m'), $sol !== '' ? $sol : 'dnct'), 0, 16);
 }
 
-function odwiedziny_zapisz(string $host, string $sciezka, int $status, string $ip, string $ua, string $referer, string $kraj, ?int $bajty): void
+/** Kod regionu z Cloudflare (CF-Region-Code) albo null; tylko znaki kodu ISO. */
+function odwiedziny_region(): ?string
+{
+    $r = strtoupper((string)($_SERVER['HTTP_CF_REGION_CODE'] ?? ''));
+    return preg_match('/^[A-Z0-9]{1,6}$/', $r) ? $r : null;
+}
+
+function odwiedziny_zapisz(string $host, string $sciezka, int $status, string $ip, string $ua, string $referer, string $kraj, ?int $bajty, ?string $region = null): void
 {
     try {
         [$b, $s, $u, $robot] = odwiedziny_ua($ua);
@@ -55,9 +62,9 @@ function odwiedziny_zapisz(string $host, string $sciezka, int $status, string $i
         }
         $kraj = preg_match('/^[A-Z]{2}$/', $kraj) && $kraj !== 'XX' ? $kraj : null;
         dnct_db()->prepare(
-            'INSERT INTO odwiedziny (czas, host, sciezka, status, gosc, kraj, przegladarka, system, urzadzenie, zrodlo, robot, bajty)
-             VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        )->execute([substr($host, 0, 64), substr($sciezka, 0, 255), $status, odwiedziny_gosc($ip, $ua), $kraj, $b, $s, $u,
+            'INSERT INTO odwiedziny (czas, host, sciezka, status, gosc, kraj, region, przegladarka, system, urzadzenie, zrodlo, robot, bajty)
+             VALUES (UTC_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([substr($host, 0, 64), substr($sciezka, 0, 255), $status, odwiedziny_gosc($ip, $ua), $kraj, $region, $b, $s, $u,
                     $zrodlo !== null ? substr($zrodlo, 0, 100) : null, $robot ? 1 : 0, $bajty]);
     } catch (Throwable $e) {
         error_log('odwiedziny: ' . $e->getMessage());
@@ -86,5 +93,5 @@ function odwiedziny_po_zadaniu(): void
     }
     odwiedziny_zapisz($host, $sciezka, $status ?: 200, client_ip(), (string)($_SERVER['HTTP_USER_AGENT'] ?? ''),
         (string)($_SERVER['HTTP_REFERER'] ?? ''), strtoupper((string)($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '')),
-        (int)($GLOBALS['odwiedziny_bajty'] ?? 0) + (int)ob_get_length());
+        (int)($GLOBALS['odwiedziny_bajty'] ?? 0) + (int)ob_get_length(), odwiedziny_region());
 }
