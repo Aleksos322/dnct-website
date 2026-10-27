@@ -191,11 +191,12 @@
 .home-bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.25rem; }
 .home-bento > .glass { border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.07); padding: clamp(1.6rem, 2.6vw, 2.4rem); }
 
-.home-bento-intro { grid-column: span 7; display: grid; gap: 1rem; align-content: start; }
+.home-bento-intro { grid-column: span 5; display: grid; gap: 1rem; align-content: center; }
 .home-bento-intro h2 { margin: 0; font-size: clamp(1.7rem, 3vw, 2.8rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
 .home-bento-intro p { margin: 0; color: #94a3b8; line-height: 1.8; font-size: 1.05rem; }
 
 .home-bento-hw {
+.home-bento-rack { grid-column: span 7; }
     grid-column: span 5; display: grid; align-content: space-between; gap: 1.5rem;
     background-image: linear-gradient(160deg, rgba(139, 92, 246, 0.22), rgba(139, 92, 246, 0.02) 70%);
 }
@@ -280,7 +281,7 @@
 .home-bento-feat p { margin: 0; font-weight: 700; font-size: 1.08rem; line-height: 1.45; color: #e2e8f0; }
 
 @media (max-width: 960px) {
-    .home-bento-intro, .home-bento-hw { grid-column: span 12; }
+    .home-bento-intro, .home-bento-hw, .home-bento-rack { grid-column: span 12; }
     .home-bento-feat { grid-column: span 6; }
 }
 @media (max-width: 520px) { .home-bento-feat { grid-column: span 12; } }
@@ -673,3 +674,40 @@
 /* "Jak to działa" na stronie głównej: nagłówek w tej samej skali co
    "Wybierz plan hostingu gier", nie mniejszy jak w cenniku. */
 .jtd-wrap #jtd-title { font-size: clamp(2rem, 3.6vw, 3.2rem); line-height: 1.05; letter-spacing: -0.03em; }
+
+/* Ikony cech hostingu: hover i animacje (wygląd w spoczynku bez zmian; 0,2-0,5 s, ease) */
+.home-feat-ico, .home-feat-ico svg, .home-feat-ico svg * { transition: transform 0.3s ease, color 0.2s ease, background 0.25s ease, fill-opacity 0.3s ease, opacity 0.2s ease; }
+.home-feat-ico svg * { transform-box: fill-box; transform-origin: center; }
+.home-bento-feat:hover .home-feat-ico { background: rgba(139, 92, 246, 0.24); color: #ddd6fe; }
+.home-bento-feat:hover .home-feat-ico svg { transform: scale(1.08); }
+.home-bento-feat[data-ico="shield"] .home-feat-ico svg path { fill: currentColor; fill-opacity: 0; }
+.home-bento-feat[data-ico="shield"]:hover .home-feat-ico svg path { fill-opacity: 0.28; }
+.home-bento-feat[data-ico="cpu"] .home-feat-ico svg rect:nth-of-type(2) { fill: currentColor; fill-opacity: 0; }
+.home-bento-feat[data-ico="cpu"]:hover .home-feat-ico svg rect:nth-of-type(2) { fill-opacity: 0.85; }
+.home-bento-feat[data-ico="cpu"]:hover .home-feat-ico svg path { opacity: 0.55; animation: home-ico-pulse 1s ease-in-out infinite; }
+.home-bento-feat[data-ico="history"]:hover .home-feat-ico svg { transform: rotate(-45deg); transition-duration: 0.5s; }
+.home-bento-feat[data-ico="settings"]:hover .home-feat-ico svg { transform: rotate(60deg); transition-duration: 0.5s; }
+@keyframes home-ico-pulse { 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+    .home-feat-ico, .home-feat-ico svg, .home-feat-ico svg * { transition: none; animation: none !important; }
+    .home-bento-feat:hover .home-feat-ico svg { transform: none !important; }
+}
+
+/* Szafa w bento: bez własnego kafla, sama szafa obok tekstu "O hostingu" */
+.home-bento-rack { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; min-width: 0; }
+
+/* Liczby pod opisem (kafel "O hostingu") */
+.home-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.7rem; margin-top: 0.8rem; }
+.home-stat {
+    padding: 0.95rem 1rem 0.85rem; border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.home-stat:hover { border-color: rgba(139, 92, 246, 0.35); background: rgba(139, 92, 246, 0.07); transform: translateY(-2px); }
+.home-stat > b {
+    display: block; font-size: 1.7rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.03em; color: #f1f5f9;
+}
+.home-stat > span { display: block; margin-top: 0.3rem; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; }
+@media (prefers-reduced-motion: reduce) { .home-stat { transition: none; } .home-stat:hover { transform: none; } }
+.home-stat > b { white-space: nowrap; }
+@media (max-width: 520px) { .home-stat > b { font-size: 1.35rem; } }

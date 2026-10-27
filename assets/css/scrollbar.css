@@ -1,0 +1,7 @@
+/* Pasek przewijania: płaski, jak .custom-scrollbar w panelu (5 px, jednolity fiolet, bez toru i gradientu).
+   Elementy z własnym paskiem (czat) mają swoje reguły i je nadpisują. Ładowany globalnie z clear.php. */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.65); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #895cf6; }
+@supports not selector(::-webkit-scrollbar) { html { scrollbar-width: thin; scrollbar-color: rgba(139, 92, 246, 0.65) transparent; } }

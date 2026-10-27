@@ -431,51 +431,6 @@
         }
     }
 
-    /* --- Szafa serwerowa w kaflu "Własny sprzęt" ([data-hw-rack]) -------- */
-    /* Po wejściu w kadr: serwery wsuwają się i bootują (CSS .is-boot), potem
-       pętla co 90 ms zapala losowe diody dysków i sieci, a co 1,6 s zmienia
-       obciążenie każdego serwera (płynnie, w okolicy poprzedniej wartości).
-       Poza ekranem i na ukrytej karcie pętla stoi. */
-    var hw = document.querySelector('[data-hw-rack]');
-    if (hw && !reduce && 'IntersectionObserver' in window) {
-        var hwJednostki = Array.prototype.slice.call(hw.querySelectorAll('.hw-unit'));
-        var hwDiody = Array.prototype.slice.call(hw.querySelectorAll('.hw-bays i, .hw-net i'));
-        var hwObc = hwJednostki.map(function () { return 0.25 + Math.random() * 0.4; });
-        var hwTimer = null, hwLoadTimer = null, hwWidac = false, hwRuszyla = false;
-
-        hw.classList.add('is-czeka');
-        var hwMig = function () {
-            hwDiody.forEach(function (d) { d.classList.toggle('is-on', Math.random() < 0.28); });
-            hwTimer = setTimeout(hwMig, 90 + Math.random() * 60);
-        };
-        var hwLoad = function () {
-            hwJednostki.forEach(function (u, i) {
-                hwObc[i] = Math.min(0.92, Math.max(0.12, hwObc[i] + (Math.random() - 0.5) * 0.3));
-                u.style.setProperty('--load', hwObc[i].toFixed(2));
-            });
-            hwLoadTimer = setTimeout(hwLoad, 1600);
-        };
-        var hwStop = function () { clearTimeout(hwTimer); clearTimeout(hwLoadTimer); };
-        var hwStart = function () {
-            hwStop();
-            if (!hwWidac || document.hidden) return;
-            // pierwsze miganie dopiero po bootowaniu (ostatnia dioda ok. 1,6 s)
-            setTimeout(function () { if (hwWidac) { hwMig(); hwLoad(); } }, hwRuszyla ? 0 : 1700);
-            hwRuszyla = true;
-        };
-        new IntersectionObserver(function (en) {
-            hwWidac = en[0].isIntersecting;
-            if (hwWidac) {
-                hw.classList.remove('is-czeka');
-                hw.classList.add('is-boot');
-                hwStart();
-            } else {
-                hwStop();
-            }
-        }, { threshold: 0.35 }).observe(hw);
-        document.addEventListener('visibilitychange', function () { if (document.hidden) hwStop(); else hwStart(); });
-    }
-
     /* --- Wejście kafli w kadr ------------------------------------------ */
     var tiles = document.querySelectorAll('.home-reveal');
     if (tiles.length && !reduce && 'IntersectionObserver' in window) {
