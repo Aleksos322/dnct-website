@@ -1,0 +1,206 @@
+/* Szafa serwerowa DNCT (kafel "Własny sprzęt" na stronie głównej). Zakres: .dnct-rack. Źródło: dnct-rack.html, zob. design.dnct.pl. */
+.dnct-rack{
+  --am:#8b5cf6;--aml:#a78bfa;--blue:#3b82f6;--ok:#22c55e;--okl:#4ade80;--warn:#fbbf24;--bad:#ef4444;
+  --metal-1:#16151d;--metal-2:#1d1c26;--metal-3:#252433;--edge:rgba(255,255,255,.07);
+  position:relative;width:100%;max-width:980px;margin:0 auto;padding:clamp(14px,3vw,28px);
+  border-radius:clamp(22px,3vw,34px);box-sizing:border-box;font-family:Inter,"Segoe UI",system-ui,sans-serif;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018) 45%,rgba(255,255,255,.038));
+  -webkit-backdrop-filter:blur(28px) saturate(185%);backdrop-filter:blur(28px) saturate(185%);
+  box-shadow:0 8px 32px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(255,255,255,.035);
+  border:1px solid var(--edge);
+}
+.dnct-rack *,.dnct-rack *::before,.dnct-rack *::after{box-sizing:border-box}
+.dnct-rack__glow{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none;z-index:0}
+.dnct-rack__glow i{position:absolute;border-radius:50%;filter:blur(10px);animation:dr-drift 26s ease-in-out infinite alternate}
+.dnct-rack__glow i:nth-child(1){width:60%;aspect-ratio:1;left:-15%;top:-30%;background:radial-gradient(circle,#984ede40,transparent 65%)}
+.dnct-rack__glow i:nth-child(2){width:55%;aspect-ratio:1;right:-15%;bottom:-35%;background:radial-gradient(circle,#4f7cfa38,transparent 65%);animation-delay:-9s}
+@keyframes dr-drift{to{transform:translate(6%,4%) scale(1.06)}}
+
+/* nagłówek szafy */
+.dnct-rack__head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 4px 14px;flex-wrap:wrap}
+.dnct-rack__title{display:flex;align-items:center;gap:10px;font-weight:900;font-size:12px;letter-spacing:.14em;color:var(--aml);text-transform:uppercase}
+.dnct-rack__title svg{width:18px;height:18px}
+.dnct-rack__live{display:flex;align-items:center;gap:8px;font-weight:900;font-size:11px;letter-spacing:.14em;color:#94a3b8;text-transform:uppercase}
+.dnct-rack__live b{width:8px;height:8px;border-radius:50%;background:var(--okl);box-shadow:0 0 10px var(--okl);animation:dr-pulse 2s ease-in-out infinite}
+@keyframes dr-pulse{50%{opacity:.35}}
+
+/* szafa: słupki z otworami + wnętrze */
+.dnct-rack__cab{position:relative;z-index:1;display:grid;grid-template-columns:clamp(18px,3vw,30px) 1fr clamp(18px,3vw,30px);
+  border-radius:18px;padding:10px 0;background:#0b0a10;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.dnct-rack__rail{position:relative;background:linear-gradient(90deg,#1a1922,#22212c 50%,#1a1922);
+  background-image:radial-gradient(circle at 50% 50%,#050507 0 2.6px,transparent 3px),linear-gradient(#1c1b25,#1c1b25);
+  background-size:100% 15.33px,100% 100%;background-position:0 4px,0 0;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+.dnct-rack__rail span{position:absolute;left:0;right:0;text-align:center;font:500 8px/1 "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#3b3a4a;transform:translateY(-50%)}
+.dnct-rack__bay{display:flex;flex-direction:column;gap:6px;padding:0 6px;position:relative}
+
+/* jednostka (wspólne) */
+.dnct-u{position:relative;display:flex;align-items:center;gap:clamp(8px,1.6vw,16px);padding:0 clamp(10px,1.8vw,16px);
+  border-radius:8px;background:#1b1a24;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  transform-origin:50% 50%;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s ease;cursor:default;outline:none}
+.dnct-u::before,.dnct-u::after{content:"";position:absolute;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;
+  background:#2c2b38}
+.dnct-u::before{left:4px}.dnct-u::after{right:4px}
+.dnct-u--1{height:clamp(36px,5vw,46px)}.dnct-u--2{height:clamp(66px,9.4vw,88px)}
+.dnct-u{z-index:1}
+.dnct-u:hover,.dnct-u:focus-visible{z-index:3;transform:scale(1.035);background:#1f1d2b;
+  box-shadow:inset 0 0 0 1px rgba(167,139,250,.6),0 14px 30px rgba(0,0,0,.6),0 0 24px rgba(139,92,246,.22)}
+/* prowadnice widoczne przy wysunięciu */
+.dnct-u__slide{position:absolute;top:28%;bottom:28%;width:0;border-radius:2px;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#3a394b 0 3px,#2a2936 3px 6px);transition:width .35s cubic-bezier(.2,.7,.2,1)}
+.dnct-u__slide--l{right:100%}.dnct-u__slide--r{left:100%}
+.dnct-u:hover .dnct-u__slide,.dnct-u:focus-visible .dnct-u__slide{width:clamp(6px,1vw,10px)}
+
+/* uchwyty */
+.dnct-u__handle{flex:none;width:clamp(8px,1vw,10px);align-self:stretch;margin:7px 0 7px 6px;border-radius:4px;
+  background:#2a2936}
+.dnct-u__handle--r{margin:7px 6px 7px 0}
+
+/* tabliczka z nazwą */
+.dnct-u__id{flex:none;display:flex;flex-direction:column;gap:3px;min-width:clamp(78px,11vw,112px)}
+.dnct-u__name{font:900 clamp(10px,1.3vw,12px)/1 Inter,sans-serif;letter-spacing:.12em;color:#e7e2ff;white-space:nowrap}
+.dnct-u__name em{font-style:normal;background:linear-gradient(90deg,var(--am),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+.dnct-u__sub{font:500 clamp(8px,1vw,9.5px)/1 "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#6b6a80;letter-spacing:.04em;white-space:nowrap}
+
+/* diody */
+.dnct-led{flex:none;width:7px;height:7px;border-radius:50%;background:#2a2935;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5);transition:background .12s,box-shadow .12s}
+.dnct-led.on-g{background:var(--okl);box-shadow:0 0 8px var(--okl),0 0 2px #fff inset}
+.dnct-led.on-a{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.dnct-led.on-b{background:#60a5fa;box-shadow:0 0 8px #60a5fa}
+.dnct-led.on-p{background:var(--aml);box-shadow:0 0 8px var(--aml)}
+.dnct-u__leds{flex:none;display:grid;grid-template-columns:repeat(2,7px);gap:5px 6px}
+.dnct-u__power{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;
+  background:#14131b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.dnct-u__power{cursor:pointer;border:0;padding:0;transition:box-shadow .2s ease}
+.dnct-u__power:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 0 0 3px rgba(239,68,68,.25)}
+.dnct-u__power:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(139,92,246,.55)}
+.dnct-u__power svg{width:10px;height:10px;stroke:#3d3c4c;transition:stroke .3s,filter .3s}
+.dnct-u.is-up .dnct-u__power svg{stroke:var(--okl);filter:drop-shadow(0 0 4px var(--okl))}
+
+/* kieszenie na dyski */
+.dnct-u__drives{flex:1;min-width:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;height:calc(100% - 14px)}
+.dnct-u--1 .dnct-u__drives{max-width:46%}
+.dnct-drive{position:relative;border-radius:4px;background:#101017;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);overflow:hidden}
+.dnct-drive::before{content:"";position:absolute;inset:3px 3px 3px 12px;border-radius:2px;
+  background:repeating-linear-gradient(90deg,#1d1c27 0 2px,#121118 2px 4px)}
+.dnct-drive .dnct-led{position:absolute;left:3px;width:5px;height:5px}
+.dnct-drive .dnct-led:first-child{top:4px}.dnct-drive .dnct-led:last-child{bottom:4px}
+
+/* kratka wentylacyjna */
+.dnct-u__vent{flex:1.2;min-width:0;align-self:stretch;margin:8px 0;border-radius:5px;
+  background:radial-gradient(circle,#08080c 0 1.6px,transparent 2px) 0 0/7px 7px,#15141c;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);position:relative;overflow:hidden}
+.dnct-u__vent::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(139,92,246,.18) 50%,transparent 70%);
+  transform:translateX(-120%);animation:dr-air 4.5s linear infinite;animation-delay:var(--d,0s)}
+@keyframes dr-air{to{transform:translateX(120%)}}
+
+/* obciążenie */
+.dnct-u__load{flex:none;width:clamp(50px,8vw,90px);display:flex;flex-direction:column;gap:5px}
+.dnct-u__load span{font:900 8.5px/1 Inter,sans-serif;letter-spacing:.14em;color:#6b6a80;display:flex;justify-content:space-between}
+.dnct-u__load span b{color:#c4b5fd;font-weight:800;letter-spacing:0}
+.dnct-bar{height:4px;border-radius:4px;background:#0c0b11;overflow:hidden}
+.dnct-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--am),var(--blue));transition:width .8s cubic-bezier(.2,.7,.2,1)}
+
+/* switch */
+.dnct-u--sw .dnct-ports{flex:1;min-width:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(2,1fr);gap:3px 4px;height:calc(100% - 12px)}
+.dnct-port{position:relative;border-radius:2px;background:#07070a;box-shadow:inset 0 0 0 1px #2c2b38}
+.dnct-port::before{content:"";position:absolute;left:25%;right:25%;top:0;height:28%;background:#2c2b38;border-radius:0 0 1px 1px}
+.dnct-port .dnct-led{position:absolute;bottom:2px;width:3px;height:3px;border-radius:1px}
+.dnct-port .dnct-led:first-child{left:2px}.dnct-port .dnct-led:last-child{right:2px}
+.dnct-u__sfp{flex:none;display:flex;gap:4px}
+.dnct-u__sfp i{width:clamp(12px,1.8vw,18px);height:12px;border-radius:2px;background:#07070a;box-shadow:inset 0 0 0 1px #3a394b}
+
+/* backup: taśma/półka */
+.dnct-u--bk .dnct-u__slots{flex:1;min-width:0;display:flex;gap:5px;height:calc(100% - 16px)}
+.dnct-u--bk .dnct-u__slots i{flex:1;border-radius:3px;background:linear-gradient(180deg,#0f0e14,#09080d);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);position:relative;overflow:hidden}
+.dnct-u--bk .dnct-u__slots i::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(0deg,rgba(139,92,246,.45),rgba(59,130,246,.15));transition:height 1.2s ease}
+.dnct-u--bk.is-sync .dnct-u__slots i::after{height:var(--h,60%)}
+
+/* puste U */
+.dnct-u--blank{height:clamp(14px,2vw,20px);background:repeating-linear-gradient(90deg,#14131a 0 6px,#18171f 6px 7px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)}
+.dnct-u--blank::before,.dnct-u--blank::after{display:none}
+
+/* wsuwanie i boot */
+.dnct-rack:not(.is-in) .dnct-u{transform:scale(1.04);opacity:0}
+.dnct-rack.is-in .dnct-u{animation:dr-in .6s cubic-bezier(.25,.8,.3,1) both;animation-delay:calc(var(--i)*170ms)}
+@keyframes dr-in{0%{transform:scale(1.04);opacity:0}60%{opacity:1}75%{transform:scale(.995)}100%{transform:none;opacity:1}}
+.dnct-rack.is-in .dnct-u.is-placed{animation:none;opacity:1}
+.dnct-rack.is-in .dnct-u:hover,.dnct-rack.is-in .dnct-u:focus-visible{animation:none;opacity:1}
+
+.dnct-u.is-cycle{animation:none!important;opacity:1!important;box-shadow:inset 0 0 0 1px rgba(251,191,36,.5),0 0 20px rgba(251,191,36,.12)}
+.dnct-u.is-cycle .dnct-u__power svg{stroke:var(--warn);filter:drop-shadow(0 0 4px var(--warn))}
+.dnct-u:not(.is-up) .dnct-u__vent::after{animation-play-state:paused;opacity:0}
+.dnct-u{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s ease,background .35s ease}
+.dnct-rack.is-in .dnct-u--bk.is-sync .dnct-u__slots i::after{animation:dr-sync 7s ease-in-out infinite;animation-delay:var(--sd,0s)}
+@keyframes dr-sync{0%{height:8%}45%{height:var(--h,60%)}70%{height:var(--h,60%);filter:brightness(1.4)}100%{height:8%}}
+.dnct-u.is-down{box-shadow:inset 0 0 0 1px rgba(239,68,68,.45)}
+.dnct-u.is-down .dnct-u__power svg{stroke:var(--bad);filter:drop-shadow(0 0 4px var(--bad))}
+.dnct-u.is-down .dnct-u__id,.dnct-u.is-down .dnct-u__drives{opacity:.45;transition:opacity .3s}
+.dnct-rack__toast{position:absolute;z-index:6;left:50%;bottom:clamp(16px,3vw,28px);transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  max-width:calc(100% - 32px);display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:16px;
+  background:rgba(14,13,20,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid rgba(239,68,68,.35);box-shadow:0 14px 40px rgba(0,0,0,.6);transition:opacity .25s ease,transform .25s ease}
+.dnct-rack__toast.show{opacity:1;transform:translate(-50%,0)}
+.dnct-rack__toast svg{flex:none;width:20px;height:20px}
+.dnct-rack__toast b{display:block;font:900 10px/1.2 Inter,sans-serif;letter-spacing:.14em;color:#f87171;text-transform:uppercase;margin-bottom:3px}
+.dnct-rack__toast span{font:800 14px/1.35 Inter,sans-serif;color:#f1f5f9}
+/* dymek */
+.dnct-rack__tip{position:absolute;z-index:5;pointer-events:none;min-width:190px;padding:12px 14px;border-radius:14px;
+  background:rgba(14,13,20,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid rgba(167,139,250,.35);box-shadow:0 14px 40px rgba(0,0,0,.55);
+  opacity:0;transform:translateY(6px);transition:opacity .2s ease,transform .2s ease;font-size:12px;color:#cbd5e1}
+.dnct-rack__tip.show{opacity:1;transform:none}
+.dnct-rack__tip h4{margin:0 0 8px;font:900 11px/1 Inter,sans-serif;letter-spacing:.14em;color:#e7e2ff;display:flex;align-items:center;gap:8px}
+.dnct-rack__tip h4 .dnct-led{width:6px;height:6px}
+.dnct-rack__tip dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 14px}
+.dnct-rack__tip dt{font:900 9px/1.5 Inter,sans-serif;letter-spacing:.14em;color:#6b6a80}
+.dnct-rack__tip dd{margin:0;text-align:right;font:500 11px/1.5 "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c4b5fd}
+
+/* stopka */
+.dnct-rack__foot{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:14px 4px 0;
+  font:500 11px/1 "IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#6b6a80}
+.dnct-rack__foot b{color:#a78bfa;font-weight:500}
+
+@media (max-width:640px){
+  .dnct-u__vent,.dnct-u__load,.dnct-u__sfp{display:none}
+  .dnct-u--1 .dnct-u__drives{max-width:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .dnct-rack *{animation:none!important;transition:none!important}
+  .dnct-rack:not(.is-in) .dnct-u{transform:none;opacity:1}
+}
+
+/* kafel w bento jest wąski - układ kompaktowy wg szerokości kontenera, nie okna */
+.dnct-rack-wrap{container-type:inline-size}
+@container (max-width:640px){
+  .dnct-u__vent,.dnct-u__load,.dnct-u__sfp{display:none}
+  .dnct-u--1 .dnct-u__drives{max-width:none}
+}
+
+/* ===== efekty na stronie głównej ===== */
+.dnct-rack-wrap{perspective:1400px}
+.dnct-rack{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s ease-out}
+/* światło pod kursorem: widoczne tylko nad szafą */
+.dnct-rack::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;opacity:0;transition:opacity .35s ease;
+  background:radial-gradient(520px circle at var(--mx,50%) var(--my,50%),rgba(167,139,250,.24),rgba(139,92,246,.12) 30%,rgba(99,102,241,.05) 52%,transparent 70%)}
+.dnct-rack.is-lit::before{opacity:1}
+/* jednorazowy przebłysk po wejściu w kadr */
+.dnct-rack.is-in::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;
+  background:linear-gradient(100deg,transparent 42%,rgba(196,181,253,.16) 50%,transparent 58%) 140% 0/260% 100% no-repeat;
+  animation:dr-sweep 1.8s ease-out .5s 1 both}
+@keyframes dr-sweep{from{background-position:140% 0}to{background-position:-40% 0}}
+/* podświetlanie z liczb */
+.dnct-rack .dnct-u{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s ease,background .35s ease,opacity .25s ease}
+.dnct-rack.has-hl.is-in .dnct-u.is-placed:not(.is-hl):not(.dnct-u--blank){opacity:.42}
+.dnct-rack .dnct-u.is-hl{z-index:2;background:#201e2e;box-shadow:inset 0 0 0 1px rgba(167,139,250,.7),0 0 28px rgba(139,92,246,.32)}
+@media (prefers-reduced-motion:reduce){.dnct-rack{transform:none}.dnct-rack::before,.dnct-rack::after{display:none}}
+
+/* w bento szafa wypełnia wysokość kafla obok (jednostki rozkładają się równo) */
+.home-bento-rack{align-items:stretch}
+.home-bento-rack .dnct-rack-wrap{height:100%}
+.home-bento-rack .dnct-rack{height:100%;display:flex;flex-direction:column}
+.home-bento-rack .dnct-rack__cab{flex:1}
+.home-bento-rack .dnct-rack__bay{justify-content:space-between}
+@media (max-width:1100px){.home-bento-rack .dnct-rack-wrap,.home-bento-rack .dnct-rack{height:auto}}

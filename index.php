@@ -155,6 +155,7 @@ ob_start();
          bez nowych klas Tailwinda - nie wymaga przebudowy tailwind.css).
          Konsola w karcie i przechył: assets/js/home.js. */ ?>
 <link rel="stylesheet" href="<?php echo asset('/assets/css/home.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/rack.css'); ?>">
 
 <!-- ============ HERO ============ -->
 <?php
@@ -395,27 +396,39 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 zasobach - stąd realna dostępność, nie tylko deklaracja. Do tego polska
                 infrastruktura, ochrona DDoS, kopie zapasowe w panelu i wsparcie przez Discord.
             </p>
+            <?php /* Dwie liczby z opisu powyżej (Polska, DDoS). Najazd podświetla
+                     pasujące jednostki szafy (rack.js, [data-hl]). */ ?>
+            <div class="home-stats">
+                <div class="home-stat" data-hl="all" tabindex="0"><b>PL</b><span>własny sprzęt w Polsce</span></div>
+                <div class="home-stat" data-hl="switch" tabindex="0"><b>DDoS</b><span>ochrona serwerów</span></div>
+            </div>
         </div>
 
-        <div class="home-bento-hw glass home-reveal" style="--d:1">
-            <p class="home-hw-big">Własny sprzęt.<small>Serwery w Polsce, nie odsprzedane zasoby - dlatego „Wyprzedane” w cenniku znaczy naprawdę wyprzedane.</small></p>
-            <?php /* Miniaturowa szafa serwerowa (13.10.2026). Po wejściu w kadr
-                     serwery wsuwają się po kolei i "bootują" (diody zasilania),
-                     potem migają dyski i zmienia się obciążenie (home.js), a po
-                     szynach płynie sygnał danych. Etykiety są poglądowe - nie
-                     opisują konkretnej konfiguracji węzłów. */ ?>
-            <div class="hw-rack" data-hw-rack aria-hidden="true">
-                <span class="hw-rail hw-rail-l"><i></i></span>
-                <span class="hw-rail hw-rail-r"><i></i></span>
-                <?php foreach (['PL-01', 'PL-02', 'PL-03', 'PL-04', 'BACKUP'] as $k => $etykieta): ?>
-                    <div class="hw-unit" style="--k:<?php echo $k; ?>">
-                        <span class="hw-power"></span>
-                        <span class="hw-name"><b>DNCT</b> <?php echo $etykieta; ?></span>
-                        <span class="hw-bays"><?php for ($d = 0; $d < 6; $d++): ?><i></i><?php endfor; ?></span>
-                        <span class="hw-load"><i></i></span>
-                        <span class="hw-net"><i></i><i></i></span>
+        <div class="home-bento-rack home-reveal" style="--d:1">
+            <?php /* Szafa serwerowa (27.10.2026, nowa wersja z dnct-rack.html).
+                     Jednostki, boot, restarty i dymki robi assets/js/rack.js
+                     z tablicy SERVERS. Etykiety (RAM, dyski, gry) są poglądowe -
+                     nie opisują konkretnej konfiguracji węzłów. */ ?>
+            <div class="dnct-rack-wrap">
+                <div class="dnct-rack" id="dnctRack" aria-label="Szafa serwerowa DNCT">
+                  <div class="dnct-rack__glow"><i></i><i></i></div>
+                  <div class="dnct-rack__head">
+                    <div class="dnct-rack__title"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>Nasza szafa · Polska</div>
+                    <div class="dnct-rack__live"><b></b>Online</div>
+                  </div>
+                
+                  <div class="dnct-rack__cab">
+                    <div class="dnct-rack__rail" aria-hidden="true"></div>
+                    <div class="dnct-rack__bay" data-units>
+                      <!-- jednostki generuje skrypt na podstawie listy SERVERS (łatwa edycja) -->
                     </div>
-                <?php endforeach; ?>
+                    <div class="dnct-rack__rail" aria-hidden="true"></div>
+                  </div>
+                
+                  <div class="dnct-rack__foot"><span>Najedź na serwer, żeby zobaczyć szczegóły. Tylko nie klikaj zasilania.</span><span>własny sprzęt · <b>Polska</b></span></div>
+                  <div class="dnct-rack__tip" role="tooltip"></div>
+                  <div class="dnct-rack__toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg><div><b></b><span></span></div></div>
+                </div>
             </div>
         </div>
 
@@ -425,7 +438,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
             ['Backupy i szybkie przywrócenie danych', '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
             ['Wsparcie dla modów i konfiguracji serwerów', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
         ] as $k => [$feature, $icon]): ?>
-            <div class="home-bento-feat glass home-reveal" style="--d:<?php echo $k; ?>">
+            <div class="home-bento-feat glass home-reveal" style="--d:<?php echo $k; ?>" data-ico="<?php echo ['shield', 'cpu', 'history', 'settings'][$k] ?? ''; ?>">
                 <span class="home-feat-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?php echo $icon; ?></svg></span>
                 <p><?php echo htmlspecialchars($feature); ?></p>
             </div>
@@ -533,6 +546,7 @@ $discordExtra = max(0, $discordOnline - count($discordShown));
          linkują do /cennik) i ten sam initChromaCards() dla kart i konsoli. */ ?>
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/home.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/rack.js'); ?>" defer></script>
 
 <?php
 $content = ob_get_clean();

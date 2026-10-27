@@ -888,6 +888,7 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #fff;
+    white-space: nowrap;
 }
 .cennik-page .pcard-badge-hot  { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
 /* Obok plakietki promocji - przy lewej krawędzi, lustrzanie. */
@@ -2813,3 +2814,15 @@ html[lang="de"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0,00
 /* Nagłówek pasma większy - jak w makiecie 01, pasmo jest teraz szerokie. */
 .cennik-page .pnl-band .cnk-h2 { font-size: clamp(2rem, 3.6vw, 3.2rem); line-height: 1.04; letter-spacing: -0.03em; }
 .cennik-page .pnl-band .pnl-lead { font-size: clamp(0.98rem, 1.1vw, 1.08rem); max-width: 46ch; margin-top: 1rem; }
+
+/* Ikony parametrów planu i waluta w cenie: delikatny hover (0,2 s, ease, bez sprężyn). Wygląd w spoczynku bez zmian. */
+.cennik-page .pcard-specs svg,
+.cennik-page .pcard-price-cur { transition: transform 0.2s ease, color 0.2s ease; }
+.cennik-page .plan-pick:hover .pcard:not(.is-soldout) .pcard-specs svg { color: #c4b5fd; }
+.cennik-page .pcard:not(.is-soldout) .pcard-specs li:hover svg { transform: scale(1.12); }
+.cennik-page .pcard-price-cur { display: inline-block; }
+.cennik-page .plan-pick:hover .pcard:not(.is-soldout) .pcard-price-cur { color: #c4b5fd; transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) {
+    .cennik-page .pcard-specs svg, .cennik-page .pcard-price-cur { transition: none; }
+    .cennik-page .pcard-specs li:hover svg, .cennik-page .plan-pick:hover .pcard-price-cur { transform: none; }
+}
