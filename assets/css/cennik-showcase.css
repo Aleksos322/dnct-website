@@ -16,7 +16,7 @@
 .cnk-back-top:hover { background: #6d40bf; border-color: #c4b5fd; }
 .cnk-back-top:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
 .cnk-back-top.is-above-selection { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
-.cnk-catalogue-scroll.is-scroll-driven > .cnk-catalogue { position: sticky; top: 88px; }
+.cnk-catalogue-scroll.is-scroll-driven > .cnk-catalogue { position: sticky; top: var(--cnk-pin-top, 88px); }
 .cnk-catalogue-scroll.is-scroll-driven .cnk-plan-showcase .cnk-plan-slide { transition: filter 0.4s ease; }
 .cnk-catalogue {
     display: grid;
