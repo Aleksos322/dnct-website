@@ -22,19 +22,19 @@
     const id=`<div class="dnct-u__id"><div class="dnct-u__name"><em>DNCT</em> ${s.name}</div><div class="dnct-u__sub">${s.sub||''}</div></div>`;
     if(s.type==='switch'){
       u.className='dnct-u dnct-u--1 dnct-u--sw';
-      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" aria-label="Wyłącz serwer">${pw}</button>${id}<div class="dnct-ports">${Array.from({length:24},()=>`<span class="dnct-port">${led()}${led()}</span>`).join('')}</div><div class="dnct-u__sfp"><i></i><i></i><i></i><i></i></div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
+      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" tabindex="-1">${pw}</button>${id}<div class="dnct-ports">${Array.from({length:24},()=>`<span class="dnct-port">${led()}${led()}</span>`).join('')}</div><div class="dnct-u__sfp"><i></i><i></i><i></i><i></i></div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
     } else if(s.type==='backup'){
       u.className='dnct-u dnct-u--2 dnct-u--bk';
-      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" aria-label="Wyłącz serwer">${pw}</button>${id}<div class="dnct-u__slots">${[62,48,80,55,70,40,66,58].map((h,k)=>`<i style="--h:${h}%;--sd:${-k*.35}s"></i>`).join('')}</div><div class="dnct-u__leds">${led()}${led()}${led()}${led()}</div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
+      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" tabindex="-1">${pw}</button>${id}<div class="dnct-u__slots">${[62,48,80,55,70,40,66,58].map((h,k)=>`<i style="--h:${h}%;--sd:${-k*.35}s"></i>`).join('')}</div><div class="dnct-u__leds">${led()}${led()}${led()}${led()}</div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
       s.info={Typ:'Kopie zapasowe',Harmonogram:'co noc',Przywracanie:'1 kliknięcie'};
     } else {
       const n=s.u===2?8:4;
       u.className='dnct-u '+(s.u===2?'dnct-u--2':'dnct-u--1');
-      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" aria-label="Wyłącz serwer">${pw}</button>${id}<div class="dnct-u__leds">${led()}${led()}${led()}${led()}</div><div class="dnct-u__drives">${Array.from({length:n},()=>`<span class="dnct-drive">${led()}${led()}</span>`).join('')}</div><div class="dnct-u__vent" style="--d:${-Math.random()*4}s"></div><div class="dnct-u__load"><span>CPU</span><div class="dnct-bar"><i></i></div><span>RAM</span><div class="dnct-bar"><i></i></div></div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
+      u.innerHTML=`<div class="dnct-u__handle"></div><button type="button" class="dnct-u__power" tabindex="-1">${pw}</button>${id}<div class="dnct-u__leds">${led()}${led()}${led()}${led()}</div><div class="dnct-u__drives">${Array.from({length:n},()=>`<span class="dnct-drive">${led()}${led()}</span>`).join('')}</div><div class="dnct-u__vent" style="--d:${-Math.random()*4}s"></div><div class="dnct-u__load"><span>CPU</span><div class="dnct-bar"><i></i></div><span>RAM</span><div class="dnct-bar"><i></i></div></div><div class="dnct-u__handle dnct-u__handle--r"></div>`;
       s.info={RAM:s.ram,Dyski:s.disk,Gry:s.games};
     }
     u.insertAdjacentHTML('beforeend','<i class="dnct-u__slide dnct-u__slide--l"></i><i class="dnct-u__slide dnct-u__slide--r"></i>');
-    u.tabIndex=0; u._s=s; u.dataset.kind=s.type; bay.appendChild(u);
+    u._s=s; u.dataset.kind=s.type; bay.appendChild(u);
   });
   const units=[...bay.querySelectorAll('.dnct-u:not(.dnct-u--blank)')];
 

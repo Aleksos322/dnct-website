@@ -409,12 +409,14 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                      Jednostki, boot, restarty i dymki robi assets/js/rack.js
                      z tablicy SERVERS. Etykiety (RAM, dyski, gry) są poglądowe -
                      nie opisują konkretnej konfiguracji węzłów. */ ?>
-            <div class="dnct-rack-wrap">
-                <div class="dnct-rack" id="dnctRack" aria-label="Szafa serwerowa DNCT">
+            <?php /* Czysta dekoracja: aria-hidden + data-nosnippet, żeby czytniki,
+                     wyszukiwarki i AI nie brały jej za opis prawdziwego sprzętu. */ ?>
+            <div class="dnct-rack-wrap" aria-hidden="true" data-nosnippet>
+                <div class="dnct-rack" id="dnctRack">
                   <div class="dnct-rack__glow"><i></i><i></i></div>
                   <div class="dnct-rack__head">
-                    <div class="dnct-rack__title"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>Nasza szafa · Polska</div>
-                    <div class="dnct-rack__live"><b></b>Online</div>
+                    <div class="dnct-rack__title"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>Wizualizacja</div>
+                    <div class="dnct-rack__live"><b></b>Demo</div>
                   </div>
                 
                   <div class="dnct-rack__cab">
@@ -425,7 +427,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                     <div class="dnct-rack__rail" aria-hidden="true"></div>
                   </div>
                 
-                  <div class="dnct-rack__foot"><span>Najedź na serwer, żeby zobaczyć szczegóły. Tylko nie klikaj zasilania.</span><span>własny sprzęt · <b>Polska</b></span></div>
+                  <div class="dnct-rack__foot"><span>Najedź na serwer, żeby zobaczyć szczegóły. Tylko nie klikaj zasilania.</span><span>ilustracja <b>poglądowa</b></span></div>
                   <div class="dnct-rack__tip" role="tooltip"></div>
                   <div class="dnct-rack__toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg><div><b></b><span></span></div></div>
                 </div>
