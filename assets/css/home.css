@@ -711,3 +711,16 @@
 @media (prefers-reduced-motion: reduce) { .home-stat { transition: none; } .home-stat:hover { transform: none; } }
 .home-stat > b { white-space: nowrap; }
 @media (max-width: 520px) { .home-stat > b { font-size: 1.35rem; } }
+
+/* Karty strony glownej w matowym stylu jak w panelu (game.panel-dnct.pl):
+   plaskie tlo, bez cienia i polysku. Blur zostaje z .glass. Przyciski i navbar
+   zostaja wypukle - to nie karty. */
+.home-bento > .glass,
+.home-card.glass,
+.dcx-stage.glass {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: none;
+}
+.home-bento > .glass::after,
+.home-card.glass::after,
+.dcx-stage.glass::after { display: none; }
