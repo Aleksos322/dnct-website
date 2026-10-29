@@ -213,7 +213,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                              przeglądarkę i bilet demo wyrzuciłby go z własnego konta
                              (to samo robi components/panel-band.php). */ ?>
                     <a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener" class="home-btn glass">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                     </svg>
                         Discord
@@ -320,7 +320,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                         </button></li>
                     <?php endforeach; ?>
                 </ol>
-                <p class="home-p3d-hint" aria-hidden="true">Przewiń, żeby obejrzeć kolejne plany</p>
+                <p class="home-p3d-hint" aria-hidden="true"><span class="hint-pc">Przewiń, żeby obejrzeć kolejne plany</span><span class="hint-m">Przesuń palcem w bok, żeby zmienić plan</span></p>
                 <a href="/cennik" class="home-p3d-more">Zobacz pełną ofertę (więcej gier) &rarr;</a>
                 <?php /* Pominięcie sekcji: przypięta karuzela zajmuje kilka ekranów
                          przewijania, a nie każdy chce oglądać wszystkie plany. */ ?>
@@ -409,12 +409,14 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                      Jednostki, boot, restarty i dymki robi assets/js/rack.js
                      z tablicy SERVERS. Etykiety (RAM, dyski, gry) są poglądowe -
                      nie opisują konkretnej konfiguracji węzłów. */ ?>
-            <div class="dnct-rack-wrap">
-                <div class="dnct-rack" id="dnctRack" aria-label="Szafa serwerowa DNCT">
+            <?php /* Czysta dekoracja: aria-hidden + data-nosnippet, żeby czytniki,
+                     wyszukiwarki i AI nie brały jej za opis prawdziwego sprzętu. */ ?>
+            <div class="dnct-rack-wrap" aria-hidden="true" data-nosnippet>
+                <div class="dnct-rack" id="dnctRack">
                   <div class="dnct-rack__glow"><i></i><i></i></div>
                   <div class="dnct-rack__head">
-                    <div class="dnct-rack__title"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>Nasza szafa · Polska</div>
-                    <div class="dnct-rack__live"><b></b>Online</div>
+                    <div class="dnct-rack__title"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>Wizualizacja</div>
+                    <div class="dnct-rack__live"><b></b>Demo</div>
                   </div>
                 
                   <div class="dnct-rack__cab">
@@ -425,7 +427,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                     <div class="dnct-rack__rail" aria-hidden="true"></div>
                   </div>
                 
-                  <div class="dnct-rack__foot"><span>Najedź na serwer, żeby zobaczyć szczegóły. Tylko nie klikaj zasilania.</span><span>własny sprzęt · <b>Polska</b></span></div>
+                  <div class="dnct-rack__foot"><span>Najedź na serwer, żeby zobaczyć szczegóły. Tylko nie klikaj zasilania.</span><span>ilustracja <b>poglądowa</b></span></div>
                   <div class="dnct-rack__tip" role="tooltip"></div>
                   <div class="dnct-rack__toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg><div><b></b><span></span></div></div>
                 </div>
