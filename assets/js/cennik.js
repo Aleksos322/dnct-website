@@ -22,6 +22,13 @@
 
         tabs.forEach(function (tab) {
             tab.addEventListener('click', function () {
+                // Strona konkretnej gry: inna zakładka = strona tamtej gry
+                // (własny h1, FAQ, canonical), a nie podmiana samego cennika.
+                var href = tab.getAttribute('data-href');
+                if (href && !tab.classList.contains('is-active')) {
+                    window.location.href = href;
+                    return;
+                }
                 var targetId = tab.getAttribute('data-target');
 
                 document.querySelectorAll('.cennik-tab').forEach(function (t) {
