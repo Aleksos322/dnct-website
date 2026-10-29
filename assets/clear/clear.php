@@ -143,6 +143,9 @@ if ($centerContent) {
             // Wizytówka Google (Knowledge Graph /g/11zy3hs6c7) - łączy stronę z profilem firmy.
             'https://www.google.com/search?kgmid=/g/11zy3hs6c7',
         ],
+            'https://www.youtube.com/@DNCT-Hosting',
+            'https://www.facebook.com/profile.php?id=61594999575970',
+            'https://www.instagram.com/dnct_hosting/',
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
     <script type="application/ld+json"><?php echo json_encode([
         '@context' => 'https://schema.org',
