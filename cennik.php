@@ -521,6 +521,9 @@ ob_start();
                             class="cennik-tab<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                             role="tab"
                             id="tab-<?php echo htmlspecialchars($game['type']); ?>"
+                            <?php /* Na stronie gry zakładka prowadzi na stronę tamtej gry -
+                                     inaczej nagłówek, FAQ i adres zostają od poprzedniej. */
+                            if ($focus !== null && isset(CENNIK_STRONY_GIER[$game['type']])): ?>data-href="/<?php echo htmlspecialchars(CENNIK_STRONY_GIER[$game['type']]['slug']); ?>"<?php endif; ?>
                             aria-controls="game-<?php echo htmlspecialchars($game['type']); ?>"
                             tabindex="<?php echo $i === $activeIdx ? '0' : '-1'; ?>"
                             aria-selected="<?php echo $i === $activeIdx ? 'true' : 'false'; ?>"
