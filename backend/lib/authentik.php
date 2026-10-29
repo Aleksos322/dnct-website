@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 function authentik_url(): string
 {
-    return rtrim((string)env('AUTHENTIK_URL', 'http://192.168.50.12:9000'), '/');
+    return rtrim((string)env('AUTHENTIK_URL', 'http://127.0.0.1:9000'), '/');
 }
 
 function authentik_token(): string
@@ -105,16 +105,23 @@ function authentik_browser_session_alive(string $username, string $userAgent): ?
     if ($res['http_code'] !== 200 || !is_array($res['body']['results'] ?? null)) {
         return null;
     }
-    foreach ($res['body']['results'] as $s) {
-        $known = [
-            (string)($s['user_agent']['string'] ?? ''),
-            (string)($s['last_user_agent']['string'] ?? ''),
-        ];
-        if (in_array($userAgent, $known, true)) {
-            return true;
+    // Authentik 2026.5: `user_agent` to obiekt (z kluczem `string`), a
+    // `last_user_agent` zwykły tekst. Czytamy oba kształty - wcześniej zakładaliśmy
+    // obiekt w obu, więc po aktualizacji przeglądarki (inny UA niż przy logowaniu)
+    // nic nie pasowało i wylogowanie nie kończyło sesji SSO.
+    $results = $res['body']['results'];
+    foreach ($results as $s) {
+        foreach (['user_agent', 'last_user_agent'] as $key) {
+            $v = $s[$key] ?? '';
+            $ua = is_array($v) ? (string)($v['string'] ?? '') : (string)$v;
+            if ($ua !== '' && $ua === $userAgent) {
+                return true;
+            }
         }
     }
-    return false;
+    // Są sesje, ale żadna nie pasuje po UA: nie wiemy, czy to ta przeglądarka.
+    // Lepiej zakończyć sesję SSO niż ją zostawić (puste = na pewno nie ma).
+    return $results === [] ? false : null;
 }
 
 /**
