@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 const PORADNIKI = [
     'jak-postawic-serwer-minecraft'       => ['minecraft', 'Jak postawić serwer Minecraft'],
+    'ile-ram-serwer-gier'                 => ['minecraft', 'Ile RAM-u potrzebuje serwer gier: Minecraft, Zomboid, Vintage Story'],
     'pluginy-na-serwer-minecraft'         => ['minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)'],
     'mody-na-serwer-minecraft'            => ['minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)'],
     'jak-wgrac-swiat-na-serwer-minecraft' => ['minecraft', 'Jak wgrać własny świat na serwer Minecraft'],
@@ -32,9 +33,9 @@ const PORADNIKI = [
 
 /* Ramka z ofertą pod poradnikiem - per gra. */
 const PORADNIKI_OFERTA = [
-    'zomboid'   => ['Serwer Project Zomboid od 29,99 zł miesięcznie', 'Od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-project-zomboid', 'Project Zomboid Build 42'],
-    'vintagestory' => ['Serwer Vintage Story od 19,99 zł miesięcznie', 'Od 5 do 100 graczy, aktualna wersja gry, stały RAM i CPU, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-vintage-story', 'Vintage Story'],
-    'minecraft' => ['Serwer Minecraft od 6,99 zł miesięcznie', 'Paper, Fabric albo Forge, od 1,5 do 32 GB RAM, dyski SSD, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-minecraft', 'Minecraft Java'],
+    'zomboid'   => ['Serwer Project Zomboid od 29,99 zł miesięcznie', 'Od 5 do 100 graczy, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-project-zomboid', 'Project Zomboid Build 42'],
+    'vintagestory' => ['Serwer Vintage Story od 19,99 zł miesięcznie', 'Od 5 do 100 graczy, aktualna wersja gry, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-vintage-story', 'Vintage Story'],
+    'minecraft' => ['Serwer Minecraft od 6,99 zł miesięcznie', 'Paper, Fabric albo Forge, od 1,5 do 32 GB RAM, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-minecraft', 'Minecraft Java'],
 ];
 
 /** @var array{slug:string,tytul:string,title:string,opis:string,data:string,tresc:string} $poradnik */
@@ -68,7 +69,7 @@ $extraHead = '<script type="application/ld+json">' . json_encode([
             'headline'      => $poradnik['tytul'],
             'description'   => $poradnik['opis'],
             'datePublished' => $poradnik['data'],
-            'dateModified'  => $poradnik['data'],
+            'dateModified'  => $poradnik['zmiana'] ?? $poradnik['data'],
             'inLanguage'    => $poradnikLang,
             'mainEntityOfPage' => $url,
             'author'        => ['@type' => 'Organization', 'name' => 'DNCT Hosting', 'url' => 'https://game.dnct.pl'],

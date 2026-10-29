@@ -506,7 +506,7 @@ foreach ($aktywne as $c) {
                 <div class="srv-specs">
                     <div><span>RAM</span><strong><?php echo srv_size((int)($isPanelOnly ? $c['ram_mb'] : $o['ram_mb'])); ?></strong></div>
                     <div><span>Procesor</span><strong><?php echo rtrim(rtrim(number_format((float)($isPanelOnly ? $c['cpu_cores'] : $o['cpu_cores']), 1, '.', ''), '0'), '.'); ?> vCore</strong></div>
-                    <div><span>Dysk SSD</span><strong><?php echo srv_size((int)($isPanelOnly ? $c['ssd_mb'] : $o['ssd_mb'])); ?></strong></div>
+                    <div><span>Dysk NVMe</span><strong><?php echo srv_size((int)($isPanelOnly ? $c['ssd_mb'] : $o['ssd_mb'])); ?></strong></div>
                     <div><span>Backupy</span><strong><?php echo (int)($isPanelOnly ? $c['backups_limit'] : $o['backups_limit']); ?></strong></div>
                 </div>
 

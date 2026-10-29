@@ -106,6 +106,25 @@ if ($centerContent) {
     <?php /* JSON-LD sitewide. Adresy zawsze wskazuja na game.dnct.pl (prod),
              tak samo jak domyslny $canonicalUrl wyzej - spojna tozsamosc
              marki niezaleznie od tego, czy strona jest ogladana na becie. */ ?>
+    <?php /* Ocena firmy z Wizytówki Google (GEO, 29.10.2026) - te same dane co taśma opinii,
+             cache 6 h w google_reviews(). Brak klucza albo błąd API = brak pola, nic więcej. */
+    $orgRating = [];
+    try {
+        require_once dirname(__DIR__, 2) . '/backend/lib/google_reviews.php';
+        $orgGoogle = google_reviews();
+        if ($orgGoogle !== null && $orgGoogle['count'] > 0 && $orgGoogle['rating'] > 0) {
+            $orgRating['aggregateRating'] = [
+                '@type'       => 'AggregateRating',
+                'ratingValue' => number_format((float)$orgGoogle['rating'], 1, '.', ''),
+                'ratingCount' => (int)$orgGoogle['count'],
+                'bestRating'  => '5',
+                'worstRating' => '1',
+            ];
+        }
+    } catch (Throwable $e) {
+        error_log('clear.php rating: ' . $e->getMessage());
+    }
+    ?>
     <script type="application/ld+json"><?php echo json_encode([
         '@context' => 'https://schema.org',
         '@type'    => 'Organization',
@@ -118,6 +137,7 @@ if ($centerContent) {
         'telephone' => '+48 536 180 706',
         'email'    => 'support@dnct.pl',
         'areaServed' => 'PL',
+        ...$orgRating,
         'sameAs'   => [
             'https://discord.gg/4kcXP5WmQ8',
             // Wizytówka Google (Knowledge Graph /g/11zy3hs6c7) - łączy stronę z profilem firmy.

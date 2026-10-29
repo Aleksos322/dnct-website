@@ -192,7 +192,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
 
             <p class="home-lead home-in" style="--d:4">
                 Serwery Minecraft, Project Zomboid i Vintage Story.
-                Ochrona DDoS, szybkie dyski SSD i wsparcie na Discordzie.
+                Ochrona DDoS, szybkie dyski NVMe i wsparcie na Discordzie.
             </p>
 
             <div class="home-cta home-in" style="--d:5">
@@ -389,7 +389,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
             <h2>Hosting serwerów Minecraft, Project Zomboid i Vintage Story</h2>
             <p>
                 DNCT Hosting to serwery dla Minecraft, Project Zomboid i Vintage Story,
-                od 3,99 zł za tydzień - stabilne CPU/RAM, szybkie dyski SSD i pełna kontrola.
+                od 3,99 zł za tydzień - stabilne CPU/RAM, szybkie dyski NVMe i pełna kontrola.
             </p>
             <p>
                 Serwery stoją na naszym własnym sprzęcie, nie na odsprzedanych
@@ -434,7 +434,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
 
         <?php foreach ([
             ['Ochrona DDoS i stały monitoring serwerów', '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'],
-            ['Dyski SSD, nowoczesne CPU, stabilne zasoby', '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>'],
+            ['Dyski NVMe, nowoczesne CPU, stabilne zasoby', '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>'],
             ['Backupy i szybkie przywrócenie danych', '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
             ['Wsparcie dla modów i konfiguracji serwerów', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
         ] as $k => [$feature, $icon]): ?>

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 return [
     ['jak-postawic-serwer-minecraft', 'minecraft', 'Jak postawić serwer Minecraft', 'Ile RAM-u, Paper czy Forge, pierwsze uruchomienie, server.properties i komendy.'],
+    ['ile-ram-serwer-gier', 'minecraft', 'Ile RAM-u potrzebuje serwer gier: Minecraft, Zomboid, Vintage Story', 'Tabela doboru RAM-u do gry i liczby graczy, objawy braku pamięci i sprawdzenie w konsoli.'],
     ['pluginy-na-serwer-minecraft', 'minecraft', 'Jak dodać pluginy na serwer Minecraft (Paper)', 'Skąd brać pluginy, wgrywanie do folderu plugins, config.yml i typowe błędy.'],
     ['mody-na-serwer-minecraft', 'minecraft', 'Mody i modpacki na serwer Minecraft (Fabric, Forge)', 'Zmiana silnika, folder mods, modpacki z CurseForge i Modrinth.'],
     ['jak-wgrac-swiat-na-serwer-minecraft', 'minecraft', 'Jak wgrać własny świat na serwer Minecraft', 'Świat z gry jednoosobowej na serwer: pakowanie, wgrywanie, level-name, Nether i End.'],

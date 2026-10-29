@@ -8,13 +8,13 @@ return [
     'title' => 'Vintage Story server for friends: which plan to choose? | DNCT',
     'opis'  => 'Which Vintage Story server to choose for friends? Specific plans for 5, 10 and 20 players, mods, backups, and picking RAM and CPU.',
     'tresc' => <<<'HTML'
-<p><strong>Short answer:</strong> for a small settlement of up to five players, choose the Vintage Story plan with 4 GB RAM, 3 vCore and 5 GB SSD for 19,99 zł per month. For ten players there's a tier with 4.5 GB RAM, 3 vCore and 10 GB SSD for 22,99 zł per month.</p>
+<p><strong>Short answer:</strong> for a small settlement of up to five players, choose the Vintage Story plan with 4 GB RAM, 3 vCore and 5 GB NVMe for 19,99 zł per month. For ten players there's a tier with 4.5 GB RAM, 3 vCore and 10 GB NVMe for 22,99 zł per month.</p>
 
 <h2>Matching the plan to your group</h2>
 <ul>
-    <li><strong>Up to 5 friends, basic gameplay:</strong> 4 GB RAM, 3 vCore, 5 GB SSD - 19,99 zł/mies.</li>
-    <li><strong>Up to 10 friends:</strong> 4.5 GB RAM, 3 vCore, 10 GB SSD - 22,99 zł/mies.</li>
-    <li><strong>A bigger settlement, a large world or more mods:</strong> choose a higher tier. For 20 players that's 6 GB RAM, 3 vCore and 15 GB SSD for 30,99 zł/mies.</li>
+    <li><strong>Up to 5 friends, basic gameplay:</strong> 4 GB RAM, 3 vCore, 5 GB NVMe - 19,99 zł/mies.</li>
+    <li><strong>Up to 10 friends:</strong> 4.5 GB RAM, 3 vCore, 10 GB NVMe - 22,99 zł/mies.</li>
+    <li><strong>A bigger settlement, a large world or more mods:</strong> choose a higher tier. For 20 players that's 6 GB RAM, 3 vCore and 15 GB NVMe for 30,99 zł/mies.</li>
 </ul>
 
 <h2>What puts load on a Vintage Story server?</h2>
@@ -34,13 +34,13 @@ HTML,
     'title' => 'Vintage-Story-Server für Freunde: welches Paket? | DNCT',
     'opis'  => 'Welcher Vintage-Story-Server für Freunde? Konkrete Pakete für 5, 10 und 20 Spieler, Mods, Backups sowie die Wahl von RAM und CPU.',
     'tresc' => <<<'HTML'
-<p><strong>Kurz gesagt:</strong> für eine kleine Siedlung mit bis zu fünf Spielern nimm das Vintage-Story-Paket mit 4 GB RAM, 3 vCore und 5 GB SSD für 19,99 zł im Monat. Für zehn Spieler gibt es die Stufe mit 4,5 GB RAM, 3 vCore und 10 GB SSD für 22,99 zł im Monat.</p>
+<p><strong>Kurz gesagt:</strong> für eine kleine Siedlung mit bis zu fünf Spielern nimm das Vintage-Story-Paket mit 4 GB RAM, 3 vCore und 5 GB NVMe für 19,99 zł im Monat. Für zehn Spieler gibt es die Stufe mit 4,5 GB RAM, 3 vCore und 10 GB NVMe für 22,99 zł im Monat.</p>
 
 <h2>Das passende Paket für die Gruppe</h2>
 <ul>
-    <li><strong>Bis 5 Freunde, normales Spiel:</strong> 4 GB RAM, 3 vCore, 5 GB SSD - 19,99 zł/mies.</li>
-    <li><strong>Bis 10 Freunde:</strong> 4,5 GB RAM, 3 vCore, 10 GB SSD - 22,99 zł/mies.</li>
-    <li><strong>Größere Siedlung, große Welt oder mehr Mods:</strong> wähl eine höhere Stufe. Für 20 Spieler sind das 6 GB RAM, 3 vCore und 15 GB SSD für 30,99 zł/mies.</li>
+    <li><strong>Bis 5 Freunde, normales Spiel:</strong> 4 GB RAM, 3 vCore, 5 GB NVMe - 19,99 zł/mies.</li>
+    <li><strong>Bis 10 Freunde:</strong> 4,5 GB RAM, 3 vCore, 10 GB NVMe - 22,99 zł/mies.</li>
+    <li><strong>Größere Siedlung, große Welt oder mehr Mods:</strong> wähl eine höhere Stufe. Für 20 Spieler sind das 6 GB RAM, 3 vCore und 15 GB NVMe für 30,99 zł/mies.</li>
 </ul>
 
 <h2>Was belastet einen Vintage-Story-Server?</h2>

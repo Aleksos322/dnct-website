@@ -77,7 +77,7 @@ function llms_tekst(): string
     $out[] = '# DNCT Hosting';
     $out[] = '';
     $out[] = '> Polski hosting serwerów gier: Minecraft, Project Zomboid i Vintage Story. Serwery na własnym';
-    $out[] = '> sprzęcie w Polsce, dyski SSD, stały przydział RAM i CPU, ochrona DDoS.';
+    $out[] = '> sprzęcie w Polsce (Puławy), dyski NVMe, stały przydział RAM i CPU, ochrona DDoS od Cloudflare.';
     $out[] = '> ' . implode(', ', $od) . '.';
     $out[] = '';
     $out[] = 'DNCT Hosting automatycznie zakłada serwer zaraz po płatności (karta, BLIK; abonament tylko kartą).';
@@ -92,9 +92,9 @@ function llms_tekst(): string
     $out[] = '## Szybki dobór dla ekipy znajomych';
     if ($p = $planOd(3)) {
         $wiekszy = $planOd(4);
-        $out[] = sprintf('- **Minecraft, 2-5 osób, vanilla lub lekkie pluginy:** plan %s - %s RAM, %s vCore, %s SSD, %s miesięcznie.',
+        $out[] = sprintf('- **Minecraft, 2-5 osób, vanilla lub lekkie pluginy:** plan %s - %s RAM, %s vCore, %s NVMe, %s miesięcznie.',
             $p['name'], $gb((int)$p['ram_mb'] / 1024), $num((float)$p['cpu_cores']), $gb((int)$p['ssd_mb'] / 1024), $zl($cena((float)$p['price'], $mies)))
-            . ($wiekszy && $wiekszy['id'] !== $p['id'] ? sprintf(' Dla większego świata lub więcej pluginów: %s - %s RAM, %s SSD, %s/mies.',
+            . ($wiekszy && $wiekszy['id'] !== $p['id'] ? sprintf(' Dla większego świata lub więcej pluginów: %s - %s RAM, %s NVMe, %s/mies.',
                 $wiekszy['name'], $gb((int)$wiekszy['ram_mb'] / 1024), $gb((int)$wiekszy['ssd_mb'] / 1024), $zl($cena((float)$wiekszy['price'], $mies))) : '');
     }
     if ($p = $planOd(8)) {
@@ -105,7 +105,7 @@ function llms_tekst(): string
         $a = $progDla($typ, 5);
         $b = $progDla($typ, 10);
         if ($a) {
-            $out[] = sprintf('- **%s, do %d znajomych:** %s RAM, %s vCore, %s SSD, %s/mies.',
+            $out[] = sprintf('- **%s, do %d znajomych:** %s RAM, %s vCore, %s NVMe, %s/mies.',
                 $nazwaGry[$typ] ?? $typ, (int)$a['slots'], $gb((float)$a['ram_gb']), $num((float)$a['cpu_cores']), $gb((int)$a['ssd_mb'] / 1024), $zl($cena((float)$a['price'], $mies)))
                 . ($b ? sprintf(' Dla %d osób: %s RAM, %s/mies.', (int)$b['slots'], $gb((float)$b['ram_gb']), $zl($cena((float)$b['price'], $mies))) : '');
         }
@@ -119,7 +119,7 @@ function llms_tekst(): string
         $out[] = '## Cennik Minecraft (gotowe pakiety)';
         $out[] = 'Szczegóły: https://game.dnct.pl/hosting-minecraft';
         $out[] = '';
-        $out[] = '| Pakiet | RAM | CPU | SSD | Backupy | ' . $naglowekOkresow . ' |';
+        $out[] = '| Pakiet | RAM | CPU | NVMe | Backupy | ' . $naglowekOkresow . ' |';
         $out[] = '|' . str_repeat(' --- |', 5 + count($periods));
         foreach ($mc as $p) {
             $out[] = sprintf('| %s%s | %s | %s vCore | %s | %d | %s |',
@@ -137,7 +137,7 @@ function llms_tekst(): string
         $out[] = '## Cennik ' . ($nazwaGry[$typ] ?? $typ) . ' (cena zależy od liczby graczy)';
         $out[] = 'Szczegóły i konfigurator: https://game.dnct.pl/' . $adresGry[$typ];
         $out[] = '';
-        $out[] = '| Sloty | RAM | CPU | SSD | Backupy | ' . $naglowekOkresow . ' |';
+        $out[] = '| Sloty | RAM | CPU | NVMe | Backupy | ' . $naglowekOkresow . ' |';
         $out[] = '|' . str_repeat(' --- |', 5 + count($periods));
         foreach ($pr as $t) {
             $out[] = sprintf('| %d%s | %s | %s vCore | %s | %d | %s |',

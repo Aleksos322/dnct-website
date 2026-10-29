@@ -3,12 +3,12 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p><strong>Krótka odpowiedź:</strong> prywatny serwer Project Zomboid dla maksymalnie pięciu znajomych zaczyna się w DNCT od 29,99 zł miesięcznie. Dostajesz 6 GB RAM, 3 vCore i 10 GB SSD. To uczciwe minimum dla świata dostępnego całą dobę — nie ma tu pakietu „do 20 zł”, który obiecywałby stabilną grę w Zomboidzie.</p>
+<p><strong>Krótka odpowiedź:</strong> prywatny serwer Project Zomboid dla maksymalnie pięciu znajomych zaczyna się w DNCT od 29,99 zł miesięcznie. Dostajesz 6 GB RAM, 3 vCore i 10 GB NVMe. To uczciwe minimum dla świata dostępnego całą dobę — nie ma tu pakietu „do 20 zł”, który obiecywałby stabilną grę w Zomboidzie.</p>
 
 <h2>Ile kosztuje serwer dla małej ekipy?</h2>
 <ul>
-    <li><strong>Do 5 osób:</strong> 6 GB RAM, 3 vCore, 10 GB SSD — 29,99 zł/mies.</li>
-    <li><strong>Do 10 osób:</strong> 7 GB RAM, 3 vCore, 15 GB SSD — 34,99 zł/mies.</li>
+    <li><strong>Do 5 osób:</strong> 6 GB RAM, 3 vCore, 10 GB NVMe — 29,99 zł/mies.</li>
+    <li><strong>Do 10 osób:</strong> 7 GB RAM, 3 vCore, 15 GB NVMe — 34,99 zł/mies.</li>
     <li><strong>Więcej osób, mapy dodatkowe albo dużo modów:</strong> wybierz wyższy próg w konfiguratorze. W Zomboidzie pamięć rośnie także wtedy, gdy gracze rozchodzą się po mapie.</li>
 </ul>
 <p>Koszt można podzielić między ekipę: przy pięciu osobach pakiet startowy to niecałe 6 zł na osobę miesięcznie. Ważniejsze od samej liczby slotów są mody, dodatkowe mapy, liczba zombie i to, czy gracze przebywają w różnych częściach świata.</p>
@@ -30,6 +30,7 @@ $poradnik = [
     'title' => 'Serwer Project Zomboid dla znajomych: koszt i dobór | DNCT',
     'opis'  => 'Ile kosztuje prywatny serwer Project Zomboid dla znajomych? Konkretne progi RAM-u, koszt dla 5 i 10 osób, mody, backupy oraz moment na zmianę pakietu.',
     'data'  => '2026-10-09',
+    'zmiana' => '2026-10-12',
     'tresc' => (string)ob_get_clean(),
 ];
 require dirname(__DIR__) . '/components/poradnik.php';
