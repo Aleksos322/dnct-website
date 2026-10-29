@@ -36,7 +36,7 @@ ob_start();
     <div class="ptn-zalety">
         <div><strong>-10%</strong><span>dla widza na pierwszy zakup z Twoim kodem</span></div>
         <div><strong>15%</strong><span>dla Ciebie od każdej płatności tego widza przez 6 miesięcy</span></div>
-        <div><strong>Zaawansowany</strong><span>darmowy serwer na czas współpracy: 10 GB RAM, 4 vCore, 60 GB SSD</span></div>
+        <div><strong>Zaawansowany</strong><span>darmowy serwer na czas współpracy: 10 GB RAM, 4 vCore, 60 GB NVMe</span></div>
     </div>
 
     <h2>Jak to działa</h2>

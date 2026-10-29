@@ -9,13 +9,13 @@ return [
     'title' => 'Minecraft server for friends: which plan to choose? | DNCT',
     'opis'  => 'Which Minecraft server to pick for your friends? Plans compared for vanilla, plugins and modpacks: how much RAM you need, what it costs and when to upgrade.',
     'tresc' => <<<'HTML'
-<p><strong>Short answer:</strong> for 2-5 friends playing plain survival or with light plugins, a sensible start is <strong>Budget</strong>: 3 GB RAM, 2 vCore and 5 GB SSD for 9,99 zł per month. If the world gets bigger or you add more plugins, choose <strong>Basic</strong>: 4 GB RAM and 15 GB SSD for 15,99 zł per month.</p>
+<p><strong>Short answer:</strong> for 2-5 friends playing plain survival or with light plugins, a sensible start is <strong>Budget</strong>: 3 GB RAM, 2 vCore and 5 GB NVMe for 9,99 zł per month. If the world gets bigger or you add more plugins, choose <strong>Basic</strong>: 4 GB RAM and 15 GB NVMe for 15,99 zł per month.</p>
 
 <h2>First decide how you'll play</h2>
 <p>In Minecraft the number of players isn't the only factor. The same server for five people can run light on vanilla, yet put real load on the CPU and memory when everyone explores new chunks or uses mods.</p>
 <ul>
-    <li><strong>2-5 players, vanilla or Paper with a few plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB SSD, 9,99 zł/mies.</li>
-    <li><strong>5-10 players, a bigger world or more plugins:</strong> Basic - 4 GB RAM, 2 vCore, 15 GB SSD, 15,99 zł/mies.</li>
+    <li><strong>2-5 players, vanilla or Paper with a few plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB NVMe, 9,99 zł/mies.</li>
+    <li><strong>5-10 players, a bigger world or more plugins:</strong> Basic - 4 GB RAM, 2 vCore, 15 GB NVMe, 15,99 zł/mies.</li>
     <li><strong>Forge, Fabric or NeoForge modpack:</strong> start by checking the pack's requirements. Full modpacks usually need at least 8 GB RAM, i.e. the Standard plan for 36,99 zł/mies.</li>
 </ul>
 
@@ -37,13 +37,13 @@ HTML,
     'title' => 'Minecraft-Server für Freunde: welches Paket? | DNCT',
     'opis'  => 'Welchen Minecraft-Server für deine Freunde? Pakete im Vergleich für Vanilla, Plugins und Modpacks: wie viel RAM du brauchst, was es kostet und wann du upgraden solltest.',
     'tresc' => <<<'HTML'
-<p><strong>Kurz gesagt:</strong> für 2-5 Freunde mit normalem Survival oder leichten Plugins ist <strong>Budget</strong> ein guter Start: 3 GB RAM, 2 vCore und 5 GB SSD für 9,99 zł im Monat. Wird die Welt größer oder kommen mehr Plugins dazu, nimm <strong>Basis</strong>: 4 GB RAM und 15 GB SSD für 15,99 zł im Monat.</p>
+<p><strong>Kurz gesagt:</strong> für 2-5 Freunde mit normalem Survival oder leichten Plugins ist <strong>Budget</strong> ein guter Start: 3 GB RAM, 2 vCore und 5 GB NVMe für 9,99 zł im Monat. Wird die Welt größer oder kommen mehr Plugins dazu, nimm <strong>Basis</strong>: 4 GB RAM und 15 GB NVMe für 15,99 zł im Monat.</p>
 
 <h2>Erst klären, wie ihr spielt</h2>
 <p>In Minecraft ist die Spielerzahl nicht der einzige Faktor. Derselbe Server für fünf Leute läuft mit Vanilla locker, kann CPU und Speicher aber stark belasten, wenn alle neue Chunks erkunden oder Mods nutzen.</p>
 <ul>
-    <li><strong>2-5 Spieler, Vanilla oder Paper mit ein paar Plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB SSD, 9,99 zł/mies.</li>
-    <li><strong>5-10 Spieler, größere Welt oder mehr Plugins:</strong> Basis - 4 GB RAM, 2 vCore, 15 GB SSD, 15,99 zł/mies.</li>
+    <li><strong>2-5 Spieler, Vanilla oder Paper mit ein paar Plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB NVMe, 9,99 zł/mies.</li>
+    <li><strong>5-10 Spieler, größere Welt oder mehr Plugins:</strong> Basis - 4 GB RAM, 2 vCore, 15 GB NVMe, 15,99 zł/mies.</li>
     <li><strong>Modpack mit Forge, Fabric oder NeoForge:</strong> prüf zuerst die Anforderungen des Packs. Volle Modpacks brauchen meist mindestens 8 GB RAM, also das Paket Standard für 36,99 zł/mies.</li>
 </ul>
 

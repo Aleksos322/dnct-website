@@ -79,7 +79,7 @@ ob_start();
             <article>
                 <div class="about-feature-icon" aria-hidden="true">⌁</div>
                 <h3>Serwery w Polsce</h3>
-                <p>Usługi działają na sprzęcie w Polsce; w każdym planie jest ochrona DDoS. Szczegóły są przy ofercie gry.</p>
+                <p>Usługi działają na sprzęcie w Polsce (Puławy) na dyskach NVMe; w każdym planie jest ochrona DDoS od Cloudflare. Szczegóły są przy ofercie gry.</p>
             </article>
         </div>
     </section>

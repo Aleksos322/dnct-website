@@ -90,7 +90,7 @@ const CENNIK_STRONY_GIER = [
     'minecraft' => [
         'slug'        => 'hosting-minecraft',
         'title'       => 'Hosting Minecraft - serwer od 6,99 zł/mies. | DNCT',
-        'description' => 'Serwer Minecraft od 6,99 zł miesięcznie (3,99 zł za tydzień): Paper, Fabric, Forge, pluginy i mody, stały RAM i CPU, dyski SSD, serwery w Polsce.',
+        'description' => 'Serwer Minecraft od 6,99 zł miesięcznie (3,99 zł za tydzień): Paper, Fabric, Forge, pluginy i mody, stały RAM i CPU, dyski NVMe, serwery w Polsce.',
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Minecraft',
         'lead'        => 'Serwer Minecraft na Paperze, Fabricu albo Forge - od 1,5 do 32 GB RAM. Silnik i wersję gry zmieniasz w panelu jednym kliknięciem, a serwer startuje zaraz po płatności.',
@@ -116,7 +116,7 @@ const CENNIK_STRONY_GIER = [
     'zomboid' => [
         'slug'        => 'hosting-project-zomboid',
         'title'       => 'Hosting Project Zomboid - serwer od 29,99 zł/mies. | DNCT',
-        'description' => 'Serwer Project Zomboid (Build 42) od 29,99 zł/mies.: od 5 do 100 graczy, stały RAM i CPU, dyski SSD, serwery w Polsce. Start zaraz po płatności.',
+        'description' => 'Serwer Project Zomboid (Build 42) od 29,99 zł/mies.: od 5 do 100 graczy, stały RAM i CPU, dyski NVMe, serwery w Polsce. Start zaraz po płatności.',
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'Project Zomboid',
         'lead'        => 'Serwer Build 42 dla Ciebie i znajomych - od 5 do 100 graczy. Wybierasz liczbę slotów, płacisz kartą albo BLIK-iem, a serwer startuje sam, bez czekania na nikogo.',
@@ -142,7 +142,7 @@ const CENNIK_STRONY_GIER = [
 ];
 
 $pageTitle       = 'Cennik hostingu gier - DNCT Hosting';
-$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story: gotowe plany i serwery na liczbę graczy. Stałe limity RAM i CPU, ochrona DDoS, dyski SSD.';
+$metaDescription = 'Cennik serwerów Minecraft, Project Zomboid i Vintage Story: gotowe plany i serwery na liczbę graczy. Stałe limity RAM i CPU, ochrona DDoS, dyski NVMe.';
 $canonicalUrl    = 'https://game.dnct.pl/cennik';
 $centerContent   = false;
 
@@ -315,7 +315,7 @@ foreach ($gamesWithPlans as $game) {
             $schemaProducts[] = [
                 '@type'       => 'Product',
                 'name'        => $game['name'] . ' - ' . (int)$tier['slots'] . ' slotów',
-                'description' => sprintf('Serwer %s dla %d graczy: %s GB RAM, %s vCore, %d GB SSD, %d backupy.',
+                'description' => sprintf('Serwer %s dla %d graczy: %s GB RAM, %s vCore, %d GB NVMe, %d backupy.',
                     $game['name'], (int)$tier['slots'],
                     rtrim(rtrim(number_format((float)$tier['ram_gb'], 1, '.', ''), '0'), '.'),
                     rtrim(rtrim(number_format((float)$tier['cpu_cores'], 1, '.', ''), '0'), '.'),
@@ -367,7 +367,7 @@ foreach ($gamesWithPlans as $game) {
             '@type' => 'Product',
             'name'  => $game['name'] . ' - ' . $plan['name'],
             'description' => sprintf(
-                'Serwer %s: %s RAM, %s SSD, %s vCore.',
+                'Serwer %s: %s RAM, %s NVMe, %s vCore.',
                 $game['name'],
                 cennik_size((int)($plan['ram_mb'] ?? 0)),
                 cennik_size((int)($plan['ssd_mb'] ?? 0)),
@@ -383,8 +383,8 @@ foreach ($gamesWithPlans as $game) {
 $schemaFaq = [
     [
         'q' => 'Co jest wliczone w każdy plan hostingu DNCT?',
-        'a' => 'Pełny dostęp do panelu i konsoli, dyski SSD ze stałymi limitami RAM-u i CPU, '
-             . 'kopie zapasowe w panelu na żądanie, ochrona DDoS, '
+        'a' => 'Pełny dostęp do panelu i konsoli, dyski NVMe ze stałymi limitami RAM-u i CPU, '
+             . 'kopie zapasowe w panelu na żądanie, ochrona DDoS od Cloudflare, '
              . 'własna subdomena, zmiana wersji gry i wsparcie przez Discord bez systemu biletów.',
     ],
     [
@@ -393,7 +393,7 @@ $schemaFaq = [
     ],
     [
         'q' => 'Gdzie fizycznie stoją serwery DNCT Hosting?',
-        'a' => 'Serwery stoją w Polsce, nie za granicą - krótsza droga oznacza niższy ping i mniej lagów w grze.',
+        'a' => 'Serwery stoją w Polsce, w Puławach, nie za granicą - krótsza droga oznacza niższy ping i mniej lagów w grze.',
     ],
     [
         'q' => 'Czy płatność roczna jest tańsza niż miesięczna?',
@@ -695,7 +695,7 @@ ob_start();
                 <h2 class="cnk-h2">Bez gwiazdek i dopłat</h2>
             <ul class="cnk-list" data-odhacz>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Pełny dostęp do panelu i konsoli</li>
-                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Dyski SSD, stałe limity RAM-u i CPU</li>
+                <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Dyski NVMe, stałe limity RAM-u i CPU</li>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Kopie zapasowe w panelu na żądanie</li>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Ochrona DDoS</li>
                 <li><span class="cnk-check" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span> Własna subdomena i zmiana wersji gry</li>
@@ -806,6 +806,55 @@ ob_start();
             <?php endforeach; ?>
             <p class="cnk-focus-more">Poradniki: <a href="/poradniki/">jak postawić serwer, dodać mody i ustawić świat</a> · Inne gry: <a href="/cennik">pełny cennik</a>.</p>
         </section>
+    <?php endif; ?>
+
+    <?php /* Tabele parametrów (GEO, 29.10.2026): te same dane co karty i JSON-LD, ale w
+             postaci, którą wyszukiwarki i asystenci AI potrafią zacytować wiersz po wierszu.
+             Na stronie gry (/hosting-minecraft...) tylko ta gra, w ogólnym cenniku wszystkie. */ ?>
+    <?php if (!$dbError && $gamesWithPlans): ?>
+        <?php foreach ($gamesWithPlans as $tabGame):
+            if ($focus !== null && $focusGame !== null && $tabGame['type'] !== $focusGame) { continue; }
+            $tabHasPlans = $tabGame['plans'] !== [];
+            $tabRows = $tabHasPlans ? $tabGame['plans'] : $tabGame['tiers'];
+            ?>
+            <section class="cnk-spec-table glass" aria-labelledby="cnk-spec-<?php echo htmlspecialchars($tabGame['type']); ?>">
+                <h2 id="cnk-spec-<?php echo htmlspecialchars($tabGame['type']); ?>">Parametry i ceny: serwer <?php echo htmlspecialchars($tabGame['name']); ?></h2>
+                <div class="cnk-spec-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col"><?php echo $tabHasPlans ? 'Pakiet' : 'Gracze (sloty)'; ?></th>
+                            <th scope="col">RAM</th>
+                            <th scope="col">CPU</th>
+                            <th scope="col">Dysk NVMe</th>
+                            <th scope="col">Kopie zapasowe</th>
+                            <th scope="col">Ochrona DDoS</th>
+                            <th scope="col">Lokalizacja</th>
+                            <th scope="col">Cena / miesiąc (PLN)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($tabRows as $row):
+                        $rowRam = $tabHasPlans ? cennik_size((int)$row['ram_mb'])
+                            : rtrim(rtrim(number_format((float)$row['ram_gb'], 1, '.', ''), '0'), '.') . 'GB';
+                        $rowCpu = rtrim(rtrim(number_format((float)$row['cpu_cores'], 1, '.', ''), '0'), '.');
+                        ?>
+                        <tr>
+                            <th scope="row"><?php echo htmlspecialchars($tabHasPlans ? (string)$row['name'] : (string)(int)$row['slots']); ?></th>
+                            <td><?php echo htmlspecialchars($rowRam); ?></td>
+                            <td><?php echo htmlspecialchars($rowCpu); ?> vCore</td>
+                            <td><?php echo htmlspecialchars(cennik_size((int)$row['ssd_mb'])); ?></td>
+                            <td><?php echo (int)$row['backups_limit']; ?></td>
+                            <td>Cloudflare</td>
+                            <td>Puławy, Polska</td>
+                            <td><?php echo htmlspecialchars(cennik_price_label($row['price'])); ?> zł</td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+                </div>
+            </section>
+        <?php endforeach; ?>
     <?php endif; ?>
 
     <div class="cennik-note">

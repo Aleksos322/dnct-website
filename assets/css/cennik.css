@@ -2826,3 +2826,12 @@ html[lang="de"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0,00
     .cennik-page .pcard-specs svg, .cennik-page .pcard-price-cur { transition: none; }
     .cennik-page .pcard-specs li:hover svg, .cennik-page .plan-pick:hover .pcard-price-cur { transform: none; }
 }
+
+/* Tabele parametrów pod katalogiem (GEO): ten sam szkielet co .cnk-focus-faq. */
+.cnk-spec-table { margin: 2.5rem 0 1.5rem; padding: clamp(1.25rem, 3vw, 2rem); border-radius: 1.25rem; }
+.cnk-spec-table h2 { margin: 0 0 1rem; font-size: 1.25rem; font-weight: 800; color: #f1f5f9; }
+.cnk-spec-scroll { overflow-x: auto; }
+.cnk-spec-table table { width: 100%; border-collapse: collapse; font-size: .92rem; color: #cbd5e1; white-space: nowrap; }
+.cnk-spec-table th, .cnk-spec-table td { padding: .6rem .8rem; text-align: left; border-top: 1px solid rgba(148, 163, 184, 0.15); }
+.cnk-spec-table thead th { border-top: 0; font-size: .75rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: #94a3b8; }
+.cnk-spec-table tbody th { font-weight: 700; color: #f1f5f9; }

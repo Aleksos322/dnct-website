@@ -3,13 +3,13 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p><strong>Krótka odpowiedź:</strong> dla małej osady do pięciu osób wybierz pakiet Vintage Story z 4 GB RAM, 3 vCore i 5 GB SSD za 19,99 zł miesięcznie. Dla dziesięciu osób jest dostępny próg 4,5 GB RAM, 3 vCore i 10 GB SSD za 22,99 zł miesięcznie.</p>
+<p><strong>Krótka odpowiedź:</strong> dla małej osady do pięciu osób wybierz pakiet Vintage Story z 4 GB RAM, 3 vCore i 5 GB NVMe za 19,99 zł miesięcznie. Dla dziesięciu osób jest dostępny próg 4,5 GB RAM, 3 vCore i 10 GB NVMe za 22,99 zł miesięcznie.</p>
 
 <h2>Dobór pakietu do ekipy</h2>
 <ul>
-    <li><strong>Do 5 znajomych, podstawowa rozgrywka:</strong> 4 GB RAM, 3 vCore, 5 GB SSD — 19,99 zł/mies.</li>
-    <li><strong>Do 10 znajomych:</strong> 4,5 GB RAM, 3 vCore, 10 GB SSD — 22,99 zł/mies.</li>
-    <li><strong>Większa osada, rozbudowany świat albo więcej modów:</strong> wybierz wyższy próg. Dla 20 osób to 6 GB RAM, 3 vCore i 15 GB SSD za 30,99 zł/mies.</li>
+    <li><strong>Do 5 znajomych, podstawowa rozgrywka:</strong> 4 GB RAM, 3 vCore, 5 GB NVMe — 19,99 zł/mies.</li>
+    <li><strong>Do 10 znajomych:</strong> 4,5 GB RAM, 3 vCore, 10 GB NVMe — 22,99 zł/mies.</li>
+    <li><strong>Większa osada, rozbudowany świat albo więcej modów:</strong> wybierz wyższy próg. Dla 20 osób to 6 GB RAM, 3 vCore i 15 GB NVMe za 30,99 zł/mies.</li>
 </ul>
 
 <h2>Co obciąża serwer Vintage Story?</h2>
@@ -29,6 +29,7 @@ $poradnik = [
     'title' => 'Serwer Vintage Story dla znajomych: jaki plan wybrać? | DNCT',
     'opis'  => 'Jaki serwer Vintage Story wybrać dla znajomych w Polsce? Konkretne pakiety dla 5, 10 i 20 osób, mody, backupy oraz dobór RAM-u i CPU.',
     'data'  => '2026-10-09',
+    'zmiana' => '2026-10-12',
     'tresc' => (string)ob_get_clean(),
 ];
 require dirname(__DIR__) . '/components/poradnik.php';

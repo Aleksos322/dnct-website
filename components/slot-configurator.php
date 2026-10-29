@@ -236,7 +236,7 @@ function render_slot_configurator(
                                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg>
                             <span class="pcard-spec-val" data-role="dysk"></span>
                             <span class="cfg-meter" aria-hidden="true"><i data-role="dyskMeter"></i></span>
-                            <span class="pcard-spec-lbl">Dysk SSD</span>
+                            <span class="pcard-spec-lbl">Dysk NVMe</span>
                         </li>
                         <li>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -315,7 +315,7 @@ function render_slot_configurator(
                 <table>
                     <thead>
                         <tr>
-                            <th>Sloty</th><th>RAM</th><th>Procesor</th><th>Dysk SSD</th><th>Backupy</th>
+                            <th>Sloty</th><th>RAM</th><th>Procesor</th><th>Dysk NVMe</th><th>Backupy</th>
                             <?php foreach ($periods as $p): ?><th><?php echo htmlspecialchars((string)$p['label']); ?></th><?php endforeach; ?>
                         </tr>
                     </thead>
