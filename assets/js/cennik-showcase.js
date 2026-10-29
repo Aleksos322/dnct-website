@@ -62,6 +62,12 @@
                 ? (tableHead.offsetHeight + 2 + (parseFloat(getComputedStyle(catalogue).rowGap) || 0)) + 'px'
                 : '0px');
             var height = catalogue.offsetHeight;
+            // Sekcja ma się zablokować od razu przy pierwszym scrollu, a nie
+            // dopiero po przewinięciu odstępu nad nią - przypinamy ją tam, gdzie
+            // leży naturalnie (jeśli się mieści), a 88 px zostaje zapasem.
+            var natural = Math.round(scrollArea.getBoundingClientRect().top + window.scrollY);
+            pinTop = natural > 0 && natural <= window.innerHeight - height ? natural : 88;
+            scrollArea.style.setProperty('--cnk-pin-top', pinTop + 'px');
             var wasPinned = pinned;
             var startY = scrollStart();
             var wasVisible = catalogue.getBoundingClientRect().bottom > pinTop && scrollArea.getBoundingClientRect().top <= pinTop;
