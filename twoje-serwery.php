@@ -180,8 +180,22 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
 
     /* JEDEN STAN NA KARTĘ, w kolejności pilności. Klient ma zobaczyć
        najważniejszą rzecz, a nie wszystkie naraz. */
+    /* Opłacone, ale serwer czeka na koniec 14 dni na odstąpienie (klient nie
+       zażądał startu przy zakupie). Może to zmienić przyciskiem na karcie. */
+    $card['deferred_start'] = null;
+    if ($order['status'] === 'paid'
+        && ($order['kind'] ?? 'new') === 'new'
+        && empty($order['ptero_server_id'])
+        && empty($order['immediate_service_requested_at'])
+        && !empty($order['service_start_at'])
+    ) {
+        $card['deferred_start'] = czas_fmt((string)$order['service_start_at'], 'd.m.Y \o H:i');
+    }
+
     if ($order['status'] === 'failed') {
         [$card['tone'], $card['state']] = ['bad', 'Wymaga naszej reakcji'];
+    } elseif ($card['deferred_start'] !== null) {
+        [$card['tone'], $card['state']] = ['warn', 'Start po terminie odstąpienia'];
     } elseif ($daysLeft !== null && $daysLeft < 0) {
         [$card['tone'], $card['state']] = ['bad', 'Wygasł'];
     } elseif ($inGrace) {
@@ -572,6 +586,20 @@ foreach ($aktywne as $c) {
                     <p class="srv-note">Ten serwer odnawia się sam. Kolejny okres pobierze się automatycznie.</p>
                 <?php elseif (!$isPanelOnly && $c['is_subscription']): ?>
                     <p class="srv-note">Abonament wyłączony - serwer działa do końca opłaconego okresu.</p>
+                <?php endif; ?>
+
+                <?php if (!$isPanelOnly && !empty($c['deferred_start']) && !$adminWidok): ?>
+                    <div class="srv-panel" data-role="startNowPanel">
+                        <h3 class="srv-panel-h">Serwer uruchomimy <?php echo htmlspecialchars($c['deferred_start']); ?></h3>
+                        <p class="srv-note">
+                            Masz 14 dni na odstąpienie od umowy, dlatego nie uruchamiamy usługi od razu.
+                            Jeśli chcesz grać już teraz, możesz zażądać startu natychmiast - serwer powstanie
+                            od razu po kliknięciu, a opłacony okres liczymy od tej chwili.
+                            Potwierdzasz wtedy, że po pełnym wykonaniu usługi możesz utracić prawo odstąpienia;
+                            przy odstąpieniu przed pełnym wykonaniem rozliczymy tylko część wykonaną do tego momentu.
+                        </p>
+                        <button type="button" class="srv-btn is-primary" data-role="startNow">Rozumiem i rezygnuję z 14-dniowego zwrotu - uruchom teraz</button>
+                    </div>
                 <?php endif; ?>
 
                 <?php /* --- PASEK AKCJI --- */ ?>

@@ -158,6 +158,19 @@
         }
 
         /* ---------------------------------------------------------------
+           Start przed końcem 14 dni na odstąpienie (żądanie klienta)
+           --------------------------------------------------------------- */
+        var btnStartNow = card.querySelector('[data-role="startNow"]');
+        if (btnStartNow) {
+            btnStartNow.addEventListener('click', function () {
+                if (!window.confirm('Uruchomić serwer teraz?\n\nRezygnujesz z 14-dniowego terminu odstąpienia od umowy: po pełnym wykonaniu usługi możesz utracić prawo odstąpienia, a przy odstąpieniu przed pełnym wykonaniem rozliczymy tylko część wykonaną do tego momentu.')) {
+                    return;
+                }
+                post('/api/serwer/start-teraz.php', { order_id: orderId }, btnStartNow, btnStartNow.textContent);
+            });
+        }
+
+        /* ---------------------------------------------------------------
            Rezygnacja z wygasłego serwera - znika z listy (orders.hidden_at)
            --------------------------------------------------------------- */
         var btnDismiss = card.querySelector('[data-role="dismiss"]');
