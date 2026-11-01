@@ -236,7 +236,9 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
                 'info',
                 'Płatność przyjęta - uruchomienie po terminie odstąpienia',
                 'Nie wybrano natychmiastowego startu. Serwer uruchomimy '
-                . czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i') . '.'
+                . czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i')
+                . '. Pomyliłeś(-aś) się i chcesz grać od razu? Kliknij przycisk i uruchom serwer teraz.',
+                ['link' => '/twoje-serwery', 'action_label' => 'Uruchom teraz']
             );
             return true;
         }
