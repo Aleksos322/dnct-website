@@ -142,8 +142,8 @@ require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/panel-band.php';
 require_once __DIR__ . '/components/jak-to-dziala.php';
 
-$pageTitle       = 'DNCT Hosting - serwery Minecraft i Project Zomboid';
-$metaDescription = 'Polski hosting serwerów Minecraft, Project Zomboid i Vintage Story z ochroną DDoS. Serwer startuje zaraz po płatności, od 3,99 zł za tydzień.';
+$pageTitle       = 'DNCT Hosting - serwery gier od 3,99 zł, start po płatności';
+$metaDescription = 'Serwer Minecraft, Project Zomboid lub Vintage Story gotowy kilkanaście sekund po płatności. Ochrona DDoS, dyski NVMe, polskie wsparcie. Od 3,99 zł za tydzień.';
 $canonicalUrl    = 'https://game.dnct.pl/';
 $centerContent   = false; // strona wielosekcyjna, nie centrujemy pionowo
 
