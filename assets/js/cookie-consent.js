@@ -9,6 +9,7 @@
     const CONSENT_COOKIE_NAME = 'dnct_cookie_consent';
     const CONSENT_COOKIE_EXPIRY = 365; // dni
     const GA_ID = 'G-0EK3K0EMFP';
+    const ADS_ID = 'AW-18500548843';
 
     /**
      * Odczyt cookie
@@ -84,6 +85,7 @@
                 'anonymize_ip': true,
                 'cookie_flags': 'SameSite=Lax;Secure'
             });
+            window.gtag('config', ADS_ID);
             return;
         }
 
@@ -104,6 +106,7 @@
             'anonymize_ip': true,
             'cookie_flags': 'SameSite=Lax;Secure'
         });
+        gtag('config', ADS_ID);
 
         console.log('[Cookie Consent] Google Analytics załadowane');
     }

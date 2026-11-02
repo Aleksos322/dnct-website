@@ -106,6 +106,7 @@ json_ok([
     'period_days'  => (int)$order['period_days'],
     'billing_mode' => $order['billing_mode'],
     'amount'       => pricing_format((int)$order['amount_gross']),
+    'amount_value' => round((int)$order['amount_gross'] / 100, 2),
     // Baza trzyma UTC - front dostaje gotowy czas polski (backend/lib/czas.php).
     'expires_at'   => $expiresAt !== null ? czas_fmt((string)$expiresAt) : null,
     'server_ready' => $order['status'] === 'provisioned',
