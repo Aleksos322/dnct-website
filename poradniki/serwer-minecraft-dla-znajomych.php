@@ -10,7 +10,7 @@ ob_start(); ?>
 <ul>
     <li><strong>2-5 osób, vanilla albo Paper z kilkoma pluginami:</strong> Budżetowy - 3 GB RAM, 2 vCore, 5 GB NVMe, 9,99 zł/mies.</li>
     <li><strong>5-10 osób, większy świat albo więcej pluginów:</strong> Podstawowy - 4 GB RAM, 2 vCore, 15 GB NVMe, 15,99 zł/mies.</li>
-    <li><strong>Modpack Forge, Fabric lub NeoForge:</strong> zacznij od sprawdzenia wymagań paczki. Pełne modpacki zwykle potrzebują co najmniej 8 GB RAM, czyli planu Standardowy za 36,99 zł/mies.</li>
+    <li><strong>Modpack Forge, Fabric lub NeoForge:</strong> zacznij od sprawdzenia wymagań paczki. Pełne modpacki zwykle potrzebują co najmniej 8 GB RAM, czyli planu Standardowy za 33,99 zł/mies.</li>
 </ul>
 
 <h2>Czego nie wybierać tylko dlatego, że jest najtańsze?</h2>

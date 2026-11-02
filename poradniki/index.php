@@ -19,7 +19,7 @@ ob_start(); ?>
         <h2><a href="/poradniki/<?php echo $slug; ?>" style="color:#f1f5f9;text-decoration:none;"><?php echo htmlspecialchars($tytul); ?></a></h2>
         <p><?php echo htmlspecialchars($opis); ?> <a href="/poradniki/<?php echo $slug; ?>">Czytaj</a></p>
     <?php endforeach; ?>
-    <p style="margin-top:2rem;">Szukasz serwera? <a href="/hosting-minecraft">Hosting Minecraft od 6,99 zł/mies.</a> · <a href="/hosting-project-zomboid">Hosting Project Zomboid od 29,99 zł/mies.</a> · <a href="/hosting-vintage-story">Hosting Vintage Story od 19,99 zł/mies.</a></p>
+    <p style="margin-top:2rem;">Szukasz serwera? <a href="/hosting-minecraft">Hosting Minecraft od 6,99 zł/mies.</a> · <a href="/hosting-project-zomboid">Hosting Project Zomboid od 19,99 zł/mies.</a> · <a href="/hosting-vintage-story">Hosting Vintage Story od 12,99 zł/mies.</a></p>
 </article>
 <?php
 $content = ob_get_clean();

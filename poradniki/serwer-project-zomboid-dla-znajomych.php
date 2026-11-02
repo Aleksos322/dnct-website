@@ -3,15 +3,15 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p><strong>Krótka odpowiedź:</strong> prywatny serwer Project Zomboid dla maksymalnie pięciu znajomych zaczyna się w DNCT od 29,99 zł miesięcznie. Dostajesz 6 GB RAM, 3 vCore i 10 GB NVMe. To uczciwe minimum dla świata dostępnego całą dobę — nie ma tu pakietu „do 20 zł”, który obiecywałby stabilną grę w Zomboidzie.</p>
+<p><strong>Krótka odpowiedź:</strong> prywatny serwer Project Zomboid dla maksymalnie pięciu znajomych zaczyna się w DNCT od 19,99 zł miesięcznie. Dostajesz 6 GB RAM, 3 vCore i 20 GB NVMe. To rozsądne minimum dla świata dostępnego całą dobę.</p>
 
 <h2>Ile kosztuje serwer dla małej ekipy?</h2>
 <ul>
-    <li><strong>Do 5 osób:</strong> 6 GB RAM, 3 vCore, 10 GB NVMe — 29,99 zł/mies.</li>
-    <li><strong>Do 10 osób:</strong> 7 GB RAM, 3 vCore, 15 GB NVMe — 34,99 zł/mies.</li>
+    <li><strong>Do 5 osób:</strong> 6 GB RAM, 3 vCore, 20 GB NVMe — 19,99 zł/mies.</li>
+    <li><strong>Do 10 osób:</strong> 8 GB RAM, 3 vCore, 25 GB NVMe — 29,99 zł/mies.</li>
     <li><strong>Więcej osób, mapy dodatkowe albo dużo modów:</strong> wybierz wyższy próg w konfiguratorze. W Zomboidzie pamięć rośnie także wtedy, gdy gracze rozchodzą się po mapie.</li>
 </ul>
-<p>Koszt można podzielić między ekipę: przy pięciu osobach pakiet startowy to niecałe 6 zł na osobę miesięcznie. Ważniejsze od samej liczby slotów są mody, dodatkowe mapy, liczba zombie i to, czy gracze przebywają w różnych częściach świata.</p>
+<p>Koszt można podzielić między ekipę: przy pięciu osobach pakiet startowy to około 4 zł na osobę miesięcznie. Ważniejsze od samej liczby slotów są mody, dodatkowe mapy, liczba zombie i to, czy gracze przebywają w różnych częściach świata.</p>
 
 <h2>Dlaczego nie hostować po prostu z gry?</h2>
 <p>Hostowanie z poziomu gry działa, gdy właściciel ma włączony komputer i jest online. Własny serwer działa niezależnie od niego: znajomi mogą wejść, gdy Ciebie nie ma, a świat ma stały adres oraz kopie zapasowe. To szczególnie istotne w długiej kampanii, w której nie chcesz stracić zapisu po błędzie lub aktualizacji moda.</p>

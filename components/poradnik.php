@@ -33,8 +33,8 @@ const PORADNIKI = [
 
 /* Ramka z ofertą pod poradnikiem - per gra. */
 const PORADNIKI_OFERTA = [
-    'zomboid'   => ['Serwer Project Zomboid od 29,99 zł miesięcznie', 'Od 5 do 100 graczy, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-project-zomboid', 'Project Zomboid Build 42'],
-    'vintagestory' => ['Serwer Vintage Story od 19,99 zł miesięcznie', 'Od 5 do 100 graczy, aktualna wersja gry, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-vintage-story', 'Vintage Story'],
+    'zomboid'   => ['Serwer Project Zomboid od 19,99 zł miesięcznie', 'Od 5 do 100 graczy, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-project-zomboid', 'Project Zomboid Build 42'],
+    'vintagestory' => ['Serwer Vintage Story od 12,99 zł miesięcznie', 'Od 5 do 100 graczy, aktualna wersja gry, stały RAM i CPU, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-vintage-story', 'Vintage Story'],
     'minecraft' => ['Serwer Minecraft od 6,99 zł miesięcznie', 'Paper, Fabric albo Forge, od 1,5 do 32 GB RAM, dyski NVMe, serwery w Polsce. Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem.', '/hosting-minecraft', 'Minecraft Java'],
 ];
 
