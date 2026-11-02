@@ -20,6 +20,9 @@ declare(strict_types=1);
 /** Krótko: logowanie nie może czekać na panel hostingu. */
 const HOSTING_TIMEOUT = 4;
 
+/** Akcje po zapłacie: panel potrafi tworzyć konto kilkanaście sekund, a timeout zrobił z udanego zakupu "nieudane" (zamówienie #7). */
+const HOSTING_TIMEOUT_SLOW = 25;
+
 function hosting_enabled(): bool
 {
     return env('HOSTING_PANEL_URL', '') !== '' && env('HOSTING_INTERNAL_TOKEN', '') !== '';
@@ -70,7 +73,7 @@ function hosting_call(string $action, array $fields = []): ?array
             'Authorization: Bearer ' . env('HOSTING_INTERNAL_TOKEN', ''),
         ],
         CURLOPT_CONNECTTIMEOUT => 2,
-        CURLOPT_TIMEOUT        => HOSTING_TIMEOUT,
+        CURLOPT_TIMEOUT        => in_array($action, ['create', 'unsuspend', 'suspend'], true) ? HOSTING_TIMEOUT_SLOW : HOSTING_TIMEOUT,
     ]);
     $raw  = curl_exec($ch);
     $http = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
