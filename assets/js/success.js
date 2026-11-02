@@ -89,6 +89,10 @@
                 // po 60 sekundach oczekiwania.
                 renderDebug(b.debug);
 
+                if (b.server_ready || b.failed) {
+                    trackPurchase(b);
+                }
+
                 if (b.server_ready) {
                     settle('ok', c.ok[0], c.ok[1], true);
                     showMeta(b);
@@ -106,6 +110,23 @@
             .catch(function () {
                 retryOrGiveUp('Brak połączenia z serwerem. Sprawdź panel za chwilę.');
             });
+    }
+
+    /* Konwersja Google Ads - raz na zamowienie. Platnosc jest pewna, gdy
+       zamowienie jest provisioned LUB failed (pieniadze doszly, zawiodl automat).
+       transaction_id = session_id, a znacznik w localStorage chroni przed
+       podwojeniem po odswiezeniu. gtag istnieje tylko po zgodzie na cookies. */
+    function trackPurchase(b) {
+        var key = 'dnct_conv_' + sessionId;
+        try { if (localStorage.getItem(key)) return; } catch (e) {}
+        if (typeof window.gtag !== 'function') return;
+        window.gtag('event', 'conversion', {
+            'send_to': 'AW-18500548843/t02BCLe6orAdEOvx3_VE',
+            'value': b.amount_value,
+            'currency': 'PLN',
+            'transaction_id': sessionId
+        });
+        try { localStorage.setItem(key, '1'); } catch (e) {}
     }
 
     function retryOrGiveUp(message) {
