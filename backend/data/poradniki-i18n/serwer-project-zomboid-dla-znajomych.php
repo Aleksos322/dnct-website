@@ -10,12 +10,12 @@ return [
     'title' => 'Project Zomboid server for friends: cost and sizing | DNCT',
     'opis'  => 'How much does a private Project Zomboid server for friends cost? Specific RAM tiers, the cost for 5 and 10 players, mods, backups and when to change plans.',
     'tresc' => <<<'HTML'
-<p><strong>Short answer:</strong> at DNCT a private Project Zomboid server for up to five friends starts at 29,99 zł per month. You get 6 GB RAM, 3 vCore and 10 GB NVMe. That's an honest minimum for a world that's online around the clock - there's no bargain plan here that promises stable Zomboid on less.</p>
+<p><strong>Short answer:</strong> at DNCT a private Project Zomboid server for up to five friends starts at 19,99 zł per month. You get 6 GB RAM, 3 vCore and 20 GB NVMe. That's a sensible minimum for a world that's online around the clock.</p>
 
 <h2>How much does a server for a small group cost?</h2>
 <ul>
-    <li><strong>Up to 5 players:</strong> 6 GB RAM, 3 vCore, 10 GB NVMe - 29,99 zł/mies.</li>
-    <li><strong>Up to 10 players:</strong> 7 GB RAM, 3 vCore, 15 GB NVMe - 34,99 zł/mies.</li>
+    <li><strong>Up to 5 players:</strong> 6 GB RAM, 3 vCore, 20 GB NVMe - 19,99 zł/mies.</li>
+    <li><strong>Up to 10 players:</strong> 8 GB RAM, 3 vCore, 25 GB NVMe - 29,99 zł/mies.</li>
     <li><strong>More players, extra maps or lots of mods:</strong> pick a higher tier in the configurator. In Zomboid memory also grows when players spread out across the map.</li>
 </ul>
 <p>You can split the cost across the group: with five people, each pays a fifth of the starter plan per month. Mods, extra maps, the zombie count and whether players are in different parts of the world matter more than the slot count itself.</p>
@@ -37,12 +37,12 @@ HTML,
     'title' => 'Project-Zomboid-Server für Freunde: Kosten und Auswahl | DNCT',
     'opis'  => 'Was kostet ein privater Project-Zomboid-Server für Freunde? Konkrete RAM-Stufen, Kosten für 5 und 10 Spieler, Mods, Backups und wann du das Paket wechseln solltest.',
     'tresc' => <<<'HTML'
-<p><strong>Kurz gesagt:</strong> ein privater Project-Zomboid-Server für bis zu fünf Freunde startet bei DNCT ab 29,99 zł im Monat. Du bekommst 6 GB RAM, 3 vCore und 10 GB NVMe. Das ist ein ehrliches Minimum für eine Welt, die rund um die Uhr läuft - ein Billigpaket, das mit weniger stabiles Zomboid verspricht, gibt es bei uns nicht.</p>
+<p><strong>Kurz gesagt:</strong> ein privater Project-Zomboid-Server für bis zu fünf Freunde startet bei DNCT ab 19,99 zł im Monat. Du bekommst 6 GB RAM, 3 vCore und 20 GB NVMe. Das ist ein vernünftiges Minimum für eine Welt, die rund um die Uhr läuft.</p>
 
 <h2>Was kostet ein Server für eine kleine Gruppe?</h2>
 <ul>
-    <li><strong>Bis 5 Spieler:</strong> 6 GB RAM, 3 vCore, 10 GB NVMe - 29,99 zł/mies.</li>
-    <li><strong>Bis 10 Spieler:</strong> 7 GB RAM, 3 vCore, 15 GB NVMe - 34,99 zł/mies.</li>
+    <li><strong>Bis 5 Spieler:</strong> 6 GB RAM, 3 vCore, 20 GB NVMe - 19,99 zł/mies.</li>
+    <li><strong>Bis 10 Spieler:</strong> 8 GB RAM, 3 vCore, 25 GB NVMe - 29,99 zł/mies.</li>
     <li><strong>Mehr Spieler, zusätzliche Karten oder viele Mods:</strong> wähl eine höhere Stufe im Konfigurator. In Zomboid wächst der Speicherbedarf auch, wenn sich die Spieler über die Karte verteilen.</li>
 </ul>
 <p>Die Kosten lassen sich in der Gruppe teilen: bei fünf Leuten zahlt jeder ein Fünftel des Startpakets im Monat. Wichtiger als die Slotzahl sind Mods, zusätzliche Karten, die Zombie-Anzahl und ob die Spieler in verschiedenen Teilen der Welt unterwegs sind.</p>

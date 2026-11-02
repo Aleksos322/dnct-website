@@ -3,13 +3,13 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p><strong>Krótka odpowiedź:</strong> dla małej osady do pięciu osób wybierz pakiet Vintage Story z 4 GB RAM, 3 vCore i 5 GB NVMe za 19,99 zł miesięcznie. Dla dziesięciu osób jest dostępny próg 4,5 GB RAM, 3 vCore i 10 GB NVMe za 22,99 zł miesięcznie.</p>
+<p><strong>Krótka odpowiedź:</strong> dla małej osady do pięciu osób wybierz pakiet Vintage Story z 3 GB RAM, 2 vCore i 15 GB NVMe za 12,99 zł miesięcznie. Dla dziesięciu osób jest dostępny próg 4 GB RAM, 2 vCore i 20 GB NVMe za 16,99 zł miesięcznie.</p>
 
 <h2>Dobór pakietu do ekipy</h2>
 <ul>
-    <li><strong>Do 5 znajomych, podstawowa rozgrywka:</strong> 4 GB RAM, 3 vCore, 5 GB NVMe — 19,99 zł/mies.</li>
-    <li><strong>Do 10 znajomych:</strong> 4,5 GB RAM, 3 vCore, 10 GB NVMe — 22,99 zł/mies.</li>
-    <li><strong>Większa osada, rozbudowany świat albo więcej modów:</strong> wybierz wyższy próg. Dla 20 osób to 6 GB RAM, 3 vCore i 15 GB NVMe za 30,99 zł/mies.</li>
+    <li><strong>Do 5 znajomych, podstawowa rozgrywka:</strong> 3 GB RAM, 2 vCore, 15 GB NVMe — 12,99 zł/mies.</li>
+    <li><strong>Do 10 znajomych:</strong> 4 GB RAM, 2 vCore, 20 GB NVMe — 16,99 zł/mies.</li>
+    <li><strong>Większa osada, rozbudowany świat albo więcej modów:</strong> wybierz wyższy próg. Dla 20 osób to 6 GB RAM, 3 vCore i 25 GB NVMe za 24,99 zł/mies.</li>
 </ul>
 
 <h2>Co obciąża serwer Vintage Story?</h2>

@@ -16,7 +16,7 @@ return [
 <ul>
     <li><strong>2-5 players, vanilla or Paper with a few plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB NVMe, 9,99 zł/mies.</li>
     <li><strong>5-10 players, a bigger world or more plugins:</strong> Basic - 4 GB RAM, 2 vCore, 15 GB NVMe, 15,99 zł/mies.</li>
-    <li><strong>Forge, Fabric or NeoForge modpack:</strong> start by checking the pack's requirements. Full modpacks usually need at least 8 GB RAM, i.e. the Standard plan for 36,99 zł/mies.</li>
+    <li><strong>Forge, Fabric or NeoForge modpack:</strong> start by checking the pack's requirements. Full modpacks usually need at least 8 GB RAM, i.e. the Standard plan for 33,99 zł/mies.</li>
 </ul>
 
 <h2>What not to choose just because it's the cheapest</h2>
@@ -44,7 +44,7 @@ HTML,
 <ul>
     <li><strong>2-5 Spieler, Vanilla oder Paper mit ein paar Plugins:</strong> Budget - 3 GB RAM, 2 vCore, 5 GB NVMe, 9,99 zł/mies.</li>
     <li><strong>5-10 Spieler, größere Welt oder mehr Plugins:</strong> Basis - 4 GB RAM, 2 vCore, 15 GB NVMe, 15,99 zł/mies.</li>
-    <li><strong>Modpack mit Forge, Fabric oder NeoForge:</strong> prüf zuerst die Anforderungen des Packs. Volle Modpacks brauchen meist mindestens 8 GB RAM, also das Paket Standard für 36,99 zł/mies.</li>
+    <li><strong>Modpack mit Forge, Fabric oder NeoForge:</strong> prüf zuerst die Anforderungen des Packs. Volle Modpacks brauchen meist mindestens 8 GB RAM, also das Paket Standard für 33,99 zł/mies.</li>
 </ul>
 
 <h2>Was du nicht nur nehmen solltest, weil es am billigsten ist</h2>

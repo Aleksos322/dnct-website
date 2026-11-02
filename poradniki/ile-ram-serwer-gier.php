@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 ob_start(); ?>
-<p><strong>Krótka odpowiedź:</strong> do Minecrafta dla 2-5 znajomych wystarczą 3-4 GB RAM, do modpacka zacznij od 8 GB, a serwer Project Zomboid dla 5 osób potrzebuje około 6 GB. Vintage Story jest lżejsze: 4 GB wystarczy dla pięciu osób. Poniżej tabela i reguły, które pozwalają dobrać pamięć bez przepłacania.</p>
+<p><strong>Krótka odpowiedź:</strong> do Minecrafta dla 2-5 znajomych wystarczą 3-4 GB RAM, do modpacka zacznij od 8 GB, a serwer Project Zomboid dla 5 osób potrzebuje około 6 GB. Vintage Story jest lżejsze: 3 GB wystarczą dla pięciu osób. Poniżej tabela i reguły, które pozwalają dobrać pamięć bez przepłacania.</p>
 
 <h2>Ile RAM-u na jaki serwer - tabela</h2>
 <div style="overflow-x:auto">
@@ -17,9 +17,9 @@ ob_start(); ?>
         <tr><th scope="row">Minecraft, modpack (Forge, Fabric, NeoForge)</th><td>kilka osób</td><td>zwykle 8-10 GB, duże paczki więcej</td></tr>
         <tr><th scope="row">Minecraft, serwer publiczny</th><td>kilkadziesiąt</td><td>14 GB i więcej</td></tr>
         <tr><th scope="row">Project Zomboid (Build 42)</th><td>5</td><td>6 GB</td></tr>
-        <tr><th scope="row">Project Zomboid (Build 42)</th><td>10</td><td>7 GB</td></tr>
-        <tr><th scope="row">Vintage Story</th><td>5</td><td>4 GB</td></tr>
-        <tr><th scope="row">Vintage Story</th><td>10</td><td>4,5 GB</td></tr>
+        <tr><th scope="row">Project Zomboid (Build 42)</th><td>10</td><td>8 GB</td></tr>
+        <tr><th scope="row">Vintage Story</th><td>5</td><td>3 GB</td></tr>
+        <tr><th scope="row">Vintage Story</th><td>10</td><td>4 GB</td></tr>
     </tbody>
 </table>
 </div>
