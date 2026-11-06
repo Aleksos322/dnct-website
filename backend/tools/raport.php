@@ -1,11 +1,15 @@
 <?php
 /**
- * Raport dla admina: dzienny (wczoraj, cron 8:00) i tygodniowy (poprzednie
- * 7 dni, cron w poniedziałek). Skrót idzie na telefon (ntfy, kanał "raporty"),
- * całość na maila.
+ * Raport dla admina: dzienny (wczoraj, cron 8:00), tygodniowy (poprzednie
+ * 7 dni, cron w poniedziałek), miesięczny, półroczny i roczny (poprzedni
+ * pełny miesiąc / 6 / 12 miesięcy, cron 1. dnia miesiąca). Skrót idzie na
+ * telefon (ntfy, kanał "raporty"), całość na maila.
  *
  *   php backend/tools/raport.php                    podgląd dziennego, nic nie wysyła
  *   php backend/tools/raport.php --tydzien          podgląd tygodniowego
+ *   php backend/tools/raport.php --miesiac          poprzedni pełny miesiąc
+ *   php backend/tools/raport.php --polrocze         ostatnie 6 pełnych miesięcy
+ *   php backend/tools/raport.php --rok              ostatnie 12 pełnych miesięcy
  *   php backend/tools/raport.php --do=adres@x.pl    wysyła mail + telefon
  *
  * Cron chodzi z crontaba konta `deployer`, nie jako www-data: po zajętość
@@ -45,17 +49,32 @@ const RAPORT_PROG_RAM_WEZLA_MB = 4096; // mniej wolnego = większy plan się nie
 const RAPORT_PROG_UPTIME = 99.5;
 const RAPORT_PROG_CZEKA_H = 12;       // zgłoszenie bez odpowiedzi dłużej niż tyle = uwaga
 
-$opcje = getopt('', ['do:', 'tydzien']);
+$opcje = getopt('', ['do:', 'tydzien', 'miesiac', 'polrocze', 'rok']);
 $adres = isset($opcje['do']) ? (string)$opcje['do'] : '';
-$tydzien = isset($opcje['tydzien']);
+$tryb = match (true) {
+    isset($opcje['rok']) => 'rok',
+    isset($opcje['polrocze']) => 'polrocze',
+    isset($opcje['miesiac']) => 'miesiac',
+    isset($opcje['tydzien']) => 'tydzien',
+    default => 'dzien',
+};
+$tydzien = $tryb !== 'dzien';                // wszystko dłuższe niż doba
+$miesiecyOkresu = ['miesiac' => 1, 'polrocze' => 6, 'rok' => 12][$tryb] ?? 0;
 
 $utc = new DateTimeZone('UTC');
 $pl = new DateTimeZone('Europe/Warsaw');
 $dzis = new DateTimeImmutable('today', $pl);
-$dni = $tydzien ? 7 : 1;
-$start = $dzis->modify('-' . $dni . ' days');
-$koniec = $dzis;
-$startPoprz = $start->modify('-' . $dni . ' days');
+if ($miesiecyOkresu > 0) {
+    // Pełne miesiące kalendarzowe: koniec = 1. dzień bieżącego miesiąca (wyłącznie).
+    $koniec = $dzis->modify('first day of this month');
+    $start = $koniec->modify('-' . $miesiecyOkresu . ' months');
+    $startPoprz = $start->modify('-' . $miesiecyOkresu . ' months');
+} else {
+    $dni = $tryb === 'tydzien' ? 7 : 1;
+    $start = $dzis->modify('-' . $dni . ' days');
+    $koniec = $dzis;
+    $startPoprz = $start->modify('-' . $dni . ' days');
+}
 
 $fmtUtc = static fn(DateTimeImmutable $d): string => $d->setTimezone($utc)->format('Y-m-d H:i:s');
 $od = $fmtUtc($start);
@@ -66,7 +85,7 @@ $doPl = $koniec->format('Y-m-d H:i:s');
 $dzienOd = $start->format('Y-m-d');
 $dzienDo = $koniec->modify('-1 day')->format('Y-m-d');
 
-// Okres w tytule: od/do, czyli doba (albo tydzień) od północy do północy.
+// Okres w tytule: od/do, czyli okres od północy do północy (koniec wyłącznie).
 $okresTxt = $start->format('d.m.Y') . '/' . $koniec->format('d.m.Y');
 
 /** Sprawy do załatwienia - lądują na górze maila i w skrócie na telefon. */
@@ -264,7 +283,7 @@ $sekcje[] = sekcja('Pieniądze', function () use ($start, $koniec, $od, $do, $dz
 
 // --- KLIENCI ----------------------------------------------------------------
 
-$sekcje[] = sekcja('Klienci', function () use ($od, $do, $tydzien, $dnct, $stan, &$noweStan, &$uwagi, &$skrot): array {
+$sekcje[] = sekcja('Klienci', function () use ($od, $do, $tryb, $dnct, $stan, &$noweStan, &$uwagi, &$skrot): array {
     $w = [];
 
     $st = $dnct->prepare('SELECT authentik_username FROM user_profiles WHERE created_at >= ? AND created_at < ? ORDER BY id');
@@ -319,7 +338,7 @@ $sekcje[] = sekcja('Klienci', function () use ($od, $do, $tydzien, $dnct, $stan,
         $g = json_decode((string)curl_exec($ch), true);
         curl_close($ch);
         if (isset($g['userRatingCount'])) {
-            $klucz = $tydzien ? 'tydzien' : 'dzien';
+            $klucz = $tryb;
             $przed = $stan['google_opinie'][$klucz] ?? null;
             $roznica = $przed === null ? 0 : (int)$g['userRatingCount'] - (int)$przed;
             $w[] = ['Opinie Google', number_format((float)$g['rating'], 1, ',', '') . '★ · ' . $g['userRatingCount'] . ' opinii'
@@ -462,7 +481,7 @@ $sekcje[] = sekcja('Serwery i maszyny', function () use ($start, $koniec, $od, $
 
 // --- RUCH I SEO -------------------------------------------------------------
 
-$sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $tydzien, $dnct, &$skrot): array {
+$sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $tydzien, $tryb, $start, $koniec, $startPoprz, $dnct, &$skrot): array {
     $w = [];
     $pomin = implode(',', array_fill(0, count(RAPORT_HOSTY_KLIENTOW), '?'));
 
@@ -512,14 +531,26 @@ $sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $ty
             'i' => (int)array_sum(array_column($r, 'impressions')),
         ];
         $kon = $dzis->modify('-3 days');
-        $dl = $tydzien ? 7 : 1;
-        $t = $suma($gsc($kon->modify('-' . ($dl - 1) . ' days'), $kon, ['date'], 10));
-        $p = $suma($gsc($kon->modify('-' . ($dl + 6) . ' days'), $kon->modify('-7 days'), ['date'], 10));
-        $opis = $tydzien ? $kon->modify('-6 days')->format('d.m') . '-' . $kon->format('d.m') : $kon->format('d.m') . ', vs tydzień wcześniej';
+        if (in_array($tryb, ['miesiac', 'polrocze', 'rok'], true)) {
+            // Pełny okres kalendarzowy (do ostatniego dnia z danymi) vs poprzedni taki sam.
+            $a = $start;
+            $b = min($koniec->modify('-1 day'), $kon);
+            $t = $suma($gsc($a, $b, ['date'], 1000));
+            $p = $suma($gsc($startPoprz, $start->modify('-1 day'), ['date'], 1000));
+            $opis = $a->format('d.m.Y') . '-' . $b->format('d.m.Y') . ', vs poprzedni okres';
+            $odFraz = $a;
+        } else {
+            $dl = $tydzien ? 7 : 1;
+            $t = $suma($gsc($kon->modify('-' . ($dl - 1) . ' days'), $kon, ['date'], 10));
+            $p = $suma($gsc($kon->modify('-' . ($dl + 6) . ' days'), $kon->modify('-7 days'), ['date'], 10));
+            $opis = $tydzien ? $kon->modify('-6 days')->format('d.m') . '-' . $kon->format('d.m') : $kon->format('d.m') . ', vs tydzień wcześniej';
+            $odFraz = $kon->modify('-6 days');
+            $b = $kon;
+        }
         $w[] = ['Google (' . $opis . ')', $t['c'] . ' kliknięć (' . zmiana($t['c'], $p['c']) . '), ' . $t['i'] . ' wyświetleń (' . zmiana($t['i'], $p['i']) . ')'];
 
         if ($tydzien) {
-            $frazy = $gsc($kon->modify('-6 days'), $kon, ['query'], 100);
+            $frazy = $gsc($odFraz, $b, ['query'], 250);
             usort($frazy, static fn($a, $b) => $b['impressions'] <=> $a['impressions']);
             $w[] = ['Top frazy', implode(', ', array_map(static fn($r) => '„' . $r['keys'][0] . '" ' . $r['impressions'] . '/' . $r['clicks'], array_slice($frazy, 0, 5))) ?: 'brak'];
             $blisko = array_filter($frazy, static fn($r) => $r['position'] > 10 && $r['position'] <= 20 && $r['impressions'] >= 5);
@@ -536,7 +567,8 @@ $sekcje[] = sekcja('Ruch i SEO', function () use ($od, $do, $odPoprz, $dzis, $ty
 
 // --- WYJŚCIE ----------------------------------------------------------------
 
-$tytul = ($tydzien ? 'Raport tygodnia ' : 'Raport dnia ') . $okresTxt;
+$nazwaRaportu = ['dzien' => 'Raport dnia ', 'tydzien' => 'Raport tygodnia ', 'miesiac' => 'Raport miesiąca ', 'polrocze' => 'Raport półroczny ', 'rok' => 'Raport roczny '][$tryb];
+$tytul = $nazwaRaportu . $okresTxt;
 $e = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
 
 $tekst = $tytul . "\n\n";
