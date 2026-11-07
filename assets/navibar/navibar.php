@@ -23,6 +23,30 @@ if (!isset($isAdmin)) {
     }
 }
 
+// Kolor nicku partnera (admin zostaje czerwony i wygrywa): twórca #bd42ff, opiekun / partner WWW #562bff.
+// Rola z tabeli partnerzy (tylko aktywni), trzymana w sesji 10 minut, żeby nie pytać bazy przy każdej stronie.
+$nickKolor = '';
+if (!$isAdmin && $isLoggedIn && !empty($_SESSION['authentik_username']) && function_exists('dnct_db')) {
+    $nickLogin = (string)$_SESSION['authentik_username'];
+    $nickCache = $_SESSION['nick_partner'] ?? null;
+    if (!is_array($nickCache) || ($nickCache['u'] ?? '') !== $nickLogin || (int)($nickCache['t'] ?? 0) < time() - 600) {
+        $nickRola = '';
+        try {
+            $st = dnct_db()->prepare("SELECT kod FROM partnerzy WHERE aktywny = 1 AND (konto_login = ? OR (konto_email IS NOT NULL AND konto_email <> '' AND konto_email = ?)) LIMIT 1");
+            $st->execute([$nickLogin, (string)($_SESSION['authentik_email'] ?? '')]);
+            $nickWiersz = $st->fetch(PDO::FETCH_ASSOC);
+            if ($nickWiersz) {
+                $nickRola = trim((string)($nickWiersz['kod'] ?? '')) !== '' ? 'opiekun' : 'tworca';
+            }
+        } catch (Throwable $e) {
+            // kolor nicku to dodatek - brak bazy nie może zepsuć navbara
+        }
+        $nickCache = ['u' => $nickLogin, 'r' => $nickRola, 't' => time()];
+        $_SESSION['nick_partner'] = $nickCache;
+    }
+    $nickKolor = ['tworca' => '#bd42ff', 'opiekun' => '#562bff'][$nickCache['r'] ?? ''] ?? '';
+}
+
 // Pełny profil pozostaje prywatny niezależnie od avatara. Obraz pobiera
 // lokalny proxy endpoint, który odczytuje aktualny avatar z account.dnct.pl.
 $profileAvatarUrl = null;
@@ -146,7 +170,7 @@ function navbar_class_mobile(bool $active): string
 
                 <!-- Spód: nazwa użytkownika, nieruchoma - zakrywa ją wjeżdżająca warstwa -->
                 <div class="profile-magic-text-container">
-                    <span class="profile-text-username <?php echo $isAdmin ? 'text-red-500' : 'text-white'; ?>">
+                    <span class="profile-text-username <?php echo $isAdmin ? 'text-red-500' : ($nickKolor !== '' ? '' : 'text-white'); ?>"<?php echo $nickKolor !== '' ? ' style="color: ' . $nickKolor . '"' : ''; ?>>
                         <?php echo $username; ?>
                     </span>
                 </div>
