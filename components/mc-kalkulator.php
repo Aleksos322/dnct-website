@@ -22,11 +22,9 @@ if (!function_exists('render_mc_calculator')) {
 /**
  * Przycisk otwierający kalkulator. Stoi w .cnk-plan-copy pod "Pomiń plany".
  *
- * Dwa wyglądy z jednego markupu: domyślnie skromny link w linii z "Pomiń
- * plany" (zero dodatkowej wysokości), a karta dopiero, gdy pod spodem jest
- * miejsce - decyduje cennik-kalkulator.js (klasa .is-card). Przy oknie
- * 1536x730 wolnego miejsca jest 4 px, a każdy piksel więcej wyłącza
- * przypięty, przewijany katalog (warunek w syncLayout, cennik-showcase.js).
+ * Zawsze pełny box (decyzja usera 2026-11-09). W niskim oknie wydłuża
+ * katalog, przez co cennik-showcase.js wyłącza przypięte przewijanie planów
+ * - świadoma cena za widoczny przycisk.
  */
 function render_mc_calculator_trigger(): void
 {

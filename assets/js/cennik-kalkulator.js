@@ -37,7 +37,6 @@
     document.body.appendChild(dialog);
 
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var wide = window.matchMedia('(min-width: 861px)');
     // Wersja EN/DE: i18n.js definiuje DNCT_T tylko poza polskim, a ładuje się
     // niezależnie od tego pliku - dlatego pytamy przy każdym użyciu.
     function T(t) { return window.DNCT_T ? window.DNCT_T(t) : t; }
@@ -429,39 +428,6 @@
     // Link z czatu albo Discorda: /cennik#kalkulator otwiera okno od razu.
     function fromHash() { if (location.hash === '#kalkulator') open(); }
     window.addEventListener('hashchange', fromHash);
-
-    /* ---------- przycisk: karta czy link ----------
-       Karta tylko wtedy, gdy mieści się w pustym miejscu lewej kolumny, czyli
-       nie wydłuża katalogu. Dłuższy katalog przestaje się mieścić w oknie
-       i cennik-showcase.js wyłącza przypięte przewijanie planów. */
-    var copy = trigger && trigger.closest('.cnk-plan-copy');
-    var fitQueued = false;
-    function fitTrigger() {
-        fitQueued = false;
-        if (!copy || !wide.matches || !copy.offsetHeight) return;
-        trigger.classList.remove('is-card');
-        // Przesunięcie linku do lewej krawędzi (gdy "Pomiń plany" jest
-        // niewidoczne): mierzone bez przesunięcia, tekst równo z kolumną.
-        trigger.style.setProperty('--mc-shift', '0px');
-        var box = trigger.getBoundingClientRect();
-        var pad = parseFloat(getComputedStyle(trigger).paddingLeft) || 0;
-        trigger.style.setProperty('--mc-shift', Math.max(0, box.left + pad - copy.getBoundingClientRect().left).toFixed(1) + 'px');
-        var before = copy.getBoundingClientRect().height;
-        trigger.classList.add('is-card');
-        if (copy.getBoundingClientRect().height > before + 0.5) trigger.classList.remove('is-card');
-    }
-    function queueFit() {
-        if (fitQueued) return;
-        fitQueued = true;
-        requestAnimationFrame(fitTrigger);
-    }
-    if (copy) {
-        window.addEventListener('resize', queueFit);
-        if ('ResizeObserver' in window) new ResizeObserver(queueFit).observe(copy.closest('.cnk-catalogue') || copy);
-        Array.prototype.forEach.call(document.querySelectorAll('.cennik-tab'), function (tab) { tab.addEventListener('click', queueFit); });
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFit);
-        fitTrigger();
-    }
 
     update();
     fromHash();

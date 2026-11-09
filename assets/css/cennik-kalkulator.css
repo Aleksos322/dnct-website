@@ -4,9 +4,9 @@
    headline 1.5 rem. Ruch bez sprężyn: 0.2 s interakcje, 0.4 s wejście. */
 
 /* ============ PRZYCISK W CENNIKU ============
-   Domyślnie karta (telefon i szeroki ekran z miejscem pod "Pomiń plany").
-   Na szerokim ekranie bez klasy .is-card skrypt uznał, że karta wydłużyłaby
-   katalog - wtedy przycisk jest linkiem w tej samej linii co "Pomiń plany". */
+   Zawsze pełny box (decyzja usera 2026-11-09). W niskim oknie (np. 1536x730)
+   box wydłuża katalog ponad wysokość okna i cennik-showcase.js wyłącza wtedy
+   przypięte przewijanie planów - strona przewija się normalnie. Świadomie. */
 /* Materiał = nowe płaskie szkło, jak kafel "4,9 opinii w Google"
    (.op-pasek-wynik): jedna barwa .04, ramka .09, rozmycie, promień 16 px.
    Bez wypukłego gradientu i wewnętrznych krawędzi .glass (stary styl).
@@ -33,33 +33,6 @@
 .mc-calc-open:hover .mc-calc-open-arrow { translate: 3px 0; }
 .mc-calc-open:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
 
-@media (min-width: 861px) {
-    .mc-calc-open:not(.is-card) {
-        /* Link w linii "Pomiń plany": ujemny margines oddaje padding, więc pole
-           kliknięcia ma 26 px wysokości, a linia tekstu nie rośnie ani o piksel. */
-        position: relative; display: inline-flex; vertical-align: middle; width: auto; max-width: none;
-        margin: -6px -8px -6px 10px; padding: 6px 8px;
-        border: 0; border-radius: 8px;
-        background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
-        color: #a78bfa; font-size: 0.72rem; line-height: 1.2;
-        transition: background-color 0.2s ease, color 0.2s ease;
-    }
-    .mc-calc-open:not(.is-card)::after { display: none; }
-    .mc-calc-open:not(.is-card) .mc-calc-open-in { display: inline-flex; gap: 7px; width: auto; }
-    .mc-calc-open:not(.is-card) .mc-calc-open-ico { width: auto; height: auto; background: none; box-shadow: none; color: inherit; }
-    .mc-calc-open:not(.is-card) .mc-calc-open-ico svg { width: 14px; height: 14px; }
-    .mc-calc-open:not(.is-card) .mc-calc-open-txt b { color: inherit; font-size: inherit; font-weight: 400; letter-spacing: 0; text-transform: none; line-height: inherit; }
-    .mc-calc-open:not(.is-card) .mc-calc-open-txt > span,
-    .mc-calc-open:not(.is-card) .mc-calc-open-arrow { display: none; }
-    .mc-calc-open:not(.is-card):hover { border-color: transparent; background: rgba(139, 92, 246, 0.12); color: #c4b5fd; }
-    /* Bez przypięcia "Pomiń plany" jest niewidoczne (visibility), ale zajmuje
-       miejsce - link stałby z dziurą po lewej. Przesuwamy go tylko wizualnie
-       (left przy position: relative), bo zmiana układu linii zmieniłaby
-       wysokość katalogu, a od niej zależy samo przypięcie - groziło huśtawką.
-       --mc-shift (odległość od lewej krawędzi kolumny, zależna od języka
-       "Pomiń plany") liczy skrypt. */
-    .cnk-catalogue-scroll:not(.is-scroll-driven) .mc-calc-open:not(.is-card) { left: calc(-1 * var(--mc-shift, 0px)); }
-}
 @media (max-width: 860px) {
     .mc-calc-open { grid-column: 1 / -1; max-width: none; margin-top: 6px; }
 }
