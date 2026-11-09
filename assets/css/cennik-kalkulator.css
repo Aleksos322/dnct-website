@@ -1,0 +1,353 @@
+/* Kalkulator zasobów Minecrafta (components/mc-kalkulator.php,
+   assets/js/cennik-kalkulator.js). Wartości z DESIGN.md: paleta, promienie
+   8/14/16/26/999, typografia label 0.72 / body 0.95 / title 1.05 /
+   headline 1.5 rem. Ruch bez sprężyn: 0.2 s interakcje, 0.4 s wejście. */
+
+/* ============ PRZYCISK W CENNIKU ============
+   Domyślnie karta (telefon i szeroki ekran z miejscem pod "Pomiń plany").
+   Na szerokim ekranie bez klasy .is-card skrypt uznał, że karta wydłużyłaby
+   katalog - wtedy przycisk jest linkiem w tej samej linii co "Pomiń plany". */
+/* Karta = kafel gry z księgi marki (design.dnct.pl -> Karty -> "Kafel gry",
+   .home-gra w home.css): kolor w --g (RGB), gradient 120deg, promień 24 px,
+   ikona w kwadracie, okrągła strzałka, duża przygaszona ikona w tle. Hover
+   jak na kaflach gier: 4 px w górę, ramka i cień w kolorze, ikona -8°,
+   tło -10°, strzałka wypełnia się kolorem. Kalkulator nie ma koloru gry,
+   więc --g to ametyst. */
+.mc-calc-open {
+    --g: 139, 92, 246;
+    position: relative; overflow: hidden;
+    display: flex; width: 100%; max-width: 360px; margin: 14px 0 0; padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
+    background: linear-gradient(120deg, rgba(var(--g), 0.2), rgba(var(--g), 0.03) 55%), rgba(255, 255, 255, 0.02);
+    color: #f1f5f9; font: inherit; text-align: left; cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.35s ease;
+}
+.mc-calc-open-bg {
+    position: absolute; right: -18px; bottom: -30px; width: 116px; height: 116px;
+    color: rgb(var(--g)); opacity: 0.12; filter: blur(2px); pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.mc-calc-open-in { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; width: 100%; }
+.mc-calc-open-ico {
+    display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px;
+    background: rgba(var(--g), 0.16); box-shadow: inset 0 0 0 1px rgba(var(--g), 0.35); color: #c4b5fd;
+}
+.mc-calc-open-ico svg { width: 24px; height: 24px; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); }
+.mc-calc-open-txt { display: grid; gap: 4px; min-width: 0; }
+.mc-calc-open-txt b { color: #f8fafc; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+.mc-calc-open-txt > span { color: #94a3b8; font-size: 0.95rem; font-weight: 500; line-height: 1.4; }
+.mc-calc-open-arrow {
+    display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12); color: #f8fafc;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.mc-calc-open-arrow svg { width: 18px; height: 18px; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.mc-calc-open:hover { transform: translateY(-4px); border-color: rgba(var(--g), 0.6); box-shadow: 0 20px 50px -20px rgba(var(--g), 0.6); }
+.mc-calc-open:hover .mc-calc-open-bg { transform: rotate(-10deg) scale(1.1); opacity: 0.2; }
+.mc-calc-open:hover .mc-calc-open-ico svg { transform: rotate(-8deg) scale(1.08); }
+.mc-calc-open:hover .mc-calc-open-arrow { background: rgba(var(--g), 0.85); border-color: transparent; }
+.mc-calc-open:hover .mc-calc-open-arrow svg { transform: translateX(2px); }
+.mc-calc-open:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
+
+@media (min-width: 861px) {
+    .mc-calc-open:not(.is-card) {
+        /* Link w linii "Pomiń plany": ujemny margines oddaje padding, więc pole
+           kliknięcia ma 26 px wysokości, a linia tekstu nie rośnie ani o piksel. */
+        position: relative; display: inline-flex; vertical-align: middle; width: auto; max-width: none;
+        margin: -6px -8px -6px 10px; padding: 6px 8px;
+        border: 0; border-radius: 8px;
+        background: none; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+        color: #a78bfa; font-size: 0.72rem; line-height: 1.2;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .mc-calc-open:not(.is-card)::after,
+    .mc-calc-open:not(.is-card) .mc-calc-open-bg { display: none; }
+    .mc-calc-open:not(.is-card) .mc-calc-open-in { display: inline-flex; gap: 7px; width: auto; }
+    .mc-calc-open:not(.is-card) .mc-calc-open-ico { width: auto; height: auto; border-radius: 0; background: none; box-shadow: none; color: inherit; }
+    .mc-calc-open:not(.is-card) .mc-calc-open-ico svg { width: 14px; height: 14px; }
+    .mc-calc-open:not(.is-card) .mc-calc-open-txt b { color: inherit; font-size: inherit; font-weight: 400; letter-spacing: 0; line-height: inherit; }
+    .mc-calc-open:not(.is-card) .mc-calc-open-txt > span,
+    .mc-calc-open:not(.is-card) .mc-calc-open-arrow { display: none; }
+    .mc-calc-open:not(.is-card):hover { transform: none; border-color: transparent; box-shadow: none; background: rgba(139, 92, 246, 0.12); color: #c4b5fd; }
+    .mc-calc-open:not(.is-card):hover .mc-calc-open-ico svg { transform: none; }
+    /* Bez przypięcia "Pomiń plany" jest niewidoczne (visibility), ale zajmuje
+       miejsce - link stałby z dziurą po lewej. Przesuwamy go tylko wizualnie
+       (left przy position: relative), bo zmiana układu linii zmieniłaby
+       wysokość katalogu, a od niej zależy samo przypięcie - groziło huśtawką.
+       --mc-shift (odległość od lewej krawędzi kolumny, zależna od języka
+       "Pomiń plany") liczy skrypt. */
+    .cnk-catalogue-scroll:not(.is-scroll-driven) .mc-calc-open:not(.is-card) { left: calc(-1 * var(--mc-shift, 0px)); }
+}
+@media (max-width: 860px) {
+    .mc-calc-open { grid-column: 1 / -1; max-width: none; margin-top: 6px; }
+}
+
+/* ============ OKIENKO ============ */
+dialog.mc-calc {
+    position: fixed; inset: 0; margin: auto;
+    width: min(1080px, calc(100vw - 32px)); max-width: none;
+    height: fit-content; max-height: min(900px, calc(100dvh - 32px));
+    padding: 0; overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 26px;
+    color: #f1f5f9;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018) 45%, rgba(255, 255, 255, 0.038)),
+        linear-gradient(145deg, rgba(139, 92, 246, 0.06), rgba(5, 5, 5, 0.8) 55%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.11), inset 0 -1px 0 rgba(255, 255, 255, 0.035);
+    overscroll-behavior: contain;
+}
+dialog.mc-calc::backdrop { background: rgba(5, 5, 5, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+/* Wejście 0.4 s, wyjście 0.2 s. Zanikanie na samym szkle, nie na przodku -
+   inaczej przodek z opacity < 1 wyłącza rozmycie tafli do końca animacji. */
+dialog.mc-calc[open] { animation: mcCalcIn 0.4s ease-out; }
+dialog.mc-calc[open]::backdrop { animation: mcCalcFadeIn 0.4s ease-out; }
+dialog.mc-calc.is-closing { animation: mcCalcOut 0.2s ease-in forwards; pointer-events: none; }
+dialog.mc-calc.is-closing::backdrop { animation: mcCalcFadeOut 0.2s ease-in forwards; }
+@keyframes mcCalcIn { from { opacity: 0; transform: translateY(16px); } }
+@keyframes mcCalcOut { to { opacity: 0; transform: translateY(8px); } }
+@keyframes mcCalcFadeIn { from { opacity: 0; } }
+@keyframes mcCalcFadeOut { to { opacity: 0; } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    dialog.mc-calc { background: #050505; }
+}
+html.mc-calc-lock { overflow: hidden !important; scrollbar-gutter: stable; }
+
+.mc-calc-shell { display: flex; flex-direction: column; max-height: min(900px, calc(100dvh - 32px)); }
+.mc-calc-label {
+    display: block; margin: 0 0 10px; padding: 0;
+    color: #94a3b8; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.3;
+}
+.mc-calc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 24px 28px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+.mc-calc-head .mc-calc-label { margin: 0; color: #a78bfa; }
+.mc-calc-head h2 { margin: 8px 0 0; color: #f8fafc; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.mc-calc-head p { margin: 6px 0 0; color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+.mc-calc-close {
+    display: grid; place-items: center; flex: none; width: 40px; height: 40px; padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8; cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.mc-calc-close svg { width: 18px; height: 18px; }
+.mc-calc-close:hover { background: rgba(139, 92, 246, 0.16); border-color: rgba(167, 139, 250, 0.45); color: #f8fafc; }
+
+.mc-calc-body {
+    flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain;
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; gap: 28px;
+    padding: 22px 28px 28px;
+}
+.mc-calc button:focus-visible,
+.mc-calc a:focus-visible,
+.mc-calc select:focus-visible,
+.mc-calc input[type="number"]:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+
+/* --- formularz --- */
+.mc-calc-form { display: grid; gap: 22px; min-width: 0; }
+.mc-calc-field { min-width: 0; margin: 0; padding: 0; border: 0; }
+.mc-calc-hint { margin: 7px 0 0; color: #64748b; font-size: 0.72rem; line-height: 1.5; }
+.mc-calc-hint:empty { display: none; }
+.mc-calc-hint.is-warn { color: #fbbf24; }
+
+.mc-calc-select { position: relative; }
+.mc-calc-select::after {
+    content: ''; position: absolute; top: 50%; right: 16px; width: 7px; height: 7px;
+    border-right: 2px solid #a78bfa; border-bottom: 2px solid #a78bfa;
+    transform: translateY(-70%) rotate(45deg); pointer-events: none;
+}
+.mc-calc-select select {
+    width: 100%; height: 44px; padding: 0 40px 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.04);
+    color: #f1f5f9; font: inherit; font-size: 0.95rem; font-weight: 600;
+    appearance: none; -webkit-appearance: none; cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.mc-calc-select select:hover { border-color: rgba(167, 139, 250, 0.4); }
+.mc-calc-select select option { background: #050505; color: #f1f5f9; }
+
+.mc-calc-engines { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.mc-calc-engine { position: relative; display: block; min-width: 0; cursor: pointer; }
+.mc-calc-engine input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.mc-calc-engine > span {
+    display: grid; align-content: start; gap: 1px; height: 100%; padding: 9px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; background: rgba(255, 255, 255, 0.03);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.mc-calc-engine b { overflow: hidden; color: #f1f5f9; font-size: 0.95rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.mc-calc-engine small { color: #64748b; font-size: 0.72rem; font-weight: 600; transition: color 0.2s ease; }
+.mc-calc-engine:hover > span { border-color: rgba(167, 139, 250, 0.35); }
+.mc-calc-engine input:checked + span { border-color: rgba(139, 92, 246, 0.65); background: rgba(139, 92, 246, 0.16); }
+.mc-calc-engine input:checked + span b { color: #f8fafc; }
+.mc-calc-engine input:checked + span small { color: #c4b5fd; }
+.mc-calc-engine input:focus-visible + span { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+
+.mc-calc-num-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.mc-calc-num-head .mc-calc-label { margin: 0; }
+.mc-calc-num input[type="number"] {
+    flex: none; width: 78px; height: 36px; padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; background: rgba(255, 255, 255, 0.04);
+    color: #f8fafc; font: inherit; font-size: 0.95rem; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right;
+    -moz-appearance: textfield; appearance: textfield;
+    transition: border-color 0.2s ease;
+}
+.mc-calc-num input[type="number"]::-webkit-inner-spin-button,
+.mc-calc-num input[type="number"]::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; }
+.mc-calc-num input[type="number"]:hover { border-color: rgba(167, 139, 250, 0.4); }
+.mc-calc-num.is-off { opacity: 0.45; }
+
+/* Suwak: --p (0..1) ustawia skrypt. Kciuk ma 18 px, więc wypełnienie kończy
+   się w jego środku: od 9 px do (100% - 9 px). Poświata kciuka dopiero przy
+   hover i focusie (DESIGN.md: poświata to odpowiedź, nie stan spoczynku). */
+.mc-calc-range {
+    --p: 0;
+    display: block; width: 100%; height: 22px; margin: 0;
+    background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer;
+}
+.mc-calc-range::-webkit-slider-runnable-track {
+    height: 6px; border-radius: 999px;
+    background:
+        linear-gradient(90deg, #8b5cf6, #6366f1) 0 0 / calc(9px + var(--p) * (100% - 18px)) 100% no-repeat,
+        rgba(255, 255, 255, 0.08);
+}
+.mc-calc-range::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%;
+    border: 4px solid #8b5cf6; background: #f8fafc; transition: box-shadow 0.2s ease;
+}
+.mc-calc-range::-moz-range-track { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); }
+.mc-calc-range::-moz-range-progress { height: 6px; border-radius: 999px; background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+.mc-calc-range::-moz-range-thumb { box-sizing: border-box; width: 18px; height: 18px; border-radius: 50%; border: 4px solid #8b5cf6; background: #f8fafc; }
+.mc-calc-range:hover::-webkit-slider-thumb { box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.25); }
+.mc-calc-range:hover::-moz-range-thumb { box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.25); }
+.mc-calc-range:focus-visible { outline: none; }
+.mc-calc-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+.mc-calc-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.55); }
+.mc-calc-range:disabled { cursor: not-allowed; }
+
+/* --- wynik --- */
+.mc-calc-result {
+    position: sticky; top: 0; display: grid; gap: 14px; min-width: 0;
+    padding: 20px; border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; background: rgba(5, 5, 5, 0.35);
+}
+.mc-calc-result > .mc-calc-label { margin: 0; color: #a78bfa; }
+.mc-calc-stats { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.mc-calc-stat {
+    display: grid; align-content: start; gap: 4px; min-width: 0; padding: 14px 16px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 16px; background: rgba(255, 255, 255, 0.035);
+}
+.mc-calc-stat > span { color: #94a3b8; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }
+.mc-calc-stat strong { color: #f8fafc; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mc-calc-stat strong small { color: #a78bfa; font-size: 0.95rem; font-weight: 800; letter-spacing: 0; }
+.mc-calc-stat strong .mc-calc-approx { margin-right: 4px; color: #94a3b8; font-weight: 700; }
+.mc-calc-stat em { color: #64748b; font-size: 0.72rem; font-style: normal; }
+.mc-calc-stat em:empty { display: none; }
+
+/* Pasek z trzech warstw na całą szerokość, skalowanych w poziomie (transform,
+   nie width - bez przeliczania układu przy każdej zmianie suwaka). Skrypt
+   podaje skale narastająco: serwer, serwer+gracze, całość; wyższa warstwa
+   przykrywa początek niższej, więc widać trzy odcinki obok siebie. */
+.mc-calc-bar { position: relative; height: 8px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.07); }
+.mc-calc-bar i { position: absolute; inset: 0; transform: scaleX(0); transform-origin: left center; transition: transform 0.4s ease-out; }
+.mc-calc-bar .is-server { z-index: 3; background: #8b5cf6; }
+.mc-calc-bar .is-players { z-index: 2; background: #3b82f6; }
+.mc-calc-bar .is-addons { z-index: 1; background: #c4b5fd; }
+.mc-calc-cores { display: flex; gap: 4px; margin-top: 10px; }
+.mc-calc-cores i { flex: 1; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); transition: background-color 0.2s ease; }
+.mc-calc-cores i.is-on { background: #a78bfa; }
+
+.mc-calc-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
+.mc-calc-legend li { display: flex; align-items: center; gap: 7px; min-width: 0; color: #94a3b8; font-size: 0.72rem; }
+.mc-calc-legend li::before { content: ''; flex: none; width: 9px; height: 9px; border-radius: 999px; }
+.mc-calc-legend span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-calc-legend b { margin-left: auto; color: #f1f5f9; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mc-calc-legend .is-server::before { background: #8b5cf6; }
+.mc-calc-legend .is-players::before { background: #3b82f6; }
+.mc-calc-legend .is-addons::before { background: #c4b5fd; }
+.mc-calc-legend .is-free::before { background: rgba(255, 255, 255, 0.12); }
+.mc-calc-legend li[hidden] { display: none; }
+
+.mc-calc-plan {
+    display: grid; gap: 6px; padding: 16px 18px;
+    border: 1px solid rgba(139, 92, 246, 0.35); border-radius: 16px; background: rgba(139, 92, 246, 0.08);
+}
+.mc-calc-plan[hidden] { display: none; }
+.mc-calc-plan > .mc-calc-label { margin: 0 0 2px; color: #c4b5fd; }
+.mc-calc-plan > p { margin: 0; color: #f1f5f9; font-size: 0.95rem; line-height: 1.5; }
+.mc-calc-plan-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 14px; }
+.mc-calc-plan-head strong { color: #f8fafc; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+.mc-calc-plan-head strong.is-legend { color: #fbbf24; }
+.mc-calc-plan-price { color: #c4b5fd; font-size: 0.95rem; font-weight: 700; white-space: nowrap; }
+.mc-calc-plan-price b { color: #f8fafc; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mc-calc-plan-price small { margin-left: 4px; color: #94a3b8; font-size: 0.72rem; font-weight: 600; }
+.mc-calc-plan .mc-calc-plan-specs { color: #94a3b8; }
+.mc-calc-plan .mc-calc-plan-msg { color: #c4b5fd; }
+.mc-calc-plan .mc-calc-plan-msg b { color: #f8fafc; font-weight: 700; }
+.mc-calc-plan .mc-calc-plan-msg[hidden] { display: none; }
+.mc-calc-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.mc-calc-btn {
+    display: inline-flex; flex: 1 1 140px; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px;
+    border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 16px; background: rgba(139, 92, 246, 0.08);
+    color: #f1f5f9; font: inherit; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none;
+    cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+}
+.mc-calc-btn:hover { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.18); color: #f8fafc; }
+.mc-calc-btn.is-primary { border-color: transparent; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #f8fafc; }
+.mc-calc-btn.is-primary:hover { filter: brightness(1.12); }
+.mc-calc-btn[hidden] { display: none; }
+
+.mc-calc-note {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 12px; padding: 14px 16px;
+    border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 16px; background: rgba(251, 191, 36, 0.06);
+    color: #f1f5f9; font-size: 0.95rem; line-height: 1.5;
+}
+.mc-calc-note > svg { width: 18px; height: 18px; margin-top: 1px; color: #fbbf24; }
+.mc-calc-note > div > b { display: block; margin-bottom: 6px; color: #fbbf24; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }
+.mc-calc-note ul { display: grid; gap: 6px; margin: 0; padding: 0 0 0 1rem; list-style: disc; }
+.mc-calc-note li::marker { color: #fbbf24; }
+.mc-calc-note li[hidden] { display: none; }
+.mc-calc-note strong { color: #f8fafc; font-weight: 700; }
+.mc-calc-note p { margin: 8px 0 0; color: #94a3b8; font-size: 0.72rem; }
+
+/* Pasek z wynikiem na dole okna - tylko na telefonie, dopóki wynik
+   jest poza widokiem (skrypt ustawia hidden). */
+.mc-calc-peek { display: none; }
+.mc-calc-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Niskie okno na szerokim ekranie: zwięźlej, żeby wynik mieścił się bez przewijania. */
+@media (min-width: 861px) and (max-height: 820px) {
+    .mc-calc-head { padding: 18px 24px 14px; }
+    .mc-calc-head p { display: none; }
+    .mc-calc-body { gap: 22px; padding: 16px 24px 20px; }
+    .mc-calc-form { gap: 16px; }
+    .mc-calc-result { gap: 12px; padding: 16px; }
+}
+
+@media (max-width: 860px) {
+    dialog.mc-calc { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); }
+    .mc-calc-shell { max-height: calc(100dvh - 16px); }
+    .mc-calc-head { padding: 18px 18px 14px; }
+    .mc-calc-head h2 { font-size: 1.05rem; }
+    .mc-calc-head p,
+    .mc-calc-head .mc-calc-label span { display: none; }
+    .mc-calc-body { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 18px 18px 22px; }
+    .mc-calc-result { position: static; padding: 16px; }
+    .mc-calc-peek {
+        display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+        border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(5, 5, 5, 0.92);
+        color: #f1f5f9; font: inherit; font-size: 0.95rem; text-align: left; cursor: pointer;
+    }
+    .mc-calc-peek[hidden] { display: none; }
+    .mc-calc-peek b { color: #f8fafc; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .mc-calc-peek-plan { flex: 1; min-width: 0; overflow: hidden; color: #c4b5fd; font-weight: 700; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+}
+@media (max-width: 480px) {
+    .mc-calc-engines { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+    .mc-calc-engine > span { padding: 8px 9px; }
+    /* Dwa kafelki obok siebie nie mieszczą "ok. 13,5 GB" przy 2.4rem. */
+    .mc-calc-stats { grid-template-columns: minmax(0, 1fr); }
+    .mc-calc-legend { grid-template-columns: minmax(0, 1fr); }
+}
+.mc-calc-nowrap { white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+    dialog.mc-calc[open], dialog.mc-calc[open]::backdrop,
+    dialog.mc-calc.is-closing, dialog.mc-calc.is-closing::backdrop { animation: none; }
+    .mc-calc-open, .mc-calc-open-bg, .mc-calc-open-ico svg, .mc-calc-open-arrow, .mc-calc-open-arrow svg,
+    .mc-calc-bar i, .mc-calc-cores i { transition: none; }
+    .mc-calc-open:hover { transform: none; }
+}

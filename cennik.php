@@ -23,6 +23,7 @@ require_once __DIR__ . '/components/plan-card-cennik.php';
 require_once __DIR__ . '/components/slot-configurator.php';
 require_once __DIR__ . '/components/game-decor.php';
 require_once __DIR__ . '/components/panel-band.php';
+require_once __DIR__ . '/components/mc-kalkulator.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
 require_once __DIR__ . '/backend/lib/notifications.php';
 
@@ -401,6 +402,7 @@ ob_start();
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-vs.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-showcase.css'); ?>">
 <link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-ekipa.css'); ?>">
+<link rel="stylesheet" href="<?php echo asset('/assets/css/cennik-kalkulator.css'); ?>">
 
 <div class="cennik-page cnk-catalogue-page">
 
@@ -534,6 +536,9 @@ ob_start();
                             <button type="button" data-catalogue-next aria-label="Następny plan">→</button>
                         </div>
                         <button type="button" class="cnk-plan-skip" data-catalogue-skip>Pomiń plany <span aria-hidden="true">↓</span></button>
+                        <?php /* Kalkulator RAM/CPU (prośba klienta 2026-11-09) - tylko Minecraft,
+                                 bo tylko tu klient wybiera z gotowych planów. */
+                        if ($game['type'] === 'minecraft') { render_mc_calculator_trigger(); } ?>
                     </div>
                     <?php /* Gotowe plany. Gdy sprzedaż jest wyłączona, karta daje
                              się zaznaczyć i trafia do paska podsumowania. Gdy jest
@@ -831,12 +836,20 @@ ob_start();
     </div>
 </div>
 
+<?php /* Okienko kalkulatora - poza .cnk-catalogue (patrz components/mc-kalkulator.php). */
+foreach ($gamesWithPlans as $calcGame) {
+    if ($calcGame['type'] === 'minecraft') {
+        render_mc_calculator($calcGame['plans'], $salesOn);
+    }
+} ?>
+
 <button type="button" class="cnk-back-top" data-catalogue-top aria-label="Wróć na górę strony" title="Wróć na górę strony" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
 </button>
 
 <script src="<?php echo asset('/assets/js/cennik.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-showcase.js'); ?>" defer></script>
+<script src="<?php echo asset('/assets/js/cennik-kalkulator.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-split.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-vs.js'); ?>" defer></script>
 <script src="<?php echo asset('/assets/js/cennik-ekipa.js'); ?>" defer></script>
