@@ -31,22 +31,19 @@ if (!function_exists('render_mc_calculator')) {
 function render_mc_calculator_trigger(): void
 {
     ?>
-    <?php /* Wygląd karty = kafel gry z księgi marki (design.dnct.pl, "Karty" ->
-             "Kafel gry", .home-gra w assets/css/home.css): gradient 120deg,
-             ikona w kwadracie w kolorze, okrągła strzałka, duża ikona w tle. */ ?>
-    <button type="button" class="mc-calc-open glass" data-mc-calc-open aria-haspopup="dialog" aria-controls="mc-calc">
-        <svg class="mc-calc-open-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></svg>
-        <span class="mc-calc-open-in glass-content">
+    <?php /* Materiał boxa = nowe, płaskie szkło jak kafel "4,9 opinii w Google"
+             (.op-pasek-wynik): jedna barwa .04, ramka .09, rozmycie. Bez klasy
+             .glass - jej wypukły gradient z krawędziami to stary styl. */ ?>
+    <button type="button" class="mc-calc-open" data-mc-calc-open aria-haspopup="dialog" aria-controls="mc-calc">
+        <span class="mc-calc-open-in">
             <span class="mc-calc-open-ico" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M8.5 6.5h7M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></svg>
             </span>
             <span class="mc-calc-open-txt">
-                <b>Kalkulator zasobów</b>
+                <b>Kalkulator</b>
                 <span>Ile RAM-u i CPU potrzebujesz?</span>
             </span>
-            <span class="mc-calc-open-arrow" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
+            <span class="mc-calc-open-arrow" aria-hidden="true">→</span>
         </span>
     </button>
     <?php
