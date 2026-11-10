@@ -99,6 +99,17 @@ const CENNIK_STRONY_GIER = [
         'h1_accent'   => 'Hosting',
         'h1_rest'     => 'botów Discord',
         'lead'        => 'Twój bot online 24/7 bez trzymania włączonego komputera. Wybierasz pakiet i język - Node.js, Python albo Java - a środowisko jest gotowe zaraz po płatności. Pliki wgrywasz w panelu.',
+        'choice_title' => 'Dobierz pakiet do swojego bota',
+        'choice'      => [
+            ['Prosty bot', '1 GB RAM', 'Komendy, moderacja, powitania - jeden bot na jednym serwerze Discord.'],
+            ['Bot z bazą', '2 GB RAM', 'Bot z bazą danych, poziomami albo ekonomią na kilku serwerach.'],
+            ['Muzyka i więcej', '4 GB RAM', 'Bot muzyczny, duży ruch albo kilka procesów naraz.'],
+        ],
+        'steps'       => [
+            'Wybierasz pakiet i język bota, płacisz kartą albo BLIK-iem.',
+            'Środowisko Node.js, Pythona albo Javy powstaje samo, zaraz po płatności.',
+            'W panelu wgrywasz pliki bota, wpisujesz token w .env i klikasz Start.',
+        ],
         'faq'         => [
             ['Jakie języki obsługujecie?', 'Node.js (discord.js, Eris), Python (discord.py, nextcord, py-cord) i Javę (JDA, Javacord). Wersję Node, Pythona albo Javy zmieniasz w panelu, w zakładce Startup.'],
             ['Jaki pakiet wybrać?', 'Prosty bot moderacyjny albo z komendami zmieści się w 1 GB RAM. Bot z bazą danych i większym ruchem lepiej czuje się na 2 GB, a bot muzyczny albo kilka botów naraz to 4 GB.'],
