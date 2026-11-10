@@ -114,6 +114,21 @@ const CENNIK_STRONY_GIER = [
             ['Jak szybko serwer jest gotowy?', 'Zakładamy go automatycznie zaraz po płatności kartą lub BLIK-iem. Adres serwera widzisz od razu w panelu, a w zakładce Subdomena możesz ustawić łatwiejszy do zapamiętania adres.'],
         ],
     ],
+    'discord' => [
+        'slug'        => 'hosting-bot-discord',
+        'title'       => 'Hosting botów Discord - Node.js, Python, Java | DNCT',
+        'description' => 'Hosting bota Discord 24/7: Node.js (discord.js), Python (discord.py) albo Java (JDA). Stały RAM i CPU, dyski NVMe, serwery w Polsce, start zaraz po płatności.',
+        'h1_accent'   => 'Hosting',
+        'h1_rest'     => 'botów Discord',
+        'lead'        => 'Twój bot online 24/7 bez trzymania włączonego komputera. Wybierasz pakiet i język - Node.js, Python albo Java - a środowisko jest gotowe zaraz po płatności. Pliki wgrywasz w panelu.',
+        'faq'         => [
+            ['Jakie języki obsługujecie?', 'Node.js (discord.js, Eris), Python (discord.py, nextcord, py-cord) i Javę (JDA, Javacord). Wersję Node, Pythona albo Javy zmieniasz w panelu, w zakładce Startup.'],
+            ['Jaki pakiet wybrać?', 'Prosty bot moderacyjny albo z komendami zmieści się w 1 GB RAM. Bot z bazą danych i większym ruchem lepiej czuje się na 2 GB, a bot muzyczny albo kilka botów naraz to 4 GB.'],
+            ['Gdzie wpisać token bota?', 'Token trzymaj w pliku .env albo config.json w menedżerze plików panelu i odczytuj go w kodzie. Nie wklejaj tokena do kodu na GitHubie - każdy, kto go zobaczy, przejmie bota.'],
+            ['Jak wgrać pliki bota?', 'Przez menedżer plików w panelu albo SFTP (FileZilla, WinSCP). Paczki z package.json albo requirements.txt doinstalowują się same przy starcie.'],
+            ['Czy bot działa 24/7?', 'Tak. Bot chodzi na naszym sprzęcie w Polsce bez usypiania, a po awarii panel uruchamia go ponownie. Konsola, pliki i kopie zapasowe są w panelu.'],
+        ],
+    ],
     'zomboid' => [
         'slug'        => 'hosting-project-zomboid',
         'title'       => 'Hosting Project Zomboid - serwer od 19,99 zł/mies. | DNCT',
@@ -165,7 +180,11 @@ try {
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
     );
 
-    $gameRows = $pdo->query('SELECT type, name, icon_img FROM hosting_games WHERE is_active = 1 ORDER BY id')->fetchAll();
+    // Admin widzi też grę wyłączoną (np. boty Discord przed startem sprzedaży) -
+    // jak przy planach niżej, inaczej nie dałoby się jej kupić na próbę.
+    $gameRows = $pdo->query(
+        'SELECT type, name, icon_img FROM hosting_games' . ($isAdmin ? '' : ' WHERE is_active = 1') . ' ORDER BY id'
+    )->fetchAll();
 
     // Jedno zapytanie na wszystkie plany zamiast jednego na grę - przy czterech
     // grach różnica jest bez znaczenia, ale wzorzec "zapytanie w pętli" ma

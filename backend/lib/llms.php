@@ -42,7 +42,7 @@ function llms_tekst(): string
     foreach ($games as $g) {
         $nazwaGry[$g['type']] = $g['name'];
     }
-    $adresGry = ['minecraft' => 'hosting-minecraft', 'zomboid' => 'hosting-project-zomboid', 'vintagestory' => 'hosting-vintage-story'];
+    $adresGry = ['minecraft' => 'hosting-minecraft', 'zomboid' => 'hosting-project-zomboid', 'vintagestory' => 'hosting-vintage-story', 'discord' => 'hosting-bot-discord'];
 
     /* Pierwszy plan Minecrafta z co najmniej $gb GB RAM-u */
     $planOd = static function (float $minGb) use ($planyGry): ?array {

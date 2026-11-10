@@ -104,6 +104,44 @@ function provision_game_map(): array
             ],
         ],
 
+        /* Boty Discord (nest 10). Jedna gra, trzy jajka - wybór klienta zapisany
+           w orders.variant. Zmienne MUSZĄ być dokładnymi nazwami zmiennych jajka.
+           Node: szablon bota ściąga sam skrypt instalacyjny (domyślne REPO_URL
+           z jajka), klient podmienia pliki. Python: USER_UPLOAD=1 = bez klonowania
+           obcego repozytorium, klient wgrywa swoje pliki. */
+        'discord' => [
+            'nest'           => 10,
+            'egg'            => 30,
+            'fallback_image' => '5140/discord-egg:latest',
+            'env_from_egg'   => true,
+            'server_name'    => 'Bot Discord',
+            'env'            => static fn(array $order, array $alloc): array => [],
+            'variants' => [
+                'node' => [
+                    'egg' => 30,
+                    'fallback_image' => '5140/discord-egg:latest',
+                    'env' => static fn(array $order, array $alloc): array => ['STARTUP_FILE' => 'index.js'],
+                ],
+                'java' => [
+                    'egg' => 31,
+                    // Domyślny obraz jajka to Java 8 - za stara dla JDA 5.
+                    'image' => 'ghcr.io/parkervcp/yolks:java_21',
+                    'fallback_image' => 'ghcr.io/parkervcp/yolks:java_21',
+                    'env' => static fn(array $order, array $alloc): array => ['JARFILE' => 'bot.jar'],
+                ],
+                'python' => [
+                    'egg' => 34,
+                    'fallback_image' => 'ghcr.io/ptero-eggs/yolks:python_3.13',
+                    'env' => static fn(array $order, array $alloc): array => [
+                        'USER_UPLOAD' => '1',
+                        'AUTO_UPDATE' => '0',
+                        'PY_FILE' => 'bot.py',
+                        'REQUIREMENTS_FILE' => 'requirements.txt',
+                    ],
+                ],
+            ],
+        ],
+
         'vintagestory' => [
             'nest'           => 9,
             'egg'            => 27,  // Vintage Story
@@ -168,22 +206,32 @@ function provision_free_allocation(int $nodeId = PROVISION_NODE_ID, array $pomin
  * są tylko na wypadek niedostępności API - serwer z zapasową komendą wciąż
  * powstanie, a to lepsze niż nieudany zakup po pobraniu pieniędzy.
  *
- * @return array{startup:string,image:string}
+ * @return array{startup:string,image:string,env_defaults:array<string,string>}
  */
 function provision_egg_defaults(int $nestId, int $eggId, string $fallbackImage): array
 {
-    $res = pterodactyl_api_request('GET', "/api/application/nests/{$nestId}/eggs/{$eggId}");
+    $res = pterodactyl_api_request('GET', "/api/application/nests/{$nestId}/eggs/{$eggId}?include=variables");
 
     if ($res['http_code'] === 200 && isset($res['body']['attributes'])) {
         $attr = $res['body']['attributes'];
+        // Domyślne wartości zmiennych jajka - panel przy zakładaniu serwera
+        // przez API ich NIE podstawia, więc brak zmiennej "required" = błąd 422.
+        $envDefaults = [];
+        foreach ($attr['relationships']['variables']['data'] ?? [] as $v) {
+            $va = $v['attributes'] ?? [];
+            if (isset($va['env_variable'])) {
+                $envDefaults[(string)$va['env_variable']] = (string)($va['default_value'] ?? '');
+            }
+        }
         return [
-            'startup' => (string)($attr['startup'] ?? ''),
-            'image'   => (string)($attr['docker_image'] ?? $fallbackImage),
+            'startup'      => (string)($attr['startup'] ?? ''),
+            'image'        => (string)($attr['docker_image'] ?? $fallbackImage),
+            'env_defaults' => $envDefaults,
         ];
     }
 
     error_log("Provisioning: nie udało się pobrać jajka {$eggId} - używam wartości zapasowych");
-    return ['startup' => '', 'image' => $fallbackImage];
+    return ['startup' => '', 'image' => $fallbackImage, 'env_defaults' => []];
 }
 
 /**
@@ -201,6 +249,12 @@ function provision_server(array $order): array
         return ['ok' => false, 'error' => 'Brak konfiguracji provisioningu dla gry: ' . $gameType];
     }
     $game = $map[$gameType];
+
+    // Gra z wariantami (boty Discord): jajko i zmienne według wyboru klienta;
+    // zamówienia bez zapisanego wariantu dostają Node.js.
+    if (isset($game['variants'])) {
+        $game = array_replace($game, $game['variants'][(string)($order['variant'] ?? 'node')] ?? $game['variants']['node']);
+    }
 
     /* Konto w panelu. Ta sama funkcja, której używa logowanie SSO, więc klient,
        który kiedykolwiek się zalogował, dostanie SWOJE istniejące konto,
@@ -242,8 +296,14 @@ function provision_server(array $order): array
     // klient nie miał ŻADNEGO sposobu, żeby się dowiedzieć, jakie dostał.
     $environment = ($game['env'])($order, $alloc, $extra);
 
+    // Boty Discord: brakujące zmienne bierzemy z jajka (np. REPO_URL Node.js,
+    // wymagane przez panel). Pozostałe gry podają komplet same.
+    if (!empty($game['env_from_egg'])) {
+        $environment += $egg['env_defaults'];
+    }
+
     $payload = [
-        'name'        => ucfirst($gameType) . ' - ' . $order['user_name'],
+        'name'        => ($game['server_name'] ?? ucfirst($gameType)) . ' - ' . $order['user_name'],
         'description' => sprintf(
             'Zamówienie #%d · %s · %d dni',
             (int)$order['id'],

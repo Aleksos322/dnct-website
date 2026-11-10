@@ -72,6 +72,10 @@ try {
             try {
                 $q = pricing_quote($panel, [
                     'game_type'    => $game,
+                    // Boty Discord: cena nie zależy od języka, więc do wyceny
+                    // podglądowej wystarczy domyślny. Prawdziwy wybór idzie z
+                    // formularza do api/checkout/create.php.
+                    'variant'      => $game === 'discord' ? 'node' : '',
                     'plan_id'      => $planId,
                     'slots'        => $slots,
                     'period_days'  => (int)$p['days'],
@@ -89,6 +93,10 @@ try {
 
     if ($spec === null) {
         $error = 'Nie znaleziono takiej oferty. Wróć do cennika i wybierz plan jeszcze raz.';
+    } elseif (!empty($spec['variant'])) {
+        // Podgląd liczył się z domyślnym językiem ("Boty Discord (Node.js)"),
+        // a klient wybiera go dopiero niżej - w nagłówku sama nazwa gry.
+        $spec['game_name'] = preg_replace('/ \([^)]*\)$/u', '', (string)$spec['game_name']);
     }
 } catch (RuntimeException $e) {
     $error = $e->getMessage();
@@ -226,6 +234,19 @@ ob_start();
             </div>
             <div class="ord-period"><span>Okres</span><strong data-role="sumPeriod"></strong></div>
         </div>
+
+        <?php if (($spec['game_type'] ?? '') === 'discord'): ?>
+            <fieldset class="ord-lang" data-role="lang">
+                <legend>Język bota</legend>
+                <?php foreach (PRICING_DISCORD_VARIANTS as $key => $nazwa): ?>
+                    <label class="ord-lang-opt">
+                        <input type="radio" name="variant" value="<?php echo htmlspecialchars($key); ?>"<?php echo $key === 'node' ? ' checked' : ''; ?>>
+                        <span><?php echo htmlspecialchars($nazwa); ?></span>
+                    </label>
+                <?php endforeach; ?>
+                <p class="ord-hint">Dobieramy do tego gotowe środowisko. Pliki bota wgrasz w panelu.</p>
+            </fieldset>
+        <?php endif; ?>
 
         <?php if (!$isLoggedIn): ?>
             <?php /* Tu trafia tylko ktoś, kogo redirect wyżej przepuścił, czyli
