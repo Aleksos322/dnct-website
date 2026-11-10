@@ -179,6 +179,12 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         if ($order === null || in_array($order['status'], ['provisioned', 'cancelled'], true)) {
             return true;   // już obsłużone
         }
+        /* Drugie zdarzenie tej samej płatności (BLIK/P24: completed + async_payment_succeeded).
+           Zamówienie z odroczonym startem zostaje w 'paid', więc warunek wyżej go nie
+           zatrzymywał i klient dostawał drugi mail z potwierdzeniem umowy (#44, 10.11.2026). */
+        if ($order['status'] === 'paid' && empty($order['immediate_service_requested_at'])) {
+            return true;
+        }
 
         /* Kwota faktycznie pobrana (po kodzie rabatowym). amount_gross to cena
            z cennika; przy kodzie Stripe pobiera mniej i to amount_total trafia

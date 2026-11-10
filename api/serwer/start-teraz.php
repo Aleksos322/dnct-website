@@ -79,7 +79,7 @@ try {
     $fresh = order_by_id($dnct, $orderId);
 
     try {
-        send_order_contract_confirmation_mail($fresh);
+        send_order_contract_confirmation_mail($fresh, true);
     } catch (Throwable $e) {
         error_log('Zamówienie #' . $orderId . ': mail z potwierdzeniem żądania startu - ' . $e->getMessage());
     }
