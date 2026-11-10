@@ -63,6 +63,7 @@ $panel = new PDO(
 try {
     $quote = pricing_quote($panel, [
         'game_type'    => request_string('game_type'),
+        'variant'      => request_string('variant'),
         'plan_id'      => (int)request_string('plan_id', '0'),
         'slots'        => (int)request_string('slots', '0'),
         'period_days'  => (int)request_string('period_days', '0'),

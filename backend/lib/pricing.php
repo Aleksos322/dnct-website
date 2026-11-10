@@ -29,6 +29,9 @@ declare(strict_types=1);
 const PRICING_DEFAULT_DISK_MB    = 20480;   // 20 GB dla gier rozliczanych za sloty
 const PRICING_DEFAULT_BACKUPS    = 1;
 
+/** Języki botów Discord: klucz = wartość w orders.variant, wartość = nazwa dla klienta. */
+const PRICING_DISCORD_VARIANTS = ['node' => 'Node.js', 'java' => 'Java', 'python' => 'Python'];
+
 /**
  * Wycena pojedynczego zamówienia.
  *
@@ -48,7 +51,17 @@ function pricing_quote(PDO $panel, array $input, bool $isAdmin = false): array
     }
 
     $period = pricing_period($panel, $periodDays);
-    $game   = pricing_game($panel, $gameType);
+    $game   = pricing_game($panel, $gameType, $isAdmin);
+
+    // Boty Discord: jedna gra, trzy jajka. Język wybiera klient przy zamówieniu,
+    // a provisioning dobiera po nim jajko (provision_game_map -> 'variants').
+    $variant = null;
+    if ($gameType === 'discord') {
+        $variant = (string)($input['variant'] ?? '');
+        if (!isset(PRICING_DISCORD_VARIANTS[$variant])) {
+            throw new RuntimeException('Wybierz język bota: Node.js, Java albo Python.');
+        }
+    }
 
     // Gotowy plan czy konfigurator slotów - rozstrzyga to, co przyszło,
     // ale WERYFIKUJEMY w bazie, że taki wybór dla tej gry w ogóle istnieje.
@@ -71,7 +84,8 @@ function pricing_quote(PDO $panel, array $input, bool $isAdmin = false): array
 
     return [
         'game_type'     => $gameType,
-        'game_name'     => $game['name'],
+        'game_name'     => $game['name'] . ($variant !== null ? ' (' . PRICING_DISCORD_VARIANTS[$variant] . ')' : ''),
+        'variant'       => $variant,
         'plan_id'       => $spec['plan_id'],
         'slots'         => $spec['slots'],
         'label'         => $spec['label'],
@@ -151,9 +165,11 @@ function pricing_period(PDO $panel, int $days): array
     ];
 }
 
-function pricing_game(PDO $panel, string $type): array
+function pricing_game(PDO $panel, string $type, bool $isAdmin = false): array
 {
-    $stmt = $panel->prepare('SELECT type, name FROM hosting_games WHERE type = ? AND is_active = 1');
+    // Admin może kupić też grę wyłączoną (jak plan z is_active = 0) - tak
+    // testuje się nową grę przed pokazaniem jej klientom.
+    $stmt = $panel->prepare('SELECT type, name FROM hosting_games WHERE type = ?' . ($isAdmin ? '' : ' AND is_active = 1'));
     $stmt->execute([$type]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 

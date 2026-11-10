@@ -77,7 +77,7 @@ function order_create(
             (int)$immediateServiceStart,
         ]);
 
-        return order_zapisz_region($dnct, (int)$dnct->lastInsertId());
+        return order_zapisz_wariant($dnct, order_zapisz_region($dnct, (int)$dnct->lastInsertId()), $quote);
     }
 
     $stmt = $dnct->prepare(
@@ -103,7 +103,21 @@ function order_create(
         $quote['currency'],
     ]);
 
-    return order_zapisz_region($dnct, (int)$dnct->lastInsertId());
+    return order_zapisz_wariant($dnct, order_zapisz_region($dnct, (int)$dnct->lastInsertId()), $quote);
+}
+
+/**
+ * Zapisuje wariant gry (boty Discord: node/java/python). Dotyczy tylko botów,
+ * więc inne gry go nie wołają. Błędu CELOWO nie łapiemy: brak kolumny ma
+ * zatrzymać zakup PRZED płatnością, a nie zgubić wybór języka po niej.
+ */
+function order_zapisz_wariant(PDO $dnct, int $orderId, array $quote): int
+{
+    if (!empty($quote['variant'])) {
+        $dnct->prepare('UPDATE orders SET variant = ? WHERE id = ?')->execute([(string)$quote['variant'], $orderId]);
+    }
+
+    return $orderId;
 }
 
 /**
