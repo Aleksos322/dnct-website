@@ -29,6 +29,27 @@ declare(strict_types=1);
 const PRICING_DEFAULT_DISK_MB    = 20480;   // 20 GB dla gier rozliczanych za sloty
 const PRICING_DEFAULT_BACKUPS    = 1;
 
+/**
+ * Gry pokazywane na TYM środowisku mimo `is_active = 0` (env CENNIK_PODGLAD_GIER,
+ * np. "discord"). Baza cennika jest wspólna dla bety i produkcji, więc włączenie
+ * gry w bazie pokazałoby ją od razu na produkcji - ten przełącznik ustawia się
+ * wyłącznie w beta.env, żeby nową grę dało się obejrzeć i kupić na becie.
+ *
+ * @return list<string>
+ */
+function pricing_preview_types(): array
+{
+    $typy = array_map('trim', explode(',', (string)env('CENNIK_PODGLAD_GIER', '')));
+    return array_values(array_filter($typy, static fn(string $t): bool => (bool)preg_match('/^[a-z0-9_-]+$/', $t)));
+}
+
+/** Warunek SQL "na sprzedaż albo w podglądzie" dla kolumny is_active/type. */
+function pricing_visible_sql(): string
+{
+    $typy = pricing_preview_types();
+    return $typy === [] ? 'is_active = 1' : "(is_active = 1 OR type IN ('" . implode("','", $typy) . "'))";
+}
+
 /** Języki botów Discord: klucz = wartość w orders.variant, wartość = nazwa dla klienta. */
 const PRICING_DISCORD_VARIANTS = ['node' => 'Node.js', 'java' => 'Java', 'python' => 'Python'];
 
@@ -51,6 +72,8 @@ function pricing_quote(PDO $panel, array $input, bool $isAdmin = false): array
     }
 
     $period = pricing_period($panel, $periodDays);
+    // Gra w podglądzie (pricing_preview_types) jest kupowalna jak dla admina.
+    $isAdmin = $isAdmin || in_array($gameType, pricing_preview_types(), true);
     $game   = pricing_game($panel, $gameType, $isAdmin);
 
     // Boty Discord: jedna gra, trzy jajka. Język wybiera klient przy zamówieniu,

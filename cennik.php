@@ -194,14 +194,14 @@ try {
     // Admin widzi też grę wyłączoną (np. boty Discord przed startem sprzedaży) -
     // jak przy planach niżej, inaczej nie dałoby się jej kupić na próbę.
     $gameRows = $pdo->query(
-        'SELECT type, name, icon_img FROM hosting_games' . ($isAdmin ? '' : ' WHERE is_active = 1') . ' ORDER BY id'
+        'SELECT type, name, icon_img FROM hosting_games' . ($isAdmin ? '' : ' WHERE ' . pricing_visible_sql()) . ' ORDER BY id'
     )->fetchAll();
 
     // Jedno zapytanie na wszystkie plany zamiast jednego na grę - przy czterech
     // grach różnica jest bez znaczenia, ale wzorzec "zapytanie w pętli" ma
     // paskudny zwyczaj przeżywać do czasu, gdy gier jest czterdzieści.
     $planRows = $pdo->query(
-        'SELECT * FROM hosting_plans' . ($isAdmin ? '' : ' WHERE is_active = 1') . ' ORDER BY price ASC'
+        'SELECT * FROM hosting_plans' . ($isAdmin ? '' : ' WHERE ' . pricing_visible_sql()) . ' ORDER BY price ASC'
     )->fetchAll();
 
     /* Dostępność liczona z realnej pojemności węzła klienckiego. Plan znika

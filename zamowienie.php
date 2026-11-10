@@ -54,7 +54,7 @@ try {
     // Przy wejściu z karty planu gra wynika z samego planu - nie każemy jej
     // podawać w adresie, bo to tylko okazja do niespójnego żądania.
     if ($planId > 0 && $game === '') {
-        $stmt = $panel->prepare('SELECT type FROM hosting_plans WHERE id = ?' . (dnct_is_admin() ? '' : ' AND is_active = 1'));
+        $stmt = $panel->prepare('SELECT type FROM hosting_plans WHERE id = ?' . (dnct_is_admin() ? '' : ' AND ' . pricing_visible_sql()));
         $stmt->execute([$planId]);
         $game = (string)($stmt->fetchColumn() ?: '');
     }
