@@ -13,7 +13,7 @@
  *      bota zatrzymuje się przed płatnością,
  *   2. merge gałęzi `boty-discord` w WEB/-dnct.pl (main) - kod musi znać boty,
  *      zanim klient je zobaczy,
- *   3. pakiety w hosting_plans + włączenie gry `discord` - dopiero teraz boty
+ *   3. włączenie pakietów i gry `discord` (ceny z admina) - dopiero teraz boty
  *      pojawiają się w cenniku dla wszystkich.
  *
  * Dlaczego merge gałęzi `boty-discord`, a nie `dev`: `dev` ma ~55 commitów,
@@ -28,16 +28,9 @@ const PROD_DIR   = '/var/www/dnct.pl/public_html/WEB/-dnct.pl';
 const BRANCH     = 'boty-discord';
 const GAME_TYPE  = 'discord';
 
-/* Pakiety. CENY ZATWIERDZA USER - zmień tutaj przed `--apply`, jeśli trzeba.
-   Dopasowanie po nazwie: istniejący wiersz (type=discord, ta sama nazwa) jest
-   aktualizowany, brakujący dopisywany. Pakietu usuniętego z tej listy skrypt
-   NIE kasuje, tylko wyłącza (is_active = 0). */
-const PLANS = [
-    ['name' => 'Bot Start',    'ram_mb' => 512,  'cpu_cores' => 1, 'ssd_mb' => 3072,  'backups_limit' => 1, 'price' => '3.99',  'popular' => 0, 'icon_img' => 'discord_bot_mini.png',     'description' => 'Na próbę: prosty bot z kilkoma komendami.'],
-    ['name' => 'Bot Mini',     'ram_mb' => 1024, 'cpu_cores' => 1, 'ssd_mb' => 5120,  'backups_limit' => 1, 'price' => '6.99',  'popular' => 0, 'icon_img' => 'discord_bot_mini.png',     'description' => 'Na start: jeden bot, jedna funkcja.'],
-    ['name' => 'Bot Standard', 'ram_mb' => 2048, 'cpu_cores' => 2, 'ssd_mb' => 10240, 'backups_limit' => 2, 'price' => '10.99', 'popular' => 1, 'icon_img' => 'discord_bot_standard.png', 'description' => 'Dla bota z bazą i większym ruchem.'],
-    ['name' => 'Bot Pro',      'ram_mb' => 4096, 'cpu_cores' => 2, 'ssd_mb' => 20480, 'backups_limit' => 3, 'price' => '16.99', 'popular' => 0, 'icon_img' => 'discord_bot_pro.png',      'description' => 'Duże serwery, muzyka, kilka procesów.'],
-];
+/* Ceny i pakiety NIE są w tym skrypcie - ustawia się je w admin.lan.dnct.pl
+   -> Cennik -> Boty Discord (wspólna baza panelu). Skrypt tylko włącza sprzedaż
+   tego, co tam jest, więc nie nadpisze żadnej zmiany zrobionej w adminie. */
 
 $apply = in_array('--apply', $argv, true);
 $fail  = static function (string $msg): never { fwrite(STDERR, "\nSTOP: $msg\n"); exit(1); };
@@ -125,83 +118,40 @@ if ($merged) {
 }
 
 /* ---- 3. Cennik w bazie panelu (wspólnej dla bety i produkcji) ------------- */
-$say("\n[3/3] Pakiety botów w panel.hosting_plans + włączenie gry `discord`:");
-$rows = $panel->prepare('SELECT * FROM hosting_plans WHERE type = ?');
-$rows->execute([GAME_TYPE]);
-$existing = [];
-foreach ($rows->fetchAll(PDO::FETCH_ASSOC) as $r) {
-    $existing[$r['name']] = $r;
+$say("\n[3/3] Włączenie sprzedaży botów (panel.hosting_plans + hosting_games):");
+$plans = $panel->prepare('SELECT id, name, price, ram_mb, cpu_cores, ssd_mb, is_active, sold_out FROM hosting_plans WHERE type = ? ORDER BY price');
+$plans->execute([GAME_TYPE]);
+$plans = $plans->fetchAll(PDO::FETCH_ASSOC);
+if (!$plans) {
+    $fail('brak pakietów `discord` w hosting_plans - dodaj je w adminie (Cennik -> Boty Discord).');
 }
-
-$cols = ['ram_mb', 'cpu_cores', 'ssd_mb', 'backups_limit', 'price', 'popular', 'icon_img', 'description'];
-$ops  = [];
-foreach (PLANS as $p) {
-    $cur = $existing[$p['name']] ?? null;
-    if ($cur === null) {
-        $ops[] = ['insert', $p];
-        $say(sprintf('      + %-13s %5d MB RAM, %d vCore, %3d GB, %d backup, %s zł  (NOWY)',
-            $p['name'], $p['ram_mb'], $p['cpu_cores'], $p['ssd_mb'] / 1024, $p['backups_limit'], $p['price']));
-        continue;
-    }
-    $diff = [];
-    foreach ($cols as $c) {
-        if ((string)$cur[$c] !== (string)$p[$c] && !($c === 'price' && (float)$cur[$c] === (float)$p[$c])) {
-            $diff[] = "$c: {$cur[$c]} -> {$p[$c]}";
-        }
-    }
-    if ((int)$cur['is_active'] !== 1) {
-        $diff[] = 'is_active: 0 -> 1';
-    }
-    $ops[] = ['update', $p, (int)$cur['id']];
-    $say(sprintf('      ~ %-13s #%d %s', $p['name'], $cur['id'], $diff ? implode(', ', $diff) : 'bez zmian'));
+foreach ($plans as $p) {
+    $say(sprintf('      %-13s #%d  %5d MB RAM, %s vCore, %3d GB, %6s zł  %s',
+        $p['name'], $p['id'], $p['ram_mb'], $p['cpu_cores'], $p['ssd_mb'] / 1024, $p['price'],
+        (int)$p['sold_out'] === 1 ? '(wyprzedany - zostaje wyłączony)' : ((int)$p['is_active'] === 1 ? 'już włączony' : 'is_active 0 -> 1')));
 }
-foreach ($existing as $name => $cur) {
-    if (!in_array($name, array_column(PLANS, 'name'), true) && (int)$cur['is_active'] === 1) {
-        $ops[] = ['off', null, (int)$cur['id']];
-        $say(sprintf('      - %-13s #%d spoza listy -> is_active = 0', $name, $cur['id']));
-    }
-}
-$game = $panel->query("SELECT is_active, icon_img FROM hosting_games WHERE type = 'discord'")->fetch(PDO::FETCH_ASSOC);
+$game = $panel->query("SELECT is_active FROM hosting_games WHERE type = 'discord'")->fetch(PDO::FETCH_ASSOC);
 if (!$game) {
     $fail('brak wiersza `discord` w hosting_games.');
 }
-$say('      gra `discord`: is_active ' . $game['is_active'] . ' -> 1');
+$say('      gra `discord`: ' . ((int)$game['is_active'] === 1 ? 'już włączona' : 'is_active 0 -> 1'));
 
 if ($apply) {
-    if (!$merged) {
-        // Kod musi być już na miejscu - patrz kolejność w nagłówku.
-        $git('merge-base --is-ancestor refs/heads/' . BRANCH . ' HEAD', $code);
-        if ($code !== 0) {
-            $fail('kod nie jest scalony, cennika nie włączam.');
-        }
+    // Kod musi być już na produkcji - patrz kolejność w nagłówku.
+    $git('merge-base --is-ancestor refs/heads/' . BRANCH . ' HEAD', $code);
+    if ($code !== 0) {
+        $fail('kod nie jest scalony, sprzedaży nie włączam.');
     }
     $panel->beginTransaction();
     try {
-        foreach ($ops as $op) {
-            [$kind, $p] = $op;
-            if ($kind === 'insert') {
-                $st = $panel->prepare(
-                    'INSERT INTO hosting_plans (name, type, popular, description, ram_mb, cpu_cores, ssd_mb, backups_limit, price, icon, is_active, background_img, icon_img)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "box", 1, "default-bg.png", ?)'
-                );
-                $st->execute([$p['name'], GAME_TYPE, $p['popular'], $p['description'], $p['ram_mb'], $p['cpu_cores'], $p['ssd_mb'], $p['backups_limit'], $p['price'], $p['icon_img']]);
-            } elseif ($kind === 'update') {
-                $st = $panel->prepare(
-                    'UPDATE hosting_plans SET popular = ?, description = ?, ram_mb = ?, cpu_cores = ?, ssd_mb = ?, backups_limit = ?, price = ?, icon_img = ?, is_active = 1
-                     WHERE id = ? AND type = ?'
-                );
-                $st->execute([$p['popular'], $p['description'], $p['ram_mb'], $p['cpu_cores'], $p['ssd_mb'], $p['backups_limit'], $p['price'], $p['icon_img'], $op[2], GAME_TYPE]);
-            } else {
-                $panel->prepare('UPDATE hosting_plans SET is_active = 0 WHERE id = ? AND type = ?')->execute([$op[2], GAME_TYPE]);
-            }
-        }
-        $panel->exec("UPDATE hosting_games SET is_active = 1, icon_img = 'media/Server_card/icons/discord_bot_standard.png' WHERE type = 'discord'");
+        $panel->prepare('UPDATE hosting_plans SET is_active = 1 WHERE type = ? AND sold_out = 0')->execute([GAME_TYPE]);
+        $panel->prepare('UPDATE hosting_games SET is_active = 1 WHERE type = ?')->execute([GAME_TYPE]);
         $panel->commit();
     } catch (Throwable $e) {
         $panel->rollBack();
-        $fail('zapis cennika się nie udał, nic nie zmieniłem w bazie panelu: ' . $e->getMessage());
+        $fail('zapis się nie udał, nic nie zmieniłem w bazie panelu: ' . $e->getMessage());
     }
-    $say('      zapisane, boty są w cenniku.');
+    $say('      włączone, boty są w cenniku.');
 }
 
 $say($apply
