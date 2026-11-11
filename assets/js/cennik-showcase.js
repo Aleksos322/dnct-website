@@ -68,6 +68,21 @@
             var natural = Math.round(scrollArea.getBoundingClientRect().top + window.scrollY);
             pinTop = natural > 0 && natural <= window.innerHeight - height ? natural : 88;
             scrollArea.style.setProperty('--cnk-pin-top', pinTop + 'px');
+            // Kilka karuzel (Minecraft, Boty Discord) dzieli jeden scrollArea.
+            // Nieaktywna nie może go ruszać - inaczej ta, która wykona się
+            // później, zdejmowała przypięcie aktywnej i cennik przewijał
+            // stronę razem z kartami (2026-11-11).
+            if (!root.closest('.cennik-panel').classList.contains('is-active')) {
+                pinned = false;
+                // Aktywna zakładka bez karuzeli (konfigurator slotów): sprząta
+                // przypięcie każda nieaktywna, bo nie ma kto inny.
+                if (!selectedPanel || !selectedPanel.querySelector('[data-catalogue-carousel]')) {
+                    scrollArea.classList.remove('is-scroll-driven');
+                    scrollArea.style.height = '';
+                }
+                queueRender();
+                return;
+            }
             var wasPinned = pinned;
             var startY = scrollStart();
             var wasVisible = catalogue.getBoundingClientRect().bottom > pinTop && scrollArea.getBoundingClientRect().top <= pinTop;

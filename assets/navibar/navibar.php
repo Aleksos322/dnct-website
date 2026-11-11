@@ -132,12 +132,7 @@ function navbar_class_mobile(bool $active): string
                 <a href="/" class="<?php echo navbar_class(navbar_active('/', [])); ?>"<?php echo navbar_active('/', []) ? ' aria-current="page"' : ''; ?>>Strona Główna</a>
                 <a href="/cennik" class="<?php echo navbar_class(navbar_active('/cennik', ['/zamowienie', '/sukces'])); ?>"<?php echo navbar_active('/cennik', ['/zamowienie', '/sukces']) ? ' aria-current="page"' : ''; ?>>Cennik</a>
                 <a href="/twoje-serwery" class="<?php echo navbar_class(navbar_active('/twoje-serwery', ['/oplaty'])); ?>"<?php echo navbar_active('/twoje-serwery', ['/oplaty']) ? ' aria-current="page"' : ''; ?>>Twoje serwery</a>
-                <?php /* Pomoc + status usług obok (2026-11-11). Kropka to ozdoba,
-                         nie żywy stan - prawdziwy stan pokazuje status.dnct.pl. */ ?>
-                <span class="nav-pomoc">
-                    <a href="/pomoc" class="<?php echo navbar_class(navbar_active('/pomoc', [])); ?>"<?php echo navbar_active('/pomoc', []) ? ' aria-current="page"' : ''; ?>>Pomoc</a>
-                    <a href="https://status.dnct.pl" class="nav-status" target="_blank" rel="noopener" title="Status usług DNCT"><i aria-hidden="true"></i>Status</a>
-                </span>
+                <a href="/pomoc" class="<?php echo navbar_class(navbar_active('/pomoc', [])); ?>"<?php echo navbar_active('/pomoc', []) ? ' aria-current="page"' : ''; ?>>Pomoc</a>
             </div>
 
             <!-- PRZYCISKI / PROFIL -->
@@ -232,7 +227,6 @@ function navbar_class_mobile(bool $active): string
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg> Pomoc
             </a>
-            <a href="https://status.dnct.pl" class="text-gray-400 hover:text-white uppercase tracking-[0.1em] py-2 block border-b border-white/5 transition-colors nav-status-mobile" target="_blank" rel="noopener"><i aria-hidden="true"></i>Status usług</a>
             <?php /* Na telefonie przełącznik języka mieszka tutaj - w górnym pasku
                      zgniatał logo (navbar.css chowa tam .nav-lang < 640 px). */ ?>
             <div class="nav-lang nav-lang--mobile" role="group" aria-label="Język / Language">
