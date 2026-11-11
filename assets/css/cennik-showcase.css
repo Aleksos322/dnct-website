@@ -2,7 +2,10 @@
    wspólne karty, ceny i konfigurator nadal mają jedno źródło danych. */
 .cennik-page.cnk-catalogue-page { margin-top: -28px; overflow-x: clip; }
 .cnk-catalogue-page .cnk-decor-layer { display: none; }
-.cnk-catalogue-page .cnk-wrap { max-width: 1600px; }
+/* Ta sama siatka co strona główna (.home-wrap) i navbar: 1680 px + boczne
+   marginesy clamp(20px, 4vw, 64px). Na 1920 px treść zaczyna się w tej samej
+   linii co logo (2026-11-11). */
+.cnk-catalogue-page .cnk-wrap { max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
 .cnk-back-top {
     position: fixed; z-index: 45; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px));
     display: grid; place-items: center; width: 48px; height: 48px; padding: 0;

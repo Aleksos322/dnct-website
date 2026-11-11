@@ -210,6 +210,10 @@
 .ml-auto { margin-left: auto; }
 
 .max-w-7xl { max-width: 80rem; }
+/* Navbar na każdej stronie tak szeroki jak na głównej (2026-11-11). Wcześniej
+   rozszerzały go tylko home.css i servers.css, więc cennik i reszta miały
+   węższy pasek (1280 px) i logo przeskakiwało przy zmianie strony. */
+nav .glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
 .max-w-lg { max-width: 32rem; }
 
 .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
@@ -438,24 +442,7 @@
     width: 1px; height: 1.1em; translate: 0 -50%; pointer-events: none;
     background: linear-gradient(180deg, transparent, rgba(167, 139, 250, 0.45) 50%, transparent);
 }
-/* "Status" przy Pomocy - etykieta marki (900, .14em) z zieloną kropką. */
-.nav-pomoc { display: inline-flex; align-items: center; gap: 0.6rem; }
-.nav-status {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    padding: 0.2rem 0.5rem; border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.09); background: rgba(255, 255, 255, 0.04);
-    color: #94a3b8; font-size: 0.6rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1;
-    text-decoration: none; transition: color 0.2s ease, border-color 0.2s ease;
-}
-.nav-status:hover { color: #f1f5f9; border-color: rgba(52, 211, 153, 0.45); }
-.nav-status:focus-visible { outline: 2px solid #a78bfa; outline-offset: 3px; }
-.nav-status i, .nav-status-mobile i {
-    width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
-}
-.nav-status-mobile { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-.nav-status-mobile i { display: inline-block; }
-/* Odstęp między zakładkami w jednym miejscu: span .nav-pomoc też go dostaje,
-   a kreska separatora stoi w jego połowie. */
+/* Odstęp między zakładkami w jednym miejscu; kreska separatora stoi w jego połowie. */
 .nav-links-desktop.space-x-8 > * + * { margin-left: var(--nav-gap); }
 @media (max-width: 1320px) { .nav-links-desktop { --nav-gap: 1.5rem; } }
 @media (max-width: 1240px) { .nav-links-desktop { --nav-gap: 1.15rem; } }
