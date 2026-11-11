@@ -28,6 +28,42 @@
             &copy; <?php echo date('Y'); ?> DNCT Hosting. Wszystkie prawa zastrzeżone.
             | <a href="tel:+48536180706" class="text-purple-500 hover:text-purple-400 transition-colors">+48 536 180 706</a>
             | <a href="mailto:support@dnct.pl" class="text-purple-500 hover:text-purple-400 transition-colors">support@dnct.pl</a>
+        <?php /* Przełącznik podpowiedzi admina (2026-11-11) - tylko dla admina.
+                 Ciasteczko czyta backend/lib/admin_hints.php; tu chowamy na żywo
+                 wszystko z data-admin-hint. */
+        require_once dirname(__DIR__, 2) . '/backend/lib/admin_hints.php';
+        if (admin_hints_is_admin()): $adminHintsOn = admin_hints_on(); ?>
+            <span class="admin-hints-row">
+                <button type="button" class="admin-hints-switch" role="switch" aria-checked="<?php echo $adminHintsOn ? 'true' : 'false'; ?>" data-admin-hints-toggle>
+                    <span class="admin-hints-track" aria-hidden="true"><span></span></span>
+                    Podpowiedzi admina
+                </button>
+            </span>
+            <style>
+                .admin-hints-row { display: inline-flex; vertical-align: middle; margin-left: 0.6rem; }
+                .admin-hints-switch { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.04); color: #94a3b8; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: color .2s ease, border-color .2s ease; }
+                .admin-hints-switch:hover { color: #f1f5f9; border-color: rgba(167,139,250,.35); }
+                .admin-hints-switch:focus-visible { outline: 2px solid #a78bfa; outline-offset: 3px; }
+                .admin-hints-track { position: relative; width: 28px; height: 16px; border-radius: 999px; background: #40394b; transition: background .2s ease; }
+                .admin-hints-track span { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #e2e8f0; transition: transform .2s ease; }
+                .admin-hints-switch[aria-checked="true"] .admin-hints-track { background: #8b5cf6; }
+                .admin-hints-switch[aria-checked="true"] .admin-hints-track span { transform: translateX(12px); }
+                [data-admin-hint][hidden] { display: none !important; }
+                @media (prefers-reduced-motion: reduce) { .admin-hints-switch, .admin-hints-track, .admin-hints-track span { transition: none; } }
+            </style>
+            <script>
+            (function () {
+                var b = document.querySelector('[data-admin-hints-toggle]');
+                if (!b) return;
+                b.addEventListener('click', function () {
+                    var on = b.getAttribute('aria-checked') !== 'true';
+                    b.setAttribute('aria-checked', on ? 'true' : 'false');
+                    document.cookie = 'dnct_admin_hints=' + (on ? '1' : '0') + '; path=/; max-age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+                    document.querySelectorAll('[data-admin-hint]').forEach(function (el) { el.hidden = !on; });
+                });
+            })();
+            </script>
+        <?php endif; ?>
         </p>
         <p class="text-center text-gray-600 text-xs mt-3">
             <a href="/regulamin" class="hover:text-gray-400 transition-colors">Regulamin</a>
