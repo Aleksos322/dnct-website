@@ -168,3 +168,36 @@
 @media(prefers-reduced-motion:reduce){.dc-manage-dialog .dm-policy-row,.dc-manage-dialog button.dc-primary,.dc-manage-dialog button.dc-danger{transition:none}}
 
 .dc-manage-dialog,.dc-avatar-dialog{max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#705699 transparent;box-sizing:border-box}.dm-mute-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .25s ease,opacity .2s ease}.is-mute-open .dm-mute-panel{grid-template-rows:1fr;opacity:1}.dm-mute-inner{overflow:hidden;min-height:0}.dm-mute-inner input[type=range]{width:100%;accent-color:#a78bfa;margin:18px 0}.dc-manage-dialog .dm-moderation-row:not(.is-mute-open) .dm-member-row{border:0;margin-bottom:0;padding-bottom:0}.dm-avatar-filename{font-size:12px;color:#bfaed5;overflow-wrap:anywhere;text-align:left}.dm-avatar-reset{margin-right:auto}.dm-avatar-drop[hidden],.dm-crop-stage[hidden]{display:none}@media(prefers-reduced-motion:reduce){.dm-mute-panel{transition:none}}
+
+/* === 2026-11-11: status jako obwódka, odznaki w prawym dolnym rogu, fade listy ===
+   1. Status (dostępny / zaraz wracam / offline) to pierścień dookoła avatara
+      zamiast kropki w lewym górnym rogu - kropka zasłaniała zdjęcie i gryzła się
+      z odznaką. Pierścień stoi 3 px poza avatarem, więc nie przykrywa twarzy.
+   2. Odznaka (.dn-pin) zawsze nad pierścieniem, prawy dolny róg.
+   3. Avatar w wątku (.dc-avatar) miał overflow:hidden + clip-path, przez co
+      dressAvatar() w chat-ui.js w ogóle nie doklejał odznaki. Przycinamy samo
+      zdjęcie, nie kontener.
+   4. Lista rozmów wygasa na górze i dole (mask-image), zamiast ucinać się twardo
+      pod paskiem przycisków i nad "Zgłoś problem". Padding = strefa fadu, więc
+      w spoczynku pierwszy i ostatni wiersz są w pełni widoczne. */
+html .dm-presence,
+html .dm-avatar > .dm-presence,
+html .dm-group-avatar > .dm-presence,
+html .dm-custom-group-avatar > .dm-presence{
+  left:-3px;top:-3px;right:-3px;bottom:-3px;width:auto;height:auto;
+  border-radius:50%;background:none;box-shadow:inset 0 0 0 2px rgba(100,116,139,.55);
+  pointer-events:none;z-index:2;transition:box-shadow .2s ease
+}
+html .dm-presence[data-state=online]{background:none;box-shadow:inset 0 0 0 2px #22c55e,0 0 8px rgba(34,197,94,.35)}
+html .dm-presence[data-state=away]{background:none;box-shadow:inset 0 0 0 2px #fbbf24}
+html .dm-avatar > .dn-pin,html .dc-avatar > .dn-pin{z-index:3}
+html .dc-avatar{overflow:visible;clip-path:none}
+html .dc-avatar > img:not(.dn-pin img){border-radius:50%;clip-path:circle(50%)}
+html .dc-avatar > .dn-pin{right:-5px;bottom:-5px;width:52%;min-width:14px;border-width:2px}
+html .dc-avatar > .dn-pin > img{position:static;inset:auto;width:140%;height:140%}
+.dm-conversations{
+  padding:12px 6px 16px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 12px,#000 calc(100% - 16px),transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0,#000 12px,#000 calc(100% - 16px),transparent 100%)
+}
+@media(prefers-reduced-motion:reduce){html .dm-presence{transition:none}}

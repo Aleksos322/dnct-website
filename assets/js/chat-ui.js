@@ -421,7 +421,7 @@
     const attach = () => {
       if (target.dataset.avatarUser !== username) return;
       const img=entry.img.cloneNode();img.className=className;
-      target.querySelectorAll('img').forEach(old=>old.remove());target.append(img);
+      target.querySelectorAll(':scope > img').forEach(old=>old.remove());target.append(img); /* tylko zdjęcie avatara - img odznaki (.dn-pin > img) zostaje */
     };
     if(entry.ready)attach();else entry.promise.then(ok=>{if(ok)attach();});
   }
