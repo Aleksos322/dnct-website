@@ -84,32 +84,6 @@ function cennik_price_label(mixed $price): string
  * @param array $p Klucze: name, price, old_price, is_on_sale, popular, sold_out,
  *                 ram, ssd, cpu, backups (gotowe napisy), bg, icon, fits, badge
  */
-/**
- * Które opcjonalne wiersze karty (niedobór, stara cena, Omnibus) ma choć jeden
- * plan z listy - te same warunki co w render_cennik_plan_card(). Wynik idzie
- * do każdej karty jako 'reserve', żeby wszystkie miały równą wysokość.
- */
-function cennik_card_reserve(array $plans): array
-{
-    $r = ['scarce' => false, 'sale' => false, 'omni' => false];
-    foreach ($plans as $plan) {
-        if (!empty($plan['sold_out'])) {
-            continue;
-        }
-        if (isset($plan['fits']) && $plan['fits'] !== null && $plan['fits'] <= 4) {
-            $r['scarce'] = true;
-        }
-        $onSale = function_exists('pricing_effective_on_sale') ? pricing_effective_on_sale($plan) : !empty($plan['is_on_sale']);
-        if ($onSale && (float)($plan['old_price'] ?? 0) > 0) {
-            $r['sale'] = true;
-        }
-        if ($onSale && is_array($plan['lowest30'] ?? null)) {
-            $r['omni'] = true;
-        }
-    }
-    return $r;
-}
-
 function render_cennik_plan_card(array $p): void
 {
     $isSoldOut = !empty($p['sold_out']);
@@ -220,34 +194,30 @@ function render_cennik_plan_card(array $p): void
                  gdy naprawdę robi się ciasno - stale wyświetlany komunikat
                  "zostały 3 sztuki" przestaje znaczyć cokolwiek po drugiej
                  wizycie, a klienci to wychwytują. */ ?>
-        <?php /* reserve (2026-11-11): wiersze, które ma choć jedna karta tej gry,
-                 dostają w pozostałych kartach niewidoczną rezerwę tej samej
-                 wysokości. Bez tego karty z promocją były o ~60 px wyższe
-                 i karuzela skakała przy przewijaniu. Liczy cennik_card_reserve(). */
-        $reserve = (array)($p['reserve'] ?? []); ?>
         <?php if (!$isSoldOut && isset($p['fits']) && $p['fits'] !== null && $p['fits'] <= 4): ?>
             <p class="pcard-scarce">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
                 <?php echo (int)$p['fits'] === 1 ? 'Zostało 1 wolne miejsce na węźle' : 'Zostały ' . (int)$p['fits'] . ' wolne miejsca na węźle'; ?>
             </p>
-        <?php elseif (!empty($reserve['scarce'])): ?>
-            <p class="pcard-scarce pcard-reserve" aria-hidden="true"><svg viewBox="0 0 24 24"></svg>&nbsp;</p>
         <?php endif; ?>
 
-        <div class="pcard-price">
+        <?php /* Cena w jednym wierszu (2026-11-11): przy promocji skreślona stara
+                 cena stoi nad "zł / mies.", a Omnibus po prawej od kwoty - karta
+                 z promocją ma tę samą wysokość co bez niej. */
+        $pcardSale = $isOnSale && !$isSoldOut;
+        $pcardOld  = $pcardSale && $oldPrice > 0;
+        $pcardOmni = $pcardSale && is_array($p['lowest30'] ?? null); ?>
+        <div class="pcard-price<?php echo $pcardOld ? ' has-old' : ''; ?>">
             <span class="pcard-price-now"><?php echo htmlspecialchars(cennik_price_label($p['price'] ?? '')); ?></span>
-            <span class="pcard-price-cur">zł</span>
-            <span class="pcard-price-per">/ mies.</span>
-            <?php if ($isOnSale && $oldPrice > 0 && !$isSoldOut): ?>
-                <span class="pcard-price-old"><?php echo htmlspecialchars(number_format($oldPrice, 2, ',', ' ')); ?> zł</span>
-            <?php elseif (!empty($reserve['sale'])): ?>
-                <span class="pcard-price-old pcard-reserve" aria-hidden="true">0,00 zł</span>
-            <?php endif; ?>
-            <?php if ($isOnSale && !$isSoldOut && is_array($p['lowest30'] ?? null)): ?>
+            <span class="pcard-price-unit">
+                <?php if ($pcardOld): ?>
+                    <span class="pcard-price-old"><?php echo htmlspecialchars(number_format($oldPrice, 2, ',', ' ')); ?> zł</span>
+                <?php endif; ?>
+                <span><span class="pcard-price-cur">zł</span> <span class="pcard-price-per">/ mies.</span></span>
+            </span>
+            <?php if ($pcardOmni): ?>
                 <span class="pcard-omni">Najniższa cena z 30 dni przed obniżką: <strong><?php echo htmlspecialchars(number_format((float)$p['lowest30']['price'], 2, ',', ' ')); ?> zł</strong></span>
-            <?php elseif (!empty($reserve['omni'])): ?>
-                <span class="pcard-omni pcard-reserve" aria-hidden="true">Najniższa cena z 30 dni przed obniżką: <strong>0,00 zł</strong></span>
             <?php endif; ?>
         </div>
 

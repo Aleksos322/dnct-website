@@ -337,7 +337,6 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 $rams    = array_map(static fn($r) => (int)($r['ram_mb'] ?? 0), $showcasePlans);
                 $ramMin  = $rams ? min($rams) : 0;
                 $ramSpan = max(1, ($rams ? max($rams) : 0) - $ramMin);
-                $cardReserve = cennik_card_reserve($showcasePlans);
                 foreach ($showcasePlans as $k => $row):
                     $ramMb = (int)($row['ram_mb'] ?? 0);
                     $ssdMb = (int)($row['ssd_mb'] ?? 0);
@@ -361,7 +360,6 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'bg'         => $row['background_img'] ?? '',
                                 'icon'       => $row['icon_img'] ?? '',
                                 'power'      => sqrt(($ramMb - $ramMin) / $ramSpan),
-                                'reserve'    => $cardReserve,
                                 // Karta na stronie głównej prowadzi do pełnego cennika.
                                 'href'       => '/cennik',
                                 'cta'        => 'Zobacz szczegóły',
