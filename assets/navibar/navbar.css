@@ -427,7 +427,38 @@
 /* Linki desktopowe - chowają się dokładnie wtedy, gdy pojawia się hamburger */
 .nav-links-desktop {
     display: flex;
+    align-items: center;
+    --nav-gap: 2rem; /* = space-x-8; węższe ekrany nadpisują niżej */
 }
+/* Separatory między zakładkami (2026-11-11): pionowa kreska z fadem na końcach,
+   dokładnie w połowie odstępu. Czysto dekoracyjna - pseudo-element. */
+.nav-links-desktop > * { position: relative; }
+.nav-links-desktop > * + *::before {
+    content: ''; position: absolute; top: 50%; left: calc(var(--nav-gap) / -2 - 0.5px);
+    width: 1px; height: 1.1em; translate: 0 -50%; pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(167, 139, 250, 0.45) 50%, transparent);
+}
+/* "Status" przy Pomocy - etykieta marki (900, .14em) z zieloną kropką. */
+.nav-pomoc { display: inline-flex; align-items: center; gap: 0.6rem; }
+.nav-status {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.2rem 0.5rem; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.09); background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8; font-size: 0.6rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1;
+    text-decoration: none; transition: color 0.2s ease, border-color 0.2s ease;
+}
+.nav-status:hover { color: #f1f5f9; border-color: rgba(52, 211, 153, 0.45); }
+.nav-status:focus-visible { outline: 2px solid #a78bfa; outline-offset: 3px; }
+.nav-status i, .nav-status-mobile i {
+    width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+}
+.nav-status-mobile { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.nav-status-mobile i { display: inline-block; }
+/* Odstęp między zakładkami w jednym miejscu: span .nav-pomoc też go dostaje,
+   a kreska separatora stoi w jego połowie. */
+.nav-links-desktop.space-x-8 > * + * { margin-left: var(--nav-gap); }
+@media (max-width: 1320px) { .nav-links-desktop { --nav-gap: 1.5rem; } }
+@media (max-width: 1240px) { .nav-links-desktop { --nav-gap: 1.15rem; } }
 
 /* ==========================================================================
    MEDIA QUERIES (DESKTOP)

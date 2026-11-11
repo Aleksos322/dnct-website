@@ -132,7 +132,12 @@ function navbar_class_mobile(bool $active): string
                 <a href="/" class="<?php echo navbar_class(navbar_active('/', [])); ?>"<?php echo navbar_active('/', []) ? ' aria-current="page"' : ''; ?>>Strona Główna</a>
                 <a href="/cennik" class="<?php echo navbar_class(navbar_active('/cennik', ['/zamowienie', '/sukces'])); ?>"<?php echo navbar_active('/cennik', ['/zamowienie', '/sukces']) ? ' aria-current="page"' : ''; ?>>Cennik</a>
                 <a href="/twoje-serwery" class="<?php echo navbar_class(navbar_active('/twoje-serwery', ['/oplaty'])); ?>"<?php echo navbar_active('/twoje-serwery', ['/oplaty']) ? ' aria-current="page"' : ''; ?>>Twoje serwery</a>
-                <a href="/pomoc" class="<?php echo navbar_class(navbar_active('/pomoc', [])); ?>"<?php echo navbar_active('/pomoc', []) ? ' aria-current="page"' : ''; ?>>Pomoc</a>
+                <?php /* Pomoc + status usług obok (2026-11-11). Kropka to ozdoba,
+                         nie żywy stan - prawdziwy stan pokazuje status.dnct.pl. */ ?>
+                <span class="nav-pomoc">
+                    <a href="/pomoc" class="<?php echo navbar_class(navbar_active('/pomoc', [])); ?>"<?php echo navbar_active('/pomoc', []) ? ' aria-current="page"' : ''; ?>>Pomoc</a>
+                    <a href="https://status.dnct.pl" class="nav-status" target="_blank" rel="noopener" title="Status usług DNCT"><i aria-hidden="true"></i>Status</a>
+                </span>
             </div>
 
             <!-- PRZYCISKI / PROFIL -->
@@ -146,20 +151,8 @@ function navbar_class_mobile(bool $active): string
                class="nav-lang-opt<?php echo $navLang === $kod ? ' is-active' : ''; ?>"<?php echo $navLang === $kod ? ' aria-current="true"' : ''; ?>><?php echo $etykieta; ?></a>
         <?php endforeach; ?>
     </div>
-    <?php /* Przelacznik dzwiekow - widoczny niezaleznie od logowania (goscie
-             tez dostaja toasty, np. po rejestracji). Obsluga w sound.js. */ ?>
-    <button type="button" id="dnct-sound-toggle" class="dnct-bell-btn dnct-sound-toggle-btn w-9 h-9 flex items-center justify-center rounded-full transition" aria-label="Włącz lub wyłącz dźwięki" aria-pressed="true" title="Dźwięki">
-        <svg class="dnct-sound-icon-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-        </svg>
-        <svg class="dnct-sound-icon-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
-        </svg>
-    </button>
+    <?php /* Przełącznik dźwięków usunięty 2026-11-11 (prośba właściciela).
+             sound.js działa dalej i sam pomija brak #dnct-sound-toggle. */ ?>
     <?php if($isLoggedIn): ?>
         
         <!-- Główny zewnętrzny kontener (Cała pigułka z obramowaniem) -->
@@ -238,6 +231,7 @@ function navbar_class_mobile(bool $active): string
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg> Pomoc
             </a>
+            <a href="https://status.dnct.pl" class="text-gray-400 hover:text-white uppercase tracking-[0.1em] py-2 block border-b border-white/5 transition-colors nav-status-mobile" target="_blank" rel="noopener"><i aria-hidden="true"></i>Status usług</a>
             <?php /* Na telefonie przełącznik języka mieszka tutaj - w górnym pasku
                      zgniatał logo (navbar.css chowa tam .nav-lang < 640 px). */ ?>
             <div class="nav-lang nav-lang--mobile" role="group" aria-label="Język / Language">
