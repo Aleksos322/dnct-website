@@ -15,7 +15,9 @@
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 .cnk-back-top[hidden] { display: none; }
-.cnk-back-top svg { width: 22px; height: 22px; }
+.cnk-back-top svg { width: 22px; height: 22px; transition: rotate 0.2s ease; }
+/* W pakietach strzałka w dół (pomiń pakiety), pod nimi w górę (2026-11-11). */
+.cnk-back-top.is-down svg { rotate: 180deg; }
 .cnk-back-top:hover { background: #6d40bf; border-color: #c4b5fd; }
 .cnk-back-top:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
 .cnk-back-top.is-above-selection { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
@@ -444,7 +446,7 @@
     .cnk-catalogue .op-pasek-wystaw { font-size: 0.57rem; gap: 5px; padding: 12px 10px; letter-spacing: 0.08em; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .cnk-back-top { transition: none; }
+    .cnk-back-top, .cnk-back-top svg { transition: none; }
     .cnk-catalogue *, .cnk-catalogue *::before, .cnk-catalogue *::after { animation: none !important; transition: none !important; }
     .cnk-catalogue .op-pasek-tasma { overflow-x: auto; }
     .cnk-catalogue .cnk-plan-stage { scroll-behavior: auto; }

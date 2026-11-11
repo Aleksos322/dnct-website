@@ -7,6 +7,18 @@
     var scrollArea = catalogue.parentElement;
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     var backTop = document.querySelector('[data-catalogue-top]');
+    /* Cele strzałki (2026-11-11): ustawia je aktywna karuzela w syncLayout.
+       W pakietach strzałka w dół = pomiń pakiety; pod nimi strzałka w górę =
+       wróć do karty startowej (DEVeloperski). */
+    var catalogueNav = null;
+    function skipY() {
+        if (catalogueNav) return catalogueNav.skip();
+        return scrollArea.getBoundingClientRect().bottom + window.scrollY - 88;
+    }
+    function startY() {
+        if (catalogueNav) return catalogueNav.start();
+        return 0;
+    }
     if (backTop) {
         // Poza kontekstem warstw main: stopka nie może zasłaniać przycisku.
         document.body.appendChild(backTop);
@@ -18,14 +30,27 @@
             new MutationObserver(updateSelectionOffset).observe(selection, { attributes: true, attributeFilter: ['class'] });
             updateSelectionOffset();
         }
-        function updateBackTop() { backTop.hidden = window.scrollY < 240; }
+        var backDown = null;
+        function updateBackTop() {
+            var down = window.scrollY < skipY() - 40;
+            backTop.hidden = false;
+            if (down === backDown) return;
+            backDown = down;
+            backTop.classList.toggle('is-down', down);
+            var label = down ? 'Pomiń pakiety' : 'Wróć do pakietów';
+            backTop.setAttribute('aria-label', label);
+            backTop.title = label;
+        }
         backTop.addEventListener('click', function () {
-            if (window.dnctLenis && !reduce.matches) window.dnctLenis.scrollTo(0, { duration: 0.9 });
-            else window.scrollTo({ top: 0, behavior: reduce.matches ? 'instant' : 'smooth' });
-            var heading = catalogue.querySelector('h1');
-            if (heading) {
-                heading.tabIndex = -1;
-                heading.focus({ preventScroll: true });
+            var target = backDown ? skipY() : startY();
+            if (window.dnctLenis && !reduce.matches) window.dnctLenis.scrollTo(target, { duration: 0.9 });
+            else window.scrollTo({ top: target, behavior: reduce.matches ? 'instant' : 'smooth' });
+            if (!backDown) {
+                var heading = catalogue.querySelector('h1');
+                if (heading) {
+                    heading.tabIndex = -1;
+                    heading.focus({ preventScroll: true });
+                }
             }
         });
         window.addEventListener('scroll', updateBackTop, { passive: true });
@@ -110,6 +135,7 @@
                 // Aktywna zakładka bez karuzeli (konfigurator slotów): sprząta
                 // przypięcie każda nieaktywna, bo nie ma kto inny.
                 if (!selectedPanel || !selectedPanel.querySelector('[data-catalogue-carousel]')) {
+                    catalogueNav = null;
                     scrollArea.classList.remove('is-scroll-driven');
                     scrollArea.style.height = '';
                 }
@@ -129,6 +155,10 @@
             if (wasPinned && !pinned && wasVisible) scrollTo(Math.max(0, startY), true);
             // Pierwsze przypięcie: przewiń od razu na kartę startową. Tylko gdy
             // strona stoi na górze (nie po odświeżeniu w połowie, nie z kotwicą).
+            catalogueNav = {
+                skip: function () { return pinned ? scrollStart() + scrollArea.offsetHeight : scrollArea.getBoundingClientRect().bottom + window.scrollY - 88; },
+                start: function () { return pinned ? scrollStart() + scrollDistance * startIdx / (cards.length - 1) : Math.max(0, catalogue.getBoundingClientRect().top + window.scrollY - 88); }
+            };
             if (!startApplied && pinned) {
                 startApplied = true;
                 if (startIdx > 0 && window.scrollY < 5 && !location.hash) {
