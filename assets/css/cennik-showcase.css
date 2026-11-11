@@ -9,17 +9,20 @@
 .cnk-back-top {
     position: fixed; z-index: 45; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px));
     display: grid; place-items: center; width: 48px; height: 48px; padding: 0;
-    transform: translateX(-50%); border: 1px solid rgba(167, 139, 250, 0.55); border-radius: 50%;
-    background: linear-gradient(145deg, #35244f, #18132b); color: #e9ddff;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    /* Płaskie rozmyte szkło jak kafel "4,9" (księga marki, 2026-11-11):
+       jedna barwa .04 na ciemnej podkładce, ramka .09, rozmycie, bez gradientu. */
+    transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 50%;
+    background: rgba(12, 10, 20, 0.55); background-image: linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04));
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    color: #c4b5fd; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 .cnk-back-top[hidden] { display: none; }
 .cnk-back-top svg { width: 22px; height: 22px; transition: rotate 0.2s ease; }
 /* W pakietach strzałka w dół (pomiń pakiety), pod nimi w górę (2026-11-11). */
 .cnk-back-top.is-down svg { rotate: 180deg; }
-.cnk-back-top:hover { background: #6d40bf; border-color: #c4b5fd; }
-.cnk-back-top:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 4px; }
+.cnk-back-top:hover { color: #f1f5f9; border-color: rgba(167, 139, 250, 0.45); background-color: rgba(139, 92, 246, 0.16); }
+.cnk-back-top:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
 .cnk-back-top.is-above-selection { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
 .cnk-catalogue-scroll.is-scroll-driven > .cnk-catalogue { position: sticky; top: var(--cnk-pin-top, 88px); }
 .cnk-catalogue-scroll.is-scroll-driven .cnk-plan-showcase .cnk-plan-slide { transition: filter 0.4s ease; }
