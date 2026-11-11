@@ -493,7 +493,8 @@ ob_start();
          poprawnie - różnicy nie warto było zgadywać bez podglądu w przeglądarce,
          prościej przenieść niżej, gdzie już wiadomo, że jest miejsce). */ ?>
 <?php if ($isAdmin && (array_filter($planRows, static fn($p) => !$p['is_active']) || array_filter($tierRows, static fn($t) => !$t['is_active']))): ?>
-    <div class="cnk-admin-notice glass-content">
+    <?php require_once __DIR__ . '/backend/lib/admin_hints.php'; ?>
+    <div class="cnk-admin-notice glass-content"<?php echo admin_hint_attrs(); ?>>
         Widzisz tu też pozycje wyłączone dla klientów ("wstrzymaj sprzedaż" w panelu) - jesteś zalogowany jako admin.
         Zwykli odwiedzający ich nie widzą i nie mogą ich kupić.
     </div>
