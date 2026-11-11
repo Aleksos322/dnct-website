@@ -198,7 +198,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
     $card['address']   = null;
     $card['suspended'] = false;
     $card['plan_name'] = null;
-    $card['game_icon'] = null;
+    $card['game_icon'] = srv_game_icon((string)($order['game_type'] ?? ''));
     $card['periods']   = [];
     $card['plans']     = [];
 
@@ -264,6 +264,8 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
         }
         $card['game_title'] = $gra['name'] ?: null;
     }
+    // Ikona z cennika ma pierwszeństwo - ta sama, którą klient widział przy zakupie.
+    $card['game_icon'] = srv_game_icon((string)$order['game_type']) ?? $card['game_icon'];
 
     if (!$salesOn || $order['status'] === 'failed') {
         return $card;
@@ -317,6 +319,26 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
     return $card;
 }
 
+/**
+ * Ikonka gry z cennika (assets/media/icons/gry/, te same co zakładki gier),
+ * dobrana po typie zamówienia albo po nazwie nestu/jajka z panelu.
+ * Brak pliku = null, wtedy karta zostaje przy dotychczasowej ikonie.
+ */
+function srv_game_icon(string ...$hints): ?string
+{
+    $hint = mb_strtolower(implode(' ', $hints));
+    $type = match (true) {
+        str_contains($hint, 'zomboid')                                      => 'zomboid',
+        str_contains($hint, 'vintage')                                      => 'vintagestory',
+        (bool)preg_match('/minecraft|paper|purpur|spigot|forge|fabric|bungee|velocity|vanilla/', $hint) => 'minecraft',
+        default                                                             => null,
+    };
+    if ($type === null || !is_file(__DIR__ . '/assets/media/icons/gry/' . $type . '.webp')) {
+        return null;
+    }
+    return '/assets/media/icons/gry/' . $type . '.webp';
+}
+
 /** @param array<string,mixed> $server @return array<string,mixed> */
 function srv_build_panel_only_card(array $server): array
 {
@@ -328,6 +350,7 @@ function srv_build_panel_only_card(array $server): array
     return [
         'panel_only' => true,
         'server_name' => (string)$server['name'],
+        'game_icon' => srv_game_icon($game, $egg),
         'game_name' => $game !== '' ? $game : 'Serwer gry',
         'egg_name' => $egg !== '' ? $egg : '—',
         'created_at' => (string)$server['created_at'],
@@ -440,7 +463,7 @@ foreach ($aktywne as $c) {
 
                 <header class="srv-head">
                     <div class="srv-ident">
-                        <?php if (!$isPanelOnly && $c['game_icon']): ?>
+                        <?php if (!empty($c['game_icon'])): ?>
                             <img class="srv-icon" src="<?php echo htmlspecialchars($c['game_icon']); ?>"
                                  alt="" width="44" height="44" loading="lazy">
                         <?php endif; ?>
