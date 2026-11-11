@@ -220,15 +220,27 @@
         }
 
         // Postęp suwaka (--p) i pozycja dymka - ten sam wzór co .cfg-tick w CSS
-        function renderSlider(index, tier) {
+        // instant: przeliczenie po zmianie rozmiaru (np. pokazanie zakładki
+        // innej gry, gdzie suwak miał szerokość 0) - dymek staje od razu na
+        // miejscu, bez przejazdu od lewej. Animuje się tylko ruch suwaka.
+        function renderSlider(index, tier, instant) {
             var n = Math.max(1, tiers.length - 1);
             var p = index / n;
             if (slider) slider.style.setProperty('--p', p);
             if (bubble && range) {
                 var w = range.offsetWidth, thumb = 26;
-                var x = thumb / 2 + p * (w - thumb) - bubble.offsetWidth / 2;
-                bubble.style.setProperty('--bx', Math.round(x) + 'px');
                 bubble.textContent = tier.slots;
+                var x = thumb / 2 + p * (w - thumb) - bubble.offsetWidth / 2;
+                if (w === 0) {
+                    // ukryta zakładka - pozycję policzy ResizeObserver po pokazaniu
+                } else if (instant) {
+                    bubble.style.transition = 'none';
+                    bubble.style.setProperty('--bx', Math.round(x) + 'px');
+                    void bubble.offsetWidth;
+                    bubble.style.transition = '';
+                } else {
+                    bubble.style.setProperty('--bx', Math.round(x) + 'px');
+                }
             }
             ticks.forEach(function (t, i) {
                 t.classList.toggle('is-current', i === index);
@@ -438,7 +450,7 @@
         // także gdy ukryta zakładka gry (szerokość 0) staje się widoczna.
         var rerenderSlider = function () {
             var i = parseInt(range.value, 10) || 0;
-            renderSlider(i, tiers[i] || tiers[0]);
+            renderSlider(i, tiers[i] || tiers[0], true);
         };
         if ('ResizeObserver' in window) new ResizeObserver(rerenderSlider).observe(range);
         else window.addEventListener('resize', rerenderSlider);

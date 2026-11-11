@@ -41,7 +41,7 @@
         var next = root.querySelector('[data-catalogue-next]');
         var skip = root.querySelector('[data-catalogue-skip]');
         var hint = root.querySelector('.cnk-plan-navigation p');
-        var active = 0, position = 0, queued = false, lastSwipe = 0, start = null;
+        var active = 0, position = 0, queued = false, lastSwipe = 0, start = null, renderedActive = -1;
         var pinned = false, scrollDistance = 0;
         var pinTop = 88;
         if (!stage || !cards.length) return;
@@ -104,8 +104,17 @@
                 var cardScale = scale * (1 - Math.min(absolute, 3) * 0.04);
                 card.style.transform = 'translate(-50%, -50%) translate3d(' + x.toFixed(1) + 'px, 0, ' + z.toFixed(1) + 'px) rotateY(' + rotation.toFixed(2) + 'deg) scale(' + cardScale.toFixed(3) + ')';
                 card.style.opacity = absolute > 2.6 ? '0' : (1 - Math.max(0, absolute - 1.2) * 0.65).toFixed(3);
-                card.style.visibility = absolute > 2.6 ? 'hidden' : 'visible';
+                var vis = absolute > 2.6 ? 'hidden' : 'visible';
+                if (card.style.visibility !== vis) card.style.visibility = vis;
                 card.style.zIndex = String(100 - Math.round(absolute * 10));
+            });
+            // Stan aktywnej karty (inert, aria, lista, licznik) tylko przy zmianie,
+            // jak lastActive w home.js. Przestawianie inert/aria-hidden na każdej
+            // karcie w każdej klatce przewijania przeliczało style całego
+            // katalogu i cennik przewijał się ciężej niż główna (2026-11-11).
+            if (active === renderedActive) return;
+            renderedActive = active;
+            cards.forEach(function (card, index) {
                 card.classList.toggle('is-front', index === active);
                 card.setAttribute('aria-hidden', index === active ? 'false' : 'true');
                 var pick = card.querySelector('.plan-pick');

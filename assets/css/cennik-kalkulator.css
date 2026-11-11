@@ -333,6 +333,16 @@ html.mc-calc-lock { overflow: hidden !important; scrollbar-gutter: stable; }
     .mc-calc-legend { grid-template-columns: minmax(0, 1fr); }
 }
 .mc-calc-nowrap { white-space: nowrap; }
+/* Stała wysokość okna (2026-11-11). Przy szybkim ruchu suwaka wynik zmieniał
+   wysokość (pakiet/brak pakietu, dodatkowa uwaga, "zapas"), a wyśrodkowany
+   <dialog> skakał wtedy w osi Y o 50-60 px. Okno ma zawsze pełną wysokość,
+   treść przewija się w .mc-calc-body jak dotąd. */
+dialog.mc-calc { height: min(900px, calc(100dvh - 32px)); }
+.mc-calc-shell { height: 100%; }
+.mc-calc-stat strong, .mc-calc-legend b, .mc-calc-plan-price b { font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) {
+    dialog.mc-calc { height: calc(100dvh - 16px); }
+}
 @media (prefers-reduced-motion: reduce) {
     dialog.mc-calc[open], dialog.mc-calc[open]::backdrop,
     dialog.mc-calc.is-closing, dialog.mc-calc.is-closing::backdrop { animation: none; }
