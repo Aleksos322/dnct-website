@@ -46,6 +46,36 @@
         var pinTop = 88;
         if (!stage || !cards.length) return;
 
+        /* Pętla (2026-11-11, prośba właściciela). position to pozycja w pętli
+           0..n-1 liczona od karty startowej, nie indeks karty. Startem jest
+           DEVeloperski (inaczej pierwszy niewyprzedany plan), więc po lewej od
+           niego stoją Proxy i - za przedziałką - najdroższe plany. Przewijanie
+           strony nadal idzie liniowo: start -> ... -> najdroższy -> przedziałka
+           -> najtańsze. Strzałki na końcu wracają na początek. */
+        var count_ = cards.length;
+        var offset = (function () {
+            var picks = cards.map(function (c) { return c.querySelector('.plan-pick'); });
+            var dev = picks.findIndex(function (p) { return p && /developer/i.test(p.dataset.planName || ''); });
+            if (dev >= 0) return dev;
+            var free = picks.findIndex(function (p) { return p && p.dataset.planSoldout !== '1'; });
+            return free >= 0 ? free : 0;
+        })();
+        var looped = count_ > 2;
+        function wrapIndex(i) { return ((i % count_) + count_) % count_; }
+        function toLoop(index) { return wrapIndex(index - offset); }
+        // Odległość po okręgu: -n/2 .. n/2.
+        function circ(d) { return looped ? wrapIndex(d + count_ / 2) - count_ / 2 : d; }
+        var seam = null;
+        if (looped) {
+            seam = document.createElement('div');
+            seam.className = 'cnk-loop-seam';
+            seam.setAttribute('aria-hidden', 'true');
+            seam.innerHTML = '<span>od nowa</span>';
+            stage.appendChild(seam);
+        }
+        var SEAM_GAP = 0.55; // dodatkowy odstęp (w krokach karty) w miejscu przedziałki
+        active = offset;
+
         function scrollTo(top, immediate) {
             if (window.dnctLenis) window.dnctLenis.scrollTo(top, { immediate: !!immediate, duration: 0.65 });
             else window.scrollTo({ top: top, behavior: immediate || reduce.matches ? 'instant' : 'smooth' });
@@ -101,16 +131,35 @@
             if (!stage.clientWidth) return;
             if (pinned) {
                 position = Math.max(0, Math.min(cards.length - 1, (window.scrollY - scrollStart()) / scrollDistance * (cards.length - 1)));
-                active = Math.round(position);
+                active = wrapIndex(offset + Math.round(position));
             }
+            var absPos = offset + position;
+            // Przedziałka leży między ostatnią (najdroższą) a pierwszą kartą.
+            var seamD = circ(count_ - 0.5 - absPos);
             var width = cards[active].offsetWidth;
             var height = cards[active].offsetHeight;
             // Ten sam układ, obrót i zanikanie co renderP3d w home.js.
             var scale = Math.min(1, stage.clientHeight / Math.max(1, height));
             var narrow = window.innerWidth < 960;
             var step = width * (narrow ? 0.86 : 0.8);
+            function layoutDistance(d) {
+                if (!looped) return d;
+                if (seamD > 0 && d > seamD) return d + SEAM_GAP;
+                if (seamD < 0 && d < seamD) return d - SEAM_GAP;
+                return d;
+            }
+            if (seam) {
+                var sd = seamD + Math.sign(seamD) * SEAM_GAP / 2;
+                var sa = Math.abs(sd);
+                var sc = Math.max(-2.2, Math.min(2.2, sd));
+                var sx = sc * step + (sa > 2.2 ? Math.sign(sd) * (sa - 2.2) * step * 0.25 : 0);
+                var sz = -Math.min(sa, 3) * (narrow ? 200 : 260);
+                seam.style.transform = 'translate(-50%, -50%) translate3d(' + sx.toFixed(1) + 'px, 0, ' + sz.toFixed(1) + 'px) rotateY(' + (-sc * (narrow ? 30 : 34)).toFixed(2) + 'deg) scale(' + (scale * (1 - Math.min(sa, 3) * 0.04)).toFixed(3) + ')';
+                seam.style.opacity = sa > 2.6 ? '0' : (1 - Math.max(0, sa - 1.2) * 0.65).toFixed(3);
+                seam.style.height = (height * 0.8) + 'px';
+            }
             cards.forEach(function (card, index) {
-                var distance = index - position;
+                var distance = layoutDistance(circ(index - absPos));
                 var absolute = Math.abs(distance);
                 var clamped = Math.max(-2.2, Math.min(2.2, distance));
                 var x = clamped * step + (absolute > 2.2 ? Math.sign(distance) * (absolute - 2.2) * step * 0.25 : 0);
@@ -139,9 +188,9 @@
                 button.classList.toggle('is-active', index === active);
                 button.setAttribute('aria-pressed', index === active ? 'true' : 'false');
             });
-            count.textContent = String(active + 1).padStart(2, '0');
-            prev.disabled = active === 0;
-            next.disabled = active === cards.length - 1;
+            count.textContent = String(toLoop(active) + 1).padStart(2, '0');
+            prev.disabled = !looped && active === 0;
+            next.disabled = !looped && active === cards.length - 1;
         }
         function queueRender() {
             if (queued) return;
@@ -149,12 +198,14 @@
             requestAnimationFrame(render);
         }
         function show(index) {
-            index = Math.max(0, Math.min(cards.length - 1, index));
+            index = looped ? wrapIndex(index) : Math.max(0, Math.min(cards.length - 1, index));
+            var loopPos = looped ? toLoop(index) : index;
             if (pinned) {
-                scrollTo(scrollStart() + scrollDistance * index / (cards.length - 1));
+                scrollTo(scrollStart() + scrollDistance * loopPos / (cards.length - 1));
                 return;
             }
-            active = position = index;
+            active = index;
+            position = loopPos;
             queueRender();
         }
         root.classList.add('is-enhanced');
@@ -203,7 +254,7 @@
             var delta = (Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY) *
                 (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
             var direction = Math.sign(delta);
-            if (!direction || (direction < 0 && active === 0) || (direction > 0 && active === cards.length - 1)) return;
+            if (!direction || (direction < 0 && toLoop(active) === 0) || (direction > 0 && toLoop(active) === cards.length - 1)) return;
             event.preventDefault();
             event.stopPropagation();
             if (Date.now() - lastWheel < 350) return;
