@@ -33,6 +33,20 @@
         var j = Math.floor(Math.random() * (i + 1));
         var t = karty[i]; karty[i] = karty[j]; karty[j] = t;
     }
+    // Ten sam autor (Napierak jest w danych 2x celowo) o pół taśmy dalej -
+    // taśma jest pętlą, więc dwie jego karty nigdy nie stoją w kadrze naraz.
+    var autorzy = {};
+    karty.forEach(function (k, idx) {
+        var a = (k.querySelector('.opinie-autor a, .opinie-autor div > span') || {}).textContent || '';
+        (autorzy[a] = autorzy[a] || []).push(idx);
+    });
+    Object.keys(autorzy).forEach(function (a) {
+        var idx = autorzy[a];
+        for (var j = 1; j < idx.length; j++) {
+            var cel = (idx[0] + Math.floor(karty.length * j / idx.length)) % karty.length;
+            var tmp = karty[cel]; karty[cel] = karty[idx[j]]; karty[idx[j]] = tmp;
+        }
+    });
     karty.forEach(function (k) { tor.appendChild(k); });
 
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
