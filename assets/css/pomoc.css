@@ -18,9 +18,9 @@
     line-height: 1.2;
 }
 
-.pomoc-head { margin: 0 0 clamp(24px, 3vw, 40px); animation: pomoc-in 0.4s ease-out both; }
-.pomoc-head h1 { margin: 0; font-size: clamp(2rem, 3.4vw, 3.25rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-.pomoc-lead { max-width: 62ch; margin: 12px 0 0; color: #a1a1aa; font-size: clamp(1rem, 1.1vw, 1.125rem); line-height: 1.6; }
+.pomoc-head { margin: 0 0 clamp(16px, 1.6vw, 24px); animation: pomoc-in 0.4s ease-out both; }
+.pomoc-head h1 { margin: 0; font-size: clamp(2rem, 2.6vw, 2.6rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.pomoc-lead { max-width: 90ch; margin: 8px 0 0; color: #a1a1aa; font-size: clamp(1rem, 1.1vw, 1.125rem); line-height: 1.6; }
 
 .pomoc-grid {
     display: grid;
@@ -39,8 +39,8 @@
     animation: pomoc-in 0.4s ease-out both;
 }
 
-.pomoc-form-box { padding: clamp(20px, 2.4vw, 36px); }
-.pomoc-box-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.pomoc-form-box { padding: clamp(20px, 1.8vw, 28px); }
+.pomoc-box-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .pomoc-box-head h2 { margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
 
 .pomoc-ico {
@@ -53,9 +53,9 @@
 .pomoc-ico svg { width: 19px; height: 19px; }
 
 /* --- formularz --- */
-.pomoc-form { display: grid; gap: 18px; }
-.pomoc-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
-.pomoc-field { display: grid; gap: 7px; min-width: 0; }
+.pomoc-form { display: grid; gap: 14px; }
+.pomoc-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; align-items: start; }
+.pomoc-field { display: grid; gap: 6px; min-width: 0; }
 .pomoc-field label { color: #e4e4e7; font-size: 0.9rem; font-weight: 600; }
 .pomoc-opt { color: #71717a; font-weight: 400; }
 
@@ -63,7 +63,7 @@
 .pomoc-field select,
 .pomoc-field textarea {
     width: 100%;
-    padding: 12px 14px;
+    padding: 10px 14px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     background: rgba(5, 5, 5, 0.45);
@@ -76,7 +76,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
 .pomoc-field select option, .pomoc-field select optgroup { background: #120f1a; color: #f1f5f9; }
-.pomoc-field textarea { min-height: 190px; resize: vertical; line-height: 1.55; }
+.pomoc-field textarea { min-height: 130px; resize: vertical; line-height: 1.55; }
 .pomoc-field input::placeholder, .pomoc-field textarea::placeholder { color: #71717a; }
 .pomoc-field input:hover, .pomoc-field select:hover, .pomoc-field textarea:hover { border-color: rgba(255, 255, 255, 0.18); }
 .pomoc-field input:focus, .pomoc-field select:focus, .pomoc-field textarea:focus {
@@ -91,7 +91,7 @@
 .pomoc-count.is-over { color: #f87171; }
 
 .pomoc-note {
-    margin: 0; padding: 12px 14px;
+    margin: 0; padding: 10px 14px;
     border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 12px;
     background: rgba(139, 92, 246, 0.07);
     color: #d4d4d8; font-size: 0.92rem; line-height: 1.5;
@@ -154,6 +154,21 @@
 .pomoc-side a.pomoc-discord:hover { border-color: rgba(129, 140, 248, 0.55); }
 
 @keyframes pomoc-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Niskie okna laptopów (1536x864, 1366x768): formularz ma się zmieścić bez przewijania. */
+@media (min-width: 1081px) and (max-height: 920px) {
+    .pomoc { margin-bottom: 3rem; }
+    .pomoc-head { margin-top: -24px; }
+    .pomoc-lead { display: none; }
+    .pomoc-box-head { display: none; }
+    .pomoc-form { gap: 12px; }
+    .pomoc-field textarea { min-height: 90px; }
+}
+@media (min-width: 1081px) and (max-height: 800px) {
+    .pomoc-head { margin-top: -48px; margin-bottom: 12px; }
+    .pomoc-head h1 { font-size: 1.75rem; }
+    .pomoc-field input, .pomoc-field select, .pomoc-field textarea { padding-top: 8px; padding-bottom: 8px; }
+}
 
 @media (max-width: 1080px) {
     .pomoc-grid { grid-template-columns: 1fr; }

@@ -141,7 +141,7 @@ ob_start();
 
                 <div class="pomoc-field">
                     <label for="pomoc-message">Opis problemu</label>
-                    <textarea id="pomoc-message" name="message" rows="8" minlength="20" maxlength="1700" required
+                    <textarea id="pomoc-message" name="message" rows="5" minlength="20" maxlength="1700" required
                               placeholder="Co się dzieje, od kiedy i co już próbowałeś. Komunikat błędu wklej w całości."></textarea>
                     <div class="pomoc-field-foot">
                         <p class="pomoc-error" data-error-for="message" aria-live="polite"></p>
