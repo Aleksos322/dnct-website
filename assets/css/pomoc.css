@@ -1,0 +1,173 @@
+/* pomoc.css - strona /pomoc. Boxy = płaskie rozmyte szkło (wzór: kafel "4,9" .op-pasek-wynik),
+   ruch 0.2 s interakcje / 0.4 s wejście, bez sprężyn, cieni i poświat. */
+
+.pomoc {
+    width: min(1680px, 100%);
+    margin: 0 auto 5rem;
+    padding: 0 clamp(16px, 3.5vw, 64px);
+    color: #f1f5f9;
+}
+
+.pomoc-label {
+    margin: 0 0 6px;
+    color: #c4b5fd;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.pomoc-head { margin: 0 0 clamp(24px, 3vw, 40px); animation: pomoc-in 0.4s ease-out both; }
+.pomoc-head h1 { margin: 0; font-size: clamp(2rem, 3.4vw, 3.25rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.pomoc-lead { max-width: 62ch; margin: 12px 0 0; color: #a1a1aa; font-size: clamp(1rem, 1.1vw, 1.125rem); line-height: 1.6; }
+
+.pomoc-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(320px, 1fr);
+    gap: clamp(16px, 2vw, 28px);
+    align-items: start;
+}
+
+/* --- materiał boxa --- */
+.pomoc-box {
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(185%) brightness(1.08);
+    animation: pomoc-in 0.4s ease-out both;
+}
+
+.pomoc-form-box { padding: clamp(20px, 2.4vw, 36px); }
+.pomoc-box-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+.pomoc-box-head h2 { margin: 0; font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+
+.pomoc-ico {
+    display: grid; place-items: center; flex: none;
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(139, 92, 246, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.3);
+    color: #c4b5fd;
+}
+.pomoc-ico svg { width: 19px; height: 19px; }
+
+/* --- formularz --- */
+.pomoc-form { display: grid; gap: 18px; }
+.pomoc-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.pomoc-field { display: grid; gap: 7px; min-width: 0; }
+.pomoc-field label { color: #e4e4e7; font-size: 0.9rem; font-weight: 600; }
+.pomoc-opt { color: #71717a; font-weight: 400; }
+
+.pomoc-field input,
+.pomoc-field select,
+.pomoc-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(5, 5, 5, 0.45);
+    color: #f1f5f9;
+    font: inherit;
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.pomoc-field select { appearance: none; padding-right: 40px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+.pomoc-field select option, .pomoc-field select optgroup { background: #120f1a; color: #f1f5f9; }
+.pomoc-field textarea { min-height: 190px; resize: vertical; line-height: 1.55; }
+.pomoc-field input::placeholder, .pomoc-field textarea::placeholder { color: #71717a; }
+.pomoc-field input:hover, .pomoc-field select:hover, .pomoc-field textarea:hover { border-color: rgba(255, 255, 255, 0.18); }
+.pomoc-field input:focus, .pomoc-field select:focus, .pomoc-field textarea:focus {
+    outline: none; border-color: rgba(139, 92, 246, 0.6); background-color: rgba(5, 5, 5, 0.6);
+}
+.pomoc-field [aria-invalid="true"] { border-color: rgba(248, 113, 113, 0.7); }
+
+.pomoc-field-foot { display: flex; justify-content: space-between; gap: 12px; }
+.pomoc-error { margin: 0; min-height: 0; color: #f87171; font-size: 0.85rem; }
+.pomoc-error:empty { display: none; }
+.pomoc-count { margin-left: auto; color: #71717a; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.pomoc-count.is-over { color: #f87171; }
+
+.pomoc-note {
+    margin: 0; padding: 12px 14px;
+    border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 12px;
+    background: rgba(139, 92, 246, 0.07);
+    color: #d4d4d8; font-size: 0.92rem; line-height: 1.5;
+}
+.pomoc-note a { color: #c4b5fd; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.pomoc-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.pomoc-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 20px; margin-top: 4px; }
+.pomoc-hint { margin: 0; color: #71717a; font-size: 0.85rem; }
+.pomoc-btn {
+    padding: 13px 26px; border: 0; border-radius: 12px;
+    background: #8b5cf6; color: #fff;
+    font: inherit; font-size: 0.78rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase;
+    cursor: pointer; transition: filter 0.2s ease;
+}
+.pomoc-btn:hover { filter: brightness(1.12); }
+.pomoc-btn:focus-visible { outline: 2px solid #a78bfa; outline-offset: 3px; }
+.pomoc-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.pomoc-status { padding: 14px 16px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5; animation: pomoc-in 0.4s ease-out both; }
+.pomoc-status[hidden] { display: none; }
+.pomoc-status.is-ok { border: 1px solid rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.08); color: #bbf7d0; }
+.pomoc-status.is-err { border: 1px solid rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08); color: #fecaca; }
+.pomoc-status strong { color: #fff; }
+.pomoc-status button {
+    margin-top: 10px; padding: 9px 16px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px;
+    background: transparent; color: #f1f5f9; font: inherit; font-size: 0.72rem; font-weight: 900;
+    letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; transition: border-color 0.2s ease;
+}
+.pomoc-status button:hover { border-color: rgba(139, 92, 246, 0.6); }
+
+/* --- kolumna boczna --- */
+.pomoc-side { display: grid; gap: 14px; }
+.pomoc-side > :nth-child(2) { animation-delay: 0.05s; }
+.pomoc-side > :nth-child(3) { animation-delay: 0.1s; }
+.pomoc-side > :nth-child(4) { animation-delay: 0.15s; }
+
+.pomoc-side a.pomoc-box {
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px;
+    padding: 14px 18px 14px 14px;
+    color: #f1f5f9; text-decoration: none;
+    transition: border-color 0.2s ease;
+}
+.pomoc-side a.pomoc-box:hover { border-color: rgba(139, 92, 246, 0.45); }
+.pomoc-side a.pomoc-box:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
+
+.pomoc-tile-txt { display: grid; gap: 3px; min-width: 0; }
+.pomoc-tile-txt b { color: #c4b5fd; font-size: 0.72rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.2; }
+.pomoc-tile-title { color: #f1f5f9; font-size: 0.98rem; font-weight: 600; line-height: 1.3; }
+.pomoc-tile-desc { color: #a1a1aa; font-size: 0.88rem; line-height: 1.45; }
+.pomoc-arrow { color: #a78bfa; font-size: 1.1rem; transition: translate 0.2s ease; }
+.pomoc-side a.pomoc-box:hover .pomoc-arrow { translate: 3px 0; }
+
+/* Discord: większy kafel, kolor Discorda tylko w ikonie */
+.pomoc-side a.pomoc-discord { padding: 22px 22px 22px 20px; gap: 18px; }
+.pomoc-ico-discord { width: 52px; height: 52px; border-radius: 12px; background: rgba(88, 101, 242, 0.18); box-shadow: inset 0 0 0 1px rgba(129, 140, 248, 0.35); color: #a5b4fc; }
+.pomoc-ico-discord svg { width: 28px; height: 28px; }
+.pomoc-discord .pomoc-tile-title { font-size: 1.2rem; font-weight: 700; }
+.pomoc-side a.pomoc-discord:hover { border-color: rgba(129, 140, 248, 0.55); }
+
+@keyframes pomoc-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 1080px) {
+    .pomoc-grid { grid-template-columns: 1fr; }
+    .pomoc-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pomoc-side a.pomoc-discord { grid-column: 1 / -1; }
+    /* Na wąskim ekranie Discord nad formularzem - to najszybsza droga do pomocy. */
+    .pomoc-side { order: -1; }
+}
+@media (max-width: 640px) {
+    .pomoc-row, .pomoc-side { grid-template-columns: 1fr; }
+    .pomoc-actions { flex-direction: column; align-items: stretch; }
+    .pomoc-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pomoc-head, .pomoc-box, .pomoc-status { animation: none; }
+    .pomoc-arrow, .pomoc-btn, .pomoc-field input, .pomoc-field select, .pomoc-field textarea { transition: none; }
+}
