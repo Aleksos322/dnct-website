@@ -46,14 +46,16 @@
         var pinTop = 88;
         if (!stage || !cards.length) return;
 
-        /* Pętla (2026-11-11, prośba właściciela). position to pozycja w pętli
-           0..n-1 liczona od karty startowej, nie indeks karty. Startem jest
-           DEVeloperski (inaczej pierwszy niewyprzedany plan), więc po lewej od
-           niego stoją Proxy i - za przedziałką - najdroższe plany. Przewijanie
-           strony nadal idzie liniowo: start -> ... -> najdroższy -> przedziałka
-           -> najtańsze. Strzałki na końcu wracają na początek. */
+        /* Pętla (2026-11-11, prośba właściciela). Karty leżą po okręgu: po lewej
+           od najtańszej (Proxy) stoją - za przedziałką "od nowa" - najdroższe.
+           Kolejność przewijania zostaje cenowa (Proxy -> ... -> najdroższy), ale
+           strona startuje przewinięta na DEVeloperskim (inaczej pierwszy
+           niewyprzedany plan), więc kółkiem w górę da się cofnąć do Proxy.
+           Strzałki na końcach zawijają. offset zostaje 0 - pozycja w pętli
+           = indeks karty. */
         var count_ = cards.length;
-        var offset = (function () {
+        var offset = 0;
+        var startIdx = (function () {
             var picks = cards.map(function (c) { return c.querySelector('.plan-pick'); });
             var dev = picks.findIndex(function (p) { return p && /developer/i.test(p.dataset.planName || ''); });
             if (dev >= 0) return dev;
@@ -74,7 +76,8 @@
             stage.appendChild(seam);
         }
         var SEAM_GAP = 0.55; // dodatkowy odstęp (w krokach karty) w miejscu przedziałki
-        active = offset;
+        active = position = startIdx;
+        var startApplied = false;
 
         function scrollTo(top, immediate) {
             if (window.dnctLenis) window.dnctLenis.scrollTo(top, { immediate: !!immediate, duration: 0.65 });
@@ -124,6 +127,14 @@
             hint.firstChild.nodeValue = pinned ? 'Przewiń, aby zmienić plan' : 'Wybierz plan strzałkami';
             hint.querySelector('span').textContent = pinned ? 'lub wybierz go z listy' : 'lub przesuń karty';
             if (wasPinned && !pinned && wasVisible) scrollTo(Math.max(0, startY), true);
+            // Pierwsze przypięcie: przewiń od razu na kartę startową. Tylko gdy
+            // strona stoi na górze (nie po odświeżeniu w połowie, nie z kotwicą).
+            if (!startApplied && pinned) {
+                startApplied = true;
+                if (startIdx > 0 && window.scrollY < 5 && !location.hash) {
+                    scrollTo(scrollStart() + scrollDistance * startIdx / (cards.length - 1), true);
+                }
+            }
             queueRender();
         }
         function render() {
