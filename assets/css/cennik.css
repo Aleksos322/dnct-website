@@ -1053,6 +1053,8 @@
     color: #94a3b8;
 }
 .cennik-page .pcard-omni strong { color: #cbd5e1; font-weight: 800; }
+/* Niewidoczna rezerwa wiersza - patrz cennik_card_reserve(). */
+.cennik-page .pcard-reserve { visibility: hidden; }
 .cennik-page .pcard-price-now {
     font-size: 2.4rem;
     font-weight: 900;
@@ -1640,8 +1642,10 @@
 .cennik-page .cfg-table-note { margin: 0; padding: 0.75rem 1.25rem 1rem; font-size: 0.7rem; color: #64748b; }
 
 /* Podbicie wartości przy zmianie progu (cennik.js dokłada .is-bump) */
-.cennik-page .cfg .is-bump { animation: cfgBump 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
-@keyframes cfgBump { from { opacity: 0.3; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
+.cennik-page .cfg .is-bump { animation: cfgBump 0.2s ease-out; }
+/* Samo przygaszenie, bez translate: przy szybkim suwaniu przesunięcie o 6 px
+   na każdej zmianie progu trzęsło całą zakładką w osi Y (2026-11-11). */
+@keyframes cfgBump { from { opacity: 0.45; } to { opacity: 1; } }
 
 @media (max-width: 860px) {
     .cennik-page .cfg-status { max-width: 60%; }

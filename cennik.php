@@ -574,6 +574,7 @@ ob_start();
                              się zaznaczyć i trafia do paska podsumowania. Gdy jest
                              włączona, jedynym celem klawiatury jest link „Zamawiam”. */ ?>
                     <div class="cnk-plan-stage" tabindex="0" role="region" aria-label="Karty planów — użyj strzałek w lewo i w prawo">
+                        <?php $cardReserve = cennik_card_reserve($game['plans']); ?>
                         <?php foreach ($game['plans'] as $k => $plan): ?>
                             <?php
                             // Pozycja planu na skali mocy w obrebie gry.
@@ -620,6 +621,7 @@ ob_start();
                                     'icon'       => $plan['icon_img'] ?? '',
                                     'fits'       => $plan['fits'] ?? null,
                                     'power'      => $ramPos,
+                                    'reserve'    => $cardReserve,
                                     // Przy wyłączonej sprzedaży brak adresu -
                                     // karta zostaje wtedy tylko do zaznaczania.
                                     'href'       => $salesOn ? '/zamowienie?plan=' . (int)$plan['id'] : null,

@@ -45,6 +45,35 @@ $opinieOdmiana = static function (int $n): string {
 };
 $opinieGwiazdki = static fn(int $n): string => str_repeat('★', $n) . str_repeat('☆', 5 - $n);
 
+/**
+ * Karty tego samego autora (Napierak jest w danych 2x celowo) rozsunięte
+ * o pół taśmy: taśma to pętla, więc odstęp n/2 to największy możliwy i dwie
+ * jego karty nigdy nie stoją w kadrze naraz. Pierwsza karta autora zostaje
+ * na swoim miejscu, kolejne idą na pozycję +n/k od niej.
+ */
+if (!function_exists('opinie_rozsun')) {
+    function opinie_rozsun(array $karty): array
+    {
+        $n = count($karty);
+        $grupy = [];
+        foreach ($karty as $i => $k) {
+            $grupy[$k['autor']][] = $i;
+        }
+        foreach ($grupy as $idx) {
+            $ile = count($idx);
+            if ($ile < 2) {
+                continue;
+            }
+            for ($j = 1; $j < $ile; $j++) {
+                $cel = ($idx[0] + intdiv($n * $j, $ile)) % $n;
+                /* zamiana z kartą stojącą na docelowej pozycji */
+                [$karty[$idx[$j]], $karty[$cel]] = [$karty[$cel], $karty[$idx[$j]]];
+            }
+        }
+        return $karty;
+    }
+}
+
 /* WARIANT "PASEK" (12.10.2026) - niski pasek opinii wbudowany w przypiętą
    sekcję planów 3D na stronie głównej (index.php ustawia $opinieWariant).
    Ocena + "Wystaw opinię" z lewej, przesuwająca się taśma krótkich kart.
@@ -53,7 +82,7 @@ if (($opinieWariant ?? '') === 'pasek') {
     $opinieKarty = $opinieGoogle['reviews'];
     shuffle($opinieKarty);
     /* Napierak (decyzja właściciela): jedna z jego dwóch kart zawsze jako
-       5. na taśmie, druga zostaje tam, gdzie wylosowało. */
+       5. na taśmie. */
     foreach ($opinieKarty as $idx => $o) {
         if ($o['autor'] === 'Napierak') {
             array_splice($opinieKarty, $idx, 1);
@@ -61,6 +90,7 @@ if (($opinieWariant ?? '') === 'pasek') {
             break;
         }
     }
+    $opinieKarty = opinie_rozsun($opinieKarty);
     /* Prędkość taśmy stała mimo dopisywania opinii: 140 s przy 22 kartach
        (karty mają stałą szerokość), więc czas rośnie razem z liczbą kart. */
     $opinieCzas = (int)round(140 * count($opinieKarty) / 22);

@@ -337,6 +337,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                 $rams    = array_map(static fn($r) => (int)($r['ram_mb'] ?? 0), $showcasePlans);
                 $ramMin  = $rams ? min($rams) : 0;
                 $ramSpan = max(1, ($rams ? max($rams) : 0) - $ramMin);
+                $cardReserve = cennik_card_reserve($showcasePlans);
                 foreach ($showcasePlans as $k => $row):
                     $ramMb = (int)($row['ram_mb'] ?? 0);
                     $ssdMb = (int)($row['ssd_mb'] ?? 0);
@@ -360,6 +361,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'bg'         => $row['background_img'] ?? '',
                                 'icon'       => $row['icon_img'] ?? '',
                                 'power'      => sqrt(($ramMb - $ramMin) / $ramSpan),
+                                'reserve'    => $cardReserve,
                                 // Karta na stronie głównej prowadzi do pełnego cennika.
                                 'href'       => '/cennik',
                                 'cta'        => 'Zobacz szczegóły',
@@ -399,8 +401,8 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
             <?php /* Dwie liczby z opisu powyżej (Polska, DDoS). Najazd podświetla
                      pasujące jednostki szafy (rack.js, [data-hl]). */ ?>
             <div class="home-stats">
-                <div class="home-stat" data-hl="all" tabindex="0"><b>PL</b><span>własny sprzęt w Polsce</span></div>
-                <div class="home-stat" data-hl="switch" tabindex="0"><b>DDoS</b><span>ochrona serwerów</span></div>
+                <div class="home-stat" data-hl="all" tabindex="0"><b>PL<svg class="home-stat-ico home-stat-flaga" viewBox="0 0 24 16" aria-hidden="true"><rect width="24" height="8" rx="0" fill="#f4f4f5"/><rect y="8" width="24" height="8" fill="#dc143c"/><rect x=".5" y=".5" width="23" height="15" rx="2.5" fill="none" stroke="rgba(255,255,255,.18)"/></svg></b><span>własny sprzęt w Polsce</span></div>
+                <div class="home-stat" data-hl="switch" tabindex="0"><b><svg class="home-stat-ico home-stat-tarcza" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>DDoS</b><span>ochrona serwerów</span></div>
             </div>
         </div>
 

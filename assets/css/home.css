@@ -710,6 +710,11 @@
 .home-stat > span { display: block; margin-top: 0.3rem; font-size: 0.62rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; }
 @media (prefers-reduced-motion: reduce) { .home-stat { transition: none; } .home-stat:hover { transform: none; } }
 .home-stat > b { white-space: nowrap; }
+/* Ikony przy liczbach: flaga za "PL", tarcza przed "DDoS" (inline SVG, bez Lucide). */
+.home-stat > b { display: flex; align-items: center; gap: 0.5rem; }
+.home-stat-ico { flex: none; width: auto; height: 0.62em; }
+.home-stat-flaga { height: 0.6em; border-radius: 3px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.home-stat-tarcza { height: 0.8em; color: #a78bfa; filter: drop-shadow(0 0 10px rgba(139,92,246,.45)); }
 @media (max-width: 520px) { .home-stat > b { font-size: 1.35rem; } }
 
 /* Karty strony glownej w matowym stylu jak w panelu (game.panel-dnct.pl):
