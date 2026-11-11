@@ -109,6 +109,35 @@
 
         p3d.classList.add('is-3d');
 
+        /* Pętla i start jak w cenniku (cennik-showcase.js, 2026-11-11): karty po
+           okręgu, po lewej od najtańszej (Proxy) za przedziałką "od nowa" stoją
+           najdroższe. Kolejność przewijania zostaje cenowa, ale wjazd w sekcję
+           z góry ustawia DEVeloperski (inaczej pierwszy niewyprzedany), więc
+           Proxy jest kółkiem w górę. */
+        var looped = n > 2;
+        var startIdx = (function () {
+            var names = cards.map(function (c) { var h = c.querySelector('h3, .pcard-name'); return h ? h.textContent : ''; });
+            var dev = names.findIndex(function (t) { return /developer/i.test(t); });
+            if (dev >= 0) return dev;
+            var free = cards.findIndex(function (c) { return !c.querySelector('.pcard.is-soldout'); });
+            return free >= 0 ? free : 0;
+        })();
+        var wrapI = function (i) { return ((i % n) + n) % n; };
+        var circ = function (d) { return looped ? wrapI(d + n / 2) - n / 2 : d; };
+        var SEAM_GAP = 0.55;
+        // Dopóki gość nie dojechał do DEVeloperskiego, karuzela go trzyma
+        // (nad sekcją i w trakcie przeskoku nie mignie Proxy). Po dojechaniu
+        // kółko w górę odsłania Proxy; wyjazd nad sekcję zakłada blokadę znowu.
+        var startLock = true;
+        var seam = null;
+        if (looped) {
+            seam = document.createElement('div');
+            seam.className = 'home-p3d-seam';
+            seam.setAttribute('aria-hidden', 'true');
+            seam.innerHTML = '<span>od nowa</span>';
+            stage.appendChild(seam);
+        }
+
         var progress = function () {
             var r = p3d.getBoundingClientRect();
             var total = p3d.offsetHeight - window.innerHeight;
@@ -119,13 +148,33 @@
         var renderP3d = function () {
             queuedP = false;
             var pos = progress();
+            if (startLock) {
+                if (pos >= startIdx - 0.02) startLock = false;
+                else pos = startIdx;
+            }
             var narrow = window.innerWidth < 960;
             var cw = cards[0].offsetWidth;
             var step = cw * (narrow ? 0.86 : 0.8);
             // Karta wyższa niż scena (telefon) - zmniejszamy całą karuzelę.
             var fit = Math.min(1, stage.clientHeight / (cards[0].offsetHeight || 1));
+            // Przedziałka między najdroższą (n-1) a najtańszą (0) kartą.
+            var seamD = circ(n - 0.5 - pos);
+            var layoutD = function (d) {
+                if (!looped) return d;
+                if (seamD > 0 && d > seamD) return d + SEAM_GAP;
+                if (seamD < 0 && d < seamD) return d - SEAM_GAP;
+                return d;
+            };
+            if (seam) {
+                var sd = seamD + Math.sign(seamD) * SEAM_GAP / 2, sa = Math.abs(sd);
+                var scl = Math.max(-2.2, Math.min(2.2, sd));
+                var sx = scl * step + (sa > 2.2 ? Math.sign(sd) * (sa - 2.2) * step * 0.25 : 0);
+                seam.style.transform = 'translate(-50%, -50%) translate3d(' + sx.toFixed(1) + 'px, 0, ' + (-Math.min(sa, 3) * (narrow ? 200 : 260)).toFixed(1) + 'px) rotateY(' + (-scl * (narrow ? 30 : 34)).toFixed(2) + 'deg) scale(' + (fit * (1 - Math.min(sa, 3) * 0.04)).toFixed(3) + ')';
+                seam.style.opacity = sa > 2.6 ? '0' : (1 - Math.max(0, sa - 1.2) * 0.65).toFixed(3);
+                seam.style.height = ((cards[0].offsetHeight || 500) * 0.8) + 'px';
+            }
             cards.forEach(function (c, i) {
-                var d = i - pos, ad = Math.abs(d);
+                var d = layoutD(circ(i - pos)), ad = Math.abs(d);
                 var clamped = Math.max(-2.2, Math.min(2.2, d));
                 var x = clamped * step + (ad > 2.2 ? Math.sign(d) * (ad - 2.2) * step * 0.25 : 0);
                 var z = -Math.min(ad, 3) * (narrow ? 200 : 260);
@@ -173,6 +222,56 @@
         window.addEventListener('resize', queueP3d);
         near = true;
         renderP3d();
+
+        /* Wjazd w sekcję z góry -> od razu DEVeloperski (jak start cennika).
+           Nie przy kliknięciach w listę/karty/strzałkę - wtedy cel wybrał gość. */
+        var secTop = function () { return p3d.getBoundingClientRect().top + window.scrollY; };
+        var stepPx = function () { return n > 1 ? (p3d.offsetHeight - window.innerHeight) / (n - 1) : 0; };
+        var startY = function () { return secTop() + stepPx() * startIdx; };
+        var skipY = function () { return secTop() + p3d.offsetHeight - 40; };
+        var suppressSnap = 0, prevY = window.scrollY;
+        var smoothTo = function (y, dur) {
+            suppressSnap = Date.now() + 1600;
+            if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: dur || 0.9 });
+            else window.scrollTo({ top: y, behavior: 'smooth' });
+        };
+        p3d.addEventListener('click', function () { suppressSnap = Date.now() + 1600; }, true);
+        window.addEventListener('scroll', function () {
+            var y = window.scrollY, top = secTop();
+            if (y < top - 2) startLock = true;
+            if (startIdx > 0 && Date.now() > suppressSnap && prevY < top - 2 && y >= top - 2 && y < startY() - 2) {
+                smoothTo(startY(), 0.6);
+            }
+            // Kliknięcie w listę/kartę (np. Proxy) z góry: gość wybrał cel sam.
+            if (Date.now() <= suppressSnap) startLock = false;
+            prevY = y;
+        }, { passive: true });
+
+        /* Strzałka jak w cenniku: w planach w dół (pomiń), pod nimi w górę
+           (do DEVeloperskiego). Nad sekcją ukryta. */
+        var arrow = document.createElement('button');
+        arrow.type = 'button';
+        arrow.className = 'home-p3d-arrow';
+        arrow.hidden = true;
+        arrow.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+        document.body.appendChild(arrow);
+        var arrowDown = null;
+        var updateArrow = function () {
+            var y = window.scrollY, top = secTop();
+            if (y < top - window.innerHeight * 0.5) { arrow.hidden = true; return; }
+            arrow.hidden = false;
+            var down = y < skipY() - window.innerHeight;
+            if (down === arrowDown) return;
+            arrowDown = down;
+            arrow.classList.toggle('is-down', down);
+            var label = down ? 'Pomiń plany' : 'Wróć do planów';
+            arrow.setAttribute('aria-label', label);
+            arrow.title = label;
+        };
+        arrow.addEventListener('click', function () { smoothTo(arrowDown ? skipY() : startY()); });
+        window.addEventListener('scroll', updateArrow, { passive: true });
+        window.addEventListener('resize', updateArrow);
+        updateArrow();
     }
 
     /* --- Pasek opinii: pisanie, gwiazdki i rozwinięcie (tylko komputer) --- */
