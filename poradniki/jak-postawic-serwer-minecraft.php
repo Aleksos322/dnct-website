@@ -63,8 +63,8 @@ stop                      zapisuje i wyłącza serwer</code></pre>
 $poradnik = [
     'slug'  => 'jak-postawic-serwer-minecraft',
     'tytul' => 'Jak postawić serwer Minecraft',
-    'title' => 'Jak postawić serwer Minecraft - poradnik krok po kroku | DNCT',
-    'opis'  => 'Ile RAM-u potrzebuje serwer Minecraft, Paper czy Forge, pierwsze uruchomienie, łączenie przez IP, server.properties i komendy administratora.',
+    'title' => 'Jak stworzyć serwer Minecraft krok po kroku (Paper, RAM)',
+    'opis'  => 'Jak stworzyć serwer Minecraft: ile RAM-u, Paper czy Forge, pierwsze uruchomienie, server.properties i komendy admina. Poradnik krok po kroku.',
     'data'  => '2026-10-07',
     'tresc' => (string)ob_get_clean(),
 ];
