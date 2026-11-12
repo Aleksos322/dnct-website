@@ -136,6 +136,7 @@
                 body: JSON.stringify({
                     csrf_token:   data.csrf,
                     game_type:    data.game,
+                    variant:      (document.querySelector('input[name="variant"]:checked') || {}).value || '',
                     plan_id:      data.plan_id || 0,
                     slots:        data.slots || 0,
                     period_days:  state.days,
