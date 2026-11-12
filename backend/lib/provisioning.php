@@ -46,6 +46,20 @@ const PROVISION_DELETE_AFTER_HOURS = [
  *
  * @return array<string,array{nest:int,egg:int,fallback_image:string,env:callable}>
  */
+/** Jajko proxy Minecrafta w panelu ("Proxy (Velocity)", dawniej Bungeecord). */
+const PROVISION_PROXY_EGG_ID = 5;
+
+/**
+ * Plany Minecrafta sprzedawane jako proxy (env PROXY_PLAN_IDS, np. "14").
+ * Cennik jest wspólny dla bety i produkcji, więc numery są te same.
+ *
+ * @return list<int>
+ */
+function provision_proxy_plan_ids(): array
+{
+    return array_values(array_filter(array_map('intval', explode(',', (string)env('PROXY_PLAN_IDS', '14')))));
+}
+
 function provision_game_map(): array
 {
     return [
@@ -254,6 +268,23 @@ function provision_server(array $order): array
     // zamówienia bez zapisanego wariantu dostają Node.js.
     if (isset($game['variants'])) {
         $game = array_replace($game, $game['variants'][(string)($order['variant'] ?? 'node')] ?? $game['variants']['node']);
+    }
+
+    // Plan "Proxy" (Minecraft) to osobne jajko proxy: instaluje się od razu
+    // z Velocity, a w zakładce Wersje widzi tylko silniki proxy (panel:
+    // ProxyServers). Zwykły plan Minecrafta zostaje na Paperze.
+    if ($gameType === 'minecraft' && in_array((int)($order['plan_id'] ?? 0), provision_proxy_plan_ids(), true)) {
+        $game = array_replace($game, [
+            'egg'            => PROVISION_PROXY_EGG_ID,
+            'image'          => 'ghcr.io/pterodactyl/yolks:java_21',
+            'fallback_image' => 'ghcr.io/pterodactyl/yolks:java_21',
+            'server_name'    => 'Proxy',
+            'env'            => static fn(array $order, array $alloc): array => [
+                'SERVER_JARFILE' => 'server.jar',
+                'BUNGEE_VERSION' => 'latest',
+                'PROXY'          => 'velocity',
+            ],
+        ]);
     }
 
     /* Konto w panelu. Ta sama funkcja, której używa logowanie SSO, więc klient,
