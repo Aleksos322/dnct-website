@@ -25,6 +25,13 @@
     var elTerms  = document.querySelector('[data-role="terms"]');
     var elImmediateStart = document.querySelector('[data-role="immediateStart"]');
     var elPromo  = document.querySelector('[data-role="promo"]');
+    // Plan Proxy: osobne potwierdzenie, że to nie serwer do gry (zamowienie.php).
+    var elProxyAck = document.querySelector('[data-role="proxyAck"]');
+
+    function canPay() {
+        return !!data.sales_enabled && !!elTerms && elTerms.checked
+            && (!elProxyAck || elProxyAck.checked);
+    }
 
     function availableDays() {
         return Object.keys(data.quotes).map(Number).sort(function (a, b) { return a - b; });
@@ -80,7 +87,7 @@
             : 'Zapłacisz kartą lub BLIK-iem. Pełną listę metod zobaczysz w Checkoucie.';
 
         if (btnPay && !btnPay.hasAttribute('data-locked')) {
-            btnPay.disabled = !data.sales_enabled || !elTerms || !elTerms.checked;
+            btnPay.disabled = !canPay();
         }
     }
 
@@ -96,6 +103,9 @@
 
     if (elTerms) {
         elTerms.addEventListener('change', render);
+    }
+    if (elProxyAck) {
+        elProxyAck.addEventListener('change', render);
     }
     if (elImmediateStart) {
         elImmediateStart.addEventListener('change', function () {
@@ -122,6 +132,10 @@
                 fail('Zaakceptuj Regulamin, aby przejść do płatności.');
                 return;
             }
+            if (elProxyAck && !elProxyAck.checked) {
+                fail('Potwierdź, że rozumiesz, że to serwer proxy, a nie serwer do gry.');
+                return;
+            }
 
             // Blokada na czas żądania. Bez niej podwójne kliknięcie zakłada
             // dwie sesje Stripe'a i dwa wiersze w tabeli zamówień.
@@ -143,6 +157,7 @@
                     billing_mode: state.mode,
                     terms_accepted: true,
                     immediate_service_start: !!(elImmediateStart && elImmediateStart.checked),
+                    proxy_acknowledged: !!(elProxyAck && elProxyAck.checked),
                     promo_code:   elPromo ? elPromo.value.trim() : ''
                 })
             })
@@ -166,7 +181,7 @@
             elError.hidden = false;
         }
         btnPay.removeAttribute('data-locked');
-        btnPay.disabled = !data.sales_enabled || !elTerms || !elTerms.checked;
+        btnPay.disabled = !canPay();
         btnPay.textContent = 'Przejdź do płatności';
     }
 

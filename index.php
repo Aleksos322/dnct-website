@@ -360,6 +360,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
                                 'bg'         => $row['background_img'] ?? '',
                                 'icon'       => $row['icon_img'] ?? '',
                                 'power'      => sqrt(($ramMb - $ramMin) / $ramSpan),
+                                'proxy'      => plan_is_proxy((int)($row['id'] ?? 0)),
                                 // Karta na stronie głównej prowadzi do pełnego cennika.
                                 'href'       => '/cennik',
                                 'cta'        => 'Zobacz szczegóły',

@@ -60,6 +60,16 @@ function provision_proxy_plan_ids(): array
     return array_values(array_filter(array_map('intval', explode(',', (string)env('PROXY_PLAN_IDS', '14')))));
 }
 
+/**
+ * Czy plan to serwer proxy (Velocity/BungeeCord), a nie serwer do gry.
+ * Jedno źródło dla karty w cenniku, zamówienia i api/checkout/create.php -
+ * plan rozpoznajemy po numerze z PROXY_PLAN_IDS, nie po cenie ani nazwie.
+ */
+function plan_is_proxy(int $planId): bool
+{
+    return $planId > 0 && in_array($planId, provision_proxy_plan_ids(), true);
+}
+
 function provision_game_map(): array
 {
     return [
