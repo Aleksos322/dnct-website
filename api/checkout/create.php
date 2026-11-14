@@ -6,7 +6,8 @@
  * front ma przekierować przeglądarkę.
  *
  * Wejście:  { game_type, plan_id | slots, period_days, billing_mode,
- *             terms_accepted, immediate_service_start, promo_code?, csrf_token }
+ *             terms_accepted, immediate_service_start, proxy_acknowledged?,
+ *             promo_code?, csrf_token }
  * Wyjście:  { ok: true, url: "https://checkout.stripe.com/..." }
  *
  * CZEGO TU NIE MA, I TO CELOWO: kwoty. Klient przysyła wyłącznie to, CO wybrał;
@@ -21,6 +22,7 @@ require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/stripe.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/notifications.php';
 require_once dirname(__DIR__, 2) . '/backend/lib/coupons.php';
+require_once dirname(__DIR__, 2) . '/backend/lib/provisioning.php';
 
 require_method('POST');
 csrf_guard();
@@ -73,6 +75,18 @@ try {
     // Komunikaty z wyceny są pisane pod klienta ("Ten plan jest już
     // niedostępny"), więc idą wprost - nie ma tu nic wrażliwego.
     json_error($e->getMessage(), 422, [], ['reason' => 'invalid_selection']);
+}
+
+/* Plan Proxy to nie serwer do gry - klient potwierdza to osobnym polem
+   w zamówieniu. Sprawdzamy tutaj, nie tylko w order.js: zablokowany przycisk
+   da się obejść, wysyłając żądanie bezpośrednio. */
+if (plan_is_proxy((int)($quote['plan_id'] ?? 0)) && !request_bool('proxy_acknowledged')) {
+    json_error(
+        'Potwierdź, że rozumiesz, że to serwer proxy, a nie serwer do gry.',
+        422,
+        ['proxy_acknowledged' => 'Potwierdzenie jest wymagane przy planie Proxy.'],
+        ['reason' => 'proxy_not_acknowledged']
+    );
 }
 
 if (!$immediateServiceStart && $quote['billing_mode'] === 'subscription') {

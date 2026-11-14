@@ -32,6 +32,9 @@
 
 declare(strict_types=1);
 
+// plan_is_proxy() - wołają ją strony, które renderują tę kartę.
+require_once dirname(__DIR__) . '/backend/lib/provisioning.php';
+
 if (!function_exists('render_cennik_plan_card')) {
 
 /** Skleja ścieżkę do grafiki, jeśli w bazie jest sama nazwa pliku. */
@@ -82,7 +85,8 @@ function cennik_price_label(mixed $price): string
 
 /**
  * @param array $p Klucze: name, price, old_price, is_on_sale, popular, sold_out,
- *                 ram, ssd, cpu, backups (gotowe napisy), bg, icon, fits, badge
+ *                 ram, ssd, cpu, backups (gotowe napisy), bg, icon, fits, badge,
+ *                 proxy (plan_is_proxy(): jeden kafel zamiast siatki, zielony akcent)
  */
 function render_cennik_plan_card(array $p): void
 {
@@ -90,6 +94,7 @@ function render_cennik_plan_card(array $p): void
     $isPopular = !empty($p['popular']);
     $isOnSale  = !empty($p['is_on_sale']);
     $oldPrice  = (float)($p['old_price'] ?? 0);
+    $isProxy   = !empty($p['proxy']);
 
     /* Promocja i "najpopularniejszy" mogą dotyczyć tego samego planu. Obwódka
        promocji ma wygrywać, bo to ona ma być widoczna z daleka. */
@@ -99,6 +104,7 @@ function render_cennik_plan_card(array $p): void
         if ($isPopular)  { $classes .= ' is-popular'; }
         if ($isOnSale)   { $classes .= ' is-sale'; }
     }
+    if ($isProxy)        { $classes .= ' is-proxy'; }
 
     $bgSrc   = cennik_card_media($p['bg'] ?? '', 'background');
     $iconSrc = cennik_card_media($p['icon'] ?? '', 'icons');
@@ -175,6 +181,34 @@ function render_cennik_plan_card(array $p): void
                  w EN/DE, gdzie nazwę podmienia dopiero filtr tłumaczeń. */ ?>
         <h3 class="pcard-name<?php echo str_ends_with(trim((string)($p['name'] ?? '')), '+') ? ' is-legend' : ''; ?>"><?php echo htmlspecialchars((string)($p['name'] ?? '')); ?></h3>
 
+        <?php if ($isProxy): ?>
+            <?php /* Proxy (2026-11-15): klienci brali go za najtańszy serwer do gry.
+                     Jeden kafel w miejscu siatki 2x2. Siatka zostaje pod spodem,
+                     niewidoczna, w tej samej komórce gridu - kafel dziedziczy jej
+                     wysokość przy każdej szerokości, więc karta nie odstaje od
+                     sąsiadek. Parametry drobną linią w kaflu. */ ?>
+            <div class="pcard-proxy-wrap">
+            <ul class="pcard-specs" aria-hidden="true">
+                <?php foreach ($specs as $s): ?>
+                    <li><svg viewBox="0 0 24 24"></svg><span class="pcard-spec-val"><?php echo htmlspecialchars($s['value']); ?></span><span class="pcard-spec-lbl"><?php echo htmlspecialchars($s['label']); ?></span></li>
+                <?php endforeach; ?>
+            </ul>
+            <div class="pcard-proxy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3M12 12V8"/></svg>
+                <p class="pcard-proxy-text">Na tym serwerze nie pograsz ze znajomymi. Proxy służy do przekierowań sieciowych (Velocity/BungeeCord), łączy kilka serwerów w jedną sieć.</p>
+                <p class="pcard-proxy-specs"><?php echo htmlspecialchars(implode(' · ', array_map(
+                    // Niełamliwa spacja w pozycji: "1 backup" nie rozjeżdża się na dwie linie.
+                    static fn(string $x): string => str_replace(' ', "\u{00A0}", $x),
+                    array_filter([
+                    trim((string)($p['ram'] ?? '')) !== '' ? $p['ram'] . ' RAM' : '',
+                    trim((string)($p['ssd'] ?? '')) !== '' ? $p['ssd'] . ' NVMe' : '',
+                    (string)($p['cpu'] ?? ''),
+                    ($b = (int)($p['backups'] ?? 0)) . ($b === 1 ? ' backup' : ($b % 10 >= 2 && $b % 10 <= 4 && ($b % 100 < 12 || $b % 100 > 14) ? ' backupy' : ' backupów')),
+                ])))); ?></p>
+            </div>
+            </div>
+        <?php else: ?>
         <ul class="pcard-specs">
             <?php foreach ($specs as $s): ?>
                 <li>
@@ -185,6 +219,7 @@ function render_cennik_plan_card(array $p): void
                 </li>
             <?php endforeach; ?>
         </ul>
+        <?php endif; ?>
 
         <?php /* Rozpórka: dosuwa cenę i przycisk do dołu karty, żeby stopki
                  w całym rzędzie leżały równo. */ ?>

@@ -621,6 +621,7 @@ ob_start();
                                     'icon'       => $plan['icon_img'] ?? '',
                                     'fits'       => $plan['fits'] ?? null,
                                     'power'      => $ramPos,
+                                    'proxy'      => plan_is_proxy((int)$plan['id']),
                                     // Przy wyłączonej sprzedaży brak adresu -
                                     // karta zostaje wtedy tylko do zaznaczania.
                                     'href'       => $salesOn ? '/zamowienie?plan=' . (int)$plan['id'] : null,

@@ -2819,3 +2819,71 @@ html[lang="de"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0,00
 .cnk-spec-table th, .cnk-spec-table td { padding: .6rem .8rem; text-align: left; border-top: 1px solid rgba(148, 163, 184, 0.15); }
 .cnk-spec-table thead th { border-top: 0; font-size: .75rem; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: #94a3b8; }
 .cnk-spec-table tbody th { font-weight: 700; color: #f1f5f9; }
+
+/* ===== Plan Proxy (2026-11-15) =====
+   Proxy (Velocity/BungeeCord) to nie serwer do gry, a klienci brali go za
+   najtańszy plan Minecrafta. Akcent przesunięty w zieleń (szmaragd -> morska
+   zieleń, nie zieleń promocji #22c55e), w miejscu siatki 2x2 jeden płaski
+   kafel tej samej wysokości - karta zostaje równa z sąsiadkami. */
+.cennik-page .pcard.is-proxy {
+    border-color: rgba(52, 211, 153, 0.45);
+    box-shadow: 0 0 34px rgba(16, 185, 129, 0.16);
+}
+.cennik-page .plan-pick:hover .pcard.is-proxy { border-color: rgba(52, 211, 153, 0.7); }
+.cennik-page .pcard.is-proxy::before {
+    background: radial-gradient(
+        480px circle at var(--mx, 50%) var(--my, 50%),
+        rgba(52, 211, 153, 0.24),
+        rgba(16, 185, 129, 0.14) 28%,
+        rgba(13, 148, 136, 0.08) 46%,
+        transparent 72%
+    );
+}
+/* Niewidoczna siatka 2x2 i kafel w jednej komórce: wysokość = większa z nich. */
+.cennik-page .pcard-proxy-wrap { display: grid; }
+.cennik-page .pcard-proxy-wrap > * { grid-area: 1 / 1; }
+.cennik-page .pcard-proxy-wrap > .pcard-specs { visibility: hidden; }
+.cennik-page .pcard-proxy {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.7rem 0.75rem 0.65rem;
+    border-radius: 14px;
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(52, 211, 153, 0.18);
+}
+.cennik-page .pcard-proxy svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #6ee7b7;
+    display: block;
+}
+.cennik-page .pcard-proxy-text {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.38;
+    color: #d1fae5;
+    text-wrap: pretty;
+}
+.cennik-page .pcard-proxy-specs {
+    margin: auto 0 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+    font-variant-numeric: tabular-nums;
+}
+.cennik-page .pcard.is-proxy .pcard-cta {
+    background: linear-gradient(135deg, #10b981, #0d9488);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+}
+.cennik-page .plan-pick:hover .pcard.is-proxy:not(.is-soldout) .pcard-price-cur { color: #6ee7b7; }
+.cennik-page .pcard.is-proxy .pcard-power > span { background: linear-gradient(90deg, #10b981, #2dd4bf); box-shadow: 0 0 10px rgba(45, 212, 191, 0.45); }
+.cennik-page .plan-pick:hover .pcard.is-proxy .pcard-art-icon { border-color: rgba(52, 211, 153, 0.5); }
+.home-p3d.is-3d .home-p3d-card.is-front .pcard.is-proxy { box-shadow: 0 40px 90px -30px rgba(16, 185, 129, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+/* Najwęższe telefony (360 px): kafel Proxy wystawał 7 px ponad siatkę sąsiadek. */
+@media (max-width: 380px) {
+    .cennik-page .pcard-proxy { gap: 0.25rem; padding: 0.6rem 0.65rem 0.55rem; }
+    .cennik-page .pcard-proxy-text { font-size: 0.74rem; line-height: 1.34; }
+}

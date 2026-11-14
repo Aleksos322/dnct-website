@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/backend/bootstrap.php';
 require_once __DIR__ . '/backend/lib/stripe.php';
+require_once __DIR__ . '/backend/lib/provisioning.php';   // plan_is_proxy()
 
 $pageTitle       = 'Zamówienie - DNCT Hosting';
 $metaDescription = 'Podsumowanie zamówienia serwera gry w DNCT Hosting.';
@@ -267,6 +268,20 @@ ob_start();
                     <span class="ord-check-text"><span data-i18n="@zgoda-akceptuje">Akceptuję</span> <a href="/regulamin" target="_blank" rel="noopener">Regulamin DNCT</a>.</span>
                     <span class="ord-req">wymagane</span>
                 </label>
+                <?php if (plan_is_proxy((int)($spec['plan_id'] ?? 0))): ?>
+                    <?php /* Proxy brano za najtańszy serwer do gry. Bez tego pola
+                             przycisk płatności stoi zablokowany (order.js), a
+                             api/checkout/create.php odrzuca zamówienie (422). */ ?>
+                    <label class="ord-check ord-check-proxy">
+                        <input type="checkbox" data-role="proxyAck" required>
+                        <span class="ord-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
+                        <span class="ord-check-text">
+                            <strong class="ord-check-title">Rozumiem, że to serwer proxy, a nie serwer do gry</strong>
+                            <span class="ord-check-legal">Na proxy (Velocity/BungeeCord) nie zagrasz ze znajomymi - łączy ono kilka osobnych serwerów Minecrafta w jedną sieć.</span>
+                        </span>
+                        <span class="ord-req">wymagane</span>
+                    </label>
+                <?php endif; ?>
                 <label class="ord-check ord-check-start">
                     <input type="checkbox" data-role="immediateStart">
                     <span class="ord-box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>

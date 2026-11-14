@@ -562,3 +562,12 @@
 .cennik-page .ord-lang-opt input:checked + span { border-color: rgba(139, 92, 246, 0.8); background: rgba(139, 92, 246, 0.16); color: #fff; }
 .cennik-page .ord-lang-opt input:focus-visible + span { outline: 2px solid #a78bfa; outline-offset: 2px; }
 .cennik-page .ord-lang .ord-hint { width: 100%; margin: 0.2rem 0 0; }
+
+/* Potwierdzenie planu Proxy (2026-11-15) - zielony akcent jak karta Proxy
+   w cenniku, żeby było widać, że to pole dotyczy właśnie tego planu. */
+.cennik-page .ord-check-proxy { border-color: rgba(52, 211, 153, 0.3); background: rgba(16, 185, 129, 0.05); }
+.cennik-page .ord-check-proxy:hover { border-color: rgba(52, 211, 153, 0.5); background: rgba(16, 185, 129, 0.08); }
+.cennik-page .ord-check-proxy:has(input:checked) { border-color: rgba(52, 211, 153, 0.6); background: rgba(16, 185, 129, 0.1); }
+.cennik-page .ord-check-proxy .ord-check-text { display: grid; gap: 0.25rem; }
+.cennik-page .ord-check-proxy input:checked + .ord-box { background: linear-gradient(135deg, #10b981, #0d9488); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18); }
+.cennik-page .ord-check-proxy input:focus-visible + .ord-box { outline-color: #6ee7b7; }
