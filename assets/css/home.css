@@ -100,7 +100,8 @@
 .home-trust-gw { color: #fbbf24; letter-spacing: 0.1em; font-size: 0.85rem; }
 
 /* Trzy gry: duże kafle pod całym hero, każdy w kolorze swojej gry. */
-.home-gry { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.9rem, 1.2vw, 1.4rem); margin-top: clamp(2.5rem, 5vh, 4rem); }
+/* Wszystkie gry w jednym rzędzie, ile by ich nie było (od 1400 px w dół dwie kolumny, na telefonie jedna). */
+.home-gry { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: clamp(0.9rem, 1.2vw, 1.4rem); margin-top: clamp(2.5rem, 5vh, 4rem); }
 .home-gra {
     --g: 139, 92, 246;
     position: relative; overflow: hidden; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.6rem 1.2rem;
@@ -111,6 +112,7 @@
 .home-gra[data-g="minecraft"] { --g: 95, 166, 74; }
 .home-gra[data-g="zomboid"] { --g: 224, 108, 60; }
 .home-gra[data-g="vintagestory"] { --g: 196, 158, 72; }
+.home-gra[data-g="discord"] { --g: 88, 101, 242; }
 .home-gra:hover { transform: translateY(-4px); border-color: rgba(var(--g), 0.6); box-shadow: 0 20px 50px -20px rgba(var(--g), 0.6); }
 .home-gra-tlo { position: absolute; right: -24px; bottom: -34px; width: 170px; height: 170px; object-fit: cover; border-radius: 50%; opacity: 0.12; filter: blur(2px) saturate(1.2); pointer-events: none; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease; }
 .home-gra:hover .home-gra-tlo { transform: rotate(-10deg) scale(1.1); opacity: 0.2; }
@@ -126,6 +128,15 @@
 .home-gra-strzalka svg { width: 18px; height: 18px; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 .home-gra:hover .home-gra-strzalka { background: rgba(var(--g), 0.85); border-color: transparent; }
 .home-gra:hover .home-gra-strzalka svg { transform: translateX(2px); }
+/* W jednym rzędzie kafel jest węższy: mniejsze odstępy, ikona i strzałka, żeby nazwa gry mieściła się w jednej linii. */
+@media (min-width: 1401px) {
+    .home-gra { padding: 1.25rem 1.2rem; gap: 0.5rem 0.9rem; }
+    .home-gra-ikona { width: 56px; height: 56px; border-radius: 16px; }
+    .home-gra-ikona img { width: 44px; height: 44px; }
+    .home-gra-strzalka { width: 38px; height: 38px; }
+    .home-gra-tekst strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 1400px) { .home-gry { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 960px) { .home-gry { grid-template-columns: 1fr; } }
 
 /* Karta serwera */
