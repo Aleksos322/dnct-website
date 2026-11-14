@@ -159,10 +159,10 @@ ob_start();
 
 <!-- ============ HERO ============ -->
 <?php
-$heroGameUrl  = ['minecraft' => '/hosting-minecraft', 'zomboid' => '/hosting-project-zomboid', 'vintagestory' => '/hosting-vintage-story'];
+$heroGameUrl  = ['minecraft' => '/hosting-minecraft', 'zomboid' => '/hosting-project-zomboid', 'vintagestory' => '/hosting-vintage-story', 'discord' => '/hosting-bot-discord'];
 // Awatary: przycięte i zmniejszone (96 px WebP, ~5 KB) ikony gier
 // z media/Server_card/icons - oryginały mają 100-300 KB i duży margines.
-$heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zomboid' => '/assets/media/icons/gry/zomboid.webp', 'vintagestory' => '/assets/media/icons/gry/vintagestory.webp'];
+$heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zomboid' => '/assets/media/icons/gry/zomboid.webp', 'vintagestory' => '/assets/media/icons/gry/vintagestory.webp', 'discord' => '/assets/media/icons/gry/discord.svg'];
 ?>
 <section class="home-hero">
     <div class="home-hero-glow" aria-hidden="true"></div>
@@ -255,7 +255,7 @@ $heroGameIcon = ['minecraft' => '/assets/media/icons/gry/minecraft.webp', 'zombo
         </div>
     </div>
     <?php if ($heroGames):
-        $heroGameLine = ['minecraft' => 'Serwer dla Twojej ekipy', 'zomboid' => 'Przetrwajcie apokalipsę razem', 'vintagestory' => 'Wspólny survival bez pośpiechu'];
+        $heroGameLine = ['minecraft' => 'Serwer dla Twojej ekipy', 'zomboid' => 'Przetrwajcie apokalipsę razem', 'vintagestory' => 'Wspólny survival bez pośpiechu', 'discord' => 'Twój bot online 24/7'];
     ?>
     <nav class="home-wrap home-gry" aria-label="Wybierz grę">
         <?php foreach ($heroGames as $i => $g):
