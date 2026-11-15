@@ -713,8 +713,8 @@ nav .glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw,
     /* Hamburger miał 40x40. */
     .nav-hamburger { min-width: 44px; min-height: 44px; }
 
-    /* Dzwonek ściskał się w rzędzie flex do 42 px. */
-    #dnct-bell-btn { flex: none; }
+    /* Dzwonek w navbarze miał 42x42 (notification-bell.css). */
+    nav.glass #dnct-bell-wrap.is-navbar #dnct-bell-btn { width: 44px; height: 44px; }
 
     /* "Zaloguj" miało 36 px wysokości. */
     nav.glass a.bg-gradient-main { display: inline-flex; align-items: center; min-height: 44px; }
