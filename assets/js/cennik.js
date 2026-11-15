@@ -676,6 +676,11 @@
      * jak mała karta wygląda na wypaczony, nie elegancki.
      */
     function attachChromaTilt(el, maxTilt) {
+        // Na dotyku przechyl nie ma sensu: przegladarka wysyla syntetyczne
+        // "mousemove" przy tapnieciu, wiec karta zamarzala przekrzywiona pod
+        // palcem, a nasluch scrolla liczyl sie przy kazdym przewinieciu strony.
+        // Tilt zostaje wylacznie tam, gdzie jest prawdziwy kursor.
+        if (window.matchMedia && !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
         // Mysz potrafi wysylac mousemove czesciej niz przegladarka rysuje
         // klatki - bez dlawienia KAZDY event od razu przeliczal transform I
         // duzy gradient (.pcard::before, kolo 480px), co dawalo wiecej
