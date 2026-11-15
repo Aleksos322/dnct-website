@@ -772,3 +772,10 @@
 .home-p3d-arrow:hover { color: #f1f5f9; border-color: rgba(167, 139, 250, 0.45); background-color: rgba(139, 92, 246, 0.16); }
 .home-p3d-arrow:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { .home-p3d-arrow, .home-p3d-arrow svg { transition: none; } }
+
+/* TELEFON (2026-11-15): nagłówek przypiętej sekcji planów dotykał navbara
+   (padding 74 px przy pasku wysokim na 77 px). 100vh zostaje celowo: svh
+   zostawiałoby pustą szczelinę pod sekcją, gdy pasek przeglądarki się chowa. */
+@media (max-width: 700px) {
+    .home-p3d.is-3d .home-p3d-sticky { padding-top: 88px; }
+}
