@@ -704,3 +704,47 @@ nav .glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw,
     .nav-lang--mobile { display: inline-flex; align-self: center; margin: 0.6rem auto 0.2rem; }
     .nav-lang--mobile .nav-lang-opt { padding: 0.45rem 0.9rem; font-size: 0.8rem; }
 }
+
+/* ==========================================================================
+   TELEFON: cele dotyku i menu na niskim ekranie (2026-11-15)
+   Wygląd zostaje ten sam - rośnie wyłącznie obszar, w który trafia palec.
+   ========================================================================== */
+@media (max-width: 1140px) {
+    /* Hamburger miał 40x40. */
+    .nav-hamburger { min-width: 44px; min-height: 44px; }
+
+    /* Dzwonek ściskał się w rzędzie flex do 42 px. */
+    #dnct-bell-btn { flex: none; }
+
+    /* "Zaloguj" miało 36 px wysokości. */
+    nav.glass a.bg-gradient-main { display: inline-flex; align-items: center; min-height: 44px; }
+
+    /* Sztywne 420 px wystawało poza ekran w poziomie telefonu (wys. 360-430 px):
+       dolnych pozycji nie dało się dosięgnąć, bo menu nie przewijało się. */
+    .nav-mobile-menu.open {
+        max-height: min(420px, calc(100vh - 4.6rem));
+        max-height: min(420px, calc(100dvh - 4.6rem));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* Menu siedzi WEWNĄTRZ <nav class="glass">, który sam ma backdrop-filter.
+       Zagnieżdżony backdrop-filter widzi tylko wnętrze rodzica, więc rozmycie
+       strony pod menu nie działało i przy kryciu 0.72 nagłówek strony
+       przebijał przez pozycje menu. Tafla dostaje pełne krycie. */
+    .nav-mobile-menu {
+        background: #0c0b12;
+    }
+
+    /* Pozycje menu to sam tekst (28 px wysokości). Pseudoelement powiększa
+       obszar dotyku do odstępu między pozycjami, bez ruszania układu. */
+    .nav-mobile-menu a:not(.nav-lang-opt) { position: relative; }
+    .nav-mobile-menu a:not(.nav-lang-opt):not(.nav-disabled)::after {
+        content: "";
+        position: absolute;
+        inset: -0.7rem 0;
+    }
+}
+@media (max-width: 640px) {
+    .nav-lang--mobile .nav-lang-opt { padding: 0.6rem 0.95rem; }
+}
