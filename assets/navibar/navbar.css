@@ -748,3 +748,27 @@ nav .glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw,
 @media (max-width: 640px) {
     .nav-lang--mobile .nav-lang-opt { padding: 0.6rem 0.95rem; }
 }
+
+/* ==========================================================================
+   TELEFON: stopka i baner cookies (2026-11-15)
+   Te reguły pasowałyby do layout.css, ale tamten plik należy do innego konta
+   (brak prawa zapisu) - navbar.css ładuje się na tych samych stronach co stopka.
+   Selektory są mocniejsze niż pojedyncza klasa, bo tailwind.css ładuje się
+   później (.gap-6, .text-xs i .text-gray-600 wygrałyby przy remisie).
+   ========================================================================== */
+@media (max-width: 767px) {
+    /* Ikony społecznościowe: 24x24 -> cel 44x44, odstęp wizualny bez zmian. */
+    footer.glass .flex.gap-6 { gap: 0.25rem; }
+    footer.glass .flex.gap-6 > a { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+
+    /* Linki prawne: 12 px w kolorze #4b5563 na czerni i 16 px wysokości wiersza -
+       nieczytelne i nie do trafienia palcem. */
+    footer.glass p.text-xs { font-size: 0.8rem; line-height: 1.3; color: #7c8798; }
+    footer.glass p.text-xs a { display: inline-block; padding: 0.7rem 0.15rem; }
+
+    /* Zapas na przycisk czatu (prawy dolny róg) - zasłaniał ostatni wiersz
+       linków, w tym "Ustawienia cookies". */
+    footer.glass { padding-bottom: 5.5rem; }
+
+    .cookie-btn { min-height: 44px; }
+}
