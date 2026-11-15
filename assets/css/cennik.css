@@ -2887,3 +2887,25 @@ html[lang="de"] .cennik-page .cnk-split--v2 .cnk-list li::after { content: "0,00
     .cennik-page .pcard-proxy { gap: 0.25rem; padding: 0.6rem 0.65rem 0.55rem; }
     .cennik-page .pcard-proxy-text { font-size: 0.74rem; line-height: 1.34; }
 }
+
+/* ---------- TELEFON (2026-11-15) ---------- */
+@media (max-width: 767px) {
+    /* Podstrony na szablonie cennika (twoje-serwery, zamowienie, oplaty, sukces)
+       dziedziczą podciągnięcie -90px pod navbar. Na telefonie nagłówek lądował
+       9 px pod paskiem - teraz ma ten sam oddech co sam cennik (ok. 25 px). */
+    .page-main .cennik-page:not(.cnk-catalogue-page):not(.home-p3d) { margin-top: -74px; }
+
+    /* CTA karty planu miało 42 px wysokości. */
+    .cennik-page .pcard-cta { padding-top: 0.95rem; padding-bottom: 0.95rem; }
+
+    /* Tabele parametrów mają 10 kolumn i przewijają się w bok, ale nic tego
+       nie zdradzało - wyglądały na ucięte. Prawa krawędź gaśnie, a ostatnia
+       kolumna dostaje zapas, żeby po dojechaniu do końca nie stała w cieniu. */
+    .cnk-spec-scroll {
+        overscroll-behavior-x: contain;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.25rem), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 2.25rem), transparent);
+    }
+    .cnk-spec-table th:last-child,
+    .cnk-spec-table td:last-child { padding-right: 2.75rem; }
+}

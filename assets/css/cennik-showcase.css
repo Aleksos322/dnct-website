@@ -523,3 +523,8 @@
 }
 .cnk-plan-showcase:not(.is-enhanced) .cnk-loop-seam { display: none; }
 @media (prefers-reduced-motion: reduce) { .cnk-plan-showcase.is-enhanced .cnk-loop-seam { transition: none; } }
+
+/* TELEFON (2026-11-15): "Wystaw opinię" miało 38 px wysokości. */
+@media (max-width: 767px) {
+    .cnk-catalogue .op-pasek-wystaw { min-height: 44px; }
+}
