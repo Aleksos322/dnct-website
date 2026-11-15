@@ -948,3 +948,39 @@ input:focus-visible {
     text-underline-offset: 2px;
 }
 .consent-info a:hover { color: #c4b5fd; }
+
+/* ---------- TELEFON (2026-11-15) ----------
+   Selektory z "body.register-page" / ".register-page ..." są celowo mocniejsze
+   niż pojedyncza klasa: tailwind.css ładuje się PO tym pliku, więc przy równej
+   specyficzności wygrałyby .text-sm, .grid-cols-2 i .p-6 z atrybutu class. */
+
+/* iOS przybliża stronę przy focusie pola z czcionką poniżej 16 px i już jej
+   nie oddala - cały kreator zostawał wtedy przesunięty w bok. */
+@media (max-width: 640px), (pointer: coarse) {
+    .register-page .input-field { font-size: 16px; line-height: 1.35; }
+}
+
+@media (max-width: 480px) {
+    /* Karta dostaje pełną szerokość ekranu minus wąski margines. */
+    body.register-page { padding: 0.75rem; }
+    .register-page .register-card > .glass { padding: 1.6rem 1.25rem; border-radius: 26px; }
+
+    /* Imię i nazwisko obok siebie zostawiały ok. 40 px na tekst
+       (ikona + status po bokach) - placeholder "np. Kowalski" był ucięty. */
+    .register-page .name-row { grid-template-columns: minmax(0, 1fr); }
+
+    /* Podpisy czytelne bez zoomu. */
+    .register-page .field-label { font-size: 0.72rem; }
+    .register-page .field-hint,
+    .register-page .consent-info { font-size: 0.8rem; }
+    .register-page .wizard-caption { font-size: 0.68rem; }
+    .register-page .req { font-size: 0.8rem; }
+    .register-page .otp-resend { font-size: 0.8rem; }
+    .register-page .consent { font-size: 0.85rem; }
+
+    /* Cele dotyku: min. 44 px wysokości. */
+    .register-page .btn-back { min-height: 44px; font-size: 0.8rem; }
+    .register-page .link-button,
+    .register-page .login-link { display: inline-block; padding: 0.7rem 0.35rem; }
+    .register-page .pw-toggle { padding: 0.6rem; right: 0.4rem; }
+}

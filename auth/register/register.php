@@ -162,7 +162,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
                         <h3 id="step-1-title" class="step-title">Załóż konto <span class="step-title-grad">DNCT</span></h3>
                         <p class="step-subtitle">Jedno konto do strony, panelu gier i hostingu WWW. Na podany adres wyślemy kod potwierdzający.</p>
 
-                        <div class="grid grid-cols-2 gap-4 mt-5">
+                        <div class="name-row grid grid-cols-2 gap-4 mt-5">
                             <div class="space-y-2">
                                 <label for="first-name" class="field-label">Imię</label>
                                 <div class="relative">
@@ -392,7 +392,7 @@ $e = static fn(string $value): string => htmlspecialchars($value, ENT_QUOTES, 'U
 
             <div class="mt-7 text-center text-sm text-gray-500">
                 Masz już konto?
-                <a href="/login" class="text-white font-bold hover:text-purple-400 transition-colors ml-1">Zaloguj się</a>
+                <a href="/login" class="login-link text-white font-bold hover:text-purple-400 transition-colors ml-1">Zaloguj się</a>
             </div>
         </div>
     </div>
