@@ -186,3 +186,12 @@
     .pomoc-head, .pomoc-box, .pomoc-status { animation: none; }
     .pomoc-arrow, .pomoc-btn, .pomoc-field input, .pomoc-field select, .pomoc-field textarea { transition: none; }
 }
+
+/* ---------- TELEFON (2026-11-15) ----------
+   15,2 px to o włos za mało: iOS przybliża stronę przy focusie pola z czcionką
+   poniżej 16 px i nie oddala jej po wyjściu z pola. */
+@media (max-width: 767px), (pointer: coarse) {
+    .pomoc-field input,
+    .pomoc-field select,
+    .pomoc-field textarea { font-size: 16px; }
+}
