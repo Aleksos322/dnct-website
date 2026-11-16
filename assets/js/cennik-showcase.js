@@ -170,6 +170,11 @@
         var SEAM_GAP = 0.55; // dodatkowy odstęp (w krokach karty) w miejscu przedziałki
         active = position = startIdx;
         var startApplied = false;
+        // Blokada startu (2026-11-16): od wejścia na stronę do dojechania
+        // przewinięcia na DEVeloperski karuzela pokazuje DEVeloperski. Bez niej
+        // pierwsza klatka liczyła pozycję z scrollY = 0 i migało Proxy.
+        var startHold = false, startTarget = 0, startHoldUntil = 0;
+        var firstLaidOut = false;
 
         function scrollTo(top, immediate) {
             if (window.dnctLenis) window.dnctLenis.scrollTo(top, { immediate: !!immediate, duration: 0.65 });
@@ -231,8 +236,21 @@
             if (!startApplied && pinned) {
                 startApplied = true;
                 if (startIdx > 0 && window.scrollY < 5 && !location.hash) {
-                    scrollTo(scrollStart() + scrollDistance * startIdx / (cards.length - 1), true);
+                    startTarget = scrollStart() + scrollDistance * startIdx / (cards.length - 1);
+                    startHold = true;
+                    startHoldUntil = Date.now() + 1500;
+                    scrollTo(startTarget, true);
                 }
+            }
+            // Pierwszy układ 3D od razu i bez animacji: inaczej karty przez
+            // klatkę stały jedna na drugiej, a przejście 0,55 s pokazywało
+            // przelot Proxy -> DEVeloperski przy każdym wejściu (2026-11-16).
+            if (!swipe && !firstLaidOut && stage.clientWidth) {
+                firstLaidOut = true;
+                root.classList.add('is-instant');
+                render();
+                requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.remove('is-instant'); }); });
+                return;
             }
             queueRender();
         }
@@ -243,6 +261,10 @@
             if (pinned) {
                 position = Math.max(0, Math.min(cards.length - 1, (window.scrollY - scrollStart()) / scrollDistance * (cards.length - 1)));
                 active = wrapIndex(offset + Math.round(position));
+                if (startHold) {
+                    if (Math.abs(window.scrollY - startTarget) < 3 || Date.now() > startHoldUntil) startHold = false;
+                    else { position = startIdx; active = startIdx; }
+                }
             }
             var absPos = offset + position;
             // Przedziałka leży między ostatnią (najdroższą) a pierwszą kartą.

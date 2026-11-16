@@ -117,6 +117,9 @@
             var n = cards.length, active = -1, queued = false;
             if (!stage || !n) return;
             p3d.classList.add('is-swipe');
+            // Podpowiedź pod palec (sam tekst, bez zależności od znaczników w index.php).
+            var hintEl = p3d.querySelector('.home-p3d-hint');
+            if (hintEl) hintEl.textContent = 'Przesuń palcem w bok, żeby zmienić plan';
             var startIdx = (function () {
                 var names = cards.map(function (c) { var h = c.querySelector('h3, .pcard-name'); return h ? h.textContent : ''; });
                 var dev = names.findIndex(function (t) { return /developer/i.test(t); });
@@ -306,13 +309,13 @@
         var stepPx = function () { return n > 1 ? (p3d.offsetHeight - window.innerHeight) / (n - 1) : 0; };
         var startY = function () { return secTop() + stepPx() * startIdx; };
         var skipY = function () { return secTop() + p3d.offsetHeight - 40; };
-        var suppressSnap = 0, prevY = window.scrollY;
+        var suppressSnap = 0, userPick = 0, prevY = window.scrollY;
         var smoothTo = function (y, dur) {
             suppressSnap = Date.now() + 1600;
             if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: dur || 0.9 });
             else window.scrollTo({ top: y, behavior: 'smooth' });
         };
-        p3d.addEventListener('click', function () { suppressSnap = Date.now() + 1600; }, true);
+        p3d.addEventListener('click', function () { suppressSnap = userPick = Date.now() + 1600; }, true);
         window.addEventListener('scroll', function () {
             var y = window.scrollY, top = secTop();
             if (y < top - 2) startLock = true;
@@ -320,7 +323,9 @@
                 smoothTo(startY(), 0.6);
             }
             // Kliknięcie w listę/kartę (np. Proxy) z góry: gość wybrał cel sam.
-            if (Date.now() <= suppressSnap) startLock = false;
+            // Tylko klik, nie automatyczny dojazd smoothTo - ten zdejmował blokadę
+            // i w trakcie dojazdu do DEVeloperskiego migało Proxy (2026-11-16).
+            if (Date.now() <= userPick) startLock = false;
             prevY = y;
         }, { passive: true });
 
