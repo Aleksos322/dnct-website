@@ -557,3 +557,16 @@
 @media (max-width: 860px) {
     .cnk-back-top { left: 16px; transform: none; }
 }
+/* Kropki pod rzędem kart i szturchnięcie przy pierwszym pokazaniu (2026-11-16). */
+.cnk-swipe-dots { display: none; }
+@media (max-width: 860px) {
+    .cnk-plan-showcase.is-swipe .cnk-swipe-dots { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; }
+    .cnk-swipe-dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); transition: width 0.2s ease, background-color 0.2s ease; }
+    .cnk-swipe-dots span.is-on { width: 18px; background: #a78bfa; }
+    .cnk-plan-showcase.is-swipe .is-nudge .cnk-plan-slide { animation: cnkSwipeNudge 1.3s cubic-bezier(0.22, 1, 0.36, 1); }
+}
+@keyframes cnkSwipeNudge {
+    0%, 100% { translate: 0 0; }
+    35% { translate: -56px 0; }
+    65% { translate: 6px 0; }
+}

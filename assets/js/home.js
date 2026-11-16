@@ -100,7 +100,84 @@
        (d): przesunięcie w bok, w głąb i obrót wokół osi Y. Liczone w rAF,
        tylko gdy sekcja jest blisko ekranu. */
     var p3d = document.querySelector('[data-plans3d]');
-    if (p3d && !reduce) {
+
+    /* TELEFON (2026-11-16, prośba właściciela): przypięta karuzela 3D
+       zmieniała plany przewijaniem w dół, a kartę zmniejszała do wysokości
+       ekranu - mała i nie było wiadomo, że to w ogóle karuzela. Do 860 px
+       zostaje zwykły rząd kart w pełnym rozmiarze, przesuwany palcem
+       (scroll-snap, CSS .is-swipe), kropki pod spodem i jednorazowe
+       "szturchnięcie" kart przy pierwszym pokazaniu. Start na DEVeloperskim,
+       Proxy wystaje po lewej. Tryb wybierany przy wczytaniu strony. */
+    var homeSwipe = !!p3d && window.matchMedia('(max-width: 860px)').matches;
+    if (homeSwipe) {
+        (function () {
+            var cards = Array.prototype.slice.call(p3d.querySelectorAll('[data-p3d]'));
+            var stage = p3d.querySelector('.home-p3d-stage');
+            var nowEl = p3d.querySelector('[data-p3d-now]');
+            var n = cards.length, active = -1, queued = false;
+            if (!stage || !n) return;
+            p3d.classList.add('is-swipe');
+            var startIdx = (function () {
+                var names = cards.map(function (c) { var h = c.querySelector('h3, .pcard-name'); return h ? h.textContent : ''; });
+                var dev = names.findIndex(function (t) { return /developer/i.test(t); });
+                if (dev >= 0) return dev;
+                var free = cards.findIndex(function (c) { return !c.querySelector('.pcard.is-soldout'); });
+                return free >= 0 ? free : 0;
+            })();
+            var dots = document.createElement('div');
+            dots.className = 'home-swipe-dots';
+            dots.setAttribute('aria-hidden', 'true');
+            cards.forEach(function () { dots.appendChild(document.createElement('span')); });
+            stage.insertAdjacentElement('afterend', dots);
+            var center = function (i) { return cards[i].offsetLeft - (stage.clientWidth - cards[i].offsetWidth) / 2; };
+            var go = function (i, instant) {
+                stage.scrollTo({ left: center(i), behavior: instant || reduce ? 'instant' : 'smooth' });
+            };
+            var mark = function (i) {
+                if (i === active) return;
+                active = i;
+                cards.forEach(function (c, k) { c.classList.toggle('is-front', k === i); });
+                Array.prototype.forEach.call(dots.children, function (d, k) { d.classList.toggle('is-on', k === i); });
+                if (nowEl) nowEl.textContent = (i < 9 ? '0' : '') + (i + 1);
+            };
+            var track = function () {
+                queued = false;
+                var best = 0, bestD = Infinity;
+                cards.forEach(function (c, k) { var d = Math.abs(center(k) - stage.scrollLeft); if (d < bestD) { bestD = d; best = k; } });
+                mark(best);
+            };
+            stage.addEventListener('scroll', function () { if (!queued) { queued = true; requestAnimationFrame(track); } }, { passive: true });
+            // Stuknięcie w wystającą kartę obok: najpierw ją wyśrodkuj.
+            cards.forEach(function (c, k) {
+                c.addEventListener('click', function (e) {
+                    if (k === active) return;
+                    e.preventDefault(); e.stopPropagation();
+                    go(k);
+                }, true);
+            });
+            var started = false;
+            var start = function () {
+                if (started || !stage.clientWidth) return;
+                started = true;
+                go(startIdx, true);
+                mark(startIdx);
+            };
+            start();
+            requestAnimationFrame(start);
+            window.addEventListener('load', start);
+            if (!reduce && 'IntersectionObserver' in window) {
+                var nudge = new IntersectionObserver(function (en) {
+                    if (!en[0].isIntersecting) return;
+                    nudge.disconnect();
+                    stage.classList.add('is-nudge');
+                    setTimeout(function () { stage.classList.remove('is-nudge'); }, 1400);
+                }, { threshold: 0.6 });
+                nudge.observe(stage);
+            }
+        })();
+    }
+
+    if (p3d && !reduce && !homeSwipe) {
         var cards = Array.prototype.slice.call(p3d.querySelectorAll('[data-p3d]'));
         var goBtns = Array.prototype.slice.call(p3d.querySelectorAll('[data-p3d-go]'));
         var nowEl = p3d.querySelector('[data-p3d-now]');

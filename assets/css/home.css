@@ -772,3 +772,61 @@
 .home-p3d-arrow:hover { color: #f1f5f9; border-color: rgba(167, 139, 250, 0.45); background-color: rgba(139, 92, 246, 0.16); }
 .home-p3d-arrow:focus-visible { outline: 2px solid #a78bfa; outline-offset: 4px; }
 @media (prefers-reduced-motion: reduce) { .home-p3d-arrow, .home-p3d-arrow svg { transition: none; } }
+
+/* ===== TELEFON: rząd planów przesuwany palcem (home.js, .is-swipe, 2026-11-16) =====
+   Zamiast przypiętej karuzeli 3D: karty w pełnym rozmiarze, rząd na całą
+   szerokość ekranu, sąsiednie karty wystają po bokach. Kropki i jednorazowe
+   szturchnięcie pokazują, że rząd się przesuwa. */
+@media (max-width: 860px) {
+    .home-p3d.is-swipe { padding: 2.5rem 0 1.5rem; }
+    .home-p3d.is-swipe .home-p3d-grid { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
+    .home-p3d.is-swipe .home-p3d-index,
+    .home-p3d.is-swipe .home-p3d-skip { display: none; }
+    .home-p3d.is-swipe .home-p3d-hint { display: flex; grid-column: 1 / -1; margin: 0.2rem 0 0; color: #a78bfa; font-weight: 700; }
+    .home-p3d.is-swipe .home-p3d-hint .hint-pc { display: none; }
+    .home-p3d.is-swipe .home-p3d-hint .hint-m { display: inline; }
+    .home-p3d.is-swipe .home-p3d-stage {
+        --slide-w: min(340px, 82vw);
+        position: relative;
+        margin-inline: calc(50% - 50vw);
+        padding: 0.6rem calc(50vw - var(--slide-w) / 2) 0.4rem;
+        gap: 12px;
+        scroll-padding-inline: calc(50vw - var(--slide-w) / 2);
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+    }
+    .home-p3d.is-swipe .home-p3d-stage::-webkit-scrollbar { display: none; }
+    .home-p3d.is-swipe .home-p3d-card {
+        flex: 0 0 var(--slide-w);
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+        transition: filter 0.3s ease;
+    }
+    .home-p3d.is-swipe .home-p3d-card:not(.is-front) { filter: saturate(0.75) brightness(0.72); }
+    .home-p3d.is-swipe .home-p3d-card .plan-pick,
+    .home-p3d.is-swipe .home-p3d-card .pcard { height: 100%; }
+    .home-p3d.is-swipe .pcard { min-height: 0; }
+    .home-p3d.is-swipe .is-nudge .home-p3d-card { animation: homeSwipeNudge 1.3s cubic-bezier(0.22, 1, 0.36, 1); }
+}
+.home-swipe-dots { display: none; }
+@media (max-width: 860px) {
+    .home-p3d.is-swipe .home-swipe-dots { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 0.5rem 0 1.4rem; }
+    .home-swipe-dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.18); transition: width 0.2s ease, background-color 0.2s ease; }
+    .home-swipe-dots span.is-on { width: 18px; background: #a78bfa; }
+}
+@keyframes homeSwipeNudge {
+    0%, 100% { translate: 0 0; }
+    35% { translate: -56px 0; }
+    65% { translate: 6px 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .home-p3d.is-swipe .is-nudge .home-p3d-card { animation: none; }
+}
+/* Te same pełne tła kart co w karuzeli 3D (bez rozmycia - lżej przy przesuwaniu). */
+.home-p3d.is-swipe .pcard {
+    background: linear-gradient(180deg, #17132a, #0d0b16) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.home-p3d.is-swipe .pcard.is-soldout { opacity: 1; filter: saturate(0.55) brightness(0.8); }
