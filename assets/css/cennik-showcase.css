@@ -575,3 +575,6 @@
     35% { translate: -56px 0; }
     65% { translate: 6px 0; }
 }
+/* Pierwszy układ karuzeli bez animacji (cennik-showcase.js, .is-instant). */
+.cnk-plan-showcase.is-instant .cnk-plan-slide,
+.cnk-plan-showcase.is-instant .cnk-loop-seam { transition: none !important; }

@@ -837,3 +837,10 @@
     box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .home-p3d.is-swipe .pcard.is-soldout { opacity: 1; filter: saturate(0.55) brightness(0.8); }
+/* Sekcje głównej z klasą .cennik-page dostają z cennik.css margin-top: -90px
+   (podciągnięcie pod navbar na stronie cennika). Na telefonie wchodziły przez
+   to na poprzednią sekcję: kafel Boty Discord pod "Zobacz, zanim zapłacisz",
+   nagłówek planów na demo konsoli (2026-11-16). */
+@media (max-width: 860px) {
+    .home-wide.cennik-page, .home-p3d.cennik-page { margin-top: 0; }
+}
