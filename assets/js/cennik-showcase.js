@@ -71,6 +71,57 @@
         var pinTop = 88;
         if (!stage || !cards.length) return;
 
+        /* TELEFON (2026-11-16): karuzela 3D była na palcu niewygodna - karty
+           zmieniało się krótkim machnięciem w poprzek sceny, a pionowy ruch na
+           niej łatwo trafiał obok. Do 860 px zostaje natywny rząd kart
+           (bez .is-enhanced, przewijanie w bok z przyciąganiem, CSS), sąsiednie
+           karty wystają po bokach. JS tylko śledzi, która karta jest na środku
+           (licznik, strzałki, lista), i przewija do niej przy strzałkach. */
+        var swipeMedia = window.matchMedia('(max-width: 860px)');
+        var swipe = false, swipeStarted = false, swipeQueued = false, swipeCentered = false;
+        function swipeCenter(index) {
+            var card = cards[index];
+            return card.offsetLeft - (stage.clientWidth - card.offsetWidth) / 2;
+        }
+        function swipeTo(index, immediate) {
+            stage.scrollTo({ left: swipeCenter(index), behavior: immediate || reduce.matches ? 'instant' : 'smooth' });
+        }
+        function swipeTrack() {
+            swipeQueued = false;
+            if (!swipe || !stage.clientWidth) return;
+            var best = 0, bestD = Infinity;
+            cards.forEach(function (card, index) {
+                var d = Math.abs(swipeCenter(index) - stage.scrollLeft);
+                if (d < bestD) { bestD = d; best = index; }
+            });
+            if (best !== active) { active = best; position = best; render(); }
+        }
+        function setSwipe(on) {
+            if (on === swipe && (on || root.classList.contains('is-enhanced'))) return;
+            swipe = on;
+            root.classList.toggle('is-enhanced', !on);
+            root.classList.toggle('is-swipe', on);
+            renderedActive = -1;
+            swipeCentered = false;
+            if (on) {
+                cards.forEach(function (card) {
+                    card.style.transform = card.style.opacity = card.style.visibility = card.style.zIndex = '';
+                });
+            }
+        }
+        // Start na karcie startowej (DEVeloperski) - Proxy wystaje po lewej.
+        // Dopiero gdy rząd ma szerokość: karuzela w ukrytej zakładce ma 0 px.
+        function swipeCenterOnce() {
+            if (!swipe || swipeCentered || !stage.clientWidth) return;
+            swipeCentered = true;
+            swipeTo(active, true);
+            swipeStarted = true;
+            renderState();
+        }
+        stage.addEventListener('scroll', function () {
+            if (swipe && swipeStarted && !swipeQueued) { swipeQueued = true; requestAnimationFrame(swipeTrack); }
+        }, { passive: true });
+
         /* Pętla (2026-11-11, prośba właściciela). Karty leżą po okręgu: po lewej
            od najtańszej (Proxy) stoją - za przedziałką "od nowa" - najdroższe.
            Kolejność przewijania zostaje cenowa (Proxy -> ... -> najdroższy), ale
@@ -112,6 +163,8 @@
             return scrollArea.getBoundingClientRect().top + window.scrollY - pinTop;
         }
         function syncLayout() {
+            setSwipe(swipeMedia.matches);
+            swipeCenterOnce();
             var selectedPanel = catalogue.querySelector('.cennik-panel.is-active');
             catalogue.classList.toggle('has-plan-cards', !!(selectedPanel && selectedPanel.querySelector('[data-catalogue-carousel]')));
             catalogue.classList.toggle('has-slot-configurator', !!(selectedPanel && selectedPanel.querySelector('.cfg')));
@@ -150,8 +203,8 @@
             scrollDistance = (cards.length - 1) * window.innerHeight * 0.36;
             scrollArea.classList.toggle('is-scroll-driven', pinned);
             scrollArea.style.height = pinned ? (height + scrollDistance) + 'px' : '';
-            hint.firstChild.nodeValue = pinned ? 'Przewiń, aby zmienić plan' : 'Wybierz plan strzałkami';
-            hint.querySelector('span').textContent = pinned ? 'lub wybierz go z listy' : 'lub przesuń karty';
+            hint.firstChild.nodeValue = pinned ? 'Przewiń, aby zmienić plan' : swipe ? 'Przesuń karty palcem' : 'Wybierz plan strzałkami';
+            hint.querySelector('span').textContent = pinned ? 'lub wybierz go z listy' : swipe ? 'lub użyj strzałek' : 'lub przesuń karty';
             if (wasPinned && !pinned && wasVisible) scrollTo(Math.max(0, startY), true);
             // Pierwsze przypięcie: przewiń od razu na kartę startową. Tylko gdy
             // strona stoi na górze (nie po odświeżeniu w połowie, nie z kotwicą).
@@ -170,6 +223,7 @@
         function render() {
             queued = false;
             if (!stage.clientWidth) return;
+            if (swipe) { renderState(); return; }
             if (pinned) {
                 position = Math.max(0, Math.min(cards.length - 1, (window.scrollY - scrollStart()) / scrollDistance * (cards.length - 1)));
                 active = wrapIndex(offset + Math.round(position));
@@ -217,13 +271,17 @@
             // jak lastActive w home.js. Przestawianie inert/aria-hidden na każdej
             // karcie w każdej klatce przewijania przeliczało style całego
             // katalogu i cennik przewijał się ciężej niż główna (2026-11-11).
+            renderState();
+        }
+        function renderState() {
             if (active === renderedActive) return;
             renderedActive = active;
             cards.forEach(function (card, index) {
                 card.classList.toggle('is-front', index === active);
-                card.setAttribute('aria-hidden', index === active ? 'false' : 'true');
+                // W rzędzie na telefonie każda widoczna karta jest klikalna.
+                card.setAttribute('aria-hidden', swipe || index === active ? 'false' : 'true');
                 var pick = card.querySelector('.plan-pick');
-                if (pick) pick.inert = index !== active;
+                if (pick) pick.inert = !swipe && index !== active;
             });
             buttons.forEach(function (button, index) {
                 button.classList.toggle('is-active', index === active);
@@ -241,6 +299,12 @@
         function show(index) {
             index = looped ? wrapIndex(index) : Math.max(0, Math.min(cards.length - 1, index));
             var loopPos = looped ? toLoop(index) : index;
+            if (swipe) {
+                active = position = index;
+                swipeTo(index);
+                renderState();
+                return;
+            }
             if (pinned) {
                 scrollTo(scrollStart() + scrollDistance * loopPos / (cards.length - 1));
                 return;
@@ -249,7 +313,6 @@
             position = loopPos;
             queueRender();
         }
-        root.classList.add('is-enhanced');
         buttons.forEach(function (button) {
             button.addEventListener('click', function () { show(Number(button.dataset.catalogueGo)); });
         });
@@ -274,7 +337,7 @@
             }
         });
         stage.addEventListener('pointerdown', function (event) {
-            if (event.pointerType !== 'mouse') start = { x: event.clientX, y: event.clientY };
+            if (event.pointerType !== 'mouse' && !swipe) start = { x: event.clientX, y: event.clientY };
         }, { passive: true });
         stage.addEventListener('pointerup', function (event) {
             if (!start) return;
@@ -317,6 +380,7 @@
         reduce.addEventListener('change', syncLayout);
         catalogue.querySelectorAll('.cennik-tab').forEach(function (tab) { tab.addEventListener('click', syncLayout); });
         if (document.fonts) document.fonts.ready.then(syncLayout);
+        swipeMedia.addEventListener('change', syncLayout);
         syncLayout();
     });
 
