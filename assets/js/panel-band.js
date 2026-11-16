@@ -121,6 +121,27 @@
 
         mock.style.setProperty('--pnl-ms', PNL_MS + 'ms');
 
+        /* Telefon (2026-11-16): sztywne 24rem zostawiało pod konsolą pustą
+           planszę. Do 480 px ramka bierze wysokość NAJWYŻSZEJ scenki - jedna
+           wartość dla wszystkich zakładek, więc nic nie skacze przy
+           przełączaniu, a pustego miejsca jest tyle, ile trzeba. */
+        var stage = mock.querySelector('.pnl-mock-stage');
+        function fitStage() {
+            if (!stage) return;
+            if (window.innerWidth > 480) { stage.style.height = ''; return; }
+            var max = 0;
+            for (var k = 0; k < scenes.length; k++) {
+                var sc = scenes[k], keep = sc.style.cssText;
+                sc.style.cssText += ';position:static;height:auto;visibility:hidden;display:grid';
+                max = Math.max(max, sc.scrollHeight);
+                sc.style.cssText = keep;
+            }
+            if (max > 0) stage.style.height = Math.max(240, Math.ceil(max) + 4) + 'px';
+        }
+        fitStage();
+        window.addEventListener('resize', fitStage);
+        if (document.fonts) document.fonts.ready.then(fitStage);
+
         function show(i) {
             current = (i + tabs.length) % tabs.length;
             var key = tabs[current].getAttribute('data-pnl-tab');
@@ -137,7 +158,11 @@
             // scrollTo na samym pasku, nie scrollIntoView: to drugie ruszałoby całą stroną.
             var nav = tabs[current].parentNode;
             if (nav.scrollWidth > nav.clientWidth) {
-                nav.scrollTo({ left: tabs[current].offsetLeft - 8, behavior: reducedMotion() ? 'auto' : 'smooth' });
+                // Pozycja względem paska, nie offsetLeft: ten liczy się od ramki
+                // demo i pierwsza zakładka wyjeżdżała o 52 px w lewo ("...sola").
+                var tabRect = tabs[current].getBoundingClientRect(), navRect = nav.getBoundingClientRect();
+                var left = tabRect.left - navRect.left + nav.scrollLeft - (nav.clientWidth - tabRect.width) / 2;
+                nav.scrollTo({ left: Math.max(0, left), behavior: reducedMotion() ? 'auto' : 'smooth' });
             }
             for (var p = 0; p < points.length; p++) {
                 points[p].classList.toggle('is-linked', points[p].getAttribute('data-pnl-goto') === key);
