@@ -523,3 +523,37 @@
 }
 .cnk-plan-showcase:not(.is-enhanced) .cnk-loop-seam { display: none; }
 @media (prefers-reduced-motion: reduce) { .cnk-plan-showcase.is-enhanced .cnk-loop-seam { transition: none; } }
+
+/* TELEFON (2026-11-16): rząd kart przesuwany palcem zamiast karuzeli 3D
+   (cennik-showcase.js, .is-swipe). Rząd wychodzi na całą szerokość ekranu,
+   karta stoi na środku, sąsiednie wystają po bokach - widać, że jest dalej.
+   Wewnętrzny padding = połowa luzu, żeby pierwsza i ostatnia karta też
+   dały się wyśrodkować. */
+@media (max-width: 860px) {
+    .cnk-plan-showcase.is-swipe .cnk-plan-stage {
+        --slide-w: min(330px, 80vw);
+        margin-inline: calc(50% - 50vw);
+        padding: 14px calc(50vw - var(--slide-w) / 2) 22px;
+        gap: 12px;
+        scroll-padding-inline: calc(50vw - var(--slide-w) / 2);
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cnk-plan-showcase.is-swipe .cnk-plan-stage::-webkit-scrollbar { display: none; }
+    .cnk-plan-showcase.is-swipe .cnk-plan-slide {
+        flex: 0 0 var(--slide-w);
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+        transition: filter 0.3s ease, opacity 0.3s ease;
+    }
+    .cnk-plan-showcase.is-swipe .cnk-plan-slide:not(.is-front) { filter: saturate(0.75) brightness(0.72); }
+    .cnk-plan-showcase.is-swipe .cnk-loop-seam { display: none; }
+    .cnk-catalogue .cnk-plan-showcase.is-swipe .pcard { min-height: 0; height: 100%; }
+    .cnk-plan-showcase.is-swipe .plan-pick { height: 100%; }
+}
+/* Okrągła strzałka "Pomiń pakiety" stała na środku dołu ekranu i zasłaniała
+   "Zamawiam" karty na telefonie. Lewy dolny róg (czat siedzi w prawym). */
+@media (max-width: 860px) {
+    .cnk-back-top { left: 16px; transform: none; }
+}
