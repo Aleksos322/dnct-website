@@ -121,6 +121,22 @@
         stage.addEventListener('scroll', function () {
             if (swipe && swipeStarted && !swipeQueued) { swipeQueued = true; requestAnimationFrame(swipeTrack); }
         }, { passive: true });
+        // Kropki pod rzędem i jednorazowe szturchnięcie kart: bez nich nie było
+        // widać, że rząd w ogóle da się przesuwać (właściciel, 2026-11-16).
+        var swipeDots = document.createElement('div');
+        swipeDots.className = 'cnk-swipe-dots';
+        swipeDots.setAttribute('aria-hidden', 'true');
+        cards.forEach(function () { swipeDots.appendChild(document.createElement('span')); });
+        stage.insertAdjacentElement('afterend', swipeDots);
+        if (!reduce.matches && 'IntersectionObserver' in window) {
+            var swipeNudge = new IntersectionObserver(function (entries) {
+                if (!swipe || !entries[0].isIntersecting) return;
+                swipeNudge.disconnect();
+                stage.classList.add('is-nudge');
+                setTimeout(function () { stage.classList.remove('is-nudge'); }, 1400);
+            }, { threshold: 0.6 });
+            swipeNudge.observe(stage);
+        }
 
         /* Pętla (2026-11-11, prośba właściciela). Karty leżą po okręgu: po lewej
            od najtańszej (Proxy) stoją - za przedziałką "od nowa" - najdroższe.
@@ -283,6 +299,7 @@
                 var pick = card.querySelector('.plan-pick');
                 if (pick) pick.inert = !swipe && index !== active;
             });
+            Array.prototype.forEach.call(swipeDots.children, function (dot, index) { dot.classList.toggle('is-on', index === active); });
             buttons.forEach(function (button, index) {
                 button.classList.toggle('is-active', index === active);
                 button.setAttribute('aria-pressed', index === active ? 'true' : 'false');
