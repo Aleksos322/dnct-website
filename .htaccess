@@ -231,7 +231,7 @@ AddDefaultCharset UTF-8
     # zgodzie użytkownika. CSP działa na poziomie przeglądarki i nie wie nic
     # o zgodzie — gdyby ich zabrakło, analityka byłaby blokowana także tym,
     # którzy ją świadomie włączyli.
-    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com; frame-src https://discord.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'"
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://account.dnct.pl https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com; frame-src https://discord.com; connect-src 'self' https://account.dnct.pl https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'"
 
     # --- HSTS ---------------------------------------------------------------
     # ŚWIADOMIE WYŁĄCZONE. HSTS jest kleisty: przeglądarka zapamiętuje go na

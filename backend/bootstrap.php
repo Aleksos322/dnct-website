@@ -42,13 +42,16 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path'     => '/',
-        'httponly' => true,
-        'secure'   => $isHttps,
-        'samesite' => 'Lax',
-    ]);
+    // api/panel-messaging.php wyłącza ciasteczka (wywołania serwer-serwer); bez tego warunku PHP sypie ostrzeżeniem na każde żądanie.
+    if (ini_get('session.use_cookies')) {
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path'     => '/',
+            'httponly' => true,
+            'secure'   => $isHttps,
+            'samesite' => 'Lax',
+        ]);
+    }
 
     session_start();
 }

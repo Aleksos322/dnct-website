@@ -9,6 +9,52 @@
     attach: '<path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2M6 15 16 5"/>',
   };
   const el = (tag, className, text) => { const n = document.createElement(tag); if (className) n.className = className; if (text != null) n.textContent = text; return n; };
+  // Linki zamiast gołego adresu: prośba o opinię DNCT w Google i płatność Stripe. Karta tylko dla
+  // linków od zespołu (share.google może prowadzić gdziekolwiek, a obcy "przycisk płatności" byłby
+  // gotowym oszustwem); stały link opinii DNCT (g.page) - od każdego. Kropka w rogu wraca do linku.
+  const OPINIE = {nazwa: 'DNCT Hosting', ocena: '4,9', rodzaj: 'Hosting internetowy', gpage: /^\/r\/CRwe2fxVy-gHEAE(\/|$)/};
+  function richLink(href, m) {
+    let u; try { u = new URL(href); } catch { return null; }
+    const host = u.hostname.replace(/^www\./, ''), staff = Boolean(m.author_admin || m.author_role === 'admin');
+    if ((host === 'g.page' && OPINIE.gpage.test(u.pathname)) || (staff && (host === 'share.google' || host === 'g.page'))) return 'opinia';
+    if (staff && ((host === 'checkout.stripe.com' && u.pathname.startsWith('/c/pay/')) || host === 'buy.stripe.com')) return 'stripe';
+    return null;
+  }
+  // Kwota z treści wiadomości ("49,99 zł", "1 200 PLN") - sam link Stripe jej nie zdradza.
+  function richAmount(text) {
+    // Bez \b: w JS "ł" nie jest literą dla \b, więc granicę po "zł" sprawdza lookahead z \p{L}.
+    const m = /(\d{1,3}(?:[ \u00a0.]\d{3})+|\d+)(?:[.,](\d{1,2}))?\s*(zł|zl|pln)(?!\p{L})/iu.exec(text || '');
+    if (!m) return '';
+    const zl = m[1].replace(/[ \u00a0.]/g, ''), gr = (m[2] || '').padEnd(2, '0');
+    return Number(zl).toLocaleString('pl-PL') + (gr && gr !== '00' ? ',' + gr : '') + ' zł';
+  }
+  function richMessage(bubble, body, m) {
+    const link = [...body.querySelectorAll('a[href]')].find(a => richLink(a.href, m));
+    if (!link) return;
+    const kind = richLink(link.href, m), href = link.href, rich = body.cloneNode(true);
+    const twin = [...rich.querySelectorAll('a[href]')].find(a => a.href === href);
+    let parent = twin.parentNode; twin.remove();
+    while (parent && parent !== rich && !parent.textContent.trim()) { const up = parent.parentNode; parent.remove(); parent = up; }
+    const walker = document.createTreeWalker(rich, NodeFilter.SHOW_TEXT), texts = []; while (walker.nextNode()) texts.push(walker.currentNode);
+    const last = texts.reverse().find(t => t.textContent.trim()); if (last) last.textContent = last.textContent.replace(/[\s:–-]+$/, '');
+    rich.classList.add('dc-rich-text'); if (!rich.textContent.trim()) rich.hidden = true;
+    const card = el('div', 'dc-rich dc-rich-' + kind);
+    if (kind === 'opinia') {
+      const a = el('a', 'dc-rich-link'); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.setAttribute('aria-label', 'Wystaw opinię: ' + OPINIE.nazwa);
+      a.append(el('strong', '', OPINIE.nazwa), el('span', '', OPINIE.ocena + ' ★ · ' + OPINIE.rodzaj));
+      card.append(a); if (rich.hidden) { rich.hidden = false; rich.textContent = 'Zostaw opinię o DNCT w Google'; }
+    } else {
+      const kwota = richAmount(rich.textContent), a = el('a', 'dc-rich-pay', kwota ? 'Zapłać ' + kwota : 'Przejdź do płatności');
+      a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      card.append(a, el('small', '', 'Bezpieczna płatność · Stripe'));
+    }
+    const dot = button('', () => {
+      const raw = bubble.classList.toggle('is-raw'); dot.setAttribute('aria-pressed', String(raw));
+      const tip = raw ? 'Ukryj link' : 'Pokaż link'; dot.dataset.tip = tip; dot.setAttribute('aria-label', tip);
+    }, 'dc-link-dot');
+    dot.dataset.tip = 'Pokaż link'; dot.setAttribute('aria-label', 'Pokaż link'); dot.setAttribute('aria-pressed', 'false');
+    body.classList.add('dc-raw-body'); body.after(rich, card); bubble.prepend(dot); bubble.classList.add('dc-rich-bubble', 'is-' + kind);
+  }
   const button = (label, fn, className = '') => { const b = el('button', className, label); b.type = 'button'; if (fn) b.addEventListener('click', fn); return b; };
   const icon = (kind, label, fn) => { const b = button('', fn, 'dc-icon'); b.title = label; b.setAttribute('aria-label', label); b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + icons[kind] + '</svg>'; return b; };
   const key = () => Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('');
@@ -51,6 +97,237 @@
     const res = await fetch(url, {method:'POST', credentials:'same-origin', cache:'no-store', headers:{'X-CSRF-Token':csrf}, body, signal:AbortSignal.timeout(20000)});
     return parse(res.status, await res.text());
   }
+  // Discord-style Markdown. The stored message stays plain text; it is turned into DOM nodes here
+  // (never innerHTML), so no markup typed by a user can ever execute.
+  const markdown = (() => {
+    const MAX_DEPTH = 6, LIMIT_NOTE = '[spoiler]';
+    const text = s => document.createTextNode(s);
+    const wrap = (tag, className, kids) => { const n = el(tag, className); n.append(...kids); return n; };
+    const isWord = c => !!c && /[\p{L}\p{N}]/u.test(c);
+    const space = c => c === undefined || /\s/.test(c);
+    const DELIMS = [['***', 'bi'], ['**', 'b'], ['__', 'u'], ['~~', 's'], ['||', 'spoiler'], ['*', 'i'], ['_', 'i']];
+    const urlRe = /https?:\/\/[^\s<>]+/y;
+
+    function findClose(src, i, d) {
+      const n = d.length, from = i + n, after = src[from], before = src[i - 1];
+      if (from >= src.length) return -1;
+      if (d === '*' && (space(after) || after === '*')) return -1;
+      if (d === '_' && (isWord(before) || space(after) || after === '_')) return -1;
+      for (let j = src.indexOf(d, from); j !== -1; j = src.indexOf(d, j + 1)) {
+        if (j === from) continue;
+        const prev = src[j - 1], next = src[j + n];
+        if (prev === '\\') continue;
+        if (d === '*' && (prev === '*' || next === '*' || space(prev))) continue;
+        if (d === '_' && (prev === '_' || next === '_' || space(prev) || isWord(next))) continue;
+        return j;
+      }
+      return -1;
+    }
+
+    function build(kind, kids, opts) {
+      if (kind === 'b') return wrap('strong', '', kids);
+      if (kind === 'i') return wrap('em', '', kids);
+      if (kind === 'bi') return wrap('strong', '', [wrap('em', '', kids)]);
+      if (kind === 'u') return wrap('u', 'dc-md-u', kids);
+      if (kind === 's') return wrap('s', '', kids);
+      if (opts.preview) return text(LIMIT_NOTE);
+      const spoiler = wrap('span', 'dc-md-spoiler', kids);
+      spoiler.tabIndex = 0; spoiler.setAttribute('role', 'button'); spoiler.setAttribute('aria-label', 'Spoiler. Naciśnij, aby odsłonić.');
+      const reveal = () => { if (spoiler.classList.contains('is-revealed')) return; spoiler.classList.add('is-revealed'); spoiler.removeAttribute('role'); spoiler.removeAttribute('aria-label'); spoiler.removeAttribute('tabindex'); };
+      spoiler.addEventListener('click', reveal);
+      spoiler.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reveal(); } });
+      return spoiler;
+    }
+
+    function inline(src, depth, opts) {
+      const out = []; let buf = '';
+      const flush = () => { if (buf) { out.push(text(buf)); buf = ''; } };
+      for (let i = 0; i < src.length;) {
+        const c = src[i];
+        if (c === '\\' && i + 1 < src.length && /[\\`*_~|>#\-\[\]()]/.test(src[i + 1])) { buf += src[i + 1]; i += 2; continue; }
+        if (c === '`') {
+          let k = 1; while (src[i + k] === '`') k++;
+          const fence = '`'.repeat(k); let found = -1;
+          for (let j = src.indexOf(fence, i + k); j !== -1; j = src.indexOf(fence, j + 1)) { if (src[j - 1] !== '`' && src[j + k] !== '`') { found = j; break; } }
+          if (found > -1 && found > i + k) {
+            flush(); let code = src.slice(i + k, found);
+            if (code.length > 2 && code[0] === ' ' && code.at(-1) === ' ') code = code.slice(1, -1);
+            out.push(el('code', 'dc-md-code', code)); i = found + k; continue;
+          }
+          buf += fence; i += k; continue;
+        }
+        if (c === 'h' && !isWord(src[i - 1])) {
+          urlRe.lastIndex = i; const m = urlRe.exec(src);
+          if (m) {
+            let u = m[0]; const cut = u.search(/\|\||\*\*|~~/); if (cut > 0) u = u.slice(0, cut);
+            while (/[.,;:!?'"*_~\]]$/.test(u) || (u.endsWith(')') && !u.includes('('))) u = u.slice(0, -1);
+            if (/^https?:\/\/[^\/\s]+/.test(u)) {
+              flush(); const a = el('a', '', u); a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; out.push(a); i += u.length; continue;
+            }
+          }
+        }
+        let done = false;
+        for (const [d, kind] of DELIMS) {
+          if (!src.startsWith(d, i)) continue;
+          const close = findClose(src, i, d); if (close < 0) continue;
+          const inner = src.slice(i + d.length, close); flush();
+          out.push(build(kind, depth < MAX_DEPTH ? inline(inner, depth + 1, opts) : [text(inner)], opts));
+          i = close + d.length; done = true; break;
+        }
+        if (done) continue;
+        buf += c; i++;
+      }
+      flush(); return out;
+    }
+
+    const ITEM = /^( *)([-*]|\d{1,9}[.)]) +(\S.*)$/;
+    function blocks(src, opts) {
+      const lines = src.split('\n'), out = []; let run = [];
+      const put = node => out.push(node);
+      const flushRun = () => { if (run.length) { out.push(...inline(run.join('\n'), 0, opts)); run = []; } };
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]; let m;
+        if (/^>>> ?/.test(line)) { flushRun(); put(wrap('blockquote', 'dc-md-quote', inline([line.replace(/^>>> ?/, ''), ...lines.slice(i + 1)].join('\n'), 0, opts))); break; }
+        if ((m = /^> ?(.*)$/.exec(line))) {
+          flushRun(); const q = [m[1]];
+          while (i + 1 < lines.length && !/^>>>/.test(lines[i + 1]) && (m = /^> ?(.*)$/.exec(lines[i + 1]))) { q.push(m[1]); i++; }
+          put(wrap('blockquote', 'dc-md-quote', inline(q.join('\n'), 0, opts))); continue;
+        }
+        if ((m = /^(#{1,3}) +(\S.*)$/.exec(line))) { flushRun(); put(wrap('div', 'dc-md-h dc-md-h' + m[1].length, inline(m[2], 0, opts))); continue; }
+        if ((m = /^-# +(\S.*)$/.exec(line))) { flushRun(); put(wrap('div', 'dc-md-sub', inline(m[1], 0, opts))); continue; }
+        if ((m = ITEM.exec(line)) && m[1].length < 2) {
+          flushRun(); const ordered = /\d/.test(m[2][0]), list = el(ordered ? 'ol' : 'ul', 'dc-md-list'); if (ordered) list.start = parseInt(m[2], 10);
+          let sub = null, last = null;
+          for (; i < lines.length; i++) {
+            const it = ITEM.exec(lines[i]); if (!it) break;
+            if (it[1].length < 2 && /\d/.test(it[2][0]) !== ordered) break;
+            const li = wrap('li', '', inline(it[3], 0, opts));
+            if (it[1].length >= 2 && last) { if (!sub) { sub = el('ul', 'dc-md-list'); last.append(sub); } sub.append(li); }
+            else { list.append(li); last = li; sub = null; }
+          }
+          i--; put(list); continue;
+        }
+        run.push(line);
+      }
+      flushRun(); return out;
+    }
+
+    function render(source, opts = {}) {
+      const frag = document.createDocumentFragment(), src = String(source ?? '').replace(/\r\n?/g, '\n');
+      let last = 0;
+      const plainText = s => { if (s) frag.append(...blocks(s, opts)); };
+      for (const m of src.matchAll(/```(?:([A-Za-z0-9_+#.-]{1,20})\n)?([\s\S]*?)```/g)) {
+        const code = m[2].replace(/^\n/, '').replace(/\n$/, '');
+        if (!code.trim()) continue;
+        plainText(src.slice(last, m.index).replace(/^\n/, '')); last = m.index + m[0].length;
+        if (opts.preview) { frag.append(text(' ' + code + ' ')); continue; }
+        const pre = el('pre', 'dc-md-pre'); if (m[1]) pre.dataset.lang = m[1]; pre.append(el('code', '', code)); frag.append(pre);
+      }
+      plainText(src.slice(last).replace(/^\n/, last ? '' : '\n')); return frag;
+    }
+    const plain = source => { const box = document.createElement('div'); box.append(render(source, {preview: true})); for (const n of box.querySelectorAll('li,blockquote,div,pre,ul,ol')) { n.before(text(' ')); n.after(text(' ')); } return box.textContent.replace(/\s+/g, ' ').trim(); };
+    return {render, plain};
+  })();
+  // Per-conversation theme (colors of each person's messages, background). Text color is always computed
+  // from the chosen color, so whatever people pick stays readable.
+  const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lumOf = ([r, g, b]) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }; return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+  const contrastOf = (a, b) => (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+  const themeBubble = hex => { const L = lumOf(hexRgb(hex)), dark = contrastOf(L, 0) > contrastOf(L, 1); return {bubble: hex, ink: dark ? '#0b0b10' : '#ffffff', line: dark ? 'rgba(0,0,0,.28)' : 'rgba(255,255,255,.28)', code: dark ? 'rgba(0,0,0,.12)' : 'rgba(0,0,0,.35)'}; };
+  const rgbaOf = (hex, a) => 'rgba(' + hexRgb(hex).join(',') + ',' + a + ')';
+  const themeBackground = bg => { const a = (bg.opacity ?? 100) / 100; return bg.mode === 'gradient' ? 'linear-gradient(' + bg.angle + 'deg,' + rgbaOf(bg.c1, a) + ',' + rgbaOf(bg.c2, a) + ')' : rgbaOf(bg.c1, a); };
+  const themeMeta = bg => {
+    // The window behind the feed is the dark glass base, so a see-through background is judged on what it looks like over it.
+    const a = (bg.opacity ?? 100) / 100, base = [14, 14, 18];
+    const stops = [bg.c1, ...(bg.mode === 'gradient' ? [bg.c2] : [])].map(h => lumOf(hexRgb(h).map((v, i) => v * a + base[i] * (1 - a))));
+    const worst = lum => Math.min(...stops.map(L => contrastOf(L, lum))), white = worst(1), black = worst(0);
+    return Math.max(white, black) < 4.5 ? {ink: '#f8f9fa', chip: true} : {ink: white >= black ? '#f8f9fa' : '#0b0b10', chip: false};
+  };
+  // End-to-end encryption of 1:1 chats. Identity key: ECDH P-256 kept only in this browser's IndexedDB
+  // (non-extractable). Per conversation an AES-256-GCM key is derived (ECDH + HKDF). An optional backup of the
+  // identity key is encrypted with a password (PBKDF2) before it ever leaves the page. Server side: chat_e2e.php.
+  const e2e = (() => {
+    const PREFIX = 'e2e1:', CURVE = {name: 'ECDH', namedCurve: 'P-256'}, ITER = 600000, enc = new TextEncoder(), dec = new TextDecoder();
+    const supported = () => Boolean(window.isSecureContext && window.crypto?.subtle && window.indexedDB);
+    const bytes = v => v instanceof Uint8Array ? v : new Uint8Array(v);
+    const b64 = v => { let t = ''; for (const x of bytes(v)) t += String.fromCharCode(x); return btoa(t); };
+    const unb64 = t => Uint8Array.from(atob(t), c => c.charCodeAt(0));
+    const b64u = v => b64(v).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const unb64u = t => unb64(t.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - t.length % 4) % 4));
+    const openDb = () => new Promise((resolve, reject) => { const r = indexedDB.open('dnct-e2e', 1); r.onupgradeneeded = () => { r.result.createObjectStore('keys'); r.result.createObjectStore('peers'); }; r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
+    const idb = async (store, mode, fn) => { const db = await openDb(); try { return await new Promise((resolve, reject) => { const tx = db.transaction(store, mode), req = fn(tx.objectStore(store)); tx.oncomplete = () => resolve(req?.result); tx.onerror = tx.onabort = () => reject(tx.error); }); } finally { db.close(); } };
+    const idbGet = (store, key) => idb(store, 'readonly', os => os.get(key));
+    const idbPut = (store, key, value) => idb(store, 'readwrite', os => os.put(value, key));
+    const hex = buf => Array.from(bytes(buf), x => x.toString(16).padStart(2, '0')).join('');
+    const fingerprintOf = async raw => hex(await crypto.subtle.digest('SHA-256', raw));
+    const groups = (text, n) => text.match(new RegExp('.{1,' + n + '}', 'g')).join(' ');
+    // Same code on both sides: hash of the two public keys in a fixed order. Compare it outside the chat.
+    async function safetyCode(a, b) {
+      const [x, y] = [bytes(a), bytes(b)].sort((p, q) => { for (let i = 0; i < p.length; i++) if (p[i] !== q[i]) return p[i] - q[i]; return 0; });
+      const both = new Uint8Array(x.length + y.length); both.set(x); both.set(y, x.length);
+      return groups((await fingerprintOf(both)).slice(0, 30), 5);
+    }
+    async function passwordKey(password, salt, iter) {
+      const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey({name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256'}, base, {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']);
+    }
+    async function wrap(pkcs8, password) {
+      const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), key = await passwordKey(password, salt, ITER);
+      return JSON.stringify({v: 1, kdf: 'pbkdf2-sha256', iter: ITER, salt: b64(salt), iv: b64(iv), data: b64(await crypto.subtle.encrypt({name: 'AES-GCM', iv}, key, pkcs8))});
+    }
+    async function unwrap(backup, password) {
+      try { return new Uint8Array(await crypto.subtle.decrypt({name: 'AES-GCM', iv: unb64(backup.iv)}, await passwordKey(password, unb64(backup.salt), backup.iter), unb64(backup.data))); }
+      catch (_) { throw Error('Nieprawidłowe hasło.'); }
+    }
+    async function generate(password) {
+      const pair = await crypto.subtle.generateKey(CURVE, true, ['deriveBits']);
+      const raw = new Uint8Array(await crypto.subtle.exportKey('raw', pair.publicKey)), pkcs8 = new Uint8Array(await crypto.subtle.exportKey('pkcs8', pair.privateKey));
+      return {raw, pkcs8, backup: password ? await wrap(pkcs8, password) : null, fingerprint: await fingerprintOf(raw)};
+    }
+    async function storeLocal(userId, pkcs8, raw) { await idbPut('keys', userId, {privateKey: await crypto.subtle.importKey('pkcs8', pkcs8, CURVE, false, ['deriveBits']), public: b64(raw)}); }
+    async function localKey(userId, publicB64) { const k = await idbGet('keys', userId); return k && k.public === publicB64 ? k.privateKey : null; }
+    async function restore(userId, serverPublic, backup, password) {
+      const pkcs8 = await unwrap(backup, password); let jwk;
+      try { jwk = await crypto.subtle.exportKey('jwk', await crypto.subtle.importKey('pkcs8', pkcs8, CURVE, true, ['deriveBits'])); } catch (_) { throw Error('Kopia klucza jest uszkodzona.'); }
+      const raw = new Uint8Array([4, ...unb64u(jwk.x), ...unb64u(jwk.y)]);
+      if (b64(raw) !== serverPublic) throw Error('Kopia nie pasuje do klucza zapisanego na koncie.');
+      await storeLocal(userId, pkcs8, raw);
+    }
+    const sharedCache = new Map();
+    async function sharedKey(userId, privateKey, convId, peerPublic, myPublic) {
+      // The cache is keyed by both public keys: replacing either key must never reuse an old conversation key.
+      const id = userId + ':' + convId + ':' + myPublic + ':' + peerPublic; if (sharedCache.has(id)) return sharedCache.get(id);
+      const peer = await crypto.subtle.importKey('raw', unb64(peerPublic), CURVE, false, []);
+      const bits = await crypto.subtle.deriveBits({name: 'ECDH', public: peer}, privateKey, 256);
+      const base = await crypto.subtle.importKey('raw', bits, 'HKDF', false, ['deriveKey']);
+      const key = await crypto.subtle.deriveKey({name: 'HKDF', hash: 'SHA-256', salt: enc.encode('dnct-e2e-v1'), info: enc.encode('conv:' + convId)}, base, {name: 'AES-GCM', length: 256}, false, ['encrypt', 'decrypt']);
+      sharedCache.set(id, key); return key;
+    }
+    const aad = convId => enc.encode('dnct-e2e-v1|' + convId);
+    // The plaintext carries the sender's username, so a server that rewrites the author is detected on open.
+    async function seal(key, convId, username, text) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({name: 'AES-GCM', iv, additionalData: aad(convId)}, key, enc.encode(JSON.stringify({v: 1, u: username, t: text})));
+      return PREFIX + b64u(iv) + '.' + b64u(ct);
+    }
+    async function unseal(key, convId, envelope) {
+      try { const [iv, ct] = envelope.slice(PREFIX.length).split('.'), plain = JSON.parse(dec.decode(await crypto.subtle.decrypt({name: 'AES-GCM', iv: unb64u(iv), additionalData: aad(convId)}, key, unb64u(ct)))); return plain && typeof plain.t === 'string' ? plain : null; } catch (_) { return null; }
+    }
+    // Trust on first use: the first key seen for a person is pinned; a different key later must be accepted explicitly.
+    async function pin(userId, peerId, fingerprint) { const known = await idbGet('peers', userId + ':' + peerId); if (!known) { await idbPut('peers', userId + ':' + peerId, fingerprint); return 'ok'; } return known === fingerprint ? 'ok' : 'changed'; }
+    const trust = (userId, peerId, fingerprint) => idbPut('peers', userId + ':' + peerId, fingerprint);
+    return {supported, isEnvelope: v => typeof v === 'string' && v.startsWith(PREFIX), generate, storeLocal, localKey, restore, sharedKey, seal, unseal, pin, trust, safetyCode, b64, unb64};
+  })();
+  const FORMATS = [
+    {id: 'bold', label: 'Pogrubienie (Ctrl+B)', open: '**', close: '**', glyph: 'B'},
+    {id: 'italic', label: 'Kursywa (Ctrl+I)', open: '*', close: '*', glyph: 'I'},
+    {id: 'underline', label: 'Podkreślenie (Ctrl+U)', open: '__', close: '__', glyph: 'U'},
+    {id: 'strike', label: 'Przekreślenie (Ctrl+Shift+X)', open: '~~', close: '~~', glyph: 'S'},
+    {id: 'spoiler', label: 'Spoiler', open: '||', close: '||', glyph: '◐'},
+    {id: 'code', label: 'Kod', open: '`', close: '`', glyph: '</>'},
+    {id: 'block', label: 'Blok kodu', open: '```\n', close: '\n```', glyph: '{ }'},
+    {id: 'quote', label: 'Cytat', line: '> ', glyph: '❝'},
+  ];
   class Conversation {
     constructor(mount, options = {}) {
       this.options = options; this.rows = []; this.nodes = new Map(); this.reply = null; this.files = []; this.writable = true; this.actions = true; this.sending = false; this.attempt = null; this.editing = null; this.editDraftBefore = '';
@@ -59,7 +336,7 @@
       this.feed = el('div', 'dc-feed'); this.feed.setAttribute('role', 'log'); this.feed.setAttribute('aria-label', 'Wiadomości'); this.feed.setAttribute('aria-live', 'polite'); this.feed.dataset.lenisPrevent = '';
       this.system = el('div', 'dc-system'); this.system.setAttribute('role', 'status'); this.system.hidden = true;
       this.bottom = el('div', 'dc-bottom'); this.preview = el('div', 'dc-reply-preview'); this.preview.hidden = true; this.editBar = el('div', 'dc-edit-composer'); this.editBar.hidden = true; const editCopy = el('span'); editCopy.append(el('b','','Edytuj wiadomość'),el('small','','Enter zapisuje · Shift+Enter dodaje nową linię')); const editCancel = button('×',()=>this.cancelEdit(),'dc-edit-cancel'); editCancel.setAttribute('aria-label','Anuluj edycję wiadomości'); this.editBar.append(editCopy,editCancel); this.previews = el('div', 'dc-previews'); this.previews.hidden = true;
-      this.form = el('form', 'dc-composer'); this.text = el('textarea'); this.text.rows = 1; this.text.maxLength = options.maxLength || 4000; this.text.placeholder = 'Napisz wiadomość…'; this.text.setAttribute('aria-label', 'Wiadomość'); this.form.append(this.text);
+      this.form = el('form', 'dc-composer'); this.text = el('textarea'); this.text.rows = 1; this.text.maxLength = options.maxLength || 2000; this.text.placeholder = 'Napisz wiadomość…'; this.text.setAttribute('aria-label', 'Wiadomość'); this.form.append(this.text);
       if (options.media) {
         this.fileInput = el('input'); this.fileInput.type = 'file'; this.fileInput.accept = 'image/jpeg,image/png,image/gif,image/webp,image/avif,video/mp4,video/webm,video/quicktime'; this.fileInput.multiple = true; this.fileInput.hidden = true;
         this.fileInput.onchange = () => { this.addFiles(this.fileInput.files); this.fileInput.value = ''; };
@@ -74,8 +351,20 @@
       this.newButton = button('↓', () => this.scrollBottom(true), 'dc-new-message'); this.newButton.setAttribute('aria-label','Przejdź do najnowszych wiadomości'); this.newButton.hidden = true;this.newButton.tabIndex=-1;
       this.receiptTimer=setInterval(()=>this.updateReceipt(),15000); this.root.append(this.feed, this.bottom, this.newButton); mount.replaceChildren(this.root);
       this.form.onsubmit = e => { e.preventDefault(); this.editing ? this.saveEdit() : this.send(); };
-      this.text.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); this.form.requestSubmit(); } if (e.key === 'Escape' && this.editing) { e.preventDefault(); e.stopPropagation(); this.cancelEdit(); } else if (e.key === 'Escape' && this.reply) { e.stopPropagation(); this.setReply(null); } };
-      this.text.oninput = () => { this.text.style.height = 'auto'; this.text.style.height = Math.min(126, this.text.scrollHeight) + 'px'; if (!this.editing) options.draft?.(this.text.value); options.typing?.(); };
+      this.format = el('div', 'dc-format'); this.format.hidden = true; this.format.setAttribute('role', 'toolbar'); this.format.setAttribute('aria-label', 'Formatowanie tekstu');
+      for (const f of FORMATS) {
+        const b = button(f.glyph, () => this.applyFormat(f), 'dc-format-btn'); b.dataset.format = f.id; b.title = f.label; b.setAttribute('aria-label', f.label.replace(/ \(.*\)$/, ''));
+        b.addEventListener('pointerdown', e => e.preventDefault()); this.format.append(b);
+      }
+      this.root.append(this.format);
+      for (const type of ['select', 'selectionchange', 'mouseup', 'keyup', 'touchend', 'scroll', 'blur']) this.text.addEventListener(type, () => this.updateFormat());
+      this.text.onkeydown = e => {
+        if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+          const id = (e.shiftKey ? {x: 'strike'} : {b: 'bold', i: 'italic', u: 'underline'})[e.key.toLowerCase()];
+          if (id) { e.preventDefault(); this.applyFormat(FORMATS.find(f => f.id === id)); return; }
+        }
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); this.form.requestSubmit(); } if (e.key === 'Escape' && this.editing) { e.preventDefault(); e.stopPropagation(); this.cancelEdit(); } else if (e.key === 'Escape' && this.reply) { e.stopPropagation(); this.setReply(null); } };
+      this.text.oninput = () => { this.text.style.height = 'auto'; this.text.style.height = Math.min(126, this.text.scrollHeight) + 'px'; if (!this.editing) options.draft?.(this.text.value); options.typing?.(); this.updateCounter(); this.updateFormat(); };
       this.followBottom=true;this.feedResize=new ResizeObserver(()=>{if(this.followBottom&&!this.loadingOlder&&!this.scrollingLatest)this.scrollBottom();});this.feedResize.observe(this.feed);this.feed.addEventListener('load',()=>{if(this.followBottom)requestAnimationFrame(()=>{if(this.followBottom)this.scrollBottom();});},true);this.feed.addEventListener('loadedmetadata',()=>{if(this.followBottom)this.scrollBottom();},true);
       this.feed.addEventListener('scroll', () => { this.followBottom=this.nearBottom(); this.newButton.hidden=this.nearBottom();this.newButton.tabIndex=this.newButton.hidden?-1:0; if(this.feed.scrollTop<80)this.loadOlder(); if (this.nearBottom()) { this.newButton.hidden = true;this.newButton.tabIndex=-1; options.read?.(this.rows.at(-1)?.id); } }, {passive:true});
       if (options.media) {
@@ -135,8 +424,75 @@
       for(const [id,node] of this.nodes){const label=node.querySelector('.dc-time');if(!label)continue;label.hidden=!(latest?.mine && latest.id===id) || boundaries.has(id);
         if(!label.hidden){const elapsed=age(latest.created_timestamp?Number(latest.created_timestamp):latest.created_at);label.textContent=latest.receipt==='Przeczytano'?'Przeczytano':'Wysłano'+(elapsed==='teraz'?'':' '+elapsed+' temu');label.title=time(latest.created_at);}}
     }
+    setTheme(theme) {
+      const signature = JSON.stringify(theme || null);
+      if (this.themeSignature === signature) return;
+      this.themeSignature = signature; this.theme = theme || null; this.applyTheme();
+    }
+    applyTheme() {
+      const bg = this.theme?.bg || null, feed = this.feed;
+      feed.classList.toggle('has-theme-bg', Boolean(bg));
+      if (bg) { const meta = themeMeta(bg); feed.style.setProperty('--dcx-feed', themeBackground(bg)); feed.style.setProperty('--dcx-meta', meta.ink); feed.classList.toggle('dcx-chip-meta', meta.chip); }
+      else { feed.style.removeProperty('--dcx-feed'); feed.style.removeProperty('--dcx-meta'); feed.classList.remove('dcx-chip-meta'); }
+      for (const m of this.rows) { const node = this.nodes.get(m.id); if (node) this.styleBubble(node, m); }
+    }
+    styleBubble(node, m) {
+      const bubble = node.querySelector?.('.dc-bubble'); if (!bubble) return;
+      const color = this.theme?.colors?.[m.username];
+      const look = color ? themeBubble(color) : this.theme?.bg ? {bubble: 'rgba(14,14,18,.82)', ink: '#f8f9fa', line: 'rgba(255,255,255,.14)', code: 'rgba(0,0,0,.35)'} : null;
+      bubble.classList.toggle('has-theme', Boolean(look));
+      for (const [name, key] of [['--dcx-bubble', 'bubble'], ['--dcx-ink', 'ink'], ['--dcx-line', 'line'], ['--dcx-code', 'code']]) { if (look) bubble.style.setProperty(name, look[key]); else bubble.style.removeProperty(name); }
+    }
+    setMediaEnabled(on) { this.mediaBlocked = !on; if (this.attach) { this.attach.disabled = !on; this.attach.title = on ? 'Załącz zdjęcie lub film' : 'W szyfrowanych rozmowach załączniki są jeszcze niedostępne'; } }
+    updateCounter() {
+      const used = this.text.value.length, max = this.text.maxLength;
+      this.hint.hidden = used < max * 0.9; this.hint.textContent = used + ' / ' + max + ' znaków'; this.hint.classList.toggle('is-over', used >= max);
+    }
+    caretPoint(index) {
+      const t = this.text, cs = getComputedStyle(t), mirror = document.createElement('div');
+      for (const p of ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'wordSpacing', 'textIndent', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'boxSizing', 'tabSize']) mirror.style[p] = cs[p];
+      Object.assign(mirror.style, {position: 'absolute', visibility: 'hidden', top: '0', left: '-9999px', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', width: t.getBoundingClientRect().width + 'px'});
+      const marker = el('span', '', '​'); mirror.append(document.createTextNode(t.value.slice(0, index)), marker); document.body.append(mirror);
+      const point = {x: marker.offsetLeft, y: marker.offsetTop}; mirror.remove(); return point;
+    }
+    updateFormat() {
+      const t = this.text, s = t.selectionStart, e = t.selectionEnd;
+      const show = this.writable && !this.sending && document.activeElement === t && e > s && t.value.slice(s, e).trim() !== '';
+      if (!show) { this.format.hidden = true; return; }
+      this.format.hidden = false;
+      const a = this.caretPoint(s), b = this.caretPoint(e), tr = t.getBoundingClientRect(), rr = this.root.getBoundingClientRect();
+      const x = a.y === b.y ? (a.x + b.x) / 2 : a.x, y = Math.max(0, a.y - t.scrollTop);
+      const left = tr.left - rr.left + x - this.format.offsetWidth / 2, top = tr.top - rr.top + y - this.format.offsetHeight - 8;
+      this.format.style.left = Math.max(6, Math.min(rr.width - this.format.offsetWidth - 6, left)) + 'px'; this.format.style.top = Math.max(6, top) + 'px';
+    }
+    applyFormat(f) {
+      const t = this.text, v = t.value, max = t.maxLength; let s = t.selectionStart, e = t.selectionEnd, from, to, repl, sel;
+      if (f.line) {
+        const end = e > s && v[e - 1] === '\n' ? e - 1 : e, a = v.lastIndexOf('\n', s - 1) + 1, b = v.indexOf('\n', end) === -1 ? v.length : v.indexOf('\n', end);
+        const lines = v.slice(a, b).split('\n'), all = lines.every(l => l.startsWith(f.line));
+        repl = lines.map(l => all ? l.slice(f.line.length) : f.line + l).join('\n'); from = a; to = b; sel = [a, a + repl.length];
+      } else {
+        while (s < e && /\s/.test(v[s])) s++; while (e > s && /\s/.test(v[e - 1])) e--;
+        const o = f.open, c = f.close;
+        if (s === e) { from = to = s; repl = o + c; sel = [s + o.length, s + o.length]; }
+        else {
+          let before = 0, after = 0;
+          if (o[0] === '*' && c[0] === '*') { while (v[s - 1 - before] === '*') before++; while (v[e + after] === '*') after++; }
+          const asterisks = o[0] === '*', run = Math.min(before, after);
+          const wrapped = asterisks ? (o.length === 1 ? run % 2 === 1 : run >= 2) : v.slice(s - o.length, s) === o && v.slice(e, e + c.length) === c;
+          if (wrapped) { from = s - o.length; to = e + c.length; repl = v.slice(s, e); sel = [from, from + repl.length]; }
+          else if (!asterisks && e - s >= o.length + c.length && v.startsWith(o, s) && v.slice(e - c.length, e) === c) { from = s; to = e; repl = v.slice(s + o.length, e - c.length); sel = [s, s + repl.length]; }
+          else { from = s; to = e; repl = o + v.slice(s, e) + c; sel = [s + o.length, s + o.length + (e - s)]; }
+        }
+      }
+      if (v.length - (to - from) + repl.length > max) { this.say('Formatowanie przekroczyłoby limit ' + max + ' znaków.'); return; }
+      this.say(); t.focus(); t.setSelectionRange(from, to);
+      let viaCommand = false; try { viaCommand = document.execCommand('insertText', false, repl); } catch (_) {}
+      if (!viaCommand) { t.setRangeText(repl, from, to, 'end'); t.dispatchEvent(new Event('input')); }
+      t.setSelectionRange(sel[0], sel[1]); this.updateFormat();
+    }
     setDraft(value) { this.text.value = value || ''; this.text.dispatchEvent(new Event('input')); }
-    reset() { this.feedResize?.disconnect();this.feedResize?.observe(this.feed);this.followBottom=true;this.newButton.hidden=true;this.newButton.tabIndex=-1;cancelAnimationFrame(this.scrollFrame);this.scrollingLatest=false;this.closePopover(); this.rows = []; this.readers=[]; this.nodes.clear(); this.feed.replaceChildren(); this.setReply(null); this.editing = null; this.editDraftBefore = ''; this.editBar.hidden = true; this.root.classList.remove('is-editing'); this.setDraft(''); this.clearFiles(); this.attempt = null; this.say(); }
+    reset() { this.setTheme(null); this.feedResize?.disconnect();this.feedResize?.observe(this.feed);this.followBottom=true;this.newButton.hidden=true;this.newButton.tabIndex=-1;cancelAnimationFrame(this.scrollFrame);this.scrollingLatest=false;this.closePopover(); this.rows = []; this.readers=[]; this.nodes.clear(); this.feed.replaceChildren(); this.setReply(null); this.editing = null; this.editDraftBefore = ''; this.editBar.hidden = true; this.root.classList.remove('is-editing'); this.setDraft(''); this.clearFiles(); this.attempt = null; this.say(); }
     update(rows, {composerNotice = '', readers = [], closed = false, closedBy = '', reason = '', writable = true, actions = writable, hasMore = false, prepend = false} = {}) {
       const stick = this.nearBottom() || !this.rows.length, height = this.feed.scrollHeight, top = this.feed.scrollTop;
       const newMessage = rows.some(m => !this.nodes.has(Number(m.id))); const oldActions = this.actions;
@@ -180,14 +536,15 @@
       else if (stick) this.scrollBottom();
       else { if(!this.scrollingLatest)this.feed.scrollTop = top; if (newMessage) this.newButton.hidden = false; }
     }
-    message(m) {
-      if(m.system){const notice=el('article','dc-message dc-system-event',m.body);notice.dataset.messageId=m.id;return notice;}
+    message(m) { const node = this.buildMessage(m); this.styleBubble(node, m); return node; }
+    buildMessage(m) {
+      if(m.system){const notice=el('article','dc-message dc-system-event',m.body);notice.dataset.messageId=m.id;if(m.care&&m.care.can_decide){const bar=el('div','dc-care-actions'),hostPanel=document.getElementById('dnct-messenger');[['accept','Tak'],['reject','Nie']].forEach(([decision,label])=>{const b=el('button','dc-care-btn dc-care-'+decision,label);b.type='button';b.addEventListener('click',async()=>{if(decision==='reject'&&!window.confirm('Odrzucić prośbę? Klient dostanie pełny zwrot pieniędzy.'))return;bar.querySelectorAll('button').forEach(x=>x.disabled=true);const note=el('span','dc-care-note','Zapisuję decyzję…');bar.append(note);try{await request(hostPanel.dataset.api,{action:'care_decide',id:m.care.conversation,message_id:m.id,decision},hostPanel.dataset.csrf);note.textContent='Zapisano.';}catch(err){note.textContent=err&&err.message||'Nie udało się zapisać decyzji.';bar.querySelectorAll('button').forEach(x=>x.disabled=false);}});bar.append(b);});notice.append(bar);}return notice;}
       const outgoing = Boolean(m.outgoing ?? m.mine);
       const node = el('article', 'dc-message' + (outgoing ? ' mine' : '')); node.dataset.messageId = m.id; node.dataset.direction = outgoing ? 'outgoing' : 'incoming';
-      if (this.options.showAuthors !== false && !outgoing && (!m.reply || m.is_withdrawn)) node.append(el('div', 'dc-author', m.author_name || m.display_name || 'Użytkownik'));
+      if (this.options.showAuthors !== false && !outgoing && (!m.reply || m.is_withdrawn)) { const author = el('div', 'dc-author', m.author_name || m.display_name || 'Użytkownik'); if (m.username) { author.dataset.miniUser = m.username; nick(author, m.username); } node.append(author); }
       const line = el('div', 'dc-line'), bubble = el('div', 'dc-bubble');
       const avatar = el('span','dc-avatar',Array.from(m.author_name || m.display_name || m.username || '?')[0]);
-      if (!outgoing && m.username) window.DNCTChat.avatar(avatar,m.username);
+      if (!outgoing && m.username) { window.DNCTChat.avatar(avatar,m.username); avatar.dataset.miniUser = m.username; avatar.title = 'Pokaż profil'; }
       if (m.edited_at && !m.is_withdrawn) bubble.append(el('small','dc-edited','Edytowano'));
 
       if (m.reply && !m.is_withdrawn) {
@@ -199,13 +556,15 @@
         const replyLabel = m.mine
           ? (selfReply ? 'Odpowiedziałeś sobie' : 'Odpowiedziałeś ' + recipient)
           : author + ' odpowiedział(a) ' + (selfReply ? 'sobie' : (m.reply.mine ?? original?.mine) === false ? recipient : 'Ci');
-        q.append(el('b', '', '↶ ' + replyLabel), el('span', '', m.reply.is_withdrawn || m.reply.withdrawn_at ? 'Wiadomość została cofnięta.' : m.reply.body || 'Załącznik')); node.append(q);
+        q.append(el('b', '', '↶ ' + replyLabel), el('span', '', m.reply.is_withdrawn || m.reply.withdrawn_at ? 'Wiadomość została cofnięta.' : markdown.plain(m.reply.body) || 'Załącznik')); node.append(q);
       }
       const body = el('p', 'dc-body' + (m.is_withdrawn ? ' dc-withdrawn' : ''));
       const content = m.is_withdrawn ? 'Wiadomość została cofnięta.' : m.body || '';
-      const parts = content.split(/(https?:\/\/[^\s<>]+)/g);
-      parts.forEach((part, i) => { if (i % 2) { const a = el('a', '', part); a.href = part; a.target = '_blank'; a.rel = 'noopener noreferrer'; body.append(a); } else body.append(document.createTextNode(part)); });
+      if (m.is_withdrawn) body.textContent = content; else body.append(markdown.render(content));
       bubble.append(body);
+      if (!m.is_withdrawn) richMessage(bubble, body, m);
+      if (m.silent) node.classList.add('dc-silent');
+      if (m.revisions?.length || m.silent) bubble.append(this.revisionBlock(m));
       if (!m.is_withdrawn && m.attachments?.length) {
         const media = el('div', 'dc-attachments');
         for (const a of m.attachments) {
@@ -254,7 +613,7 @@
         }
         bubble.classList.add('dc-has-media');if(!content)bubble.classList.add('dc-media-only');bubble.append(media);
       }
-      if (!outgoing) line.append(avatar);
+      if (!outgoing) { const avatarWrap = el('span', 'dn-av'); avatarWrap.append(avatar); line.append(avatarWrap); }
       line.append(bubble);
       if (this.actions && !m.is_withdrawn) {
         const actions = el('div', 'dc-actions');
@@ -280,20 +639,31 @@
     async act(action, values) { return this.run(async () => { await this.options.action?.(action, values); }); }
     setReply(m) {
       this.reply = m; this.preview.replaceChildren(); this.preview.hidden = !m;
-      if (m) { const copy = el('span', '', m.body || 'Załącznik'); copy.prepend(el('b', '', 'Odpowiadasz: ' + (m.mine ? 'sobie' : m.author_name || m.display_name || 'Użytkownik'))); const cancel = button('×', () => this.setReply(null), 'dc-icon'); cancel.setAttribute('aria-label', 'Anuluj odpowiedź'); this.preview.append(copy, cancel); this.text.focus(); }
+      if (m) { const copy = el('span', '', markdown.plain(m.body) || 'Załącznik'); copy.prepend(el('b', '', 'Odpowiadasz: ' + (m.mine ? 'sobie' : m.author_name || m.display_name || 'Użytkownik'))); const cancel = button('×', () => this.setReply(null), 'dc-icon'); cancel.setAttribute('aria-label', 'Anuluj odpowiedź'); this.preview.append(copy, cancel); this.text.focus(); }
     }
     chooseReply() {
       const candidates = this.rows.filter(m => !m.is_withdrawn).slice(-8).reverse();
       if (!candidates.length) { this.say('Nie ma jeszcze wiadomości, na którą można odpowiedzieć.'); return; }
       const menu = this.popover(this.replyButton, 'dc-menu');if(!menu)return;
       menu.append(el('p', 'dc-popover-note', 'Wybierz wiadomość'));
-      for (const m of candidates) menu.append(button((m.mine ? 'Ty' : m.author_name || m.display_name || 'Użytkownik') + ': ' + (m.body || 'Załącznik').slice(0, 64), () => { this.closePopover(); this.setReply(m); }));
+      for (const m of candidates) menu.append(button((m.mine ? 'Ty' : m.author_name || m.display_name || 'Użytkownik') + ': ' + (markdown.plain(m.body) || 'Załącznik').slice(0, 64), () => { this.closePopover(); this.setReply(m); }));
       this.positionPopover();
     }
     menu(m, anchor) {
       const menu = this.popover(anchor, 'dc-menu');if(!menu)return;
       if (this.canEdit(m)) menu.append(button('Edytuj wiadomość', () => { this.closePopover(); this.edit(m); }));
       menu.append(button('Cofnij wysłanie', () => { this.closePopover(); this.withdraw(m); }, 'dc-danger')); this.positionPopover();
+    }
+    revisionBlock(m) {
+      const secret = t => Boolean(window.DNCTChat?.e2e?.isEnvelope?.(t));
+      const box = el('div', 'dc-revisions');
+      box.append(el('div', 'dc-rev-head', m.is_withdrawn ? (m.silent ? 'Usunięte bez śladu - widzi tylko admin' : 'Usunięte - widzi tylko admin') : 'Edytowane - historię widzi tylko admin'));
+      for (const r of m.revisions || []) {
+        const row = el('div', 'dc-rev-row');
+        row.append(el('small', '', (r.kind === 'withdraw' ? 'Treść przed usunięciem' : 'Wcześniejsza wersja') + ' · ' + new Date(r.at * 1000).toLocaleString('pl-PL')), el('p', '', secret(r.body) ? 'Zaszyfrowana treść (E2E)' : r.body));
+        box.append(row);
+      }
+      return box;
     }
     canEdit(m) { if ((m.attachments||[]).some(a=>a.media_type==='image'||a.kind==='image'||String(a.mime_type||'').startsWith('image/'))) return false; return Date.now() < (Number(m.edit_expires_at)*1000 || date(m.created_at).getTime()+300000); }
     edit(m) {
@@ -389,6 +759,7 @@
       window.addEventListener('resize',fit);d.addEventListener('close',()=>{cancelAnimationFrame(zoomFrame);window.removeEventListener('resize',fit);},{once:true});d.showModal();fit();if(video)media.play().catch(()=>{});
     }
     addFiles(files) {
+      if (this.mediaBlocked) { this.say('W szyfrowanych rozmowach załączniki są jeszcze niedostępne.'); return; }
       if (!this.writable || this.sending) return;
       for (const file of Array.from(files)) { const video = file.type.startsWith('video/'); if (!/^(image|video)\//.test(file.type)) { this.say('Możesz wysłać zdjęcie albo film.'); continue; } if (this.files.length >= this.limits.files) { this.say('Do jednej wiadomości możesz dodać ' + this.limits.files + ' pliki.'); break; } if (file.size > (video ? this.limits.video : this.limits.image)) { this.say('Plik ' + file.name + ' jest za duży. Limit: ' + ((video ? this.limits.video : this.limits.image)/1024/1024) + ' MB.'); continue; } this.files.push({file, url:URL.createObjectURL(file)}); }
       this.renderFiles();
@@ -405,10 +776,147 @@
     }
     destroy() { this.feedResize?.disconnect();cancelAnimationFrame(this.scrollFrame);clearInterval(this.receiptTimer);this.closePopover(); this.clearFiles(); this.root.remove(); }
   }
+  // Odznaki, kolor nicku i ramka avatara z account.dnct.pl (backend/lib/odznaki.php).
+  // Zapytania o wielu rozmówców zbieramy w jedną paczkę; wynik trzymamy 2 minuty.
+  // Przez API czatu (ta sama domena); bez komunikatora - wprost z account.dnct.pl.
+  const chatApi = () => document.getElementById('dnct-messenger')?.dataset.api || '';
+  const lookUrl = (action, n) => chatApi() ? chatApi() + (chatApi().includes('?') ? '&' : '?') + 'action=' + action + '&n=' + n : 'https://account.dnct.pl/api/publiczne/' + (action === 'mini' ? 'mini' : 'wyglad') + '.php?n=' + n;
+  const lookCreds = () => chatApi() ? 'same-origin' : 'omit';
+  const looks = new Map(), lookQueue = new Set(); let lookTimer = 0;
+  function lookFor(username) {
+    const known = looks.get(username);
+    if (known && Date.now() - known.at < 120000) return known.promise;
+    const entry = {at: Date.now()}; entry.promise = new Promise(resolve => { entry.resolve = resolve; });
+    looks.set(username, entry); lookQueue.add(username); clearTimeout(lookTimer); lookTimer = setTimeout(flushLooks, 40);
+    return entry.promise;
+  }
+  async function flushLooks() {
+    const batch = [...lookQueue].slice(0, 60); batch.forEach(u => lookQueue.delete(u));
+    if (lookQueue.size) lookTimer = setTimeout(flushLooks, 40);
+    let users = null;
+    try { const r = await fetch(lookUrl('look', batch.map(encodeURIComponent).join(',')), {credentials: lookCreds()}); if (r.ok) users = (await r.json()).users || {}; } catch (_) {}
+    for (const u of batch) { const entry = looks.get(u); if (!entry) continue; if (!users) entry.at = 0; entry.resolve(users?.[u] || null); }
+  }
+  function badgeIcon(info, className) {
+    const s = el('span', className + ' dn-t--' + info.tier); s.title = info.name + ' - ' + info.desc;
+    if (info.brand) s.style.setProperty('--dn-brand', info.brand);
+    if (info.img) { const img = new Image(); img.alt = ''; img.src = info.img; s.append(img); return s; }
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'), path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true'); if (info.fill) svg.setAttribute('class', 'dn-fill'); path.setAttribute('d', info.icon); svg.append(path); s.append(svg);
+    return s;
+  }
+  function dressAvatar(target, look) {
+    target.classList.forEach(c => { if (c.startsWith('dn-ramka')) target.classList.remove(c); });
+    const host = target.parentElement?.classList.contains('dn-av') ? target.parentElement : (getComputedStyle(target).overflow === 'hidden' ? null : target);
+    host?.querySelectorAll(':scope > .dn-pin').forEach(p => p.remove());
+    if (!look) return;
+    // Panel czatu bywa ukryty (hidden), gdy lista się renderuje - offsetWidth = 0 i odznaka/ramka
+    // przepadały, a wygląd jest w cache 2 min. Bierzemy wtedy szerokość z CSS (2026-11-11).
+    const size = target.offsetWidth || parseFloat(getComputedStyle(target).width) || 0;
+    if (look.frame && look.frame !== 'brak' && size >= 26) target.classList.add('dn-ramka', 'dn-ramka--' + look.frame);
+    if (look.pin && host && size >= 24) host.append(badgeIcon(look.pin, 'dn-pin'));
+  }
+  function decorateAvatar(target, username) {
+    lookFor(username).then(look => requestAnimationFrame(() => { if (target.dataset.avatarUser === username) dressAvatar(target, look); }));
+  }
+  function nick(target, username) {
+    if (!username) return;
+    target.dataset.nickUser = username;
+    lookFor(username).then(look => {
+      if (target.dataset.nickUser !== username) return;
+      target.classList.forEach(c => { if (c.startsWith('dn-nick--')) target.classList.remove(c); });
+      if (look?.nick && look.nick !== 'domyslny') target.classList.add('dn-nick--' + look.nick);
+    });
+  }
+  // Mini-profil po kliknięciu w avatar albo nick: baner jako tło całej karty,
+  // "poziom" z liczby odznak, wyróżniona (przypięta) odznaka, gablota, akcje.
+  let mini = null;
+  function closeMini() { if (!mini) return; mini.card.remove(); document.removeEventListener('pointerdown', mini.outside, true); document.removeEventListener('keydown', mini.key, true); mini.anchor?.focus?.({preventScroll: true}); mini = null; }
+  async function openMini(anchor, username) {
+    closeMini();
+    const card = el('div', 'dn-mini'); card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', 'Profil ' + username); card.tabIndex = -1;
+    card.append(el('p', 'dn-mini-wait', 'Wczytuję profil...'));
+    // W otwartym oknie dialogowym karta musi być w jego warstwie, inaczej zostanie pod nim.
+    (anchor.closest('dialog[open]') || document.body).append(card);
+    const outside = e => { if (!card.contains(e.target) && !anchor.contains(e.target)) closeMini(); };
+    const key = e => { if (e.key === 'Escape') { e.stopPropagation(); closeMini(); } };
+    mini = {card, anchor, outside, key};
+    document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', key, true);
+    const place = () => {
+      const r = anchor.getBoundingClientRect(), w = card.offsetWidth, h = card.offsetHeight, m = 12;
+      let left = r.right + 12; if (left + w > innerWidth - m) left = r.left - w - 12; left = Math.max(m, Math.min(left, innerWidth - w - m));
+      const top = Math.max(m, Math.min(r.top - 24, innerHeight - h - m));
+      card.style.left = left + 'px'; card.style.top = top + 'px';
+    };
+    place();
+    let d;
+    try { const r = await fetch(lookUrl('mini', encodeURIComponent(username)), {credentials: lookCreds()}); d = await r.json(); if (!r.ok || !d.ok) throw Error(d.message || 'Nie udało się wczytać profilu.'); }
+    catch (e) { if (mini?.card === card) { card.replaceChildren(el('p', 'dn-mini-wait', e.message || 'Nie udało się wczytać profilu.')); place(); } return; }
+    if (mini?.card !== card) return;
+    card.replaceChildren();
+    const tlo = el('div', 'dn-mini-tlo'); tlo.style.cssText = d.banner || '';
+    const close = button('', closeMini, 'dn-mini-close'); close.setAttribute('aria-label', 'Zamknij profil');
+    close.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    const head = el('div', 'dn-mini-head'), wrap = el('span', 'dn-av'), face = el('span', 'dn-mini-avatar', d.initials || '?');
+    if (d.avatar) { const img = new Image(); img.alt = ''; img.referrerPolicy = 'no-referrer'; img.src = d.avatar; face.append(img); }
+    wrap.append(face);
+    const who = el('div', 'dn-mini-who'), name = el('strong', 'dn-mini-name', d.name);
+    if (d.look?.nick && d.look.nick !== 'domyslny') name.classList.add('dn-nick--' + d.look.nick);
+    who.append(name, el('small', '', '@' + d.login));
+    const poziom = el('div', 'dn-mini-poziom'); poziom.title = d.badges + ' z ' + d.badges_total + ' odznak';
+    poziom.append(el('b', '', String(d.badges)), el('small', '', d.badges === 1 ? 'odznaka' : (d.badges % 10 >= 2 && d.badges % 10 <= 4 && (d.badges % 100 < 12 || d.badges % 100 > 14) ? 'odznaki' : 'odznak')));
+    head.append(wrap, who, poziom);
+    const body = el('div', 'dn-mini-body');
+    const pin = d.look?.pin;
+    if (pin) {
+      const wyr = el('div', 'dn-mini-wyroznik'), txt = el('div');
+      txt.append(el('small', '', 'Przypięta odznaka'), el('strong', '', pin.name), el('span', 'dn-mini-rz', pin.tier_name));
+      txt.querySelector('.dn-mini-rz').style.color = pin.color || '';
+      wyr.append(badgeIcon(pin, 'dn-med'), txt); body.append(wyr);
+    }
+    if (d.bio) body.append(el('p', 'dn-mini-bio', d.bio));
+    const reszta = (d.look?.showcase || []).filter(b => !pin || b.key !== pin.key);
+    if (reszta.length) {
+      const show = el('div', 'dn-mini-show');
+      for (const b of reszta) { const cell = el('div', 'dn-mini-badge'); cell.title = b.name + ' - ' + b.desc; cell.append(badgeIcon(b, 'dn-med'), el('small', '', b.name)); show.append(cell); }
+      body.append(show);
+    }
+    const foot = el('div', 'dn-mini-foot');
+    foot.append(el('small', 'dn-mini-meta', d.joined ? 'W DNCT od ' + d.joined : ''));
+    const actions = el('div', 'dn-mini-actions');
+    if (d.url) { const a = el('a', 'dn-mini-btn', 'Profil'); a.href = d.url; a.target = '_blank'; a.rel = 'noopener'; actions.append(a); }
+    if (document.querySelector('#dnct-messenger')) actions.append(button('Wiadomość', () => { closeMini(); document.dispatchEvent(new CustomEvent('dnct:chat-dm', {detail: {username: d.login}})); }, 'dn-mini-btn dn-mini-main'));
+    foot.append(actions);
+    card.append(tlo, close, head, body, foot);
+    dressAvatar(face, d.look ? {frame: d.look.frame, pin: d.look.pin} : null);
+    face.dataset.avatarUser = d.login;
+    place(); card.focus({preventScroll: true});
+  }
+  // Pasek strony (navibar.php): nick, ramka i przypięta odznaka zalogowanego, jak w czacie.
+  function dressNavbar() {
+    const name = document.querySelector('.profile-magic-wrapper .profile-text-username'), face = document.querySelector('.profile-magic-wrapper .profile-magic-avatar');
+    const login = name?.textContent.trim();
+    if (!login || !/^[A-Za-z0-9_.@+-]{1,150}$/.test(login)) return;
+    nick(name, login);
+    if (face) lookFor(login).then(look => requestAnimationFrame(() => {
+      face.classList.forEach(c => { if (c.startsWith('dn-ramka')) face.classList.remove(c); });
+      face.querySelectorAll(':scope > .dn-pin').forEach(p => p.remove());
+      if (!look) return;
+      if (look.frame && look.frame !== 'brak') face.classList.add('dn-ramka', 'dn-ramka--' + look.frame);
+      if (look.pin) face.append(badgeIcon(look.pin, 'dn-pin'));
+    }));
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', dressNavbar); else dressNavbar();
+  document.addEventListener('click', e => {
+    const t = e.target.closest?.('[data-mini-user]');
+    if (!t || t.closest('.dn-mini')) return;
+    e.preventDefault(); openMini(t, t.dataset.miniUser);
+  });
   const avatarImages = new Map();
   function avatar(target, username, className = '') {
     if (!username) return;
     target.dataset.avatarUser = username;
+    decorateAvatar(target, username);
     let entry = avatarImages.get(username);
     // Brak awatara (404) pamietamy 10 minut, zeby kazde odrysowanie wiadomosci nie pytalo od nowa.
     if (entry?.failedAt && Date.now() - entry.failedAt > 600000) { avatarImages.delete(username); entry = undefined; }
@@ -425,7 +933,100 @@
     };
     if(entry.ready)attach();else entry.promise.then(ok=>{if(ok)attach();});
   }
-  window.DNCTChat = {Conversation, request, key, el, button, icon, avatar, age};
+  // Resizable chat windows: drag the left/top edges, plus "Powiększ" (fullscreen) and "Zmniejsz" (default size).
+  // Fullscreen is shared by every panel on the page; a dragged size is remembered per panel.
+  const sizing = (() => {
+    const STORE = 'dnct:chat-size:', MARGIN = 12, memory = new Map(), entries = new Map(); let fullscreen = false;
+    const small = () => matchMedia('(max-width:640px)').matches;
+    const read = k => { if (memory.has(k)) return memory.get(k); try { const v = JSON.parse(localStorage.getItem(STORE + k)); if (v && v.w > 0 && v.h > 0) { memory.set(k, v); return v; } } catch (_) {} return null; };
+    const write = (k, v) => { if (v) memory.set(k, v); else memory.delete(k); try { v ? localStorage.setItem(STORE + k, JSON.stringify(v)) : localStorage.removeItem(STORE + k); } catch (_) {} };
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const svg = d => '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>';
+    const isOpen = panel => !panel.hidden && panel.getAttribute('aria-hidden') !== 'true';
+
+    function paint(entry) {
+      const {panel, key} = entry, custom = read(key);
+      panel.classList.toggle('dc-fullscreen', fullscreen); panel.classList.toggle('dc-sized', !fullscreen && !!custom);
+      if (custom) { panel.style.setProperty('--dc-w', custom.w + 'px'); panel.style.setProperty('--dc-h', custom.h + 'px'); } else { panel.style.removeProperty('--dc-w'); panel.style.removeProperty('--dc-h'); }
+      if (entry.shrink) entry.shrink.disabled = !fullscreen && !custom;
+      if (entry.expand) entry.expand.disabled = fullscreen;
+    }
+    const paintAll = () => entries.forEach(paint);
+    // Size changes made with the buttons glide to the new size (CSS transition, only while .dc-morph is set,
+    // so dragging and the scroll-driven fit() of the controllers are never animated).
+    let morphTimer = 0;
+    function morph(change) {
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        for (const panel of entries.keys()) if (isOpen(panel)) panel.classList.add('dc-morph');
+        clearTimeout(morphTimer); morphTimer = setTimeout(() => { for (const panel of entries.keys()) panel.classList.remove('dc-morph'); }, 450);
+      }
+      change();
+    }
+    function reset(entry) { morph(() => { fullscreen = false; write(entry.key, null); paintAll(); }); }
+    function expand() { morph(() => { fullscreen = true; paintAll(); }); }
+
+    function drag(entry, handle, mode, e) {
+      if (e.button !== 0 || fullscreen || small()) return;
+      e.preventDefault();
+      const {panel, key} = entry, rect = panel.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY;
+      const maxW = Math.max(entry.minW, rect.right - MARGIN), maxH = Math.max(entry.minH, rect.bottom - MARGIN);
+      let size = {w: Math.round(rect.width), h: Math.round(rect.height)};
+      handle.setPointerCapture(e.pointerId); panel.classList.add('dc-resizing');
+      const move = ev => {
+        size = {w: mode.includes('l') ? Math.round(clamp(rect.width + x0 - ev.clientX, entry.minW, maxW)) : size.w, h: mode.includes('t') ? Math.round(clamp(rect.height + y0 - ev.clientY, entry.minH, maxH)) : size.h};
+        memory.set(key, size); paint(entry);
+      };
+      const end = () => { handle.removeEventListener('pointermove', move); handle.removeEventListener('pointerup', end); handle.removeEventListener('pointercancel', end); panel.classList.remove('dc-resizing'); write(key, size); paint(entry); };
+      handle.addEventListener('pointermove', move); handle.addEventListener('pointerup', end); handle.addEventListener('pointercancel', end);
+    }
+
+    function ensure(entry) {
+      const {panel} = entry, header = panel.querySelector('.dm-top-actions,.dc-support-top');
+      if (header && !header.querySelector('.dc-size-actions')) {
+        const box = el('div', 'dc-size-actions');
+        entry.shrink = button('', () => reset(entry), 'dc-size-btn'); entry.shrink.innerHTML = svg('<path d="M20 10h-6V4M4 14h6v6M14 10l7-7M3 21l7-7"/>'); entry.shrink.title = 'Zmniejsz czat do domyślnego rozmiaru'; entry.shrink.setAttribute('aria-label', 'Zmniejsz czat do domyślnego rozmiaru');
+        entry.expand = button('', expand, 'dc-size-btn'); entry.expand.innerHTML = svg('<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>'); entry.expand.title = 'Powiększ czat na cały ekran'; entry.expand.setAttribute('aria-label', 'Powiększ czat na cały ekran');
+        box.append(entry.shrink, entry.expand);
+        const close = header.querySelector('.dm-close,.dc-shell-close'); header.insertBefore(box, close && close.parentNode === header ? close : null);
+      }
+      if (!panel.querySelector(':scope > .dc-resize')) for (const mode of ['l', 't', 'tl']) {
+        const handle = el('div', 'dc-resize dc-resize-' + mode); handle.setAttribute('aria-hidden', 'true');
+        handle.addEventListener('pointerdown', e => drag(entry, handle, mode, e)); handle.addEventListener('dblclick', () => reset(entry)); panel.append(handle);
+      }
+      paint(entry);
+    }
+
+    function attach(panel, key, minW, minH) {
+      if (!panel || entries.has(panel)) return;
+      const entry = {panel, key, minW, minH, shrink: null, expand: null}; entries.set(panel, entry); ensure(entry);
+      new MutationObserver(() => ensure(entry)).observe(panel, {childList: true});
+      // Fullscreen ends together with the chat; a panel switch (one closes, one opens) keeps it.
+      new MutationObserver(() => setTimeout(() => { if (fullscreen && ![...entries.keys()].some(isOpen)) { fullscreen = false; paintAll(); } }, 300)).observe(panel, {attributes: true, attributeFilter: ['hidden', 'aria-hidden']});
+    }
+    // Only the messenger is resizable; the support ticket window keeps its fixed size.
+    function attachAll() { attach(document.getElementById('dnct-messenger'), 'dm', 560, 420); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachAll); else attachAll();
+    document.addEventListener('dnct:messaging-ready', attachAll);
+    // Switching between the messenger and a ticket: the incoming window starts at the outgoing window's rectangle
+    // (inline !important beats the stylesheet's !important sizes) and then glides to its own size.
+    function glide(from, to, before, reduced) {
+      const done = to.animate([{opacity: 1}, {opacity: 1}], {duration: reduced ? 0 : 400});
+      if (reduced) return done;
+      const keep = {}, start = {width: before.width, height: before.height, right: innerWidth - before.right, bottom: innerHeight - before.bottom, 'max-height': before.height};
+      const radius = getComputedStyle(from).borderTopLeftRadius, border = getComputedStyle(from).borderTopWidth;
+      for (const k of [...Object.keys(start), 'border-radius', 'border-width']) keep[k] = [to.style.getPropertyValue(k), to.style.getPropertyPriority(k)];
+      for (const [k, v] of Object.entries(start)) to.style.setProperty(k, Math.round(v) + 'px', 'important');
+      to.style.setProperty('border-radius', radius, 'important'); to.style.setProperty('border-width', border, 'important');
+      void to.offsetWidth; // commit the start rectangle first, without a transition
+      to.classList.add('dc-morph');
+      for (const k in keep) { to.style.removeProperty(k); if (keep[k][0]) to.style.setProperty(k, keep[k][0], keep[k][1]); }
+      const clean = () => to.classList.remove('dc-morph');
+      done.addEventListener('finish', clean); done.addEventListener('cancel', clean);
+      return done;
+    }
+    return {attach, expand, paintAll, glide};
+  })();
+  window.DNCTChat = {Conversation, request, key, el, button, icon, avatar, nick, miniProfile: openMini, age, plain: markdown.plain, sizing, themeBackground, e2e};
 })();
 
 /* Shared message indicators and delivery effects. No private content is persisted. */
@@ -476,7 +1077,7 @@
  const sync=()=>{const supported='Notification' in window,on=supported&&Notification.permission==='granted'&&read(':desktopEnabled',true);b.replaceChildren();const dot=document.createElement('span');dot.className='dnct-permission-dot';dot.setAttribute('aria-hidden','true');b.append(dot,document.createTextNode('Powiadomienia systemowe'));b.classList.toggle('is-active',Boolean(on));b.setAttribute('aria-pressed',String(Boolean(on)));b.disabled=!supported;b.title=supported&&Notification.permission==='denied'?'Odblokuj powiadomienia w ustawieniach przeglądarki':'';};
  b.onclick=async()=>{if(Notification.permission==='granted')write(':desktopEnabled',!read(':desktopEnabled',true));else if(Notification.permission==='default'){try{const result=await Notification.requestPermission();write(':desktopEnabled',result==='granted');}catch{}}else b.title='Odblokuj powiadomienia w ustawieniach przeglądarki';sync();if(!matchMedia('(prefers-reduced-motion: reduce)').matches)b.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:320});};host.after(b);sync();addEventListener('storage',sync);}
 
- async function message(key,name,body,open,muted=false,isViewing=()=>false){if(muted||seenMessages.has(key))return;seenMessages.add(key);await exclusive(()=>{const seen=read(':seen',{}),now=Date.now();if(seen[key])return;for(const id in seen)if(now-seen[id]>86400000)delete seen[id];seen[key]=now;write(':seen',seen);if(!document.hidden&&isViewing())return;play('message');if(!document.hidden&&['game.dnct.pl','panel.dnct.pl'].includes(location.hostname))return;if(!('Notification' in window)||Notification.permission!=='granted'||read(':desktopEnabled',true)===false)return;try{const n=new Notification(key.startsWith('ticket:')?'Zgłoszenie | DNCT.PL':'Czaty | DNCT.PL',{body:String(name||'Użytkownik')+'\n'+String(body||'Załącznik'),icon:document.querySelector('link[rel~="icon"]')?.href||new URL('/'+'assets/media/icons/favicon.png',location.origin).href,tag:scope+':'+key,silent:true});n.onclick=()=>{window.focus();open?.();n.close();};}catch{}});}
+ async function message(key,name,body,open,muted=false,isViewing=()=>false){if(muted||seenMessages.has(key))return;seenMessages.add(key);await exclusive(()=>{const seen=read(':seen',{}),now=Date.now();if(seen[key])return;for(const id in seen)if(now-seen[id]>86400000)delete seen[id];seen[key]=now;write(':seen',seen);if(!document.hidden&&isViewing())return;play('message');if(['game.dnct.pl','panel.dnct.pl'].includes(location.hostname))return;if(!('Notification' in window)||Notification.permission!=='granted'||read(':desktopEnabled',true)===false)return;try{const n=new Notification(key.startsWith('ticket:')?'Zgłoszenie | DNCT.PL':'Czaty | DNCT.PL',{body:String(name||'Użytkownik')+'\n'+(markdown.plain(body)||'Załącznik'),icon:document.querySelector('link[rel~="icon"]')?.href||new URL('/'+'assets/media/icons/favicon.png',location.origin).href,tag:scope+':'+key,silent:true});n.onclick=()=>{window.focus();open?.();n.close();};}catch{}});}
  const notificationKey=n=>String(n.audience||n.target_type||'normal')+':'+n.id;
  const kind=n=>(n.author||n.category==='announcements'||n.category==='announcement'||n.category==='announcements_marketing')?(recipes[n.type]?n.type:'info'):'system';
  async function soundFor(items,reminder=false){if(!items.length)return;await exclusive(()=>{const ack=read(':opened',{});items=items.filter(n=>!ack[notificationKey(n)]);if(!items.length||Date.now()-read(':soundAt',0)<(reminder?30000:2500))return;const types=new Set(items.map(kind));if(play(['error','warning','success','info','system'].find(t=>types.has(t))||'system'))write(':soundAt',Date.now());});}
