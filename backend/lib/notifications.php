@@ -122,7 +122,13 @@ function dnct_insert_notification(
     }
 
     $id = (int) $pdo->lastInsertId();
-    dnct_forward_notification_to_messaging($type, $title, $message, $targetType, $targetUserId, $opts);
+    // Dalej idzie tylko zapis do WŁASNEJ bazy strony (dnct_db). Panel admina pisze tą
+    // biblioteką prosto do bazy bety (powiadomienia_zapisz): przekazanie dałoby każdemu
+    // odbiorcy drugą kopię (internal-notify dokleja prefiks "prod:" do event_key, więc
+    // duplikat nie jest odrzucany) i HTTP do bety na każdego odbiorcę w środku transakcji.
+    if (empty($opts['skip_forward']) && $pdo === dnct_db()) {
+        dnct_forward_notification_to_messaging($type, $title, $message, $targetType, $targetUserId, $opts);
+    }
 
     return $id;
 }

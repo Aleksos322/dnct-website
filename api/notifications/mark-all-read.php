@@ -23,7 +23,8 @@ $userId  = (string) $_SESSION['authentik_username'];
 $isAdmin = dnct_is_admin();
 
 // Klient dostaje potwierdzony wynik, zamiast tylko optymistycznej zmiany wyglądu.
-$scope=request_string('scope','normal');if(!in_array($scope,['normal','admin'],true))json_error('Nieprawidłowa zakładka.',400);if($scope==='admin'&&!$isAdmin)json_error('Brak uprawnień.',403);
+// 'all' = przycisk "Przeczytaj wszystko" w podglądzie użytkownika: oba zakresy naraz.
+$scope=request_string('scope','normal');if(!in_array($scope,['normal','admin','all'],true))json_error('Nieprawidłowa zakładka.',400);if($scope==='admin'&&!$isAdmin)json_error('Brak uprawnień.',403);
 $marked = mark_all_read(dnct_db(), $userId, $isAdmin,$scope);
 
 json_ok(['marked' => $marked]);

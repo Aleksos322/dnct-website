@@ -59,7 +59,9 @@
     const messages=data.messages||[],read=Math.max(0,...(data.receipts||[]).filter(r=>r.participant_role==='customer').map(r=>Number(r.last_message_id)));
     window.DNCTAlerts.ticket(data.customer_unread??messages.filter(m=>m.author_role==='admin'&&Number(m.id)>read).length);
     const incoming=messages.filter(m=>m.author_role==='admin'&&!m.withdrawn_at&&!m.is_withdrawn);
-    const previous=alertTicket===Number(t.id)?alertMessage:0;
+    // Inny ticket niż poprzednio = jego historia to nie nowe wiadomości. Wcześniej baza 0
+    // sprawiała, że otwarcie starszego zgłoszenia pikało za stare odpowiedzi.
+    const previous=alertTicket===Number(t.id)?alertMessage:Math.max(0,...incoming.map(m=>Number(m.id)));
     if(alertsStarted)for(const m of incoming)if(Number(m.id)>previous)window.DNCTAlerts.message('ticket:'+t.id+':'+m.id,m.author_name,m.body,()=>open(),false,()=>panel.classList.contains('is-open')&&panel.getAttribute('aria-hidden')!=='true'&&Number(ticket?.id)===Number(t.id)&&!freshForm);
     alertMessage=Math.max(previous,0,...incoming.map(m=>Number(m.id)));alertTicket=Number(t.id);alertsStarted=true;
   }

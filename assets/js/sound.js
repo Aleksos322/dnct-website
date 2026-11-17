@@ -100,6 +100,11 @@
             s._tone(ctx, 987, { dur: 0.09, type: 'sine', gain: 0.14 });
             s._tone(ctx, 784, { start: 0.06, dur: 0.13, type: 'sine', gain: 0.12 });
         },
+        // Nowa wiadomość czatu - dwa miękkie, wznoszące się tony, cichsze od powiadomień.
+        message: (s, ctx) => {
+            s._tone(ctx, 660, { dur: 0.12, type: 'sine', gain: 0.1 });
+            s._tone(ctx, 880, { start: 0.12, dur: 0.17, type: 'sine', gain: 0.1 });
+        },
         // Bardzo krótkie kliknięcie - potwierdzenie interakcji (np. przełącznik dźwięku).
         click: (s, ctx) => {
             s._tone(ctx, 700, { dur: 0.05, type: 'sine', gain: 0.09 });
@@ -114,7 +119,21 @@
         recipe(this, ctx);
     };
 
+    /* Ten sam przepis w podanym kontekście audio - dla DNCTAlerts (chat-ui.js),
+       żeby dzwonek, czat i toasty brzmiały jednym zestawem tonów. Bez sprawdzania
+       `enabled`: wołający pilnuje przełącznika sam. */
+    DnctSound.prototype.playIn = function (ctx, name) {
+        if (!ctx || !RECIPES[name]) return false;
+        RECIPES[name](this, ctx);
+        return true;
+    };
+
     window.DnctSound = window.DnctSound || new DnctSound();
+    // dnct.pl ładuje własny sound.js (produkcja) przed tym z mostu - dołóż playIn
+    // do już istniejącego obiektu, inaczej czat grałby starym zestawem tonów.
+    if (typeof window.DnctSound.playIn !== 'function') {
+        window.DnctSound.playIn = DnctSound.prototype.playIn;
+    }
 
     /* Przełącznik w navbarze (#dnct-sound-toggle, patrz navibar.php) - część
        tego samego systemu, nie osobny skrypt, żeby stan i logika żyły w
