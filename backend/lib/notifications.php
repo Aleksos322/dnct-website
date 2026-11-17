@@ -154,7 +154,7 @@ function dnct_forward_notification_to_messaging(
     if (($_SERVER['DNCT_ENV_FILE'] ?? getenv('DNCT_ENV_FILE')) || !function_exists('sodium_crypto_sign_detached')) {
         return;
     }
-    $key = @file_get_contents('/home/jakub/dnct-private-media/site-messaging.key');
+    $key = @file_get_contents((string)env('SITE_MESSAGING_KEY_FILE', ''));
     if (!is_string($key) || strlen($key) !== 64) {
         return;
     }
@@ -345,7 +345,10 @@ function hide_notification(PDO $pdo, int $notificationId, string $userId, bool $
 function notification_scope_sql(string $scope,bool $isAdmin):string {
  if(!in_array($scope,['all','normal','admin'],true))throw new InvalidArgumentException('Nieprawidłowa zakładka powiadomień.');
  if($scope==='admin'&&!$isAdmin)throw new DomainException('Brak uprawnień administratora.');
- return notification_visible_sql() . match($scope){'normal'=>" AND n.target_type <> 'admins'",'admin'=>" AND n.target_type = 'admins'",default=>''};
+ // COALESCE: kampanie mają category = NULL, a "NULL = 'support'" to w SQL NULL,
+ // nie FALSE - NOT(...) wycinało wtedy adminom wszystkie powiadomienia kampanii
+ // z obu zakładek, a liczniki admina i użytkownika się rozjeżdżały (2026-11-11).
+ return notification_visible_sql() . match($scope){'normal'=>" AND n.target_type <> 'admins'".($isAdmin?" AND NOT (n.target_type = 'user' AND COALESCE(n.category, '') = 'support')":''),'admin'=>" AND (n.target_type = 'admins' OR (n.target_type = 'user' AND COALESCE(n.category, '') = 'support'))",default=>''};
 }
 
 /** Hide only previously read messages visible to this account in the selected tab. */
