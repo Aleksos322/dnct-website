@@ -17,6 +17,16 @@ function pterodactyl_api_url(): string
 }
 
 /**
+ * Adres panelu, do którego prowadzimy KLIENTA (przyciski, maile). Osobny od
+ * `PTERO_API_URL`: beta strony wysyła klienta do bety panelu, ale API
+ * (zakładanie kont i serwerów) zostaje na produkcyjnym panelu.
+ */
+function panel_public_url(): string
+{
+    return rtrim((string)env('PANEL_URL', 'https://panel.dnct.pl'), '/');
+}
+
+/**
  * API Key do Pterodactyla (wymagany: Users Read & Write)
  */
 function pterodactyl_api_key(): string

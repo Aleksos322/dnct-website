@@ -10,10 +10,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 
 $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
-$isPanelOrigin = $origin === 'https://panel.dnct.pl';
+$isPanelOrigin = $origin === 'https://panel.dnct.pl' || $origin === panel_public_url();
 
 if ($isPanelOrigin) {
-    header('Access-Control-Allow-Origin: https://panel.dnct.pl');
+    header('Access-Control-Allow-Origin: ' . $origin);
     header('Access-Control-Allow-Credentials: true');
     header('Vary: Origin');
 }

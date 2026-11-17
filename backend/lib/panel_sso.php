@@ -54,6 +54,24 @@ function panel_sso_ticket(string $email, string $username = ''): string
     }
 
     $base  = rtrim((string)env('PANEL_SSO_TOKEN_URL', 'https://panel.dnct.pl/auth/sso'), '/');
+
+    /* Beta panelu ma własną bazę (panel_beta), do której ta strona nie ma
+       dostępu, więc bilet w tabeli `sso_tokens` produkcji byłby tam
+       niewidoczny. Gdy jest PANEL_SSO_SECRET, wystawiamy bilet PODPISANY
+       (HMAC) i beta panelu sprawdza podpis własnym kluczem. Produkcja go nie
+       ustawia i zostaje przy biletach w bazie. */
+    $secret = (string)env('PANEL_SSO_SECRET', '');
+    if ($secret !== '') {
+        $payload = rtrim(strtr(base64_encode(json_encode([
+            'e' => $email,
+            'u' => $username,
+            'x' => time() + PANEL_SSO_TTL_SECONDS,
+            'j' => bin2hex(random_bytes(16)),
+        ], JSON_UNESCAPED_UNICODE)), '+/', '-_'), '=');
+
+        return $base . '?token=' . rawurlencode('s1.' . $payload . '.' . hash_hmac('sha256', $payload, $secret));
+    }
+
     $token = bin2hex(random_bytes(32));
 
     $pdo = panel_db();

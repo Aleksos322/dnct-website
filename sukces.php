@@ -76,7 +76,7 @@ ob_start();
         <p data-role="text"><?php echo htmlspecialchars($startCopy[1]); ?></p>
 
         <div class="suc-actions" data-role="actions" hidden>
-            <a class="suc-primary" href="https://panel.dnct.pl" target="_blank" rel="noopener">Otwórz panel</a>
+            <a class="suc-primary" href="<?php echo htmlspecialchars(panel_public_url()); ?>" target="_blank" rel="noopener">Otwórz panel</a>
             <?php /* Po przedłużeniu i zmianie pakietu klient wraca do swoich
                      serwerów, nie do cennika - kupił już to, po co przyszedł. */ ?>
             <?php if ($kind === 'new'): ?>

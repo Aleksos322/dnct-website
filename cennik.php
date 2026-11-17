@@ -58,9 +58,6 @@ $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username'
  */
 const CENNIK_TRAILER_YT = '';
 
-/** Dokąd prowadzi przycisk demo. Panel wpuszcza przez to samo SSO co strona. */
-const CENNIK_PANEL_URL = 'https://panel.dnct.pl';
-
 const CENNIK_STRONY_GIER = [
     'vintagestory' => [
         'slug'        => 'hosting-vintage-story',
@@ -521,12 +518,12 @@ ob_start();
                             class="cennik-tab<?php echo $i === $activeIdx ? ' is-active' : ''; ?>"
                             role="tab"
                             id="tab-<?php echo htmlspecialchars($game['type']); ?>"
-                            <?php /* Na stronie gry zakładka prowadzi na stronę tamtej gry -
-                                     inaczej nagłówek, FAQ i adres zostają od poprzedniej. */
-                            if ($focus !== null && isset(CENNIK_STRONY_GIER[$game['type']])): ?>data-href="/<?php echo htmlspecialchars(CENNIK_STRONY_GIER[$game['type']]['slug']); ?>"<?php endif; ?>
                             aria-controls="game-<?php echo htmlspecialchars($game['type']); ?>"
                             tabindex="<?php echo $i === $activeIdx ? '0' : '-1'; ?>"
                             aria-selected="<?php echo $i === $activeIdx ? 'true' : 'false'; ?>"
+                            <?php /* Na stronie gry zakładka prowadzi na stronę tamtej gry -
+                                     inaczej nagłówek, FAQ i adres zostają od poprzedniej. */
+                            if ($focus !== null && isset(CENNIK_STRONY_GIER[$game['type']])): ?>data-href="/<?php echo htmlspecialchars(CENNIK_STRONY_GIER[$game['type']]['slug']); ?>"<?php endif; ?>
                             data-target="game-<?php echo htmlspecialchars($game['type']); ?>">
                         <?php if (!empty($game['icon_img'])): ?>
                             <img src="/assets/media/Server_card/icons/<?php echo htmlspecialchars(basename($game['icon_img'])); ?>"
@@ -658,7 +655,7 @@ ob_start();
 </div><!-- /.cnk-catalogue-scroll -->
 
     <?php /* Pasmo wspólne ze stroną główną - patrz components/panel-band.php. */ ?>
-    <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => CENNIK_PANEL_URL]); ?>
+    <?php render_panel_band(['trailer' => CENNIK_TRAILER_YT, 'panelUrl' => panel_public_url()]); ?>
 
     <?php /* ZAPROSZENIE ZAMIAST OBIETNICY.
              Wcześniej stało tu "Wkrótce" z listą gier, których nie hostujemy.

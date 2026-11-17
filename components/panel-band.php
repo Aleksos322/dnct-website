@@ -17,7 +17,7 @@ if (!function_exists('render_panel_band')) {
 function render_panel_band(array $opts = []): void
 {
     $trailerId = (string)($opts['trailer'] ?? '');
-    $panelUrl  = (string)($opts['panelUrl'] ?? 'https://panel.dnct.pl');
+    $panelUrl  = (string)($opts['panelUrl'] ?? panel_public_url());
 
     /* Zalogowanemu NIE proponujemy demo. Panel trzyma jedną sesję na
        przeglądarkę, więc wejście na demo wyrzuciłoby go z własnego konta -

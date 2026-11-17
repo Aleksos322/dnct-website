@@ -26,6 +26,7 @@ require_once __DIR__ . '/backend/lib/plan_change.php';
 
 $pageTitle       = 'Twoje serwery - DNCT Hosting';
 $metaDescription = 'Twoje serwery, terminy ważności, przedłużanie i zmiana pakietu w DNCT Hosting.';
+$robots          = 'noindex, follow';
 $centerContent   = false;
 
 $isLoggedIn = isset($_SESSION['authentik_email'], $_SESSION['authentik_username']);
@@ -251,7 +252,7 @@ function srv_build_card(array $order, ?PDO $panel, bool $salesOn): ?array
             $q->execute([(int)$order['ptero_server_id']]);
             if ($row = $q->fetch(PDO::FETCH_ASSOC)) {
                 /* Klientowi podajemy adres PUBLICZNY (`ip_alias`), nie adres
-                   wewnętrzny węzła. Wpisanie 192.168.50.5 w grze nie połączy
+                   wewnętrzny węzła. Wpisanie adresu wewnętrznego w grze nie połączy
                    nikogo spoza naszej sieci. */
                 $host = !empty($row['ip_alias']) ? $row['ip_alias'] : $row['ip'];
                 $card['address']   = $host . ':' . $row['port'];
@@ -643,7 +644,7 @@ foreach ($aktywne as $c) {
                         <button type="button" class="srv-btn is-quiet" data-role="dismiss">Rezygnuję</button>
                     <?php endif; ?>
 
-                    <a class="srv-btn is-link" href="https://panel.dnct.pl" target="_blank" rel="noopener">Otwórz w panelu</a>
+                    <a class="srv-btn is-link" href="<?php echo htmlspecialchars(panel_public_url()); ?>" target="_blank" rel="noopener">Otwórz w panelu</a>
                 </div>
 
                 <p class="srv-error" data-role="error" hidden></p>
