@@ -82,7 +82,8 @@
 }
 .home-btn svg { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 .home-btn:hover { transform: translateY(-2px); }
-.home-btn:hover svg { transform: translateX(3px); }
+.home-btn-main:hover svg { transform: translateX(3px); }
+.home-btn.glass:hover svg { transform: scale(1.1); }
 .home-btn.glass { position: relative; }
 .home-btn.glass:hover { background-color: rgba(255, 255, 255, 0.06); }
 .home-btn-main { border-color: transparent; box-shadow: 0 10px 30px -12px rgba(139, 92, 246, 0.9); }
@@ -727,6 +728,25 @@
 .home-stat-flaga { height: 0.6em; border-radius: 3px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
 .home-stat-tarcza { height: 0.8em; color: #a78bfa; filter: drop-shadow(0 0 10px rgba(139,92,246,.45)); }
 @media (max-width: 520px) { .home-stat > b { font-size: 1.35rem; } }
+
+/* ===== TELEFON (do 700 px) - desktop bez zmian ===== */
+.home-p3d-hint .hint-m { display: none; }
+@media (max-width: 700px) {
+    /* Sekcje strony głównej z klasą .cennik-page dziedziczyły margin-top: -90px z cennik.css
+       (podciągnięcie pod navbar na stronie cennika) i na telefonie wchodziły na poprzednią sekcję. */
+    .home-wide.cennik-page, .home-p3d.cennik-page { margin-top: 0; }
+    /* Przesuwanie karuzeli planów palcem w bok (home.js); pionowe przewijanie strony zostaje natywne. */
+    .home-p3d.is-3d .home-p3d-stage { touch-action: pan-y; }
+    .home-p3d.is-3d .home-p3d-hint { display: flex; }
+    .home-p3d-hint .hint-pc { display: none; }
+    .home-p3d-hint .hint-m { display: inline; }
+    .home-p3d.is-3d .home-p3d-hint { grid-column: 1 / -1; margin-top: 0.5rem; }
+    /* Scena bierze dokładnie tyle miejsca, ile zostało nad paskiem opinii (wcześniej miała stałą
+       wysokość, wystawała pod pasek i karta była przez niego zasłonięta); home.js skaluje kartę do sceny. */
+    .home-p3d.is-3d .home-p3d-grid { display: flex; flex-direction: column; gap: 0.6rem; }
+    .home-p3d.is-3d .home-p3d-copy { flex: none; }
+    .home-p3d.is-3d .home-p3d-stage { flex: 1 1 0; height: auto; min-height: 0; }
+}
 
 /* Karty strony glownej w matowym stylu jak w panelu (game.panel-dnct.pl):
    plaskie tlo, bez cienia i polysku. Blur zostaje z .glass. Przyciski i navbar

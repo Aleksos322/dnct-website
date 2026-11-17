@@ -275,10 +275,10 @@
         var queueP3d = function () { if (near && !queuedP) { queuedP = true; requestAnimationFrame(renderP3d); } };
 
         // Przewiń stronę tak, żeby karuzela stanęła na planie i.
-        var goTo = function (i) {
+        var goTo = function (i, dur) {
             var total = p3d.offsetHeight - window.innerHeight;
             var y = p3d.getBoundingClientRect().top + window.scrollY + (n > 1 ? total * i / (n - 1) : 0);
-            if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: 1.1 });
+            if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: dur || 1.1 });
             else window.scrollTo({ top: y, behavior: 'smooth' });
         };
         goBtns.forEach(function (b) { b.addEventListener('click', function () { goTo(+b.getAttribute('data-p3d-go')); }); });
@@ -289,6 +289,21 @@
             if (window.dnctLenis) window.dnctLenis.scrollTo(y, { duration: 1.2 });
             else window.scrollTo({ top: y, behavior: 'smooth' });
         });
+        // Telefon: przesunięcie palcem w bok na scenie = poprzedni/następny plan. Pionowy ruch
+        // zostaje przewijaniem strony (CSS: touch-action: pan-y), na komputerze nic się nie zmienia.
+        var tx = 0, ty = 0, tTrack = false;
+        stage.addEventListener('touchstart', function (e) {
+            if (window.innerWidth > 700 || e.touches.length !== 1) { tTrack = false; return; }
+            tx = e.touches[0].clientX; ty = e.touches[0].clientY; tTrack = true;
+        }, { passive: true });
+        stage.addEventListener('touchend', function (e) {
+            if (!tTrack) return;
+            tTrack = false;
+            var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+            if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+            var to = Math.max(0, Math.min(n - 1, lastActive + (dx < 0 ? 1 : -1)));
+            if (to !== lastActive) goTo(to, 0.6);
+        }, { passive: true });
         cards.forEach(function (c, i) {
             c.addEventListener('click', function () { if (!c.classList.contains('is-front')) goTo(i); });
         });

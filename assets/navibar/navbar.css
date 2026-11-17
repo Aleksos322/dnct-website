@@ -641,10 +641,24 @@ nav .glass-content.max-w-7xl { max-width: 1680px; padding-left: clamp(20px, 4vw,
 /* Poniżej 900px: linki chowają się do hamburgera, a pigułka profilu zwija się
    do okrągłego avatara. Jeden wspólny próg, żeby navbar przełączał się w tryb
    mobilny w jednym momencie, a nie etapami. */
-@media (max-width: 900px) {
+@media (max-width: 1140px) {
     .nav-links-desktop { display: none; }
     .nav-hamburger { display: inline-flex; }
     .nav-mobile-menu { display: block; }
+}
+
+/* Linki nigdy nie łamią się do drugiej linii. Zamiast tego, gdy zrobi się ciaśniej
+   (zalogowany: język + dźwięk + pigułka + dzwonek zajmują ~425 px), najpierw znika
+   "HOSTING" przy logo, potem zmniejszają się odstępy i czcionka linków, a dopiero
+   poniżej 1140 px wchodzi hamburger. */
+.nav-links-desktop a { white-space: nowrap; }
+@media (max-width: 1320px) {
+    .brand-hosting { display: none; }
+    .nav-links-desktop.space-x-8 > a + a { margin-left: 1.5rem; }
+}
+@media (max-width: 1240px) {
+    .nav-links-desktop { font-size: 0.9rem; }
+    .nav-links-desktop.space-x-8 > a + a { margin-left: 1.15rem; }
 }
 
 /* Pigułka profilu: znika nick i wylogowanie, zostaje okrągły avatar w obwódce. */
