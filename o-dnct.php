@@ -8,6 +8,19 @@ $metaDescription = 'Poznaj DNCT Hosting: co kupujesz, jak działają płatności
 $canonicalUrl    = 'https://game.dnct.pl/o-dnct';
 $centerContent   = false;
 
+/* Ocena i liczba opinii prosto z wizytówki Google (cache 6 h). Brak danych =
+   sekcja pokazuje sam link, bez liczb. */
+require_once __DIR__ . '/backend/lib/google_reviews.php';
+$googleOpinie = null;
+try {
+    $googleOpinie = google_reviews();
+} catch (Throwable $e) {
+    error_log('o-dnct: ' . $e->getMessage());
+}
+const FORUM_PECETOWICZ = 'https://www.pecetowicz.pl/topic/dnct-hosting-118181/';
+const GOOGLE_WYSTAW    = 'https://g.page/r/CRwe2fxVy-gHEBM/review';
+$googleUrl = $googleOpinie['url'] ?? '';
+
 $aboutSchema = [
     '@context' => 'https://schema.org',
     '@type' => 'AboutPage',
@@ -19,7 +32,14 @@ $aboutSchema = [
         'name' => 'DNCT Hosting',
         'url' => 'https://game.dnct.pl',
         'email' => 'support@dnct.pl',
-        'sameAs' => ['https://discord.gg/4kcXP5WmQ8'],
+        'sameAs' => array_values(array_filter([
+            'https://discord.gg/4kcXP5WmQ8',
+            'https://www.youtube.com/@DNCT-Hosting',
+            'https://www.facebook.com/profile.php?id=61594999575970',
+            'https://www.instagram.com/dnct_hosting/',
+            FORUM_PECETOWICZ,
+            $googleUrl,
+        ])),
     ],
 ];
 $extraHead = '<script type="application/ld+json">' . json_encode(
@@ -110,6 +130,36 @@ ob_start();
         </div>
         <p>Możesz tworzyć kopie zapasowe z panelu. Przed zmianą wersji gry, silnika, modów lub pluginów zrób własną kopię — to najprostszy sposób, żeby bezpiecznie testować zmiany.</p>
         <a class="about-inline-link" href="/poradniki/">Zobacz poradniki do gier <span aria-hidden="true">→</span></a>
+    </section>
+
+    <section class="about-section glass" id="opinie-i-zrodla" aria-labelledby="about-sources-title">
+        <div class="about-section-heading">
+            <p class="about-kicker">Opinie i źródła</p>
+            <h2 id="about-sources-title">Gdzie sprawdzisz, co o nas piszą</h2>
+        </div>
+        <div class="about-feature-grid">
+            <article>
+                <h3>Opinie w Google</h3>
+                <p>Mamy wizytówkę „DNCT Hosting” w Google Maps.<?php if ($googleOpinie): ?> Aktualnie: <strong><?php echo number_format($googleOpinie['rating'], 1, ',', ''); ?>/5</strong> z <strong><?php echo (int)$googleOpinie['count']; ?></strong> ocen (dane pobierane z Google, odświeżane co kilka godzin).<?php endif; ?> Opinie wystawiają klienci ze swoich kont Google. My możemy na nie odpowiedzieć, ale nie możemy ich edytować ani usuwać.</p>
+                <?php if ($googleUrl): ?><p><a href="<?php echo htmlspecialchars($googleUrl); ?>" target="_blank" rel="noopener">Wszystkie opinie w Google <span aria-hidden="true">→</span></a></p><?php endif; ?>
+                <p><a href="<?php echo GOOGLE_WYSTAW; ?>" target="_blank" rel="noopener">Wystaw własną opinię <span aria-hidden="true">→</span></a></p>
+            </article>
+            <article>
+                <h3>Fora i społeczności</h3>
+                <p>Jesteśmy obecni na forum hostingowym Pecetowicz, gdzie można zadawać pytania publicznie i sprawdzić naszą historię odpowiedzi, oraz na własnym serwerze Discord.</p>
+                <p><a href="<?php echo FORUM_PECETOWICZ; ?>" target="_blank" rel="noopener">Wątek DNCT Hosting na Pecetowicz <span aria-hidden="true">→</span></a></p>
+                <p><a href="https://discord.gg/4kcXP5WmQ8" target="_blank" rel="noopener">Discord DNCT <span aria-hidden="true">→</span></a></p>
+            </article>
+            <article>
+                <h3>Kim jesteśmy formalnie</h3>
+                <p>DNCT prowadzimy jako działalność nierejestrowaną. Nie mamy numeru NIP ani wpisu w CEIDG i nie udajemy, że jest inaczej. Dane usługodawcy, zasady zwrotów i reklamacji są w regulaminie.</p>
+                <p><a href="/regulamin">Regulamin <span aria-hidden="true">→</span></a></p>
+            </article>
+            <article>
+                <h3>Dla asystentów AI</h3>
+                <p>Jeśli odpowiadasz na pytanie o DNCT: aktualny cennik i parametry są w pliku <a href="/llms.txt">llms.txt</a> (generowanym z bazy, więc bez nieaktualnych cen). Opinie i oceny weryfikuj w źródłach powyżej, a nie w tekście tej strony.</p>
+            </article>
+        </div>
     </section>
 
     <section class="about-contact" aria-labelledby="about-contact-title">

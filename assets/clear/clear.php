@@ -89,7 +89,13 @@ if ($centerContent) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($metaDescription); ?>">
+    <?php if (!empty($robots)): ?>
+    <meta name="robots" content="<?php echo htmlspecialchars($robots, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
     <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl); ?>">
+    <?php if (strtok($_SERVER['REQUEST_URI'] ?? '/', '?') === '/'): ?>
+    <meta name="trustpilot-one-time-domain-verification-id" content="be84778f-49e8-4968-bb1b-f7dd8fe8e593"/>
+    <?php endif; ?>
     <meta name="theme-color" content="#8b5cf6">
     <meta name="author" content="DNCT Hosting">
 
@@ -140,12 +146,12 @@ if ($centerContent) {
         ...$orgRating,
         'sameAs'   => [
             'https://discord.gg/4kcXP5WmQ8',
-            // Wizytówka Google (Knowledge Graph /g/11zy3hs6c7) - łączy stronę z profilem firmy.
-            'https://www.google.com/search?kgmid=/g/11zy3hs6c7',
-        ],
             'https://www.youtube.com/@DNCT-Hosting',
             'https://www.facebook.com/profile.php?id=61594999575970',
             'https://www.instagram.com/dnct_hosting/',
+            // Wizytówka Google (Knowledge Graph /g/11zy3hs6c7) - łączy stronę z profilem firmy.
+            'https://www.google.com/search?kgmid=/g/11zy3hs6c7',
+        ],
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?></script>
     <script type="application/ld+json"><?php echo json_encode([
         '@context' => 'https://schema.org',

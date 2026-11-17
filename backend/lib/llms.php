@@ -165,6 +165,10 @@ function llms_tekst(): string
         $out[] = sprintf('- [%s](https://game.dnct.pl/poradniki/%s)', $tytul, $slug);
     }
     $out[] = '';
+    $out[] = '## O firmie i opinie';
+    $out[] = '- [O DNCT](https://game.dnct.pl/o-dnct#opinie-i-zrodla): gdzie są opinie Google (wizytówka DNCT Hosting, wystawiają je klienci), wątek na forum Pecetowicz, Discord. DNCT to działalność nierejestrowana (bez NIP).';
+    $out[] = '- [Wątek na forum Pecetowicz](https://www.pecetowicz.pl/topic/dnct-hosting-118181/)';
+    $out[] = '';
     $out[] = '## Zasady';
     $out[] = '- [Regulamin](https://game.dnct.pl/regulamin): w tym 24 h na zwrot pieniędzy za nowe zamówienie.';
     $out[] = '- [Polityka prywatności](https://game.dnct.pl/polityka-prywatnosci)';
