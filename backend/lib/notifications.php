@@ -98,8 +98,77 @@ function dnct_insert_notification(
         throw $e;
     }
 
-    return (int) $pdo->lastInsertId();
+    $id = (int) $pdo->lastInsertId();
+    // Dzwonek na dnct.pl i w panelu czyta wyłącznie bazę systemu wiadomości (beta),
+    // więc zapis do bazy strony trzeba tam przekazać. Tylko zapis do WŁASNEJ bazy
+    // (dnct_db): panel admina pisze tą biblioteką prosto do bazy bety i dostałby
+    // każdemu odbiorcy drugą kopię (internal-notify dokleja "prod:" do event_key).
+    if (empty($opts['skip_forward']) && $pdo === dnct_db()) {
+        dnct_forward_notification_to_messaging($type, $title, $message, $targetType, $targetUserId, $opts);
+    }
+
+    return $id;
 }
+
+/**
+ * Produkcja: przekazuje powiadomienie do systemu wiadomości na becie, bo to
+ * stamtąd czytają dzwonek klienta i admin/powiadomienia (patrz
+ * api/internal-notify.php po stronie bety). Na becie (DNCT_ENV_FILE ustawione)
+ * nie robi nic - tam zapis lokalny JEST bazą wiadomości.
+ *
+ * Podpis tym samym kluczem co api/messaging.php, `purpose` = "notify".
+ * Błąd tu nigdy nie przerywa procesu: powiadomienie jest już w bazie lokalnej,
+ * a cykl życia serwera nie może się wywrócić o niedostępny dzwonek.
+ */
+function dnct_forward_notification_to_messaging(
+    string $type,
+    string $title,
+    string $message,
+    string $targetType,
+    ?string $targetUserId,
+    array $opts
+): void {
+    if (($_SERVER['DNCT_ENV_FILE'] ?? getenv('DNCT_ENV_FILE')) || !function_exists('sodium_crypto_sign_detached')) {
+        return;
+    }
+    $key = @file_get_contents((string)env('SITE_MESSAGING_KEY_FILE', ''));
+    if (!is_string($key) || strlen($key) !== 64) {
+        return;
+    }
+
+    try {
+        $payload = json_encode([
+            'v' => 1, 'purpose' => 'notify', 'time' => time(), 'nonce' => bin2hex(random_bytes(24)),
+            'type' => $type, 'target_type' => $targetType, 'target_user_id' => $targetUserId,
+            'title' => mb_substr($title, 0, 120), 'message' => mb_substr($message, 0, 2000),
+            'event_key' => $opts['event_key'] ?? null, 'link' => $opts['link'] ?? null,
+            'category' => $opts['category'] ?? null, 'action_label' => $opts['action_label'] ?? null,
+            'expires_at' => $opts['expires_at'] ?? null,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+
+        $ch = curl_init('http://127.0.0.1:8910/api/internal-notify.php');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => [
+                'payload'   => base64_encode($payload),
+                'signature' => base64_encode(sodium_crypto_sign_detached($payload, $key)),
+            ],
+            CURLOPT_HTTPHEADER     => ['Host: beta.dnct.pl'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_TIMEOUT        => 4,
+        ]);
+        curl_exec($ch);
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        curl_close($ch);
+        if ($status !== 200) {
+            error_log('notifications: przekazanie do systemu wiadomości nieudane, HTTP ' . $status);
+        }
+    } catch (Throwable $e) {
+        error_log('notifications: przekazanie do systemu wiadomości nieudane: ' . $e->getMessage());
+    }
+}
+
 
 /**
  * Pobiera powiadomienia widoczne dla danego usera (własne + admins jeśli isAdmin + all),
