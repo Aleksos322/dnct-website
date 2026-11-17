@@ -4,7 +4,7 @@
  *
  * W przeciwieństwie do pterodactyl.php NIE MA tu find-or-create po e-mailu:
  * odpowiedź `GET /Users` Jellyfina nie zawiera e-maila (potwierdzone na żywo
- * na 192.168.50.9), więc nie ma jak wykryć, że dany klient już ma konto.
+ * na serwerze), więc nie ma jak wykryć, że dany klient już ma konto.
  * Dlatego dwie ścieżki są rozdzielone i jawne:
  *
  *   - jellyfin_create_user()  - ZAWSZE zakłada nowe konto. Wołać wyłącznie raz,
@@ -15,15 +15,15 @@
  *     (rodzina/znajomi sprzed tego systemu) bez trzymania ich haseł u nas.
  *
  * Zachowanie obu endpointów zweryfikowane na żywo względem Jellyfin 10.11.11
- * (192.168.50.9) przed napisaniem tego pliku - patrz plan account.dnct.pl.
+ * przed napisaniem tego pliku - patrz plan account.dnct.pl.
  */
 
 declare(strict_types=1);
 
-/** URL API Jellyfina - domyślnie LAN, port wystawiony na 0.0.0.0. */
+/** URL API Jellyfina - adres z JELLYFIN_API_URL w .env. */
 function jellyfin_api_url(): string
 {
-    return rtrim((string)env('JELLYFIN_API_URL', 'http://192.168.50.9:8096'), '/');
+    return rtrim((string)env('JELLYFIN_API_URL', 'http://127.0.0.1:8096'), '/');
 }
 
 /** Klucz API Jellyfina - dedykowany dla strony, NIE ten używany przez skill do sortowania mediów. */

@@ -5,7 +5,7 @@
 -- BAZA: dnct_db() (MY_DB_*) - ta sama baza co orders/coupons/notifications.
 -- Migracja `users` Pterodactyla do tej bazy jest ŚWIADOMIE ODRZUCONA (18
 -- migracji z FK po stronie panelu) - ta tabela tylko LINKUJE, nie duplikuje.
--- Jellyfin nie trzyma kont w MySQL wcale (lokalny SQLite na 192.168.50.9) -
+-- Jellyfin nie trzyma kont w MySQL wcale (lokalny SQLite na serwerze Jellyfina) -
 -- integracja idzie wyłącznie przez jego REST API (backend/lib/jellyfin.php).
 --
 -- KLUCZ TO authentik_username, NIE authentik_sub. `sub` z OIDC jest dostępny

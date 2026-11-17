@@ -26,3 +26,9 @@ backend/storage/
 
 # Kopie przed zmiana - od tego jest git
 *.bak-*
+
+# Lokalne ustawienia Claude Code (komendy, sciezki, adresy) - nie do repo
+.claude/
+
+# Kopie robocze typu plik.przed-opieka
+*.przed-*
