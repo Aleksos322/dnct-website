@@ -14,7 +14,7 @@ if(!is_string($raw)||strlen($raw)>1048576||!is_string($sig)||strlen($sig)!==64||
 $p=json_decode($raw,true);
 if(!is_array($p)||($p['v']??0)!==1||abs(time()-(int)($p['time']??0))>60||!preg_match('/^[a-f0-9]{48}$/D',$p['nonce']??'')||!preg_match('/^[a-f0-9]{64}$/D',$p['session']??'')||!filter_var($p['email']??'',FILTER_VALIDATE_EMAIL))bridge_deny();
 $path=(string)($p['path']??'');
-if(!preg_match('~^(frame|revoke|api/(chat\.php|support/(ticket|realtime|media)\.php|notifications/(list|unread-count|mark-read|mark-all-read|hide|clear-read|media)\.php)|assets/(css/(tailwind|chat-shell|chat-ui|notification-bell)\.css|js/(chat-ui|notifications|messenger-controller|support-controller|support-realtime|sound|panel-messaging-frame|messaging-native)\.js|data/emoji-pl\.json))$~D',$path))bridge_deny(404);
+if(!preg_match('~^(frame|revoke|api/(chat\.php|support/(ticket|realtime|media)\.php|notifications/(list|unread-count|mark-read|mark-all-read|hide|clear-read|media)\.php)|assets/(css/(tailwind|chat-shell|chat-ui|notification-bell)\.css|js/(chat-ui|notifications|messenger-controller|support-controller|support-realtime|sound|panel-messaging-frame|messaging-native|push-sw)\.js|data/emoji-pl\.json))$~D',$path))bridge_deny(404);
 if(!in_array($p['method']??'', ['GET','POST'],true))bridge_deny(405);
 if($path==='revoke'&&$p['method']!=='POST')bridge_deny(405);
 $actual=[];

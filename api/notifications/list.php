@@ -24,7 +24,7 @@ rate_limit_guard(
 try {
     $pdo = dnct_db();
     // Powiadomienia systemowe: stan konta jedzie z listą (dzwonek i tak odpytuje co 5 s).
-    try { require_once dirname(__DIR__, 2) . '/backend/lib/notification_desktop.php'; $desktop = notification_desktop_state($pdo, $userId); }
+    try { require_once dirname(__DIR__, 2) . '/backend/lib/notification_desktop.php'; $desktop = notification_desktop_state($pdo, $userId, is_string($_GET['device'] ?? null) ? $_GET['device'] : ''); }
     catch (Throwable $e) { error_log('notifications/list: desktop ' . $e->getMessage()); $desktop = null; }
     $notifications=get_notifications_for_user($pdo,$userId,$isAdmin,50,'normal');$normal=count_unread_for_user($pdo,$userId,$isAdmin,'normal');$adminUnread=$isAdmin?count_unread_for_user($pdo,$userId,true,'admin'):0;
     $savedNotifications=get_notifications_for_user($pdo,$userId,$isAdmin,5000,'all',true);

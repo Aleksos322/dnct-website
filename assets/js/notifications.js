@@ -122,7 +122,7 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
   }
  }
  async function request(path,body){
-  const res=await fetch('/api/notifications/'+path+'.php',{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(body)}:{})});
+  const res=await fetch('/api/notifications/'+path+'.php'+(path==='list'?'?device='+deviceId():''),{credentials:'same-origin',cache:'no-store',...(body?{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify(body)}:{})});
   const data=await res.json().catch(()=>null);
   if(res.status===429){nextRequest=Date.now()+Math.max(1,Number(res.headers.get('Retry-After'))||30)*1000;throw new Error('Za dużo odświeżeń. Lista wczyta się ponownie za chwilę.');}
   if(res.status===401)throw new Error(data?.reason==='unauthorized'?'Sesja wygasła. Zaloguj się ponownie.':'Dostęp do bety wygasł. Odśwież stronę i zaloguj się.');
@@ -173,8 +173,10 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
  // Telefony: Android pokazuje je wyłącznie przez service worker, iOS tylko jako
  // aplikację z ekranu początkowego - to wariant B (Web Push).
  const reducedMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
- const desk={enabled:null,snoozeEnds:0,offerShown:false,offerPending:false,last:''};
- const deskSupported='Notification' in window&&window.isSecureContext!==false&&!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+ const desk={enabled:null,snoozeEnds:0,offerShown:false,offerPending:false,last:'',pushKey:null,pushDevice:false,pushBusy:false,pushTried:false};
+ // Wariant B: Web Push (service worker) działa też przy zamkniętej karcie i na Androidzie.
+ const pushSupported='serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window&&window.isSecureContext!==false;
+ const deskSupported=pushSupported||('Notification' in window&&window.isSecureContext!==false&&!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
  const perm=()=>deskSupported?Notification.permission:'unsupported';
  const deskOn=()=>perm()==='granted'&&desk.enabled!==false;
  const deskInfo=()=>({supported:deskSupported,permission:perm(),on:deskOn(),enabled:desk.enabled});
@@ -190,10 +192,12 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
  const deskRow=document.createElement('div');deskRow.className='dnct-notif-desktop';deskRow.hidden=!deskSupported;
  deskRow.innerHTML='<span class="dnct-notif-desktop-copy"><strong id="dnct-desktop-label">Powiadomienia na komputerze</strong><small></small></span><button type="button" role="switch" class="dnct-notif-switch" aria-labelledby="dnct-desktop-label"><span></span></button>';
  const deskSwitch=deskRow.querySelector('button'),deskHint=deskRow.querySelector('small');panel.append(deskRow);
- function deskRender(){const i=deskInfo();deskSwitch.classList.toggle('is-on',i.on);deskSwitch.setAttribute('aria-checked',String(i.on));deskSwitch.disabled=i.permission==='denied';deskHint.textContent=i.permission==='denied'?'Zablokowane w przeglądarce. Odblokuj je przy kłódce obok adresu strony.':i.on?'Pokażemy je także, gdy ta karta jest w tle.':'Wyłączone.';}
+ function deskRender(){const i=deskInfo();deskSwitch.classList.toggle('is-on',i.on);deskSwitch.setAttribute('aria-checked',String(i.on));deskSwitch.disabled=i.permission==='denied';deskHint.textContent=i.permission==='denied'?'Zablokowane w przeglądarce. Odblokuj je przy kłódce obok adresu strony.':i.on?(desk.pushDevice?'Przyjdą także, gdy karta jest zamknięta.':'Pokażemy je także, gdy ta karta jest w tle.'):'Wyłączone.';}
  function deskEmit(){const info=deskInfo(),sig=JSON.stringify(info);deskRender();if(sig===desk.last)return;desk.last=sig;document.dispatchEvent(new CustomEvent('dnct:desktop-state',{detail:info}));}
- function deskState(s){if(!s||typeof s!=='object')return;desk.enabled=s.enabled===null||s.enabled===undefined?null:Boolean(s.enabled);desk.snoozeEnds=Date.now()+(Number(s.snoozed_for)||0)*1000;deskEmit();}
- async function deskSave(on){const prev=desk.enabled;desk.enabled=on;deskEmit();try{const d=await request('mark-read',{action:'desktop',enabled:on?'1':'0'});deskState(d.desktop);note(on?'Powiadomienia na komputerze włączone.':'Powiadomienia na komputerze wyłączone.');}catch(e){desk.enabled=prev;deskEmit();note(e.message,true);}}
+ function deskState(s){if(!s||typeof s!=='object')return;desk.enabled=s.enabled===null||s.enabled===undefined?null:Boolean(s.enabled);desk.snoozeEnds=Date.now()+(Number(s.snoozed_for)||0)*1000;if(typeof s.push_key==='string')desk.pushKey=s.push_key;desk.pushDevice=s.push_device===true;deskEmit();
+  // Zgoda jest, a ta przeglądarka nie ma jeszcze subskrypcji (np. włączone w innej przeglądarce albo przed wariantem B): dopisz po cichu, raz na wejście.
+  if(deskOn()&&pushSupported&&desk.pushKey&&!desk.pushDevice&&!desk.pushTried){desk.pushTried=true;pushEnsure();}}
+ async function deskSave(on){const prev=desk.enabled;desk.enabled=on;deskEmit();try{const d=await request('mark-read',{action:'desktop',enabled:on?'1':'0',device:deviceId()});deskState(d.desktop);if(on)await pushEnsure();else await pushRemove();note(on?'Powiadomienia na komputerze włączone.':'Powiadomienia na komputerze wyłączone.');}catch(e){desk.enabled=prev;deskEmit();note(e.message,true);}}
  async function deskToggle(){
   if(!deskSupported)return;
   let p=perm();
@@ -220,14 +224,14 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
   if(!reducedMotion())offer.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:200,easing:'ease-out'});
  }
  offer.querySelector('[data-allow]').onclick=()=>{hideOffer();deskToggle();};
- offer.querySelector('[data-later]').onclick=async()=>{hideOffer();desk.snoozeEnds=Date.now()+86400000;try{deskState((await request('mark-read',{action:'desktop-snooze'})).desktop);}catch{}};
+ offer.querySelector('[data-later]').onclick=async()=>{hideOffer();desk.snoozeEnds=Date.now()+86400000;try{deskState((await request('mark-read',{action:'desktop-snooze',device:deviceId()})).desktop);}catch{}};
  button.addEventListener('click',hideOffer);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&desk.offerPending)deskOffer();});
  window.addEventListener('resize',()=>{if(!offer.hidden)placeOffer();});window.addEventListener('scroll',()=>{if(!offer.hidden)placeOffer();},{passive:true});
  // Jedna karta na powiadomienie: karta, na którą patrzysz, "zabiera" je od razu i nic nie
  // pokazuje (widzisz dzwonek). Karty w tle czekają chwilę; pierwsza zgłoszona wygrywa.
  async function deskNotify(key,{title,body,onclick}={}){
-  if(!deskOn()||!/^[a-z]{1,12}:[0-9:]{1,60}$/.test(key))return false;
+  if(!deskOn()||desk.pushDevice||!/^[a-z]{1,12}:[0-9:]{1,60}$/.test(key))return false;   // push pokaże je sam (service worker)
   const looking=()=>!document.hidden&&document.hasFocus();
   const focused=looking();
   if(!focused)await new Promise(r=>setTimeout(r,1200));
@@ -236,6 +240,39 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
   try{const n=new Notification(String(title||'DNCT'),{body:String(body||'').slice(0,240),icon:document.querySelector('link[rel~="icon"]')?.href||new URL('/'+'assets/media/icons/favicon.png',location.origin).href,tag:'dnct:'+key,silent:true});n.onclick=()=>{window.focus();try{onclick?.();}catch{}n.close();};return true;}catch{return false;}
  }
  function deskOpen(n){if(!opened)button.click();const fresh=[...records,...adminRecords].find(x=>String(x.id)===String(n.id))||n;show(fresh,button);}
+ // Identyfikator przeglądarki we wspólnym ciasteczku *.dnct.pl: strona i panel w tej samej
+ // przeglądarce mają jedną subskrypcję, więc jedno powiadomienie zamiast dwóch.
+ function deviceId(){
+  let id=(document.cookie.match(/(?:^|;\s*)dnct_dev=([a-f0-9]{32})/)||[])[1];
+  if(!id){id=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+   document.cookie='dnct_dev='+id+'; Path=/; Max-Age=63072000; SameSite=Lax'+(location.protocol==='https:'?'; Secure':'')+(/(^|\.)dnct\.pl$/.test(location.hostname)?'; Domain=.dnct.pl':'');}
+  return id;
+ }
+ const b64bytes=s=>{const pad='='.repeat((4-s.length%4)%4),raw=atob((s+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(raw,c=>c.charCodeAt(0));};
+ async function pushRegistration(){
+  // Most przepisuje ten adres na /messaging/assets/js/push-sw.js (game.dnct.pl, panel).
+  const reg=await navigator.serviceWorker.register('/assets/js/push-sw.js');
+  if(!reg.active){const sw=reg.installing||reg.waiting;if(sw)await new Promise(r=>{if(sw.state==='activated')return r();sw.addEventListener('statechange',()=>{if(sw.state==='activated')r();});setTimeout(r,8000);});}
+  return reg;
+ }
+ async function pushEnsure(){
+  if(!pushSupported||!desk.pushKey||perm()!=='granted'||desk.enabled===false||desk.pushBusy)return false;
+  desk.pushBusy=true;
+  try{
+   const reg=await pushRegistration(),key=b64bytes(desk.pushKey);let sub=await reg.pushManager.getSubscription();
+   const same=sub&&sub.options?.applicationServerKey&&new Uint8Array(sub.options.applicationServerKey).join()===key.join();
+   if(sub&&!same){await sub.unsubscribe().catch(()=>{});sub=null;}
+   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+   const d=await request('mark-read',{action:'desktop-push',subscription:JSON.stringify(sub),device:deviceId(),origin:location.origin});
+   deskState(d.desktop);return true;
+  }catch(e){console.warn('DNCT push:',e?.message||e);return false;}
+  finally{desk.pushBusy=false;}
+ }
+ async function pushRemove(){
+  if(!pushSupported)return;
+  try{const reg=await navigator.serviceWorker.getRegistration('/assets/js/push-sw.js');const sub=await reg?.pushManager.getSubscription();await sub?.unsubscribe();}catch{}
+  try{deskState((await request('mark-read',{action:'desktop-push-off',device:deviceId()})).desktop);}catch{}
+ }
  window.DNCTDesktop={info:deskInfo,toggle:deskToggle,offer:deskOffer,notify:deskNotify,open:deskOpen};
  deskEmit();
  refresh();setInterval(()=>{if(opened||modal.open)refresh();},3000);setInterval(refresh,5000);

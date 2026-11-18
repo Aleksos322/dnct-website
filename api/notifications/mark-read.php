@@ -12,7 +12,7 @@ csrf_guard();
 // wymagałby zmian w trzech miejscach). Osobny limit per konto: "jedna karta"
 // zgłasza się przy każdej nowej wiadomości i nie może zjadać limitu odczytów.
 $action = request_string('action');
-$desktop = in_array($action, ['desktop', 'desktop-snooze', 'desktop-claim'], true);
+$desktop = in_array($action, ['desktop', 'desktop-snooze', 'desktop-claim', 'desktop-push', 'desktop-push-off'], true);
 
 if (!$desktop) {
     rate_limit_guard(
@@ -42,12 +42,20 @@ if ($desktop) {
         notification_desktop_set($db, $userId, $enabled === '1');
     } elseif ($action === 'desktop-snooze') {
         notification_desktop_snooze($db, $userId);
+    } elseif ($action === 'desktop-push') {
+        try {
+            notification_push_save($db, $userId, request_string('device'), request_string('subscription'), request_string('origin'), $isAdmin);
+        } catch (InvalidArgumentException $e) {
+            json_error($e->getMessage(), 422);
+        }
+    } elseif ($action === 'desktop-push-off') {
+        notification_push_remove($db, $userId, request_string('device'));
     } else {
         $key = request_string('key');
         if (!preg_match('/^[a-z]{1,12}:[0-9:]{1,60}$/D', $key)) json_error('Nieprawidłowy klucz.', 422);
         json_ok(['claimed' => notification_desktop_claim($db, $userId, $key)]);
     }
-    json_ok(['desktop' => notification_desktop_state($db, $userId)]);
+    json_ok(['desktop' => notification_desktop_state($db, $userId, request_string('device'))]);
 }
 
 $id = (int) request_string('id', '0');

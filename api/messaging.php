@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__).'/backend/bootstrap.php';
 if(!isset($_SESSION['authentik_username'],$_SESSION['authentik_email']))json_error('Zaloguj się, aby korzystać z komunikacji.',401);
 $path=(string)($_GET['bridge_path']??'');
-if(!preg_match('~^(frame|revoke|api/(chat\.php|support/(ticket|realtime|media)\.php|notifications/(list|unread-count|mark-read|mark-all-read|hide|clear-read|media)\.php)|assets/(css/(tailwind|chat-shell|chat-ui|notification-bell)\.css|js/(chat-ui|notifications|messenger-controller|support-controller|support-realtime|sound|panel-messaging-frame|messaging-native)\.js|data/emoji-pl\.json))$~D',$path))json_error('Nie znaleziono zasobu.',404);
+if(!preg_match('~^(frame|revoke|api/(chat\.php|support/(ticket|realtime|media)\.php|notifications/(list|unread-count|mark-read|mark-all-read|hide|clear-read|media)\.php)|assets/(css/(tailwind|chat-shell|chat-ui|notification-bell)\.css|js/(chat-ui|notifications|messenger-controller|support-controller|support-realtime|sound|panel-messaging-frame|messaging-native|push-sw)\.js|data/emoji-pl\.json))$~D',$path))json_error('Nie znaleziono zasobu.',404);
 $method=$_SERVER['REQUEST_METHOD'];if(!in_array($method,['GET','POST'],true))json_error('Niedozwolona metoda.',405);
 if($path==='revoke'&&$method!=='POST')json_error('Niedozwolona metoda.',405);
 if($method==='POST')csrf_guard();
