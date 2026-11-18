@@ -129,6 +129,14 @@
     };
 
     window.DnctSound = window.DnctSound || new DnctSound();
+    /* Przełącznik dźwięku zniknął z navbara 2026-11-11, a zapisane wcześniej "0" zostawało
+       w przeglądarce na zawsze - bez sposobu, żeby to odkręcić (dźwięk ginął np. tylko w Operze).
+       Bez przełącznika nie ma wyciszenia: kasujemy stary zapis i włączamy też obiekt
+       produkcyjnego sound.js, który na game.dnct.pl ładuje się przed tym z mostu. */
+    if (!document.getElementById('dnct-sound-toggle')) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        window.DnctSound.enabled = true;
+    }
     // dnct.pl ładuje własny sound.js (produkcja) przed tym z mostu - dołóż playIn
     // do już istniejącego obiektu, inaczej czat grałby starym zestawem tonów.
     if (typeof window.DnctSound.playIn !== 'function') {
