@@ -15,8 +15,9 @@ csrf_guard();
 // Limit na SESJĘ, a na IP tylko szeroki bezpiecznik. Dawniej 10/min na IP: każde wejście
 // na stronę to 2 zgłoszenia (wejście + wyjście), więc kilka kliknięć albo kilka kart, czy
 // domownicy za jednym IP, kończyło się czerwonym 429 w konsoli i dziurą w statystyce.
-rate_limit_guard('aktywnosc', [120, 60], 'Zbyt wiele odświeżeń obecności z tego adresu IP. Odczekaj chwilę.');
-rate_limit_guard('aktywnosc-' . substr(hash('sha256', session_id()), 0, 16), [20, 60], 'Zbyt wiele odświeżeń obecności. Odczekaj chwilę.');
+// Jedno wejście to do 3 zgłoszeń (wejście, ukrycie karty, wyjście), więc 60/min to ok. 20 stron na minutę.
+rate_limit_guard('aktywnosc', [240, 60], 'Zbyt wiele odświeżeń obecności z tego adresu IP. Odczekaj chwilę.');
+rate_limit_guard('aktywnosc-' . substr(hash('sha256', session_id()), 0, 16), [60, 60], 'Zbyt wiele odświeżeń obecności. Odczekaj chwilę.');
 
 $strona   = request_string('strona', '/');
 $widoczna = request_bool('widoczna');
