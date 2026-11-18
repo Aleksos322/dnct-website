@@ -28,29 +28,71 @@ declare(strict_types=1);
 require_once __DIR__ . '/orders.php';
 require_once __DIR__ . '/notifications.php';
 
-/** Kod twórcy użyty w tym zamówieniu -> przypisanie klienta (tylko pierwsze się liczy). */
+/**
+ * Stawka VAT (w %) odejmowana przy liczeniu prowizji netto. 0 = sprzedawca
+ * nie jest płatnikiem VAT, więc netto = brutto. Po rejestracji VAT wystarczy
+ * ustawić VAT_RATE_PROCENT w .env - kod nie wymaga zmian.
+ */
+function partner_vat_procent(): float
+{
+    $v = (float)str_replace(',', '.', (string)env('VAT_RATE_PROCENT', '0'));
+    return $v > 0 && $v < 100 ? $v : 0.0;
+}
+
+/** Kwota netto w groszach z kwoty brutto zapłaconej przez klienta. */
+function partner_netto(int $brutto): int
+{
+    $vat = partner_vat_procent();
+    return $vat > 0 ? (int)round($brutto / (1 + $vat / 100)) : $brutto;
+}
+
+/** Kod -> aktywny partner: własny kod partnera (partnerzy.kod) albo kupon powiązany z partnerem (twórcy gier). */
+function partner_po_kodzie(PDO $dnct, string $kod): ?array
+{
+    $kod = strtoupper(trim($kod));
+    if ($kod === '') {
+        return null;
+    }
+    $st = $dnct->prepare(
+        'SELECT id, okres_miesiecy, prowizja_procent, konto_email FROM partnerzy WHERE aktywny = 1 AND kod = ?
+         UNION ALL
+         SELECT p.id, p.okres_miesiecy, p.prowizja_procent, p.konto_email FROM coupons c JOIN partnerzy p ON p.id = c.partner_id
+          WHERE c.code = ? AND p.aktywny = 1
+         LIMIT 1'
+    );
+    $st->execute([$kod, $kod]);
+    return $st->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+
+/** Czy to konto samego partnera (partner nie może przypisać siebie jako klienta własnym kodem). */
+function partner_to_jego_konto(array $partner, string $email): bool
+{
+    $konto = trim((string)($partner['konto_email'] ?? ''));
+    return $konto !== '' && strcasecmp($konto, trim($email)) === 0;
+}
+
+/**
+ * Kod partnera użyty w tym zamówieniu -> przypisanie klienta (tylko pierwsze się liczy).
+ * okres_miesiecy = 0 oznacza brak limitu (wygasa 9999-12-31).
+ */
 function partner_przypisz(PDO $dnct, string $email, ?string $kod): void
 {
     if ($kod === null || $kod === '' || $email === '') {
         return;
     }
-    $st = $dnct->prepare(
-        'SELECT p.id, p.okres_miesiecy FROM coupons c JOIN partnerzy p ON p.id = c.partner_id
-          WHERE c.code = ? AND p.aktywny = 1'
-    );
-    $st->execute([$kod]);
-    $p = $st->fetch(PDO::FETCH_ASSOC);
-    if (!$p) {
+    $p = partner_po_kodzie($dnct, $kod);
+    if (!$p || partner_to_jego_konto($p, $email)) {
         return;
     }
-    // INSERT IGNORE: klient należy do pierwszego twórcy, nie do ostatniego.
+    $okres = (int)$p['okres_miesiecy'];
+    // INSERT IGNORE: klient należy do pierwszego partnera, nie do ostatniego.
     $dnct->prepare(
-        'INSERT IGNORE INTO partner_klienci (partner_id, klient_email, kod, przypisano, wygasa)
-         VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL ? MONTH))'
-    )->execute([(int)$p['id'], $email, $kod, (int)$p['okres_miesiecy']]);
+        "INSERT IGNORE INTO partner_klienci (partner_id, klient_email, kod, przypisano, wygasa)
+         VALUES (?, ?, ?, NOW(), IF(? = 0, '9999-12-31 23:59:59', DATE_ADD(NOW(), INTERVAL ? MONTH)))"
+    )->execute([(int)$p['id'], $email, strtoupper(trim($kod)), $okres, $okres]);
 }
 
-/** Nalicza prowizję od jednej płatności, jeśli klient ma aktywnego twórcę. */
+/** Nalicza prowizję od jednej płatności (od kwoty netto), jeśli klient ma aktywnego partnera. */
 function partner_nalicz(PDO $dnct, string $email, int $kwota, string $ref, ?int $orderId): void
 {
     if ($email === '' || $kwota <= 0 || $ref === '') {
@@ -65,11 +107,12 @@ function partner_nalicz(PDO $dnct, string $email, int $kwota, string $ref, ?int 
     if (!$p) {
         return;
     }
-    $prowizja = (int)round($kwota * (float)$p['prowizja_procent'] / 100);
+    $netto = partner_netto($kwota);
+    $prowizja = (int)round($netto * (float)$p['prowizja_procent'] / 100);
     $dnct->prepare(
-        'INSERT IGNORE INTO partner_prowizje (partner_id, order_id, klient_email, stripe_ref, kwota_klienta, prowizja)
-         VALUES (?, ?, ?, ?, ?, ?)'
-    )->execute([(int)$p['id'], $orderId, $email, $ref, $kwota, $prowizja]);
+        'INSERT IGNORE INTO partner_prowizje (partner_id, order_id, klient_email, stripe_ref, kwota_klienta, kwota_netto, prowizja)
+         VALUES (?, ?, ?, ?, ?, ?, ?)'
+    )->execute([(int)$p['id'], $orderId, $email, $ref, $kwota, $netto, $prowizja]);
 }
 
 /** Po obsłużonej sesji Checkout (zakup gry, przedłużenie, zmiana pakietu). */
@@ -109,6 +152,42 @@ function partner_po_fakturze(PDO $dnct, $invoice): void
         partner_nalicz($dnct, (string)$order['user_email'], (int)($invoice->amount_paid ?? 0), (string)$invoice->id, (int)$order['id']);
     } catch (Throwable $e) {
         partner_blad('faktura ' . ($invoice->id ?? '?'), $e);
+    }
+}
+
+/** Po obsłużonej sesji Checkout hostingu WWW (zakup albo przedłużenie): przypisanie partnera i prowizja. */
+function partner_po_sesji_hostingu(PDO $dnct, $session): void
+{
+    try {
+        $paid = (string)($session->payment_status ?? '');
+        if ($paid !== 'paid' && $paid !== 'no_payment_required') {
+            return;
+        }
+        $order = hosting_order_by($dnct, 'stripe_session_id', (string)$session->id);
+        if ($order === null && hosting_session_order_id($session) > 0) {
+            $order = hosting_order_by($dnct, 'id', hosting_session_order_id($session));
+        }
+        if ($order === null) {
+            return;
+        }
+        $email = (string)$order['user_email'];
+        partner_przypisz($dnct, $email, $order['promo_code'] ?? null);
+
+        // Pierwsza faktura abonamentu ma ten sam numer co w invoice.paid - zapis jest raz (UNIQUE stripe_ref).
+        $ref = (string)($session->invoice ?? '') ?: (string)($session->payment_intent ?? '') ?: (string)$session->id;
+        partner_nalicz($dnct, $email, (int)($session->amount_total ?? 0), $ref, (int)$order['id']);
+    } catch (Throwable $e) {
+        partner_blad('sesja hostingu ' . ($session->id ?? '?'), $e);
+    }
+}
+
+/** Po opłaconej fakturze abonamentu hostingu WWW (odnowienia, także roczne). */
+function partner_po_fakturze_hostingu(PDO $dnct, array $order, $invoice): void
+{
+    try {
+        partner_nalicz($dnct, (string)$order['user_email'], (int)($invoice->amount_paid ?? 0), (string)$invoice->id, (int)$order['id']);
+    } catch (Throwable $e) {
+        partner_blad('faktura hostingu ' . ($invoice->id ?? '?'), $e);
     }
 }
 
@@ -167,4 +246,47 @@ function partnerzy_lista(PDO $dnct): array
                 COALESCE((SELECT SUM(prowizja) FROM partner_prowizje r WHERE r.partner_id = p.id AND r.status = 'wyplacona'), 0) AS wyplacono
            FROM partnerzy p ORDER BY p.aktywny DESC, p.id DESC"
     )->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Opiekunowie stron: aktywni partnerzy z kontem DNCT i zaznaczonym "przyjmuje opieke".
+ * Zwraca tylko to, co wolno pokazac klientowi (id, nazwa, avatar). Przed migracja 059 - pusta lista.
+ *
+ * @return list<array{id:int,nazwa:string,avatar:?string,login:string}>
+ */
+function partner_opiekunowie(PDO $db): array
+{
+    try {
+        $st = $db->query("SELECT id, nazwa, konto_login FROM partnerzy
+                           WHERE opieka = 1 AND aktywny = 1 AND konto_login IS NOT NULL AND konto_login <> '' AND kod IS NOT NULL AND kod <> ''
+                           ORDER BY nazwa");
+        $wiersze = $st->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        return [];
+    }
+    $avatary = [];
+    $loginy = array_values(array_unique(array_map(static fn($w) => (string)$w['konto_login'], $wiersze)));
+    if ($loginy) {
+        try {
+            $in = implode(',', array_fill(0, count($loginy), '?'));
+            $q = $db->prepare("SELECT authentik_username, avatar_file FROM user_profiles WHERE authentik_username IN ({$in}) AND avatar_file IS NOT NULL AND avatar_file <> ''");
+            $q->execute($loginy);
+            foreach ($q->fetchAll(PDO::FETCH_ASSOC) as $r) {
+                $avatary[mb_strtolower((string)$r['authentik_username'])] = (string)$r['avatar_file'];
+            }
+        } catch (Throwable $e) {
+            // avatar jest dodatkiem
+        }
+    }
+    $out = [];
+    foreach ($wiersze as $w) {
+        $f = $avatary[mb_strtolower((string)$w['konto_login'])] ?? '';
+        $out[] = [
+            'id' => (int)$w['id'],
+            'nazwa' => (string)$w['nazwa'],
+            'login' => (string)$w['konto_login'],
+            'avatar' => preg_match('/^[a-f0-9]{16}-avatar-[a-f0-9]{8}\.webp$/', $f) ? 'https://account.dnct.pl/m/' . $f : null,
+        ];
+    }
+    return $out;
 }

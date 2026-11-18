@@ -36,8 +36,9 @@ ob_start();
 
       <h1>Regulamin świadczenia usług - DNCT</h1>
       <p><strong>Data wejścia w życie:</strong> 7 lutego 2026<br>
-      <strong>Aktualizacja:</strong> 13 października 2026 - tabele cen w pkt 3 i 4 zastąpione odesłaniem do cennika (ceny się nie zmieniają).<br>
-      <strong>Wcześniej:</strong> 4 października 2026 - zasady rozpoczęcia usługi, prawo odstąpienia i dobrowolna Gwarancja Zwrotu 24 h. Dla nowych zamówień wersja obowiązuje od chwili zawarcia umowy. Wobec dotychczasowych Klientów zmiany wymagające powiadomienia obowiązują po doręczeniu informacji na trwałym nośniku i po upływie wskazanego w pkt 14 terminu.</p>
+      <strong>Aktualizacja:</strong> 5 listopada 2026 - zasady dodatku „domena z certyfikatem SSL” (pkt 15.10), w tym minimalny okres 12 miesięcy.<br>
+      <strong>Wcześniej:</strong> 13 października 2026 - tabele cen w pkt 3 i 4 zastąpione odesłaniem do cennika (ceny się nie zmieniają).<br>
+      4 października 2026 - zasady rozpoczęcia usługi, prawo odstąpienia i dobrowolna Gwarancja Zwrotu 24 h. Dla nowych zamówień wersja obowiązuje od chwili zawarcia umowy. Wobec dotychczasowych Klientów zmiany wymagające powiadomienia obowiązują po doręczeniu informacji na trwałym nośniku i po upływie wskazanego w pkt 14 terminu.</p>
       <p>Ten dokument określa zasady świadczenia usług przez DNCT (dalej: „DNCT”, „Dostawca”). Korzystając z usług, Klient akceptuje poniższe postanowienia.</p>
 
       <section>
@@ -208,6 +209,7 @@ ob_start();
           <li><strong>Po terminie płatności:</strong> nieopłacony hosting jest zawieszany (strony i poczta przestają działać, dane zostają nienaruszone). Po opłaceniu wszystko wraca od razu. Konto zawieszone dłużej niż 14 dni DNCT może usunąć po wcześniejszym powiadomieniu Klienta e-mailem i umożliwieniu pobrania kopii.</li>
           <li><strong>Kopie zapasowe</strong> mają charakter pomocniczy - Klient odpowiada za posiadanie własnej kopii ważnych danych (pkt 9).</li>
           <li><strong>Zmiana pakietu</strong> w trakcie okresu rozliczeniowego odbywa się na zgłoszenie; różnica w cenie jest rozliczana proporcjonalnie.</li>
+          <li><strong>Domena z certyfikatem SSL (dodatek):</strong> przy nowym abonamencie Klient może zamówić domenę w końcówce <code>.pl</code> wraz z certyfikatem SSL, za 19,99 zł brutto co 30 dni albo 180 zł brutto rocznie (ceny dodatku są widoczne w koszyku i w potwierdzeniu zamówienia). DNCT kupuje domenę i przypisuje ją do konta Klienta w ciągu 48 godzin od płatności, zwykle do godziny. Jeżeli wybrana domena okaże się niedostępna, DNCT kontaktuje się z Klientem i zwraca opłatę za dodatek. Przy okresie próbnym hostingu (7 dni) opłata za hosting wynosi 0 zł, a opłata za domenę z SSL jest pobierana od razu (za pierwsze 30 dni), po czym domena odnawia się co 30 dni. Domena z SSL jest zamawiana na <strong>minimum 12 miesięcy</strong>: z domeny i certyfikatu SSL można zrezygnować <strong>dopiero po roku od dnia zamówienia</strong>, także przy płatności miesięcznej. Rezygnacja zatrzymuje opłatę za dodatek od następnego okresu rozliczeniowego, a domena przestaje być przedłużana. Do rejestracji domeny Klient podaje dane właściciela domeny (imię i nazwisko albo dane firmy, adres, telefon, e-mail), które DNCT przekazuje rejestratorowi wyłącznie w tym celu; Klient odpowiada za ich prawdziwość. Strefą DNS domeny zarządza DNCT (Cloudflare), a Klient zmienia serwery nazw u rejestratora zgodnie z instrukcją DNCT.</li>
         </ol>
       </section>
 

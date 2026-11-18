@@ -52,6 +52,34 @@ function registration_clear(): void
     unset($_SESSION[REGISTRATION_SESSION_KEY]);
 }
 
+/** Gdzie wrócić po rejestracji (np. do koszyka na stronie hostingu). Klucz poza stanem kreatora, żeby przeżył jego czyszczenie. */
+const REGISTRATION_RETURN_KEY = 'registration_return_to';
+
+/**
+ * Zapamiętuje powrót po rejestracji. Przyjmujemy WYŁĄCZNIE ścieżkę z krótkim
+ * zapytaniem (np. /?plan=dnct-web-pro&billing_mode=subscription#pakiety) - host
+ * jest zawsze stroną hostingu (hosting_site_url()), więc z adresu w żądaniu
+ * nie da się zrobić otwartego przekierowania.
+ */
+function registration_return_to_store(?string $raw): void
+{
+    $raw = trim((string)$raw);
+    if ($raw !== '' && strlen($raw) <= 300 && preg_match('~^/(\?[A-Za-z0-9_=&%.+-]*)?(#[A-Za-z0-9_-]*)?$~', $raw)) {
+        $_SESSION[REGISTRATION_RETURN_KEY] = $raw;
+    }
+}
+
+/** Adres logowania na stronie hostingu z powrotem do koszyka albo null, gdy rejestracja nie szła z koszyka. */
+function registration_return_to_take(): ?string
+{
+    $path = $_SESSION[REGISTRATION_RETURN_KEY] ?? null;
+    unset($_SESSION[REGISTRATION_RETURN_KEY]);
+    if (!is_string($path) || $path === '') {
+        return null;
+    }
+    return hosting_site_url() . '/login?return_to=' . rawurlencode($path);
+}
+
 /**
  * Rozpoczyna (lub aktualizuje) rejestrację danymi z kroku 1.
  *

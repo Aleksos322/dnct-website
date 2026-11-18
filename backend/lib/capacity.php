@@ -55,11 +55,14 @@ const CAPACITY_DEFAULT_NODE = 'User node';
  *
  * Jednostki jak w Pterodactylu: 100 = jeden rdzeń. 40 vCPU = 4000.
  *
- * BEZ nadsubskrypcji (0%). Project Zomboid jest w dużej mierze jednowątkowy;
- * zajętość jest odczytywana z panelu przy każdym sprawdzeniu dostępności.
+ * Nadsubskrypcja 100% (od 2026-11-13; wcześniej 0%). Pomiar na pteroq: przy
+ * 39 z 40 przydzielonych rdzeni realne zużycie CPU było ok. 6-9%, a cały cennik
+ * od 3 GB w górę pokazywał się jako wyprzedany. Przydział CPU w Pterodactylu to
+ * limit, nie rezerwacja. Project Zomboid jest w dużej mierze jednowątkowy -
+ * pilnuj load average na pteroq (powinien zostać poniżej ok. 20).
  */
 const CAPACITY_NODE_CPU_CORES        = 4000;
-const CAPACITY_NODE_CPU_OVERALLOCATE = 0;
+const CAPACITY_NODE_CPU_OVERALLOCATE = 100;
 
 /**
  * Wolne zasoby węzła, z uwzględnieniem nadsubskrypcji.

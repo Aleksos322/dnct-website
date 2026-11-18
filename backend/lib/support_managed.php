@@ -29,7 +29,7 @@ function managed_support_can_reply(array $ticket, bool $care): bool
 }
 
 /** Zwraca istniejące aktywne zgłoszenie zamiast tworzyć duplikat. */
-function managed_support_create(PDO $db, string $username, string $access, string $name, string $email, string $key, string $ipHash, string $billing): array
+function managed_support_create(PDO $db, string $username, string $access, string $name, string $email, string $key, string $ipHash, string $billing, string $period = 'month', ?array $opiekun = null): array
 {
     $existing=managed_support_active($db,$username,$access);
     if($existing) return ['ticket'=>$existing,'created'=>false];
@@ -45,8 +45,10 @@ function managed_support_create(PDO $db, string $username, string $access, strin
         $q=$db->prepare('INSERT INTO support_tickets(public_id,access_token_hash,owner_key,active_owner_key,request_key,customer_username,customer_name,customer_email,category_key,category_label,ip_hash,status) VALUES(:number,:access,:owner,:active_owner,:request,:username,:name,:email,"www",:label,:ip,"new")');
         $q->execute([':number'=>$number,':access'=>$access,':owner'=>$owner,':active_owner'=>$owner,':request'=>$key,':username'=>$username?:null,':name'=>$name,':email'=>$email,':label'=>support_categories()['www'],':ip'=>$ipHash]);
         $id=(int)$db->lastInsertId();
-        $price=$billing==='payment'?'60,50 zł jednorazowo za 30 dni (+10%)':'55,00 zł w abonamencie co 30 dni';
-        $db->prepare('INSERT INTO support_messages(ticket_id,author_role,author_name,body) VALUES(:id,"customer",:name,:body)')->execute([':id'=>$id,':name'=>$name,':body'=>'Interesuje mnie Strona pod opieką DNCT: '.$price.'. Proszę o kontakt i ustalenie szczegółów. To zapytanie, bez złożenia płatnego zamówienia.']);
+        $year=$period==='year';
+        $kwota=pricing_format(HOSTING_MANAGED_PRICE*($year?HOSTING_YEAR_PAID_MONTHS:1));
+        $price=$kwota.' zł w abonamencie '.($year?'co rok (11 miesięcy w cenie)':'co 30 dni');
+        $db->prepare('INSERT INTO support_messages(ticket_id,author_role,author_name,body) VALUES(:id,"customer",:name,:body)')->execute([':id'=>$id,':name'=>$name,':body'=>'Interesuje mnie Strona pod opieką DNCT: '.$price.'.'.($opiekun!==null?' Wybrany opiekun: '.$opiekun['nazwa'].' (konto '.$opiekun['login'].').':'').' Proszę o kontakt i ustalenie szczegółów. To zapytanie, bez złożenia płatnego zamówienia.']);
         $db->prepare('INSERT INTO support_messages(ticket_id,author_role,author_name,body) VALUES(:id,"admin",:name,:body)')->execute([':id'=>$id,':name'=>'Administracja DNCT · wiadomość automatyczna',':body'=>managed_support_greeting()]);
         $db->prepare('INSERT INTO support_ticket_audit(ticket_id,actor_username,action,details) VALUES(:id,:actor,"managed_care_created",:details)')->execute([':id'=>$id,':actor'=>$username?:null,':details'=>'web.dnct.pl; billing_mode='.$billing.'; automatic greeting']);
         $db->commit();

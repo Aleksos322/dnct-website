@@ -42,7 +42,11 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
         case 'checkout.session.async_payment_succeeded':
             // Hosting WWW ma własną tabelę zamówień (backend/lib/hosting_orders.php).
             if (hosting_is_hosting_session($event->data->object)) {
-                return hosting_webhook_checkout_completed($dnct, $event->data->object);
+                $ok = hosting_webhook_checkout_completed($dnct, $event->data->object);
+                if ($ok) {
+                    partner_po_sesji_hostingu($dnct, $event->data->object);
+                }
+                return $ok;
             }
             // Prowizja twórcy dopiero PO obsłudze - zamówienie ma już status i dane.
             $ok = webhook_checkout_completed($dnct, $event->data->object);
@@ -54,7 +58,11 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
 
         case 'invoice.paid':
             if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
-                return hosting_webhook_invoice_paid($dnct, $h, $event->data->object);
+                $ok = hosting_webhook_invoice_paid($dnct, $h, $event->data->object);
+                if ($ok) {
+                    partner_po_fakturze_hostingu($dnct, $h, $event->data->object);
+                }
+                return $ok;
             }
             $ok = webhook_invoice_paid($dnct, $event->data->object);
             if ($ok) {
@@ -85,6 +93,11 @@ function webhook_dispatch(PDO $dnct, \Stripe\Event $event): bool
         case 'invoice.payment_failed':
             if ($h = webhook_hosting_by_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
                 return hosting_webhook_invoice_failed($dnct, $h, $event->data->object);
+            }
+            require_once __DIR__ . '/domeny.php';
+            if ($d = domain_order_by_addon_subscription($dnct, (string)($event->data->object->subscription ?? ''))) {
+                domain_addon_payment_failed($dnct, $d, $event->data->object);
+                return true;
             }
             return webhook_invoice_failed($dnct, $event->data->object);
 
@@ -169,6 +182,12 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
         if ($order === null || in_array($order['status'], ['provisioned', 'cancelled'], true)) {
             return true;   // już obsłużone
         }
+        /* Drugie zdarzenie tej samej płatności (BLIK/P24: completed + async_payment_succeeded).
+           Zamówienie z odroczonym startem zostaje w 'paid', więc warunek wyżej go nie
+           zatrzymywał i klient dostawał drugi mail z potwierdzeniem umowy (#44, 10.11.2026). */
+        if ($order['status'] === 'paid' && empty($order['immediate_service_requested_at'])) {
+            return true;
+        }
         /* Kwota faktycznie pobrana (po kodzie rabatowym). amount_gross to cena
            z cennika; przy kodzie Stripe pobiera mniej i to amount_total trafia
            do historii opłat, panelu admina, raportu i maila (order_paid_amount).
@@ -224,7 +243,9 @@ function webhook_checkout_completed(PDO $dnct, $session): bool
                 'info',
                 'Płatność przyjęta - uruchomienie po terminie odstąpienia',
                 'Nie wybrano natychmiastowego startu. Serwer uruchomimy '
-                . czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i') . '.'
+                . czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i')
+                . '. Pomyliłeś(-aś) się i chcesz grać od razu? Kliknij przycisk i uruchom serwer teraz.',
+                ['link' => '/twoje-serwery', 'action_label' => 'Uruchom teraz']
             );
             return true;
         }

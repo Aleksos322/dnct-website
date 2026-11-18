@@ -54,6 +54,12 @@ function hosting_site_url(): string
     return rtrim((string)env('HOSTING_SITE_URL', 'https://web.dnct.pl'), '/');
 }
 
+/** Komunikat błędu z ostatniego wywołania panelu (pusty, gdy brak albo wywołanie się udało). */
+function hosting_last_error(): string
+{
+    return (string)($GLOBALS['hosting_last_error'] ?? '');
+}
+
 /**
  * @return array<string,mixed>|null  odpowiedź panelu albo null przy błędzie
  */
@@ -73,7 +79,7 @@ function hosting_call(string $action, array $fields = []): ?array
             'Authorization: Bearer ' . env('HOSTING_INTERNAL_TOKEN', ''),
         ],
         CURLOPT_CONNECTTIMEOUT => 2,
-        CURLOPT_TIMEOUT        => in_array($action, ['create', 'unsuspend', 'suspend'], true) ? HOSTING_TIMEOUT_SLOW : HOSTING_TIMEOUT,
+        CURLOPT_TIMEOUT        => in_array($action, ['domain_attach', 'domain_detach'], true) ? 90 : (in_array($action, ['create', 'unsuspend', 'suspend'], true) ? HOSTING_TIMEOUT_SLOW : HOSTING_TIMEOUT),
     ]);
     $raw  = curl_exec($ch);
     $http = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -81,7 +87,9 @@ function hosting_call(string $action, array $fields = []): ?array
     curl_close($ch);
 
     $data = is_string($raw) ? json_decode($raw, true) : null;
+    $GLOBALS['hosting_last_error'] = '';
     if ($http !== 200 || !is_array($data) || empty($data['ok'])) {
+        $GLOBALS['hosting_last_error'] = is_array($data) ? (string)($data['error'] ?? '') : '';
         error_log('Hosting: ' . $action . ' nieudane (HTTP ' . $http . ($err !== '' ? ', ' . $err : '')
             . '): ' . (is_array($data) ? (string)($data['error'] ?? '') : substr((string)$raw, 0, 200)));
         return null;

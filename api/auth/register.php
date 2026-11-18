@@ -161,11 +161,12 @@ if (($result['uid'] ?? '') !== '') {
 // ------------------------------------------------------------
 // 5. Sukces - czyścimy stan rejestracji i przekazujemy komunikat na logowanie.
 // ------------------------------------------------------------
+$wrocDo = registration_return_to_take();
 registration_clear();
 session_regenerate_id(true);
 $_SESSION['success'] = 'Konto zostało utworzone. Możesz się teraz zalogować.';
 
 json_ok([
     'message'  => 'Konto zostało utworzone.',
-    'redirect' => REGISTER_REDIRECT,
+    'redirect' => $wrocDo ?? REGISTER_REDIRECT,
 ]);

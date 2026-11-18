@@ -111,24 +111,118 @@ function send_order_paid_mail(array $order, ?string $adminUser = null, ?string $
  * uruchomimy usługę. Dzięki temu klient dostaje trwały zapis wersji warunków
  * i wyboru startu także wtedy, gdy wybrał uruchomienie po 14 dniach.
  */
-function send_order_contract_confirmation_mail(array $order): array
+function send_order_contract_confirmation_mail(array $order, bool $poStarcie = false): array
 {
     $legal = order_contract_confirmation_text($order);
     if ($legal === '') {
         return ['ok' => true, 'error' => ''];
     }
 
-    $text = 'Cześć ' . (string)$order['user_name'] . ",\n\n"
-        . 'Potwierdzamy zawarcie umowy i przyjęcie płatności za zamówienie #'
-        . (int)$order['id'] . ".\n\n"
-        . $legal
-        . "\nDNCT Hosting";
+    $id  = (int)$order['id'];
+    $esc = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+
+    /* Serwer czeka 14 dni (klient nie zaznaczył startu od razu). Ten sam mail
+       daje mu od razu przycisk "uruchom teraz" - wcześniej szedł osobnym
+       przypomnieniem godzinę później i klienci pytali, czemu serwer nie działa. */
+    $czeka = empty($order['immediate_service_requested_at'])
+        && !empty($order['service_start_at'])
+        && empty($order['ptero_server_id']);
+
+    /* $poStarcie = mail wysyła api/serwer/start-teraz.php po kliknięciu
+       "Uruchom teraz". Osobny temat, żeby nie wyglądało jak ten sam mail
+       wysłany drugi raz. */
+    $startPozniej = $poStarcie;
+
+    $wstep = $startPozniej
+        ? 'Potwierdzamy Twoje żądanie uruchomienia usługi z zamówienia #' . $id . ' przed upływem terminu odstąpienia.'
+        : 'Potwierdzamy zawarcie umowy i przyjęcie płatności za zamówienie #' . $id . '.';
+
+    $text = 'Cześć ' . (string)$order['user_name'] . ",\n\n" . $wstep . "\n\n" . $legal;
     $html = '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#111">'
-        . nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')) . '</div>';
+        . nl2br($esc('Cześć ' . (string)$order['user_name'] . ",\n\n" . $wstep . "\n\n" . $legal));
+
+    if ($czeka) {
+        $url  = rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/') . '/twoje-serwery';
+        $btn  = 'Rozumiem i rezygnuję z 14-dniowego zwrotu - uruchom teraz';
+        $text .= "\nCHCESZ GRAĆ OD RAZU?\n"
+            . "Wejdź w Twoje serwery i kliknij \"{$btn}\". Serwer powstanie od razu, a opłacony okres "
+            . "policzymy od chwili uruchomienia. Po pełnym wykonaniu usługi możesz utracić prawo odstąpienia; "
+            . "przy odstąpieniu przed pełnym wykonaniem rozliczymy tylko część wykonaną do tego momentu.\n"
+            . "Twoje serwery: {$url}\n"
+            . "Jeśli wolisz zaczekać, nic nie musisz robić.\n";
+        $html .= '<p style="margin:22px 0 6px;font-weight:bold">Chcesz grać od razu?</p>'
+            . '<p style="margin:0 0 14px">Kliknij przycisk - zobaczysz kartę zamówienia i tam potwierdzisz start. '
+            . 'Serwer powstanie od razu, a opłacony okres policzymy od chwili uruchomienia.</p>'
+            . '<p><a href="' . $esc($url) . '" style="display:inline-block;background:#8b5cf6;color:#fff;text-decoration:none;'
+            . 'font-weight:bold;padding:12px 20px;border-radius:10px">' . $esc($btn) . '</a></p>'
+            . '<p style="font-size:13px;color:#555">Po pełnym wykonaniu usługi możesz utracić prawo odstąpienia; '
+            . 'przy odstąpieniu przed pełnym wykonaniem rozliczymy tylko część wykonaną do tego momentu. '
+            . 'Jeśli wolisz zaczekać, nic nie musisz robić.</p>';
+    }
+
+    $text .= "\nDNCT Hosting";
+    $html .= '<p>DNCT Hosting</p></div>';
+
+    $wynik = send_mail(
+        (string)$order['user_email'],
+        ($startPozniej ? 'Potwierdzenie uruchomienia - zamówienie #' : 'Potwierdzenie umowy - zamówienie #') . $id,
+        $html,
+        $text,
+        'info'
+    );
+
+    /* Przycisk już poszedł w tym mailu - przypomnienie z deferred-reminder.php
+       (godzinę po zakupie) byłoby drugim mailem o tym samym. */
+    if ($czeka && !empty($wynik['ok'])) {
+        try {
+            dnct_db()->prepare('UPDATE orders SET deferred_mail_at = NOW() WHERE id = ? AND deferred_mail_at IS NULL')->execute([$id]);
+        } catch (Throwable $e) {
+            error_log('Zamówienie #' . $id . ': deferred_mail_at - ' . $e->getMessage());
+        }
+    }
+
+    return $wynik;
+}
+
+/**
+ * Przypomnienie wysyłane godzinę po zakupie bez zgody na natychmiastowy start:
+ * serwer ruszy za 14 dni, a przycisk na karcie uruchamia go od razu
+ * (api/serwer/start-teraz.php). Wysyła je backend/tools/deferred-reminder.php.
+ */
+function send_deferred_start_reminder_mail(array $order): array
+{
+    $name  = (string)$order['user_name'];
+    $start = czas_fmt((string)$order['service_start_at'], 'd.m.Y \\o H:i');
+    $url   = rtrim((string)env('BASE_URL', 'https://game.dnct.pl'), '/') . '/twoje-serwery';
+
+    $text = "Cześć {$name},\n\n"
+        . "nie zrezygnowałeś(-aś) z 14-dniowego zwrotu, więc serwer z zamówienia #" . (int)$order['id']
+        . " uruchomi się dopiero {$start}.\n\n"
+        . "Jeśli chcesz, aby serwer ruszył teraz, wejdź w Twoje serwery i kliknij przycisk "
+        . "\"Rozumiem i rezygnuję z 14-dniowego zwrotu - uruchom teraz\". Ten przycisk zrezygnuje z 14-dniowego "
+        . "zwrotu i uruchomi serwer od razu. Opłacony okres liczymy wtedy od chwili uruchomienia.\n\n"
+        . "Po pełnym wykonaniu usługi możesz utracić prawo odstąpienia; przy odstąpieniu przed pełnym wykonaniem "
+        . "rozliczymy tylko część wykonaną do tego momentu.\n\n"
+        . "Jeśli wolisz zaczekać, nic nie musisz robić.\n\n"
+        . "Twoje serwery: {$url}\n\nDNCT Hosting";
+
+    $esc = static fn(string $v): string => htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+    $html = '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#111">'
+        . '<p>Cześć ' . $esc($name) . ',</p>'
+        . '<p>nie zrezygnowałeś(-aś) z 14-dniowego zwrotu, więc serwer z zamówienia #' . (int)$order['id']
+        . ' uruchomi się dopiero <strong>' . $esc($start) . '</strong>.</p>'
+        . '<p>Jeśli chcesz, aby serwer ruszył teraz, kliknij przycisk poniżej, aby zrezygnować z 14-dniowego zwrotu. '
+        . 'Ten przycisk uruchamia serwer od razu. Opłacony okres liczymy wtedy od chwili uruchomienia.</p>'
+        . '<p><a href="' . $esc($url) . '" style="display:inline-block;background:#8b5cf6;color:#fff;text-decoration:none;'
+        . 'font-weight:bold;padding:12px 20px;border-radius:10px">Rozumiem i rezygnuję z 14-dniowego zwrotu - uruchom teraz</a></p>'
+        . '<p style="font-size:13px;color:#555">Po kliknięciu zobaczysz kartę zamówienia - tam potwierdzasz start. '
+        . 'Po pełnym wykonaniu usługi możesz utracić prawo odstąpienia; przy odstąpieniu przed pełnym wykonaniem '
+        . 'rozliczymy tylko część wykonaną do tego momentu. Jeśli wolisz zaczekać, nic nie musisz robić.</p>'
+        . '<p>DNCT Hosting</p></div>';
 
     return send_mail(
         (string)$order['user_email'],
-        'Potwierdzenie umowy - zamówienie #' . (int)$order['id'],
+        'Zamówienie #' . (int)$order['id'] . ' - serwer ruszy za 14 dni, chyba że uruchomisz go teraz',
         $html,
         $text,
         'info'

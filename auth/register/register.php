@@ -13,6 +13,11 @@ require_once dirname(__DIR__, 2) . '/backend/bootstrap.php';
 
 $token = csrf_token();
 
+// Rejestracja z koszyka na stronie hostingu: po założeniu konta wracamy do wybranego pakietu.
+if (isset($_GET['return_to'])) {
+    registration_return_to_store((string)$_GET['return_to']);
+}
+
 // Komunikaty przeniesione z innych stron (np. po wygaśnięciu sesji).
 $error = $_SESSION['error'] ?? null;
 $success = $_SESSION['success'] ?? null;

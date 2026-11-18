@@ -45,10 +45,12 @@ function hosting_order_create(
     string $package,
     string $billingMode,
     ?int $extendsId = null,
-    ?bool $immediateServiceStart = null
+    ?bool $immediateServiceStart = null,
+    int $periodDays = HOSTING_PERIOD_DAYS
 ): int
 {
     $plan = HOSTING_PLANS[$package] ?? null;
+    $period = $periodDays >= HOSTING_YEAR_DAYS ? 'year' : 'month';
     if ($plan === null) {
         throw new RuntimeException('Nieznany pakiet hostingu.');
     }
@@ -61,7 +63,7 @@ function hosting_order_create(
                      IF(?, NOW(), DATE_ADD(NOW(), INTERVAL 14 DAY)))'
         );
         $stmt->execute([
-            $email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, hosting_price($package, $billingMode), $extendsId,
+            $email, $name, $package, $periodDays, $billingMode, hosting_price($package, $billingMode, $period), $extendsId,
             DNCT_TERMS_VERSION, (int)$immediateServiceStart, (int)$immediateServiceStart,
         ]);
     } else {
@@ -69,7 +71,7 @@ function hosting_order_create(
             'INSERT INTO hosting_orders (user_email, user_name, package, period_days, billing_mode, amount_gross, extends_order_id)
              VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$email, $name, $package, HOSTING_PERIOD_DAYS, $billingMode, hosting_price($package, $billingMode), $extendsId]);
+        $stmt->execute([$email, $name, $package, $periodDays, $billingMode, hosting_price($package, $billingMode, $period), $extendsId]);
     }
     return (int)$dnct->lastInsertId();
 }
@@ -94,6 +96,7 @@ function hosting_current_order(PDO $dnct, string $email): ?array
     $stmt = $dnct->prepare(
         'SELECT * FROM hosting_orders
           WHERE user_email = ? AND extends_order_id IS NULL AND status IN ("paid", "provisioned")
+            AND (care_state IS NULL OR care_state = "accepted")
           ORDER BY id DESC LIMIT 1'
     );
     $stmt->execute([$email]);
@@ -268,6 +271,22 @@ function hosting_webhook_checkout_completed(PDO $dnct, $session): bool
         }
         hosting_send_contract_confirmation($order);
 
+        // Domena + SSL z koszyka: wpis dla admina i powiadomienia (lib/domeny.php).
+        // Przy opiece zlecenie zakupu domeny idzie dopiero po "Tak" opiekuna (care_accept), bo po "Nie" jest zwrot.
+        if (!empty($order['addon_domain']) && ($order['care_state'] ?? '') !== 'pending') {
+            require_once __DIR__ . '/domeny.php';
+            domeny_po_platnosci($dnct, $order);
+            if ($trialClaim !== null && isset($sub)) {
+                domain_followup_subscription($dnct, $order, $sub);
+            }
+        }
+
+        // Strona pod opieką: płatność przyjęta, ale pakiet i prowizja czekają na "Tak" opiekuna (lib/care.php).
+        if (!empty($order['care_partner_id']) && ($order['care_state'] ?? '') === 'pending') {
+            require_once __DIR__ . '/care.php';
+            return care_po_platnosci($dnct, $order);
+        }
+
         if (empty($order['immediate_service_requested_at'])) {
             notify_user(
                 $dnct,
@@ -294,6 +313,7 @@ function hosting_activate_paid_order(PDO $dnct, array $order): bool
             'email'   => (string)$order['user_email'],
             'name'    => (string)$order['user_name'],
             'package' => (string)$order['package'],
+            'sub'     => (string)($order['user_sub'] ?? ''),
     ]);
 
     if ($res === null || empty($res['user'])) {
@@ -391,7 +411,7 @@ function hosting_announce_paid(PDO $dnct, ?array $order): void
         return;
     }
     $renew   = $order['billing_mode'] === 'subscription'
-        ? 'Abonament odnawia się sam co 30 dni.'
+        ? 'Abonament odnawia się sam ' . hosting_period_every((int)$order['period_days']) . '.'
         : 'To płatność jednorazowa - przedłużysz ją na stronie hostingu.';
 
     notify_user($dnct, (string)$order['user_name'], 'success', 'Hosting ' . $plan['name'] . ' jest gotowy',

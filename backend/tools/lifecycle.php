@@ -103,7 +103,14 @@ if ($stage('purge'))   { lifecycle_purge($dnct, $apply); }
 
 /* Hosting WWW: własna tabela (hosting_orders), własne etapy - ostrzeżenie,
    zawieszenie konta, sygnał dla admina. Bez kasowania - patrz hosting_orders.php. */
-if ($stage('hosting')) { hosting_lifecycle_run($dnct, $apply); }
+if ($stage('hosting')) {
+    hosting_lifecycle_run($dnct, $apply);
+    // Podglądy kont przez partnerów, po których nie ma śladu aktywności, domykamy i informujemy klienta o czasie.
+    require_once dirname(__DIR__) . '/lib/partner_panel.php';
+    if ($apply && ($zamkniete = partner_podglady_domknij($dnct)) > 0) {
+        echo "Domknieto porzuconych podgladow partnerow: {$zamkniete}\n";
+    }
+}
 
 /* Konta w usługach, których nie udało się założyć przy rejestracji
    (usługa nie działała) - ponawiane z rosnącym odstępem, patrz accounts.php. */

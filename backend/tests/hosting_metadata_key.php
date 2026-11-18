@@ -33,6 +33,13 @@ if (!str_starts_with((string)env('STRIPE_SECRET_KEY', ''), 'sk_test_')) {
     exit(2);
 }
 
+// TEST_PARTNER_KOD=1: dodatkowo kod partnera (tymczasowy partner w bazie bety) - sprawdza promo_code i metadata.partner_kod.
+$kodTest = '';
+if (getenv('TEST_PARTNER_KOD') === '1') {
+    $kodTest = 'E2EKOD' . strtoupper(bin2hex(random_bytes(3)));
+    dnct_db()->prepare('INSERT INTO partnerzy (nazwa, kod, prowizja_procent, okres_miesiecy) VALUES (?, ?, 20, 0)')->execute(['TEST e2e kod', $kodTest]);
+}
+
 $email = 'e2e-test+' . bin2hex(random_bytes(3)) . '@dnct.invalid';
 $_SESSION['authentik_email'] = $email;
 $_SESSION['authentik_username'] = 'e2etest';
@@ -43,6 +50,9 @@ $_POST = [
     'terms_accepted' => '1',
     'immediate_service_start' => '1',
 ];
+if ($kodTest !== '') {
+    $_POST['promo_code'] = strtolower($kodTest);
+}
 
 $fail = 0;
 $check = function (string $what, bool $ok, string $extra = '') use (&$fail): void {
@@ -52,7 +62,7 @@ $check = function (string $what, bool $ok, string $extra = '') use (&$fail): voi
     }
 };
 
-register_shutdown_function(function () use ($check, &$fail, $email) {
+register_shutdown_function(function () use ($check, &$fail, $email, $kodTest) {
     $out = (string)ob_get_clean();
     $res = json_decode($out, true);
     if (!is_array($res) || empty($res['ok'])) {
@@ -79,6 +89,12 @@ register_shutdown_function(function () use ($check, &$fail, $email) {
         $row = hosting_order_by($dnct, 'id', $orderId);
         $check('zamowienie w bazie bety, status pending', $row !== null && $row['status'] === 'pending', $row['status'] ?? 'brak');
         $check('kwota jednorazowa Start = 10,99 zl', (int)($row['amount_gross'] ?? 0) === 1099, (string)($row['amount_gross'] ?? ''));
+        if ($kodTest !== '') {
+            $check('metadata.partner_kod == kod partnera', (string)($md->partner_kod ?? '') === $kodTest, (string)($md->partner_kod ?? '-'));
+            $check('hosting_orders.promo_code zapisany (wielkie litery)', ($row['promo_code'] ?? '') === $kodTest, (string)($row['promo_code'] ?? '-'));
+        } else {
+            $check('bez kodu: brak metadata.partner_kod', !isset($md->partner_kod));
+        }
         try { \Stripe\Checkout\Session::retrieve($sid)->expire(); echo "sprzatanie: sesja testowa wygaszona\n"; } catch (Throwable $e) { echo "sprzatanie sesji: ", $e->getMessage(), "\n"; }
     } catch (Throwable $e) {
         $check('retrieve sesji', false, $e->getMessage());
@@ -86,6 +102,10 @@ register_shutdown_function(function () use ($check, &$fail, $email) {
     $del = $dnct->prepare('DELETE FROM hosting_orders WHERE id = ? AND user_email = ?');
     $del->execute([$orderId, $email]);
     echo "sprzatanie: usunieto wierszy z bety: ", $del->rowCount(), "\n";
+    if ($kodTest !== '') {
+        $dnct->prepare('DELETE FROM partnerzy WHERE kod = ?')->execute([$kodTest]);
+        echo "sprzatanie: usunieto tymczasowego partnera\n";
+    }
     echo $fail === 0 ? "\nWSZYSTKO OK\n" : "\nBLEDOW: $fail\n";
     exit($fail === 0 ? 0 : 1);
 });

@@ -150,14 +150,14 @@ function support_messages_for_viewer(
         FROM support_messages AS m
         LEFT JOIN support_message_hides AS own_hide
             ON own_hide.message_id = m.id
-           AND own_hide.participant_role = :viewer_role
-           AND own_hide.participant_key = :viewer_key
+           AND own_hide.participant_role = :own_viewer_role
+           AND own_hide.participant_key = :own_viewer_key
         LEFT JOIN support_messages AS parent
             ON parent.id = m.reply_to_message_id
         LEFT JOIN support_message_hides AS parent_hide
             ON parent_hide.message_id = parent.id
-           AND parent_hide.participant_role = :viewer_role
-           AND parent_hide.participant_key = :viewer_key
+           AND parent_hide.participant_role = :parent_viewer_role
+           AND parent_hide.participant_key = :parent_viewer_key
         WHERE m.ticket_id = :ticket
           AND own_hide.message_id IS NULL';
 
@@ -169,8 +169,10 @@ function support_messages_for_viewer(
     $sql .= ' ORDER BY m.id DESC LIMIT ' . ($limit + 1);
 
     $statement = $db->prepare($sql);
-    $statement->bindValue(':viewer_role', $viewerRole, PDO::PARAM_STR);
-    $statement->bindValue(':viewer_key', $viewerKey, PDO::PARAM_STR);
+    $statement->bindValue(':own_viewer_role', $viewerRole, PDO::PARAM_STR);
+    $statement->bindValue(':own_viewer_key', $viewerKey, PDO::PARAM_STR);
+    $statement->bindValue(':parent_viewer_role', $viewerRole, PDO::PARAM_STR);
+    $statement->bindValue(':parent_viewer_key', $viewerKey, PDO::PARAM_STR);
     $statement->bindValue(':ticket', $ticketId, PDO::PARAM_INT);
     if ($beforeId > 0) {
         $statement->bindValue(':before_id', $beforeId, PDO::PARAM_INT);
@@ -679,6 +681,9 @@ function support_message_attachment_public_payload(array $row, string $mediaUrlB
 /** Zwraca katalog storage prywatnych mediów pod chronionym backend/. */
 function support_message_media_storage_root(): string
 {
+    if (defined('SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT')) {
+        return rtrim((string) SUPPORT_MESSAGE_MEDIA_STORAGE_ROOT, DIRECTORY_SEPARATOR);
+    }
     $backendPath = defined('DNCT_BACKEND_PATH') ? DNCT_BACKEND_PATH : dirname(__DIR__);
     return rtrim($backendPath, DIRECTORY_SEPARATOR) . '/storage/support-message-media';
 }

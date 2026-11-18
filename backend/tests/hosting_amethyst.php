@@ -94,6 +94,11 @@ fresh();$r=checkout(input(['billing_mode'=>'payment','unit_amount'=>1]));$last=\
 check($r->status===200&&$last[0]['line_items'][0]['price_data']['unit_amount']===2199,'Kwota jednorazowa Pro z serwera, próba podmiany kwoty ignorowana');
 check(hosting_price('dnct-web-start','payment')===1099&&hosting_price('dnct-web-biznes','payment')===4399,'Dopłata 10% zaokrąglona do grosza');
 check(hosting_price('dnct-start','payment')===900,'Cena istniejącego planu pozostaje bez zmian');
+check(hosting_price('dnct-web-pro','subscription','year')===1999*11&&hosting_price('dnct-web-pro','payment','year')===hosting_price('dnct-web-pro','payment')*11,'Rok = 11 miesiecy (abonament i jednorazowo)');
+check(hosting_period_days('year')===365&&hosting_period_days('month')===30&&hosting_period_every(365)==='co rok'&&hosting_period_every(30)==='co 30 dni','Okres: dni i opisy');
+$tz=false;try{hosting_checkout_spec('dnct-web-pro','subscription',true,'year');}catch(InvalidArgumentException $e){$tz=true;}
+check($tz,'Test 7 dni niedostepny przy rocznym');
+check(HOSTING_MANAGED_PRICE===2999,'Hosting w stronie pod opieka 29,99 zl');
 fresh();check(checkout(input(['trial'=>true]))->status===422,'Brak zgody na abonament po trialu blokuje zamówienie');
 check(checkout(input(['trial'=>true,'trial_accepted'=>true,'billing_mode'=>'payment']))->status===422,'Trial jednorazowy jest odrzucany');
 check(checkout(input(['package'=>'dnct-pro']))->status===422,'Stare plany nie są sprzedawane jako nowa oferta');

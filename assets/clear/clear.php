@@ -90,6 +90,9 @@ if ($centerContent) {
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($metaDescription); ?>">
     <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl); ?>">
+    <?php if (strtok($_SERVER['REQUEST_URI'] ?? '/', '?') === '/'): ?>
+    <meta name="trustpilot-one-time-domain-verification-id" content="be84778f-49e8-4968-bb1b-f7dd8fe8e593"/>
+    <?php endif; ?>
     <meta name="theme-color" content="#8b5cf6">
     <meta name="author" content="DNCT Hosting">
 

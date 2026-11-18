@@ -69,6 +69,7 @@ foreach ($games as $order) {
 $hosting = $dnct->query(
     'SELECT * FROM hosting_orders
       WHERE status = "paid" AND extends_order_id IS NULL AND hosting_user IS NULL
+        AND care_state IS NULL
         AND immediate_service_requested_at IS NULL
         AND service_start_at IS NOT NULL AND service_start_at <= NOW()
       ORDER BY service_start_at ASC LIMIT 20'
