@@ -12,11 +12,11 @@ require_once dirname(__DIR__, 2) . '/backend/lib/aktywnosc.php';
 
 require_method('POST');
 csrf_guard();
-rate_limit_guard(
-    'aktywnosc',
-    RATE_LIMIT_AKTYWNOSC,
-    'Zbyt wiele odświeżeń obecności z tego adresu IP. Odczekaj chwilę.'
-);
+// Limit na SESJĘ, a na IP tylko szeroki bezpiecznik. Dawniej 10/min na IP: każde wejście
+// na stronę to 2 zgłoszenia (wejście + wyjście), więc kilka kliknięć albo kilka kart, czy
+// domownicy za jednym IP, kończyło się czerwonym 429 w konsoli i dziurą w statystyce.
+rate_limit_guard('aktywnosc', [120, 60], 'Zbyt wiele odświeżeń obecności z tego adresu IP. Odczekaj chwilę.');
+rate_limit_guard('aktywnosc-' . substr(hash('sha256', session_id()), 0, 16), [20, 60], 'Zbyt wiele odświeżeń obecności. Odczekaj chwilę.');
 
 $strona   = request_string('strona', '/');
 $widoczna = request_bool('widoczna');
