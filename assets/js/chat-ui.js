@@ -913,6 +913,20 @@
     e.preventDefault(); openMini(t, t.dataset.miniUser);
   });
   const avatarImages = new Map();
+  // Jedno zapytanie zbiorcze (account.dnct.pl/awatary) zamiast obrazka /avatar/<nick> na każdego rozmówcę:
+  // większość kont nie ma zdjęcia, a każde takie 404 było czerwonym błędem w konsoli i osobnym zapytaniem do bazy.
+  // Gdy zbiorcze zapytanie się nie uda, wracamy do starego sposobu (obrazek na osobę).
+  let avatarQueue = new Set(), avatarTimer = 0;
+  function avatarLookup() {
+    const names = [...avatarQueue]; avatarQueue = new Set(); avatarTimer = 0;
+    for (let i = 0; i < names.length; i += 100) {
+      const part = names.slice(i, i + 100);
+      fetch('https://account.dnct.pl/awatary?n=' + part.map(encodeURIComponent).join(','), {credentials: 'omit'})
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+        .then(data => { for (const name of part) { const entry = avatarImages.get(name); if (!entry || entry.ready || entry.failedAt) continue; const url = data?.avatars?.[name]; if (typeof url === 'string' && url.startsWith('https://account.dnct.pl/m/')) entry.img.src = url; else entry.fail(); } })
+        .catch(() => { for (const name of part) { const entry = avatarImages.get(name); if (entry && !entry.ready && !entry.failedAt) entry.img.src = 'https://account.dnct.pl/avatar/' + encodeURIComponent(name); } });
+    }
+  }
   function avatar(target, username, className = '') {
     if (!username) return;
     target.dataset.avatarUser = username;
@@ -923,8 +937,8 @@
     if (!entry) {
       const img = new Image(); img.referrerPolicy = 'no-referrer'; img.alt = '';
       entry = {img,ready:false};
-      entry.promise = new Promise(resolve => { img.onload = async () => { try { await img.decode(); } catch {} entry.ready=true;resolve(true); }; img.onerror = () => { entry.failedAt = Date.now();resolve(false); }; });
-      avatarImages.set(username,entry); img.src='https://account.dnct.pl/avatar/'+encodeURIComponent(username);
+      entry.promise = new Promise(resolve => { img.onload = async () => { try { await img.decode(); } catch {} entry.ready=true;resolve(true); }; img.onerror = () => { entry.failedAt = Date.now();resolve(false); }; entry.fail = img.onerror; });
+      avatarImages.set(username,entry); avatarQueue.add(username); if (!avatarTimer) avatarTimer = setTimeout(avatarLookup, 30);
     }
     const attach = () => {
       if (target.dataset.avatarUser !== username) return;
