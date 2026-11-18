@@ -59,6 +59,11 @@ function cennik_card_media(?string $file, string $subdir): string
             return $webp;
         }
     }
+    // Plik ustawiony w cenniku, ale nie ma go na dysku (np. domyślne "default-bg.png" planów
+    // botów): bez tła zamiast pustego obrazka i 404 w konsoli.
+    if (!is_file(dirname(__DIR__) . $url)) {
+        return '';
+    }
     return $url;
 }
 

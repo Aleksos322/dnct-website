@@ -49,7 +49,6 @@ function chat_search(string $query, array $actor): array
         // Publiczna lista zwraca nazwy, nigdy pełnego katalogu adresów e-mail.
         $out[]=chat_profile($u);
     }
-    if($viewer!==null){$q=$db->prepare('SELECT DISTINCT peer.user_id FROM chat_members own JOIN chat_members peer ON peer.conversation_id=own.conversation_id AND peer.user_id<>own.user_id JOIN chat_preferences pref ON pref.conversation_id=own.conversation_id AND pref.blocked=1 LEFT JOIN chat_groups g ON g.conversation_id=own.conversation_id WHERE own.user_id=? AND g.conversation_id IS NULL');$q->execute([$viewer]);foreach($q->fetchAll(PDO::FETCH_COLUMN) as $peer)if(in_array((string)$peer,$ids,true))$out[$peer]='hidden';}
     return $out;
 }
 function chat_member(PDO $db,int $id,string $actor): array
