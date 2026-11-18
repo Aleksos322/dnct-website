@@ -23,6 +23,9 @@ rate_limit_guard(
 );
 try {
     $pdo = dnct_db();
+    // Powiadomienia systemowe: stan konta jedzie z listą (dzwonek i tak odpytuje co 5 s).
+    try { require_once dirname(__DIR__, 2) . '/backend/lib/notification_desktop.php'; $desktop = notification_desktop_state($pdo, $userId); }
+    catch (Throwable $e) { error_log('notifications/list: desktop ' . $e->getMessage()); $desktop = null; }
     $notifications=get_notifications_for_user($pdo,$userId,$isAdmin,50,'normal');$normal=count_unread_for_user($pdo,$userId,$isAdmin,'normal');$adminUnread=$isAdmin?count_unread_for_user($pdo,$userId,true,'admin'):0;
     $savedNotifications=get_notifications_for_user($pdo,$userId,$isAdmin,5000,'all',true);
     $notifications=array_merge($notifications,$savedNotifications);
@@ -32,7 +35,7 @@ try {
       $q=$pdo->prepare('SELECT notification_id,username FROM notification_authors WHERE notification_id IN ('.implode(',',array_fill(0,count($ids),'?')).')');$q->execute($ids);$authors=$q->fetchAll(PDO::FETCH_KEY_PAIR);
       foreach($notifications as &$notification){$notification['attachments']=$files[$notification['id']]??[];$notification['author']=$authors[$notification['id']]??null;}unset($notification);
     }
-    json_ok(['notifications'=>array_values(array_filter($notifications,fn($n)=>$n['target_type']!=='admins'&&!($isAdmin&&$n['target_type']==='user'&&($n['category']??'')==='support'))),'admin_notifications'=>$isAdmin?array_merge(get_notifications_for_user($pdo,$userId,true,50,'admin'),array_values(array_filter($savedNotifications,fn($n)=>$n['target_type']==='admins'||($n['target_type']==='user'&&($n['category']??'')==='support')))):[],'is_admin'=>$isAdmin,'counts'=>['normal'=>$normal,'admin'=>$adminUnread],'unread'=>$normal+$adminUnread]);
+    json_ok(['notifications'=>array_values(array_filter($notifications,fn($n)=>$n['target_type']!=='admins'&&!($isAdmin&&$n['target_type']==='user'&&($n['category']??'')==='support'))),'admin_notifications'=>$isAdmin?array_merge(get_notifications_for_user($pdo,$userId,true,50,'admin'),array_values(array_filter($savedNotifications,fn($n)=>$n['target_type']==='admins'||($n['target_type']==='user'&&($n['category']??'')==='support')))):[],'is_admin'=>$isAdmin,'counts'=>['normal'=>$normal,'admin'=>$adminUnread],'unread'=>$normal+$adminUnread,'desktop'=>$desktop]);
 } catch (Throwable $e) {
     error_log('notifications/list: ' . $e->getMessage());
     json_error('Powiadomienia są chwilowo niedostępne. Spróbuj ponownie.', 503);

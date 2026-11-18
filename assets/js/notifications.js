@@ -136,7 +136,7 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
    const data=await request('list');
    if(started!==revision)return;
    if(!Array.isArray(data.notifications))throw new Error('Serwer zwrócił nieprawidłową listę powiadomień.');
-   records=data.notifications;isAdmin=data.is_admin===true;adminRecords=isAdmin&&Array.isArray(data.admin_notifications)?data.admin_notifications:[];if(!isAdmin)activeTab='normal';counts.normal=Number(data.counts?.normal??data.unread)||0;counts.admin=isAdmin?Number(data.counts?.admin)||0:0;update(data.unread);render();note('');window.DNCTAlerts?.notifications([...records,...adminRecords]);if(opened)window.DNCTAlerts?.opened(activeTab==='admin'?adminRecords:records);
+   records=data.notifications;deskState(data.desktop);isAdmin=data.is_admin===true;adminRecords=isAdmin&&Array.isArray(data.admin_notifications)?data.admin_notifications:[];if(!isAdmin)activeTab='normal';counts.normal=Number(data.counts?.normal??data.unread)||0;counts.admin=isAdmin?Number(data.counts?.admin)||0:0;update(data.unread);render();note('');window.DNCTAlerts?.notifications([...records,...adminRecords]);if(opened)window.DNCTAlerts?.opened(activeTab==='admin'?adminRecords:records);
    if(modal.open&&previewId){const updated=[...records,...adminRecords].find(n=>String(n.id)===previewId);if(!updated)closePreview();else if(JSON.stringify([updated.title,updated.message,updated.created_at,updated.attachments])!==previewVersion)show(updated,button);}
   }catch(e){if(started===revision)note(e.message,true);}
   finally{loading=false;}
@@ -165,6 +165,79 @@ note(n.is_saved?'Dodano do zapisanych':'Usunięto z zapisanych');}catch(error){n
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.open&&!document.querySelector('.dnct-notif-confirm[open]')&&!panel.classList.contains('hidden')){close();button.focus();}});
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
  document.addEventListener('dnct:close-notifications',close);
+ // --- Powiadomienia systemowe (na komputerze), wariant "karta otwarta" ----------------
+ // Stan włącz/wyłącz jest na KONCIE (list.php -> data.desktop), bo zgoda przeglądarki
+ // i localStorage są osobne dla game.dnct.pl, panel.dnct.pl i bety. Ten sam przełącznik
+ // jest tu (stopka listy) i w czacie (chat-ui.js, DNCTAlerts). Przeglądarka pyta o zgodę
+ // tylko po kliknięciu, więc przy nowej wiadomości pokazujemy własną prośbę z przyciskiem.
+ // Telefony: Android pokazuje je wyłącznie przez service worker, iOS tylko jako
+ // aplikację z ekranu początkowego - to wariant B (Web Push).
+ const reducedMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const desk={enabled:null,snoozeEnds:0,offerShown:false,offerPending:false,last:''};
+ const deskSupported='Notification' in window&&window.isSecureContext!==false&&!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+ const perm=()=>deskSupported?Notification.permission:'unsupported';
+ const deskOn=()=>perm()==='granted'&&desk.enabled!==false;
+ const deskInfo=()=>({supported:deskSupported,permission:perm(),on:deskOn(),enabled:desk.enabled});
+ const deskStyle=document.createElement('style');deskStyle.textContent=
+  '.dnct-notif-desktop{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 14px;border-top:1px solid #ffffff12;flex-shrink:0}.dnct-notif-desktop[hidden]{display:none}'
+ +'.dnct-notif-desktop-copy{display:grid;gap:2px;min-width:0}.dnct-notif-desktop-copy strong{font-size:13px;font-weight:700;color:#ede9fe}.dnct-notif-desktop-copy small{font-size:11px;line-height:1.4;color:#a8a3b8}'
+ +'.dnct-notif-switch{position:relative;flex:0 0 42px;width:42px;height:24px;padding:0;border:1px solid #ffffff1f;border-radius:99px;background:#ffffff12;cursor:pointer;transition:background .2s,border-color .2s}.dnct-notif-switch span{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#c4bfd3;transition:transform .2s,background .2s}'
+ +'.dnct-notif-switch.is-on{background:#7c3aed;border-color:#a78bfa}.dnct-notif-switch.is-on span{transform:translateX(18px);background:#fff}.dnct-notif-switch:disabled{opacity:.5;cursor:default}.dnct-notif-switch:focus-visible{outline:2px solid #c4b5fd;outline-offset:2px}'
+ +'.dnct-desktop-offer{position:fixed;z-index:96;box-sizing:border-box;padding:16px;border:1px solid #ffffff17;border-radius:16px;background:linear-gradient(150deg,#211b2cf0,#15121cf0);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 45px #0006;color:#e9e6f2;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:13px;line-height:1.5;text-align:left}.dnct-desktop-offer[hidden]{display:none}'
+ +'.dnct-desktop-offer-eyebrow{display:block;margin-bottom:6px;color:#c4b5fd;font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.dnct-desktop-offer p{margin:0 0 12px;color:#cfcbdb}.dnct-desktop-offer-actions{display:flex;gap:8px;justify-content:flex-end}'
+ +'.dnct-desktop-offer button{min-height:36px;padding:0 14px;border:1px solid #ffffff1f;border-radius:10px;background:#ffffff0a;color:#ddd6fe;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s}.dnct-desktop-offer button:hover{background:#ffffff14}.dnct-desktop-offer button[data-allow]{border-color:#9b75f4;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}.dnct-desktop-offer button:focus-visible{outline:2px solid #c4b5fd;outline-offset:2px}';
+ document.head.append(deskStyle);
+ const deskRow=document.createElement('div');deskRow.className='dnct-notif-desktop';deskRow.hidden=!deskSupported;
+ deskRow.innerHTML='<span class="dnct-notif-desktop-copy"><strong id="dnct-desktop-label">Powiadomienia na komputerze</strong><small></small></span><button type="button" role="switch" class="dnct-notif-switch" aria-labelledby="dnct-desktop-label"><span></span></button>';
+ const deskSwitch=deskRow.querySelector('button'),deskHint=deskRow.querySelector('small');panel.append(deskRow);
+ function deskRender(){const i=deskInfo();deskSwitch.classList.toggle('is-on',i.on);deskSwitch.setAttribute('aria-checked',String(i.on));deskSwitch.disabled=i.permission==='denied';deskHint.textContent=i.permission==='denied'?'Zablokowane w przeglądarce. Odblokuj je przy kłódce obok adresu strony.':i.on?'Pokażemy je także, gdy ta karta jest w tle.':'Wyłączone.';}
+ function deskEmit(){const info=deskInfo(),sig=JSON.stringify(info);deskRender();if(sig===desk.last)return;desk.last=sig;document.dispatchEvent(new CustomEvent('dnct:desktop-state',{detail:info}));}
+ function deskState(s){if(!s||typeof s!=='object')return;desk.enabled=s.enabled===null||s.enabled===undefined?null:Boolean(s.enabled);desk.snoozeEnds=Date.now()+(Number(s.snoozed_for)||0)*1000;deskEmit();}
+ async function deskSave(on){const prev=desk.enabled;desk.enabled=on;deskEmit();try{const d=await request('mark-read',{action:'desktop',enabled:on?'1':'0'});deskState(d.desktop);note(on?'Powiadomienia na komputerze włączone.':'Powiadomienia na komputerze wyłączone.');}catch(e){desk.enabled=prev;deskEmit();note(e.message,true);}}
+ async function deskToggle(){
+  if(!deskSupported)return;
+  let p=perm();
+  if(p==='denied'){deskEmit();note('Powiadomienia są zablokowane w przeglądarce. Kliknij kłódkę obok adresu strony i zezwól na powiadomienia.',true);return;}
+  if(p==='default'){
+   try{p=await Notification.requestPermission();}catch{p=perm();}
+   if(p!=='granted'){deskEmit();if(p==='denied')note('Przeglądarka zablokowała powiadomienia. Zmienisz to przy kłódce obok adresu strony.',true);return;}
+   return deskSave(true);
+  }
+  return deskSave(!deskOn());
+ }
+ deskSwitch.onclick=()=>deskToggle();
+ // Prośba o zgodę: tylko gdy przeglądarka jeszcze nie pytała, konto nie wyłączyło
+ // powiadomień i nie kliknięto "Nie teraz" w ciągu doby (stan wspólny dla domen).
+ const offer=document.createElement('div');offer.className='dnct-desktop-offer';offer.hidden=true;offer.setAttribute('role','dialog');offer.setAttribute('aria-labelledby','dnct-desktop-offer-title');
+ offer.innerHTML='<span class="dnct-desktop-offer-eyebrow" id="dnct-desktop-offer-title">Bądź na bieżąco</span><p>Dostajesz wiadomości na czacie i powiadomienia pod dzwonkiem. Zezwól na powiadomienia systemowe, a pokażemy je także wtedy, gdy ta karta jest w tle.</p><div class="dnct-desktop-offer-actions"><button type="button" data-later>Nie teraz</button><button type="button" data-allow>Zezwól</button></div>';
+ document.body.append(offer);
+ function placeOffer(){const r=button.getBoundingClientRect(),w=Math.min(340,document.documentElement.clientWidth-24);offer.style.width=w+'px';offer.style.top=Math.round(r.bottom+10)+'px';offer.style.left=Math.max(12,Math.min(document.documentElement.clientWidth-w-12,Math.round(r.right)-w))+'px';}
+ function hideOffer(){if(offer.hidden)return;if(reducedMotion()){offer.hidden=true;return;}offer.animate([{opacity:1},{opacity:0}],{duration:200,easing:'ease-in'}).finished.catch(()=>{}).then(()=>{offer.hidden=true;});}
+ function deskOffer(){
+  if(!deskSupported||perm()!=='default'||desk.enabled===false||Date.now()<desk.snoozeEnds||desk.offerShown)return;
+  if(document.hidden||opened){desk.offerPending=true;return;}
+  desk.offerShown=true;desk.offerPending=false;placeOffer();offer.hidden=false;
+  if(!reducedMotion())offer.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:200,easing:'ease-out'});
+ }
+ offer.querySelector('[data-allow]').onclick=()=>{hideOffer();deskToggle();};
+ offer.querySelector('[data-later]').onclick=async()=>{hideOffer();desk.snoozeEnds=Date.now()+86400000;try{deskState((await request('mark-read',{action:'desktop-snooze'})).desktop);}catch{}};
+ button.addEventListener('click',hideOffer);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&desk.offerPending)deskOffer();});
+ window.addEventListener('resize',()=>{if(!offer.hidden)placeOffer();});window.addEventListener('scroll',()=>{if(!offer.hidden)placeOffer();},{passive:true});
+ // Jedna karta na powiadomienie: karta, na którą patrzysz, "zabiera" je od razu i nic nie
+ // pokazuje (widzisz dzwonek). Karty w tle czekają chwilę; pierwsza zgłoszona wygrywa.
+ async function deskNotify(key,{title,body,onclick}={}){
+  if(!deskOn()||!/^[a-z]{1,12}:[0-9:]{1,60}$/.test(key))return false;
+  const looking=()=>!document.hidden&&document.hasFocus();
+  const focused=looking();
+  if(!focused)await new Promise(r=>setTimeout(r,1200));
+  let claimed=true;try{claimed=(await request('mark-read',{action:'desktop-claim',key})).claimed===true;}catch{}
+  if(!claimed||focused||looking())return false;
+  try{const n=new Notification(String(title||'DNCT'),{body:String(body||'').slice(0,240),icon:document.querySelector('link[rel~="icon"]')?.href||new URL('/'+'assets/media/icons/favicon.png',location.origin).href,tag:'dnct:'+key,silent:true});n.onclick=()=>{window.focus();try{onclick?.();}catch{}n.close();};return true;}catch{return false;}
+ }
+ function deskOpen(n){if(!opened)button.click();const fresh=[...records,...adminRecords].find(x=>String(x.id)===String(n.id))||n;show(fresh,button);}
+ window.DNCTDesktop={info:deskInfo,toggle:deskToggle,offer:deskOffer,notify:deskNotify,open:deskOpen};
+ deskEmit();
  refresh();setInterval(()=>{if(opened||modal.open)refresh();},3000);setInterval(refresh,5000);
  // Jednorazowe komunikaty formularzy nie uczestniczą w pobieraniu listy.
  document.querySelectorAll('.dnct-toast').forEach(toast=>{requestAnimationFrame(()=>toast.classList.remove('opacity-0','translate-x-4'));const remove=()=>toast.remove();toast.querySelector('.dnct-toast-close')?.addEventListener('click',remove);setTimeout(remove,5000);});
