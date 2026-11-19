@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/backend/bootstrap.php';
 
 $pageTitle = 'Program dla twórców - DNCT Hosting';
-$metaDescription = 'Nagrywasz albo streamujesz Minecrafta? Twoi widzowie dostają 10% zniżki na start, Ty 15% od ich płatności przez 6 miesięcy i darmowy serwer Zaawansowany.';
+$metaDescription = 'Nagrywasz albo streamujesz? Mniejsi twórcy dostają rangę na Discordzie, do 30% zniżki dla siebie i do 10% dla widzów. Więksi YouTuberzy mogą dostać serwer po rozmowie.';
 $canonicalUrl = 'https://game.dnct.pl/partnerzy';
 $centerContent = false;
 $csrfToken = csrf_token();
@@ -17,6 +17,11 @@ ob_start();
     .ptn-zalety div { padding:1.1rem 1.2rem; border:1px solid rgba(139,92,246,.35); border-radius:1rem; background:rgba(22,17,36,.55); }
     .ptn-zalety strong { display:block; font-size:1.9rem; line-height:1.1; color:#c4b5fd; }
     .ptn-zalety span { color:#cbd5e1; font-size:.92rem; }
+    .ptn-poziomy { display:grid; grid-template-columns:repeat(auto-fit, minmax(17rem, 1fr)); gap:1rem; margin:1.5rem 0 2rem; }
+    .ptn-poziomy section { padding:1.2rem 1.3rem; border:1px solid rgba(255,255,255,.09); border-radius:1rem; background:rgba(255,255,255,.04); backdrop-filter:blur(14px); }
+    .ptn-poziomy h3 { margin:0 0 .2rem; font-size:.72rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:#a78bfa; }
+    .ptn-poziomy p { margin:.2rem 0 .8rem; color:#e5e7eb; font-weight:700; }
+    .ptn-poziomy ul { margin:0; padding-left:1.1rem; color:#cbd5e1; font-size:.94rem; }
     .ptn-form label { display:block; margin:1rem 0 .4rem; font-weight:700; color:#e5e7eb; }
     .ptn-form input, .ptn-form textarea { width:100%; padding:.8rem; border:1px solid #4c3a6f; border-radius:.6rem; background:#161124; color:#fff; font:inherit; }
     .ptn-form textarea { min-height:7rem; resize:vertical; }
@@ -31,30 +36,49 @@ ob_start();
 
 <article class="legal glass glass-content" style="border-radius:22px;padding:clamp(1.25rem,4vw,3rem);max-width:900px;margin:0 auto 4rem;">
     <h1>Program dla twórców</h1>
-    <p>Nagrywasz albo streamujesz Minecrafta? Dostajesz własny kod. Twoi widzowie płacą mniej za pierwszy serwer, a Ty zarabiasz na każdej ich płatności przez pół roku.</p>
+    <p>Nagrywasz albo streamujesz? Dostajesz własny kod zniżkowy dla siebie i swoich widzów. Program dopiero się rozkręca, więc na razie wygląda tak:</p>
 
     <div class="ptn-zalety">
-        <div><strong>-10%</strong><span>dla widza na pierwszy zakup z Twoim kodem</span></div>
-        <div><strong>15%</strong><span>dla Ciebie od każdej płatności tego widza przez 6 miesięcy</span></div>
-        <div><strong>Zaawansowany</strong><span>darmowy serwer na czas współpracy: 10 GB RAM, 4 vCore, 60 GB NVMe</span></div>
+        <div><strong>do -30%</strong><span>dla Ciebie na Twoje serwery</span></div>
+        <div><strong>do -10%</strong><span>dla Twoich widzów z Twoim kodem</span></div>
+        <div><strong>Ranga</strong><span>twórcy na naszym Discordzie</span></div>
+    </div>
+
+    <div class="ptn-poziomy">
+        <section>
+            <h3>Mniejsi twórcy</h3>
+            <p>Ranga i zniżki</p>
+            <ul>
+                <li>ranga twórcy na Discordzie DNCT,</li>
+                <li>do 30% zniżki na Twoje serwery,</li>
+                <li>do 10% zniżki dla widzów z Twoim kodem.</li>
+            </ul>
+        </section>
+        <section>
+            <h3>Więksi YouTuberzy</h3>
+            <p>Serwer po rozmowie</p>
+            <ul>
+                <li>możliwy serwer od nas na czas współpracy,</li>
+                <li>warunki ustalamy indywidualnie,</li>
+                <li>zgłoś się formularzem, odezwiemy się mailowo.</li>
+            </ul>
+        </section>
     </div>
 
     <h2>Jak to działa</h2>
     <ol>
         <li>Wypełniasz formularz niżej. Patrzymy na kanał i odzywamy się mailowo.</li>
         <li>Dostajesz kod (np. <code>TWOJNICK</code>) i link <code>game.dnct.pl/?kod=TWOJNICK</code>. Z linku kod wpisuje się sam.</li>
-        <li>Widz wpisuje kod przy pierwszym zamówieniu i płaci 10% mniej.</li>
-        <li>Od tej chwili przez 6 miesięcy dostajesz 15% od wszystkiego, co ten widz u nas zapłaci: zakup, przedłużenia, odnowienia abonamentu.</li>
-        <li>Prowizję wypłacamy raz w miesiącu przelewem, gdy uzbiera się co najmniej 50 zł.</li>
+        <li>Widz wpisuje kod przy pierwszym zamówieniu i płaci mniej (do 10%).</li>
+        <li>Ty dostajesz rangę na Discordzie i własną zniżkę (do 30%). Większym kanałom proponujemy rozmowę o serwerze.</li>
     </ol>
 
     <h2>Zasady</h2>
     <ul>
         <li>Kod działa tylko przy pierwszym zakupie na danym koncie. Klient, który już coś u nas kupił, nie dostanie zniżki i nie zostanie przypisany.</li>
         <li>Klient należy do twórcy, którego kod wpisał jako pierwszy.</li>
-        <li>Prowizja liczy się od kwoty faktycznie zapłaconej (po zniżce). Przy zwrocie pieniędzy prowizja od tej płatności przepada.</li>
-        <li>Nie wolno kupować z własnego kodu, reklamować go w płatnych reklamach na hasło „dnct” ani wrzucać do serwisów z kuponami. Za to zamykamy kod bez wypłaty.</li>
-        <li>Każda strona może zakończyć współpracę w dowolnym momencie. Naliczona prowizja zostaje wypłacona.</li>
+        <li>Nie wolno kupować z własnego kodu, reklamować go w płatnych reklamach na hasło „dnct” ani wrzucać do serwisów z kuponami. Za to zamykamy kod.</li>
+        <li>Każda strona może zakończyć współpracę w dowolnym momencie.</li>
     </ul>
 
     <h2>Zgłoś się</h2>
