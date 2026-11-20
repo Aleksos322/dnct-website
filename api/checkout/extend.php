@@ -85,6 +85,26 @@ $panel = new PDO(
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
 );
 
+/* KOLEJKA PRZEDŁUŻEŃ. Zawieszony serwer nie blokuje RAM-u węzła, więc gdy wszystko jest
+   zajęte, nie ma dokąd go przywrócić. Przed płatnością mówimy to wprost i pytamy,
+   czy klient mimo to płaci i czeka (accept_queue=1). Abonamentu w takiej sytuacji nie
+   oferujemy - kolejka obsługuje tylko płatność jednorazową. */
+require_once dirname(__DIR__, 2) . '/backend/lib/extension_queue.php';
+$cap = extension_capacity($panel, $dnct, $parent);
+if (!$cap['fits']) {
+    if ($mode === 'subscription') {
+        json_error('Na węźle nie ma teraz miejsca - dostępna jest tylko płatność jednorazowa (serwer ruszy, gdy zwolni się miejsce).', 409, [], ['reason' => 'queue_one_time_only']);
+    }
+    if (request_string('accept_queue', '0') !== '1') {
+        json_error(
+            'Cześć! Niestety zostaliśmy wyprzedani. Jeśli opłacisz serwer teraz, zostanie uruchomiony od razu, gdy zwolni się miejsce.',
+            409,
+            [],
+            ['reason' => 'no_capacity', 'position' => $cap['position'], 'ahead' => $cap['ahead'], 'refund_days' => QUEUE_REFUND_DAYS]
+        );
+    }
+}
+
 try {
     $quote = pricing_quote($panel, [
         'game_type'    => (string)$parent['game_type'],

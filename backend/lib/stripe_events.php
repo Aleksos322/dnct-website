@@ -398,6 +398,22 @@ function webhook_extension_paid(PDO $dnct, array $order, $session = null): bool
         return true;
     }
 
+    /* KOLEJKA. Zawieszony serwer nie blokuje RAM-u węzła, więc przy wyprzedaniu nie ma
+       dokąd go przywrócić. Płatność jednorazowa trafia wtedy do kolejki: serwer zostaje
+       zawieszony, dni dopisze dopiero queue-start.php w chwili uruchomienia. */
+    if (!empty($parent['ptero_server_id']) && (string)$order['billing_mode'] !== 'subscription') {
+        require_once __DIR__ . '/extension_queue.php';
+        try {
+            $cap = extension_capacity(panel_db(), $dnct, $parent);
+        } catch (Throwable $e) {
+            error_log('Kolejka: nie sprawdzono pojemności dla #' . (int)$order['id'] . ' - ' . $e->getMessage());
+            $cap = ['fits' => true];
+        }
+        if (!$cap['fits']) {
+            return extension_enqueue($dnct, $order, $parent);
+        }
+    }
+
     order_extend($dnct, (int)$parent['id'], (int)$order['period_days']);
     ntfy_send(
         'sprzedaz',

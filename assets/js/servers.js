@@ -111,13 +111,55 @@
             });
         });
 
+        /* Brak miejsca na węźle: PRZED płatnością pokazujemy komunikat i pytamy, czy klient
+           mimo to płaci i czeka w kolejce (serwer ruszy, gdy zwolni się miejsce). */
+        function showQueueNotice(info) {
+            var old = card.querySelector('[data-role="queueNotice"]');
+            if (old) old.remove();
+            var box = document.createElement('div');
+            box.className = 'srv-alert srv-kolejka';
+            box.setAttribute('data-role', 'queueNotice');
+            var t = document.createElement('p');
+            t.style.margin = '0 0 .6rem';
+            t.textContent = 'Cześć! Niestety zostaliśmy wyprzedani. Jeśli opłacisz serwer teraz, zostanie uruchomiony od razu, gdy zwolni się miejsce.';
+            var d = document.createElement('p');
+            d.style.margin = '0 0 .8rem';
+            d.textContent = 'Opłacony czas zacznie biec dopiero od uruchomienia. Jesteś na pozycji ' + (info.position || 1)
+                + ' w kolejce. Jeśli miejsce nie zwolni się w ciągu ' + (info.refund_days || 14) + ' dni, zwrócimy całą kwotę.';
+            var go = document.createElement('button');
+            go.type = 'button'; go.className = 'srv-btn is-primary'; go.textContent = 'Opłać i czekaj w kolejce';
+            var no = document.createElement('button');
+            no.type = 'button'; no.className = 'srv-btn is-quiet'; no.textContent = 'Wróć';
+            go.addEventListener('click', function () {
+                post('/api/checkout/extend.php', {
+                    order_id: orderId, period_days: state.days, billing_mode: 'payment', accept_queue: '1'
+                }, go, 'Opłać i czekaj w kolejce');
+            });
+            no.addEventListener('click', function () { box.remove(); });
+            box.appendChild(t); box.appendChild(d); box.appendChild(go); box.appendChild(document.createTextNode(' ')); box.appendChild(no);
+            btnPay.parentNode.insertBefore(box, btnPay.nextSibling);
+        }
+
         if (btnPay) {
             btnPay.addEventListener('click', function () {
                 post('/api/checkout/extend.php', {
                     order_id: orderId,
                     period_days: state.days,
                     billing_mode: state.mode
-                }, btnPay, 'Przejdź do płatności');
+                }, btnPay, 'Przejdź do płatności', function (b) {
+                    if (b && (b.reason === 'no_capacity' || b.reason === 'queue_one_time_only')) {
+                        if (b.reason === 'queue_one_time_only') {
+                            state.mode = 'payment';
+                            renderExtend();
+                            elError && (elError.hidden = true);
+                            showQueueNotice({ position: 1, refund_days: 14 });
+                        } else {
+                            showQueueNotice(b);
+                        }
+                        return true;
+                    }
+                    return false;
+                });
             });
         }
 
@@ -285,7 +327,7 @@
         /* ---------------------------------------------------------------
            Wysyłka
            --------------------------------------------------------------- */
-        function post(url, body, btn, originalLabel) {
+        function post(url, body, btn, originalLabel, onError) {
             if (btn.disabled) return;
 
             btn.disabled = true;
@@ -302,6 +344,11 @@
                 .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
                 .then(function (res) {
                     if (!res.ok) {
+                        if (onError && onError(res.body)) {
+                            btn.disabled = false;
+                            btn.textContent = originalLabel;
+                            return;
+                        }
                         fail(res.body.message || 'Nie udało się wykonać operacji.');
                         return;
                     }

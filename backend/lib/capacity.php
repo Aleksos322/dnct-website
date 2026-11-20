@@ -16,10 +16,13 @@
  *    43 968 MiB przydzielonego RAM-u i CAŁY cennik pokazałby się jako wyprzedany.
  *    Wartość -1 oznacza w Pterodactylu brak limitu.
  *
- * 2. LICZY SIĘ PRZYDZIAŁ, NIE ZUŻYCIE. Serwer wyłączony albo zawieszony nadal
- *    zajmuje miejsce na węźle, bo jego pliki leżą na dysku, a RAM jest dla niego
- *    zarezerwowany. Dlatego sumujemy `servers.memory` i `servers.disk`, a nie
- *    bieżące zużycie z /resources.
+ * 2. LICZY SIĘ PRZYDZIAŁ, NIE ZUŻYCIE. Sumujemy `servers.memory`, `servers.disk`
+ *    i `servers.cpu`, a nie bieżące zużycie z /resources.
+ *    WYJĄTEK (od 2026-11-20, decyzja właściciela): serwery ZAWIESZONE (servers.status = 'suspended') nie liczą się
+ *    do RAM ani CPU - nie działają, więc niczego nie zużywają. DYSK liczy się dla
+ *    wszystkich, bo pliki zawieszonego nadal leżą na węźle. Skutek uboczny: jeśli
+ *    właściciel zawieszonego serwera zapłaci, a miejsca już nie ma, trafia do
+ *    kolejki (backend/lib/extension_queue.php).
  */
 
 declare(strict_types=1);
@@ -87,7 +90,10 @@ function node_capacity(PDO $pdo, ?string $nodeName = null): ?array
     }
 
     $used = $pdo->prepare(
-        'SELECT COUNT(*) AS ile, COALESCE(SUM(memory), 0) AS ram, COALESCE(SUM(disk), 0) AS hdd, COALESCE(SUM(cpu), 0) AS cpu
+        'SELECT COUNT(*) AS ile,
+                COALESCE(SUM(IF(status <=> \'suspended\', 0, memory)), 0) AS ram,
+                COALESCE(SUM(disk), 0) AS hdd,
+                COALESCE(SUM(IF(status <=> \'suspended\', 0, cpu)), 0) AS cpu
          FROM servers WHERE node_id = ?'
     );
     $used->execute([$node['id']]);

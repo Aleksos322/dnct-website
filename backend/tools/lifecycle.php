@@ -407,6 +407,7 @@ function lifecycle_delete(PDO $dnct, bool $apply): void
           WHERE ptero_server_id IS NOT NULL
             AND suspended_at IS NOT NULL
             AND deleted_at IS NULL
+            AND NOT EXISTS (SELECT 1 FROM orders q WHERE q.extends_order_id = orders.id AND q.queued_at IS NOT NULL)
           ORDER BY id
           LIMIT 50'
     )->fetchAll(PDO::FETCH_ASSOC);

@@ -545,3 +545,31 @@
 }
 .srv-cena-stara { color: #64748b; font-weight: 600; font-size: 0.85em; text-decoration-color: rgba(248, 113, 113, 0.8); margin-right: 0.3rem; }
 .srv-rabat { display: block; margin-top: 0.25rem; font-size: 0.76rem; font-weight: 700; color: #4ade80; }
+
+/* ---------- TELEFON (2026-11-15) ----------
+   Trzy równe kolumny miały po ok. 90 px na treść, a data "08.10.2027"
+   potrzebuje ok. 100 px - wystawała poza kafel i poza zaokrąglenie ramki.
+   Kolumna z datą jest szersza, a podpisy łamią się tylko na spacjach. */
+@media (max-width: 640px) {
+    .srv-strona .srv-podsumowanie { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr); }
+    .srv-strona .srv-podsumowanie li { min-width: 0; padding: 0.9rem 0.45rem 0.9rem 0.65rem; align-content: start; }
+    .srv-strona .srv-podsumowanie strong { white-space: nowrap; }
+}
+@media (max-width: 380px) {
+    .srv-strona .srv-podsumowanie strong { font-size: 0.98rem; }
+    .srv-strona .srv-podsumowanie span { font-size: 0.56rem; letter-spacing: 0.06em; }
+}
+
+/* Kolejka przedłużeń: komunikat "wyprzedani" i baner "czekasz w kolejce". */
+.cennik-page .srv .srv-kolejka {
+    font-size: .9rem;
+    margin: 1rem 0 0;
+    padding: 1rem 1.15rem;
+    border: 1px solid rgba(251, 191, 36, .45);
+    border-radius: 14px;
+    background: rgba(251, 191, 36, .08);
+    color: #fde68a;
+    line-height: 1.55;
+}
+.cennik-page .srv .srv-kolejka strong { color: #fff; }
+.cennik-page .srv .srv-kolejka .srv-btn { margin: .25rem .4rem 0 0; }
