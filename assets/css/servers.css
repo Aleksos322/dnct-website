@@ -559,3 +559,17 @@
     .srv-strona .srv-podsumowanie strong { font-size: 0.98rem; }
     .srv-strona .srv-podsumowanie span { font-size: 0.56rem; letter-spacing: 0.06em; }
 }
+
+/* Kolejka przedłużeń: komunikat "wyprzedani" i baner "czekasz w kolejce". */
+.cennik-page .srv .srv-kolejka {
+    font-size: .9rem;
+    margin: 1rem 0 0;
+    padding: 1rem 1.15rem;
+    border: 1px solid rgba(251, 191, 36, .45);
+    border-radius: 14px;
+    background: rgba(251, 191, 36, .08);
+    color: #fde68a;
+    line-height: 1.55;
+}
+.cennik-page .srv .srv-kolejka strong { color: #fff; }
+.cennik-page .srv .srv-kolejka .srv-btn { margin: .25rem .4rem 0 0; }

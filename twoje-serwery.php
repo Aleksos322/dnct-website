@@ -69,6 +69,21 @@ if ($isLoggedIn) {
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /* Kolejka przedłużeń (backend/lib/extension_queue.php): oplacone, czeka na miejsce.
+       Klucz = zamówienie serwera, wartość = pozycja w kolejce (1 = następny). */
+    $kolejka = [];
+    try {
+        $poz = 0;
+        foreach ($dnct->query('SELECT extends_order_id, user_email, queued_at FROM orders WHERE queued_at IS NOT NULL ORDER BY queued_at, id')->fetchAll(PDO::FETCH_ASSOC) as $q) {
+            $poz++;
+            if ($adminWidok || hash_equals((string)$q['user_email'], (string)$_SESSION['authentik_email'])) {
+                $kolejka[(int)$q['extends_order_id']] = ['pozycja' => $poz, 'od' => (string)$q['queued_at']];
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('twoje-serwery: kolejka - ' . $e->getMessage());
+    }
+
     $panel = null;
     try {
         $panel = new PDO(
@@ -612,6 +627,15 @@ foreach ($aktywne as $c) {
                     <p class="srv-note">Abonament wyłączony - serwer działa do końca opłaconego okresu.</p>
                 <?php endif; ?>
 
+                <?php if (!$isPanelOnly && $o !== null && isset($kolejka[(int)$o['id']])): $kq = $kolejka[(int)$o['id']]; ?>
+                    <div class="srv-alert srv-kolejka" data-role="queued">
+                        <strong>Opłacone - czekasz w kolejce (pozycja <?php echo (int)$kq['pozycja']; ?>)</strong><br>
+                        Na węźle nie ma teraz miejsca. Uruchomimy serwer od razu, gdy się zwolni, i dostaniesz o tym mail.
+                        Opłacony czas zacznie biec dopiero od uruchomienia. Jeśli miejsce nie zwolni się w ciągu 14 dni
+                        od <?php echo htmlspecialchars(czas_fmt($kq['od'], 'd.m.Y')); ?>, zwrócimy pieniądze.
+                    </div>
+                <?php endif; ?>
+
                 <?php if (!$isPanelOnly && !empty($c['deferred_start']) && !$adminWidok): ?>
                     <div class="srv-panel" data-role="startNowPanel">
                         <h3 class="srv-panel-h">Serwer uruchomimy <?php echo htmlspecialchars($c['deferred_start']); ?></h3>
@@ -628,7 +652,7 @@ foreach ($aktywne as $c) {
 
                 <?php /* --- PASEK AKCJI --- */ ?>
                 <div class="srv-actions">
-                    <?php if ($salesOn && $c['periods']): ?>
+                    <?php if ($salesOn && $c['periods'] && !($o !== null && isset($kolejka[(int)$o['id']]))): ?>
                         <button type="button" class="srv-btn is-primary" data-role="toggleExtend">Przedłuż serwer</button>
                     <?php endif; ?>
 
